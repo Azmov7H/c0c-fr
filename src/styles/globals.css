@@ -1,0 +1,142 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Typography */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+
+  /* Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  /* Radius */
+  --radius-xs: calc(var(--radius) - 6px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+
+  /* Shadows */
+  --shadow-premium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 0 20px rgba(43, 108, 238, 0.15);
+}
+
+:root {
+  --radius: 0.75rem;
+  
+  /* Light Theme - Content Creator Cloud */
+  --background: hsl(0, 0%, 98%); /* #FAFAFA */
+  --foreground: hsl(240, 10%, 4%); /* zinc-950 */
+
+  --card: hsl(0, 0%, 100%); /* #FFFFFF */
+  --card-foreground: hsl(240, 10%, 4%);
+
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(240, 10%, 4%);
+
+  --primary: hsl(238, 82%, 67%); /* #6366F1 */
+  --primary-foreground: hsl(0, 0%, 100%);
+
+  --secondary: hsl(240, 5%, 96%); /* #F4F4F5 */
+  --secondary-foreground: hsl(240, 10%, 4%);
+
+  --muted: hsl(240, 5%, 96%); /* #F4F4F5 */
+  --muted-foreground: hsl(240, 4%, 46%); /* #71717A */
+
+  --accent: hsl(160, 84%, 39%); /* #10B981 */
+  --accent-foreground: hsl(0, 0%, 100%);
+
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+
+  --border: hsl(240, 6%, 90%); /* #E4E4E7 */
+  --input: hsl(240, 6%, 90%);
+  --ring: hsl(238, 82%, 67%);
+}
+
+.dark {
+  /* Dark Theme - Content Creator Cloud */
+  --background: hsl(240, 10%, 4%); /* #09090B */
+  --foreground: hsl(0, 0%, 100%);
+
+  --card: hsl(240, 5%, 9%); /* #161618 */
+  --card-foreground: hsl(0, 0%, 100%);
+
+  --popover: hsl(240, 5%, 9%);
+  --popover-foreground: hsl(0, 0%, 100%);
+
+  --primary: hsl(234, 89%, 74%); /* #818CF8 */
+  --primary-foreground: hsl(240, 10%, 4%);
+
+  --secondary: hsl(240, 4%, 16%); /* #27272A */
+  --secondary-foreground: hsl(0, 0%, 100%);
+
+  --muted: hsl(240, 4%, 16%); /* #27272A */
+  --muted-foreground: hsl(240, 5%, 65%); /* #A1A1AA */
+
+  --accent: hsl(158, 64%, 52%); /* #34D399 */
+  --accent-foreground: hsl(240, 10%, 4%);
+
+  --destructive: hsl(0, 62%, 30%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+
+  --border: hsl(240, 4%, 16%); /* #27272A */
+  --input: hsl(240, 4%, 16%);
+  --ring: hsl(234, 89%, 74%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-primary/20;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-background/60 backdrop-blur-md border border-white/10;
+  }
+  .glass-dark {
+    @apply bg-black/40 backdrop-blur-lg border border-white/5;
+  }
+  .shadow-premium {
+    box-shadow: var(--shadow-premium);
+  }
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+}
