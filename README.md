@@ -1,36 +1,216 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# C0C Frontend
 
-## Getting Started
+C0C is a modern SaaS platform designed to help **content creators** streamline their workflow and generate content faster.
 
-First, run the development server:
+The platform provides tools for discovering and generating:
+- Images
+- Titles
+- Hashtags
+- Sound effects
+- Content ideas
+
+The goal is to reduce the time creators spend searching for resources and allow them to focus on producing content.
+
+---
+
+## Features
+
+- Creator resource generation
+- Modern SaaS dashboard UI
+- Notifications system
+- Authentication system
+- Responsive design
+- Dark / Light mode
+- API based architecture
+- Scalable frontend architecture
+
+---
+
+## Tech Stack
+
+Frontend:
+
+- Next.js
+- React
+- TypeScript
+- TailwindCSS
+- Shadcn UI
+- React Query / TanStack Query
+- Axios
+
+Backend (API expected):
+
+- Node.js
+- Express / Next API Routes
+- MongoDB
+- JWT Authentication
+
+Deployment:
+
+- Vercel
+
+---
+
+## Project Structure
+
+
+c0c-fr
+│
+├── app
+│ ├── dashboard
+│ ├── auth
+│ ├── settings
+│ └── layout.tsx
+│
+├── components
+│ ├── ui
+│ ├── dashboard
+│ └── shared
+│
+├── hooks
+│
+├── services
+│ ├── api
+│ └── auth
+│
+├── store
+│
+├── lib
+│
+└── public
+
+
+---
+
+## Installation
+
+Clone the repository
 
 ```bash
+git clone https://github.com/Azmov7H/c0c-fr.git
+
+Navigate to the project
+
+cd c0c-fr
+
+Install dependencies
+
+npm install
+
+Run development server
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open in browser
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+http://localhost:3000
+Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a .env.local file
 
-## Learn More
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+NEXT_PUBLIC_APP_NAME=C0C
+API Integration
 
-To learn more about Next.js, take a look at the following resources:
+The frontend communicates with the backend via REST API.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Example request:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+GET /api/notifications
+POST /api/auth/login
 
-## Deploy on Vercel
+Authentication uses JWT tokens stored in:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+HTTP Only Cookies
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Authorization Header
+
+Example:
+
+Authorization: Bearer TOKEN
+Authentication Flow
+
+User login
+
+Backend returns JWT
+
+Token stored in cookie or local storage
+
+Authenticated requests sent with token
+
+Protected routes verify session
+
+Scripts
+
+Run development server
+
+npm run dev
+
+Build production
+
+npm run build
+
+Start production
+
+npm run start
+
+Lint project
+
+npm run lint
+Deployment
+
+Recommended deployment:
+
+Vercel
+
+Steps:
+
+Push repository to GitHub
+
+Import project into Vercel
+
+Configure environment variables
+
+Deploy
+
+Roadmap
+
+Future features planned:
+
+AI content generator
+
+SEO tools
+
+Hashtag intelligence
+
+Trending content discovery
+
+Team collaboration
+
+Creator analytics
+
+Contributing
+
+Contributions are welcome.
+
+Steps:
+
+Fork the repository
+
+Create a feature branch
+
+Commit changes
+
+Submit a pull request
+
+License
+
+MIT License
+
+Author
+
+Developed by:
+
+Ali Naji
+
+Full Stack Developer
