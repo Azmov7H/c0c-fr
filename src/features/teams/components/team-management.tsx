@@ -15,7 +15,6 @@ import {
     Mail,
     Plus,
     Settings,
-    MoreVertical,
     Trash2,
     User as UserIcon,
     RefreshCw,
@@ -72,7 +71,7 @@ export const TeamManagement = () => {
         owner: 'bg-primary/10 text-primary border-primary/20',
         admin: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
         editor: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-        viewer: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
+        viewer: 'bg-muted text-muted-foreground border-border/50',
     };
 
     if (isLoading) {
@@ -92,7 +91,7 @@ export const TeamManagement = () => {
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+                    <h1 className="text-3xl font-bold flex items-center gap-3">
                         <Users className="w-8 h-8 text-primary" />
                         Workspace Teams
                     </h1>
@@ -101,12 +100,12 @@ export const TeamManagement = () => {
 
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button className="bg-primary hover:bg-primary/90">
+                        <Button>
                             <Plus className="w-4 h-4 mr-2" />
                             New Workspace
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-sidebar border-sidebar-border">
+                    <DialogContent>
                         <DialogHeader>
                             <DialogTitle>Create New Team Workspace</DialogTitle>
                             <DialogDescription>Workspaces allow you to group projects and collaborators together.</DialogDescription>
@@ -119,7 +118,6 @@ export const TeamManagement = () => {
                                     value={newTeamName}
                                     onChange={(e) => setNewTeamName(e.target.value)}
                                     placeholder="e.g. Marketing House"
-                                    className="bg-muted border-sidebar-border"
                                 />
                             </div>
                         </div>
@@ -133,12 +131,12 @@ export const TeamManagement = () => {
             </div>
 
             {!activeTeam ? (
-                <Card className="border-dashed border-2 border-white/10 bg-white/5 py-20">
+                <Card className="border-dashed border-2 py-20">
                     <CardContent className="flex flex-col items-center text-center">
                         <Users className="w-16 h-16 text-muted-foreground/30 mb-6" />
-                        <h3 className="text-xl font-semibold text-white mb-2">You don't belong to any teams yet</h3>
+                        <h3 className="text-xl font-semibold mb-2">You don&apos;t belong to any teams yet</h3>
                         <p className="text-muted-foreground max-w-sm mb-8">Create your first workspace to start collaborating with other AI content creators.</p>
-                        <Button onClick={() => (document.querySelector('[data-state="closed"] button') as any)?.click()}>Get Started</Button>
+                        <Button>Create Your First Team</Button>
                     </CardContent>
                 </Card>
             ) : (
@@ -146,7 +144,7 @@ export const TeamManagement = () => {
 
                     {/* Team Switcher & Header */}
                     <div className="space-y-6">
-                        <Card className="border-white/5 bg-background/50 backdrop-blur-xl">
+                        <Card>
                             <CardHeader>
                                 <CardTitle className="text-sm font-medium">Your Workspaces</CardTitle>
                             </CardHeader>
@@ -155,11 +153,11 @@ export const TeamManagement = () => {
                                     <div
                                         key={t.id}
                                         onClick={() => setSelectedTeamId(t.id)}
-                                        className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border ${activeTeam.id === t.id ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10'
+                                        className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border ${activeTeam.id === t.id ? 'bg-primary/10 border-primary/30 text-primary' : 'hover:bg-muted text-muted-foreground'
                                             }`}
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-8 h-8 rounded-md flex items-center justify-center font-bold text-xs ${activeTeam.id === t.id ? 'bg-primary text-white' : 'bg-white/10'}`}>
+                                            <div className={`w-8 h-8 rounded-md flex items-center justify-center font-bold text-xs ${activeTeam.id === t.id ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                                                 {t.name.slice(0, 2).toUpperCase()}
                                             </div>
                                             <span className="text-sm font-medium">{t.name}</span>
@@ -170,7 +168,7 @@ export const TeamManagement = () => {
                             </CardContent>
                         </Card>
 
-                        <Card className="border-white/5 bg-background/50 backdrop-blur-xl">
+                        <Card>
                             <CardHeader>
                                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                                     <UserPlus className="w-4 h-4 text-primary" /> Invite Collaborator
@@ -183,7 +181,7 @@ export const TeamManagement = () => {
                                         <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                                         <Input
                                             placeholder="colleague@agency.com"
-                                            className="pl-10 bg-white/5 border-white/10"
+                                            className="pl-10"
                                             value={inviteEmail}
                                             onChange={(e) => setInviteEmail(e.target.value)}
                                         />
@@ -192,7 +190,7 @@ export const TeamManagement = () => {
                                 <div className="space-y-2">
                                     <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Assign Role</Label>
                                     <Select value={inviteRole} onValueChange={(val) => setInviteRole(val as TeamRole)}>
-                                        <SelectTrigger className="bg-white/5 border-white/10">
+                                        <SelectTrigger>
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -211,29 +209,29 @@ export const TeamManagement = () => {
                     </div>
 
                     {/* Members List */}
-                    <Card className="lg:col-span-2 border-white/5 bg-background/50 backdrop-blur-xl">
-                        <CardHeader className="flex flex-row items-center justify-between border-b border-white/5">
+                    <Card className="lg:col-span-2">
+                        <CardHeader className="flex flex-row items-center justify-between border-b">
                             <div>
                                 <CardTitle className="text-lg">Members & Permissions</CardTitle>
                                 <CardDescription>{activeTeam.members.length} active users in this workspace</CardDescription>
                             </div>
-                            <Button variant="outline" size="sm" className="border-white/10">
+                            <Button variant="outline" size="sm">
                                 <Settings className="w-4 h-4 mr-2" />
                                 Team Settings
                             </Button>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <div className="divide-y divide-white/5">
+                            <div className="divide-y">
                                 {activeTeam.members.map((member) => (
-                                    <div key={member.user.id} className="flex items-center justify-between p-6 hover:bg-white/5 transition-colors group">
+                                    <div key={member.user.id} className="flex items-center justify-between p-6 hover:bg-muted/40 transition-colors group">
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/20">
                                                 <UserIcon className="w-5 h-5 text-primary" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-semibold text-white flex items-center gap-2">
+                                                <p className="text-sm font-semibold flex items-center gap-2">
                                                     {member.user.firstName} {member.user.lastName}
-                                                    {member.user.id === activeTeam.owner.id && <Shield className="w-3 h-3 text-yellow-500" />}
+                                                    {member.user.id === activeTeam.owner.id && <Shield className="w-3 h-3 text-amber-500" />}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">{member.user.email}</p>
                                             </div>
@@ -249,7 +247,7 @@ export const TeamManagement = () => {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="h-8 w-8 text-red-500 hover:bg-red-500/10"
+                                                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
                                                         onClick={() => removeMember({ teamId: activeTeam.id, userId: member.user.id })}
                                                     >
                                                         <UserMinus className="w-4 h-4" />

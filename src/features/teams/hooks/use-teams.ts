@@ -7,7 +7,7 @@ export const teamKeys = {
     all: ['teams'] as const,
     lists: () => [...teamKeys.all, 'list'] as const,
     details: () => [...teamKeys.all, 'detail'] as const,
-    detail: (id: string) => [...trendKeys.details(), id] as const, // typo in previous turn but fixing here
+    detail: (id: string) => [...teamKeys.details(), id] as const,
 };
 
 export const useTeams = () => {

@@ -1,11 +1,11 @@
-'use client';
+import type { Metadata } from "next"
+import { TeamManagement } from "@/features/teams/components/team-management"
 
-import { TeamManagement } from '@/features/teams/components/team-management';
+export const metadata: Metadata = {
+  title: "Team",
+  description: "Manage your team members, workspaces, and collaboration settings.",
+}
 
 export default function TeamPage() {
-    return (
-        <div className="p-6">
-            <TeamManagement />
-        </div>
-    );
+  return <TeamManagement />
 }

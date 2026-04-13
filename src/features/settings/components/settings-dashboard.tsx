@@ -11,7 +11,6 @@ import {
     User,
     CreditCard,
     Key,
-    Bell,
     Shield,
     Zap,
     Check,
@@ -20,13 +19,13 @@ import {
     LogOut
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAuth } from '@/features/auth/hooks/use-auth';
+import { useLogout } from '@/features/auth/hooks/use-auth';
 
 export const SettingsDashboard = () => {
     const { data: profile, isLoading } = useProfile();
     const { mutate: updateProfile, isPending: isUpdatingProfile } = useUpdateProfile();
     const { mutate: updatePlan, isPending: isUpdatingPlan } = useUpdatePlan();
-    const { logout } = useAuth();
+    const { mutate: logout } = useLogout();
 
     const [formData, setFormData] = useState({
         firstName: profile?.firstName || '',
@@ -59,27 +58,27 @@ export const SettingsDashboard = () => {
         <div className="space-y-8 animate-in fade-in duration-500">
 
             <div>
-                <h1 className="text-3xl font-bold text-white">System Settings</h1>
+                <h1 className="text-3xl font-bold">System Settings</h1>
                 <p className="text-muted-foreground mt-2">Manage your account preferences, billing, and API access.</p>
             </div>
 
             <Tabs defaultValue="profile" className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
 
                 <TabsList className="flex flex-col h-auto bg-transparent gap-2 items-start lg:col-span-1 p-0">
-                    <TabsTrigger value="profile" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-white/5 transition-all">
+                    <TabsTrigger value="profile" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-muted transition-all">
                         <User className="w-4 h-4" /> My Profile
                     </TabsTrigger>
-                    <TabsTrigger value="billing" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-white/5 transition-all">
+                    <TabsTrigger value="billing" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-muted transition-all">
                         <CreditCard className="w-4 h-4" /> Billing & Plans
                     </TabsTrigger>
-                    <TabsTrigger value="api" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-white/5 transition-all">
+                    <TabsTrigger value="api" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-muted transition-all">
                         <Key className="w-4 h-4" /> AI API Keys
                     </TabsTrigger>
-                    <TabsTrigger value="security" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-white/5 transition-all">
+                    <TabsTrigger value="security" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-muted transition-all">
                         <Shield className="w-4 h-4" /> Security
                     </TabsTrigger>
-                    <div className="pt-4 mt-4 border-t border-white/5 w-full">
-                        <Button variant="ghost" className="w-full justify-start gap-3 text-red-400 hover:bg-red-500/10 hover:text-red-400" onClick={logout}>
+                    <div className="pt-4 mt-4 border-t w-full">
+                        <Button variant="ghost" className="w-full justify-start gap-3 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => logout()}>
                             <LogOut className="w-4 h-4" /> Logout Instance
                         </Button>
                     </div>
@@ -87,7 +86,7 @@ export const SettingsDashboard = () => {
 
                 <div className="lg:col-span-3">
                     <TabsContent value="profile" className="mt-0 space-y-6">
-                        <Card className="border-white/5 bg-background/50 backdrop-blur-xl">
+                        <Card>
                             <CardHeader>
                                 <CardTitle>Personal Information</CardTitle>
                                 <CardDescription>Update your public identity on the platform.</CardDescription>
@@ -101,7 +100,6 @@ export const SettingsDashboard = () => {
                                                 id="firstName"
                                                 defaultValue={profile?.firstName}
                                                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                                className="bg-white/5 border-white/10"
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -110,7 +108,6 @@ export const SettingsDashboard = () => {
                                                 id="lastName"
                                                 defaultValue={profile?.lastName}
                                                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                                className="bg-white/5 border-white/10"
                                             />
                                         </div>
                                     </div>
@@ -120,7 +117,6 @@ export const SettingsDashboard = () => {
                                             id="email"
                                             defaultValue={profile?.email}
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                            className="bg-white/5 border-white/10"
                                         />
                                     </div>
                                     <Button type="submit" disabled={isUpdatingProfile}>
@@ -138,9 +134,9 @@ export const SettingsDashboard = () => {
                                 { id: 'pro', name: 'Pro Studio', price: '49', icon: Star, features: ['Unlimited Projects', 'Advanced AI Models', 'Priority Generation', 'Team Collaboration'] },
                                 { id: 'studio', name: 'Enterprise', price: '199', icon: Shield, features: ['Custom AI Training', 'Dedicated Support', 'API Access', 'SSO & Security'] }
                             ].map((plan) => (
-                                <Card key={plan.id} className={`relative overflow-hidden border-white/5 bg-background/50 transition-all ${profile?.plan === plan.id ? 'border-primary ring-1 ring-primary' : 'hover:border-white/20'}`}>
+                                <Card key={plan.id} className={`relative overflow-hidden transition-all ${profile?.plan === plan.id ? 'border-primary ring-1 ring-primary' : 'hover:border-border/80'}`}>
                                     {profile?.plan === plan.id && (
-                                        <div className="absolute top-0 right-0 p-1 bg-primary text-white rounded-bl-lg">
+                                        <div className="absolute top-0 right-0 p-1 bg-primary text-primary-foreground rounded-bl-lg">
                                             <Check className="w-3 h-3" />
                                         </div>
                                     )}
@@ -177,7 +173,7 @@ export const SettingsDashboard = () => {
                     </TabsContent>
 
                     <TabsContent value="api" className="mt-0 space-y-6">
-                        <Card className="border-white/5 bg-background/50 backdrop-blur-xl">
+                        <Card>
                             <CardHeader>
                                 <CardTitle>AI Provider Tokens</CardTitle>
                                 <CardDescription>Securely store your own API keys to bypass rate limits.</CardDescription>
@@ -187,19 +183,19 @@ export const SettingsDashboard = () => {
                                     <div className="space-y-2">
                                         <Label className="flex justify-between">
                                             <span>OpenAI API Key</span>
-                                            <span className="text-[10px] text-green-500 font-mono">ENCRYPTED</span>
+                                            <span className="text-[10px] text-emerald-500 font-mono">ENCRYPTED</span>
                                         </Label>
-                                        <Input type="password" value="sk-........................" readOnly className="bg-white/5 border-white/10" />
+                                        <Input type="password" value="sk-........................" readOnly />
                                     </div>
                                     <div className="space-y-2">
                                         <Label className="flex justify-between">
                                             <span>Anthropic Key</span>
                                             <span className="text-[10px] text-muted-foreground font-mono">NOT SET</span>
                                         </Label>
-                                        <Input type="password" placeholder="sk-ant-..." className="bg-white/5 border-white/10" />
+                                        <Input type="password" placeholder="sk-ant-..." />
                                     </div>
                                 </div>
-                                <Button variant="outline" className="border-white/10">Rotate All Keys</Button>
+                                <Button variant="outline">Rotate All Keys</Button>
                             </CardContent>
                         </Card>
                     </TabsContent>
