@@ -46,11 +46,11 @@ export const AnalyticsView = ({ projectId }: AnalyticsViewProps) => {
 
     if (!report) {
         return (
-            <div className="flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-white/10 rounded-xl bg-white/5 h-[400px]">
+            <div className="flex flex-col items-center justify-center p-12 text-center border-2 border-dashed rounded-xl h-[400px]">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
                     <BarChart3 className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="text-2xl font-semibold text-white mb-2">No Analysis Found</h3>
+                <h3 className="text-2xl font-semibold mb-2">No Analysis Found</h3>
                 <p className="text-muted-foreground mb-8 max-w-md">
                     Generate an AI-powered analysis to predict performance and get optimization tips for your content idea.
                 </p>
@@ -58,7 +58,6 @@ export const AnalyticsView = ({ projectId }: AnalyticsViewProps) => {
                     onClick={handleGenerate}
                     disabled={isGenerating}
                     size="lg"
-                    className="bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                     {isGenerating ? (
                         <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
@@ -76,25 +75,25 @@ export const AnalyticsView = ({ projectId }: AnalyticsViewProps) => {
 
             {/* Top Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="shadow-sm border-white/5 bg-background/50 backdrop-blur-xl">
+                <Card className="shadow-sm">
                     <CardHeader className="pb-2">
                         <CardDescription className="flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4 text-green-500" />
+                            <TrendingUp className="w-4 h-4 text-emerald-500" />
                             Retention Score
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-white">{report.retentionPrediction}%</span>
-                            <span className="text-xs text-green-500 flex items-center">
+                            <span className="text-3xl font-bold">{report.retentionPrediction}%</span>
+                            <span className="text-xs text-emerald-500 flex items-center">
                                 <ArrowUpRight className="w-3 h-3" /> +12%
                             </span>
                         </div>
-                        <Progress value={report.retentionPrediction} className="h-1.5 mt-4 bg-white/5" indicatorClassName="bg-green-500" />
+                        <Progress value={report.retentionPrediction} className="h-1.5 mt-4" />
                     </CardContent>
                 </Card>
 
-                <Card className="shadow-sm border-white/5 bg-background/50 backdrop-blur-xl">
+                <Card className="shadow-sm">
                     <CardHeader className="pb-2">
                         <CardDescription className="flex items-center gap-2">
                             <Zap className="w-4 h-4 text-primary" />
@@ -103,32 +102,32 @@ export const AnalyticsView = ({ projectId }: AnalyticsViewProps) => {
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-white">{report.engagementProbability}%</span>
+                            <span className="text-3xl font-bold">{report.engagementProbability}%</span>
                             <span className="text-xs text-primary flex items-center">
                                 High Potential
                             </span>
                         </div>
-                        <Progress value={report.engagementProbability} className="h-1.5 mt-4 bg-white/5" indicatorClassName="bg-primary" />
+                        <Progress value={report.engagementProbability} className="h-1.5 mt-4" />
                     </CardContent>
                 </Card>
 
-                <Card className="shadow-sm border-white/5 bg-background/50 backdrop-blur-xl">
+                <Card className="shadow-sm">
                     <CardHeader className="pb-2">
                         <CardDescription className="flex items-center gap-2">
-                            <Target className="w-4 h-4 text-yellow-500" />
+                            <Target className="w-4 h-4 text-amber-500" />
                             Topic Competition
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-white uppercase tracking-tighter">{report.topicCompetition}</span>
+                            <span className="text-3xl font-bold uppercase tracking-tighter">{report.topicCompetition}</span>
                         </div>
                         <div className="mt-4 flex gap-1">
                             {[1, 2, 3, 4].map((i) => (
                                 <div
                                     key={i}
                                     className={`h-1.5 flex-1 rounded-full ${i <= (report.topicCompetition === 'extreme' ? 4 : report.topicCompetition === 'high' ? 3 : 2)
-                                            ? 'bg-yellow-500' : 'bg-white/5'
+                                            ? 'bg-amber-500' : 'bg-muted'
                                         }`}
                                 />
                             ))}
@@ -141,7 +140,7 @@ export const AnalyticsView = ({ projectId }: AnalyticsViewProps) => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* Performance Chart Simulation */}
-                <Card className="lg:col-span-2 shadow-sm border-white/5 bg-background/50 backdrop-blur-xl">
+                <Card className="lg:col-span-2 shadow-sm">
                     <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
                             <BarChart3 className="w-5 h-5 text-primary" />
@@ -172,7 +171,7 @@ export const AnalyticsView = ({ projectId }: AnalyticsViewProps) => {
 
                 {/* Competitor Analysis & Suggestions */}
                 <div className="space-y-6">
-                    <Card className="shadow-sm border-white/5 bg-background/50 backdrop-blur-xl">
+                    <Card className="shadow-sm">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-medium flex items-center gap-2">
                                 <PieChart className="w-4 h-4 text-muted-foreground" />
@@ -184,15 +183,15 @@ export const AnalyticsView = ({ projectId }: AnalyticsViewProps) => {
                                 <div key={i} className="space-y-1">
                                     <div className="flex justify-between text-xs">
                                         <span className="text-muted-foreground">{c.topic}</span>
-                                        <span className="text-white font-mono">{c.percentage}%</span>
+                                        <span className="font-mono">{c.percentage}%</span>
                                     </div>
-                                    <Progress value={c.percentage} className="h-1 bg-white/5" indicatorClassName="bg-white/20" />
+                                    <Progress value={c.percentage} className="h-1" />
                                 </div>
                             ))}
                         </CardContent>
                     </Card>
 
-                    <Card className="shadow-sm border-white/5 bg-background/50 backdrop-blur-xl">
+                    <Card className="shadow-sm">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-medium flex items-center gap-2">
                                 <AlertCircle className="w-4 h-4 text-primary" />
@@ -203,7 +202,7 @@ export const AnalyticsView = ({ projectId }: AnalyticsViewProps) => {
                             <ul className="space-y-3">
                                 {report.optimizationSuggestions.map((s, i) => (
                                     <li key={i} className="flex gap-3 text-xs text-muted-foreground leading-relaxed">
-                                        <div className="mt-1 h-1.5 w-1.5 rounded-full bg-primary shrink-0 shadow-[0_0_8px_rgba(43,108,238,0.5)]" />
+                                        <div className="mt-1 h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
                                         {s}
                                     </li>
                                 ))}
@@ -215,7 +214,7 @@ export const AnalyticsView = ({ projectId }: AnalyticsViewProps) => {
             </div>
 
             <div className="flex justify-end">
-                <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-white" onClick={handleGenerate}>
+                <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={handleGenerate}>
                     <RefreshCw className="w-3 h-3 mr-2" />
                     Update Analysis
                 </Button>

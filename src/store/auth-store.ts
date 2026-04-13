@@ -1,41 +1,24 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import type { User } from '@/types';
 
 interface AuthState {
     user: User | null;
-    accessToken: string | null;
     isAuthenticated: boolean;
-    setAuth: (user: User, accessToken: string) => void;
-    setAccessToken: (accessToken: string) => void;
-    setUser: (user: User) => void;
+    isLoading: boolean;
+    setUser: (user: User | null) => void;
     logout: () => void;
+    setLoading: (loading: boolean) => void;
 }
 
-export const useAuthStore = create<AuthState>()(
-    persist(
-        (set) => ({
-            user: null,
-            accessToken: null,
-            isAuthenticated: false,
+export const useAuthStore = create<AuthState>()((set) => ({
+    user: null,
+    isAuthenticated: false,
+    isLoading: true,
 
-            setAuth: (user, accessToken) =>
-                set({ user, accessToken, isAuthenticated: true }),
+    setUser: (user) => set({ user, isAuthenticated: !!user, isLoading: false }),
+    setLoading: (isLoading) => set({ isLoading }),
 
-            setAccessToken: (accessToken) => set({ accessToken }),
-
-            setUser: (user) => set({ user }),
-
-            logout: () =>
-                set({ user: null, accessToken: null, isAuthenticated: false }),
-        }),
-        {
-            name: 'auth-storage',
-            partialize: (state) => ({
-                user: state.user,
-                accessToken: state.accessToken,
-                isAuthenticated: state.isAuthenticated,
-            }),
-        }
-    )
-);
+    logout: () => {
+        set({ user: null, isAuthenticated: false, isLoading: false });
+    },
+}));

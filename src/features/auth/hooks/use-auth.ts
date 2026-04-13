@@ -7,14 +7,15 @@ import { LoginCredentials, RegisterCredentials } from '@/types';
 
 export function useLogin() {
     const router = useRouter();
-    const setAuth = useAuthStore((state) => state.setAuth);
+    const setUser = useAuthStore((state) => state.setUser);
 
     return useMutation({
         mutationFn: (credentials: LoginCredentials) => authService.login(credentials),
         onSuccess: (data) => {
-            setAuth(data.user, data.accessToken);
+            setUser(data.user);
             toast.success('Welcome back!');
             router.push('/dashboard');
+            router.refresh();
         },
         onError: (error: any) => {
             const message = error.response?.data?.error?.message || 'Failed to sign in. Please check your credentials.';
@@ -25,14 +26,15 @@ export function useLogin() {
 
 export function useRegister() {
     const router = useRouter();
-    const setAuth = useAuthStore((state) => state.setAuth);
+    const setUser = useAuthStore((state) => state.setUser);
 
     return useMutation({
         mutationFn: (credentials: RegisterCredentials) => authService.register(credentials),
         onSuccess: (data) => {
-            setAuth(data.user, data.accessToken);
+            setUser(data.user);
             toast.success('Account created successfully!');
             router.push('/dashboard');
+            router.refresh();
         },
         onError: (error: any) => {
             const message = error.response?.data?.error?.message || 'Failed to create account. Please try again.';
@@ -40,7 +42,28 @@ export function useRegister() {
         },
     });
 }
+
+export function useLogout() {
+    const router = useRouter();
+    const logout = useAuthStore((state) => state.logout);
+
+    return useMutation({
+        mutationFn: () => authService.logout(),
+        onSuccess: () => {
+            logout();
+            router.push('/login');
+            router.refresh();
+        },
+        onError: () => {
+            // Still logout client-side even if server call fails
+            logout();
+            router.push('/login');
+            router.refresh();
+        },
+    });
+}
+
 export function useAuth() {
-    const { user, accessToken, setAuth, logout } = useAuthStore();
-    return { user, accessToken, setAuth, logout };
+    const { user, isAuthenticated, isLoading } = useAuthStore();
+    return { user, isAuthenticated, isLoading };
 }
