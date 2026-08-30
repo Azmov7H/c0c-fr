@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname, useRouter } from "next/navigation"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react"
 
 import {
   Bell, Plus, Search, Sun, Moon, Monitor,
@@ -134,25 +134,27 @@ export function Header() {
             <Breadcrumb className="hidden sm:flex">
               <BreadcrumbList>
                 {breadcrumbs.map((crumb, i) => (
-                  <BreadcrumbItem key={crumb.href}>
-                    {!crumb.isLast ? (
-                      <>
+                  <Fragment key={crumb.href}>
+                    <BreadcrumbItem>
+                      {crumb.isLast ? (
+                        <BreadcrumbPage className="text-xs font-semibold text-foreground">
+                          {crumb.label}
+                        </BreadcrumbPage>
+                      ) : (
                         <BreadcrumbLink
                           href={crumb.href}
                           className="text-xs text-muted-foreground hover:text-foreground transition-colors font-medium"
                         >
                           {crumb.label}
                         </BreadcrumbLink>
-                        <BreadcrumbSeparator>
-                          <ChevronRight className="w-3 h-3" />
-                        </BreadcrumbSeparator>
-                      </>
-                    ) : (
-                      <BreadcrumbPage className="text-xs font-semibold text-foreground">
-                        {crumb.label}
-                      </BreadcrumbPage>
+                      )}
+                    </BreadcrumbItem>
+                    {!crumb.isLast && (
+                      <BreadcrumbSeparator>
+                        <ChevronRight className="w-3 h-3" />
+                      </BreadcrumbSeparator>
                     )}
-                  </BreadcrumbItem>
+                  </Fragment>
                 ))}
               </BreadcrumbList>
             </Breadcrumb>

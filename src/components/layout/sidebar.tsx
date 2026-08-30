@@ -26,6 +26,7 @@ import {
 import {
   LayoutDashboard,
   Lightbulb,
+  PackageMinus,
   FileText,
   CalendarDays,
   Type,
@@ -36,7 +37,10 @@ import {
   LayoutTemplate,
   BarChart3,
   Users,
+  PanelTop,
   Settings,
+  User2,
+  AlignVerticalDistributeCenter
 } from "lucide-react"
 
 import Logo from "../logo"
@@ -54,11 +58,11 @@ const navGroups = [
   {
     label: "Content Engine",
     items: [
-      { title: "Ideas & Trends", url: "/trends", icon: Lightbulb },
-      { title: "Script Generator", url: "/scripts", icon: FileText },
-      { title: "Content Planner", url: "/planner", icon: CalendarDays },
-      { title: "Title Generator", url: "/titles", icon: Type },
-      { title: "Hashtag Generator", url: "/hashtags", icon: Hash },
+      { title: "Projects", url: "/projects", icon: PackageMinus },
+      { title: "Trends", url: "/trends", icon: PanelTop },
+      { title: "Team", url: "/team", icon: User2 },
+      { title: "Analyticts", url: "/analytics", icon: AlignVerticalDistributeCenter },
+      
     ],
   },
   {
@@ -104,7 +108,7 @@ function NavItem({
         hover:bg-muted/60 hover:text-foreground
         data-[active=true]:bg-primary/10 data-[active=true]:text-primary
         data-[active=true]:font-semibold data-[active=true]:border-l-2
-        data-[active=true]:border-primary data-[active=true]:pl-[calc(0.75rem-2px)]
+        data-[active=true]:border-primary data-[active=true]:pl-2.5
       "
     >
       <Link href={item.url} className="flex items-center gap-3 px-3">
@@ -138,7 +142,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border/60">
 
       {/* Logo Header */}
-      <SidebarHeader className="h-16 flex items-center px-4 border-b border-border/60">
+      <SidebarHeader className="h-16 flex items-start px-4 border-b border-border/60">
         <Logo />
       </SidebarHeader>
 
