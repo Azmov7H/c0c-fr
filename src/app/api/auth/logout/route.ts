@@ -1,27 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { config } from '@/config';
+import { SERVER_API_URL } from '@/services/server-api';
+import { SESSION_COOKIE, REFRESH_COOKIE, clearCookieOptions } from '@/lib/auth-cookies';
 
-const API_URL = config.apiUrl;
+const REVOCATION_TIMEOUT_MS = 2000;
 
 export async function POST(request: NextRequest) {
-  try {
-    // Try to notify backend of logout (non-blocking, fire-and-forget)
-    const sessionCookie = request.cookies.get('auth_session');
-    if (sessionCookie?.value) {
-      fetch(`${API_URL}/auth/logout`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${sessionCookie.value}` },
-      }).catch(() => {});
+  const sessionCookie = request.cookies.get(SESSION_COOKIE);
+
+  // Best-effort revocation of the backend refresh family. Always clear local
+  // cookies regardless of the outcome (idempotent; safe with backend down).
+  if (sessionCookie?.value) {
+    try {
+      await Promise.race([
+        fetch(`${SERVER_API_URL}/api/v1/auth/logout`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${sessionCookie.value}` },
+        }),
+        new Promise((resolve) => setTimeout(resolve, REVOCATION_TIMEOUT_MS)),
+      ]);
+    } catch {
+      // Ignore network errors — local session must still be cleared.
     }
-  } catch {
-    // Ignore errors — always clear cookies regardless
   }
 
   const res = NextResponse.json({ success: true });
-
-  // Clear auth cookies
-  res.cookies.set('auth_session', '', { httpOnly: true, path: '/', maxAge: 0 });
-  res.cookies.set('user_info', '', { httpOnly: false, path: '/', maxAge: 0 });
-
+  res.cookies.set(SESSION_COOKIE, '', clearCookieOptions());
+  res.cookies.set(REFRESH_COOKIE, '', clearCookieOptions());
   return res;
 }

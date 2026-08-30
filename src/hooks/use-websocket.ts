@@ -1,5 +1,5 @@
-import { useEffect, useRef, useCallback } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { useEffect, useRef, useCallback, useState } from 'react';
+import { io, type Socket } from 'socket.io-client';
 import { useQueryClient } from '@tanstack/react-query';
 import { notificationsKeys } from '@/features/notifications/hooks/use-notifications';
 import { toast } from 'sonner';
@@ -15,28 +15,35 @@ interface NotificationPayload {
     createdAt: string;
 }
 
-let socketInstance: Socket | null = null;
+async function fetchSocketToken(): Promise<string | null> {
+    try {
+        const res = await fetch('/api/auth/ws-token', { cache: 'no-store' });
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data?.data?.token ?? null;
+    } catch {
+        return null;
+    }
+}
 
 export function useWebSocket() {
     const { user } = useAuth();
     const queryClient = useQueryClient();
     const socketRef = useRef<Socket | null>(null);
+    const [isConnected, setIsConnected] = useState(false);
 
-    const connect = useCallback(() => {
+    const connect = useCallback(async () => {
         if (!user || socketRef.current?.connected) return;
 
-        // Get token from cookie or session
-        const userInfoCookie = document.cookie
-            .split('; ')
-            .find((row) => row.startsWith('auth_session='));
-
-        const token = userInfoCookie?.split('=')[1];
+        // Short-lived token issued server-side (RT-01); never read the httpOnly cookie.
+        const token = await fetchSocketToken();
         if (!token) return;
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api/v1';
-        const wsUrl = apiUrl.replace('/api/v1', '');
+        // Same-origin topology (FE-01): the socket connects to the app origin.
+        const origin = typeof window !== 'undefined' ? window.location.origin : '';
+        const wsUrl = origin || 'http://localhost:3000';
 
-        socketRef.current = io(wsUrl, {
+        const socket = io(wsUrl, {
             path: '/api/v1/ws',
             auth: { token },
             transports: ['websocket', 'polling'],
@@ -45,53 +52,57 @@ export function useWebSocket() {
             reconnectionAttempts: 5,
         });
 
-        socketRef.current.on('connect', () => {
-            console.log('WebSocket connected');
+        socketRef.current = socket;
+
+        socket.on('connect', () => {
+            setIsConnected(true);
         });
 
-        // Handle incoming notifications
-        socketRef.current.on('notification', (data: NotificationPayload) => {
-            // Invalidate notification queries to trigger refetch
-            queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
+        socket.on('disconnect', () => {
+            setIsConnected(false);
+        });
 
-            // Show toast
+        socket.on('connect_error', () => {
+            setIsConnected(false);
+        });
+
+        socket.on('notification', (data: NotificationPayload) => {
+            queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
             toast.info(data.title, { description: data.message });
         });
 
-        socketRef.current.on('script:generated', () => {
+        socket.on('script:generated', () => {
             queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
             toast.success('Script Generated', {
                 description: 'AI has finished generating your script.',
             });
         });
 
-        socketRef.current.on('thumbnail:generated', () => {
+        socket.on('thumbnail:generated', () => {
             queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
             toast.success('Thumbnail Ready', {
                 description: 'AI has finished generating your thumbnail.',
             });
         });
 
-        socketRef.current.on('audio:generated', () => {
+        socket.on('audio:generated', () => {
             queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
             toast.success('Audio Ready', {
                 description: 'AI has finished generating your audio suggestions.',
             });
         });
 
-        socketRef.current.on('error', (message: string) => {
+        socket.on('error', (message: string) => {
             toast.error('WebSocket Error', { description: message });
         });
-
-        socketInstance = socketRef.current;
     }, [user, queryClient]);
 
     const disconnect = useCallback(() => {
         if (socketRef.current) {
             socketRef.current.disconnect();
             socketRef.current = null;
-            socketInstance = null;
         }
+        setIsConnected(false);
     }, []);
 
     useEffect(() => {
@@ -99,15 +110,15 @@ export function useWebSocket() {
             connect();
         }
 
+        // Cleanup disconnects the socket when `user` changes (e.g. logout).
         return () => {
             disconnect();
         };
     }, [user, connect, disconnect]);
 
     return {
-        socket: socketRef.current,
         connect,
         disconnect,
-        isConnected: socketRef.current?.connected ?? false,
+        isConnected,
     };
 }

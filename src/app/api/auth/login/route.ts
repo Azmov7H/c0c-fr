@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { config } from '@/config';
-
-const API_URL = config.apiUrl;
+import { SERVER_API_URL } from '@/services/server-api';
+import { SESSION_COOKIE, REFRESH_COOKIE, SESSION_COOKIE_MAX_AGE, authCookieOptions } from '@/lib/auth-cookies';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,8 +14,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Forward login request to external backend
-    const response = await fetch(`${API_URL}/auth/login`, {
+    const response = await fetch(`${SERVER_API_URL}/api/v1/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -31,31 +29,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { user, accessToken } = result.data;
+    const { user, accessToken, refreshToken } = result.data;
 
-    // Create the response with user data
     const res = NextResponse.json({
       success: true,
       data: { user },
     });
 
-    // Set httpOnly cookie for the access token (secure, not accessible to JS)
-    res.cookies.set('auth_session', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    });
+    // Session cookie (access token) tracks the refresh lifetime (AUTH-03).
+    res.cookies.set(SESSION_COOKIE, accessToken, authCookieOptions({ maxAge: SESSION_COOKIE_MAX_AGE }));
 
-    // Set a separate cookie with user info for middleware checks (non-sensitive)
-    res.cookies.set('user_info', JSON.stringify({ id: user.id, email: user.email }), {
-      httpOnly: false, // Readable by client for display purposes
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7,
-    });
+    // Refresh cookie is owned server-side by the BFF (AUTH-04).
+    if (refreshToken) {
+      res.cookies.set(REFRESH_COOKIE, refreshToken, authCookieOptions({ maxAge: SESSION_COOKIE_MAX_AGE }));
+    }
+
+    // No user_info (PII) cookie (AUTH-02.2); user data via GET /api/auth/session.
 
     return res;
   } catch {

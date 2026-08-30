@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { config } from '@/config';
-
-const API_URL = config.apiUrl;
+import { SERVER_API_URL } from '@/services/server-api';
+import { SESSION_COOKIE, REFRESH_COOKIE, SESSION_COOKIE_MAX_AGE, authCookieOptions } from '@/lib/auth-cookies';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,8 +14,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Forward register request to external backend
-    const response = await fetch(`${API_URL}/auth/register`, {
+    const response = await fetch(`${SERVER_API_URL}/api/v1/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, firstName, lastName }),
@@ -31,30 +29,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { user, accessToken } = result.data;
+    const { user, accessToken, refreshToken } = result.data;
 
     const res = NextResponse.json({
       success: true,
       data: { user },
     });
 
-    // Set httpOnly cookie
-    res.cookies.set('auth_session', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    });
+    res.cookies.set(SESSION_COOKIE, accessToken, authCookieOptions({ maxAge: SESSION_COOKIE_MAX_AGE }));
 
-    // Set user info cookie (non-sensitive, client-readable)
-    res.cookies.set('user_info', JSON.stringify({ id: user.id, email: user.email }), {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7,
-    });
+    if (refreshToken) {
+      res.cookies.set(REFRESH_COOKIE, refreshToken, authCookieOptions({ maxAge: SESSION_COOKIE_MAX_AGE }));
+    }
 
     return res;
   } catch {

@@ -4,16 +4,27 @@ interface AuthResponse {
     user: User;
 }
 
+export interface SessionData {
+    authenticated: boolean;
+    user: User | null;
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
     const res = await fetch(path, {
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         ...options,
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-        throw { response: { data } };
+        throw {
+            response: { data },
+            message: data?.error?.message || 'Request failed',
+            code: data?.error?.code,
+            status: res.status,
+        };
     }
 
     return data;
@@ -40,12 +51,14 @@ export const authService = {
         await request('/api/auth/logout', { method: 'POST' });
     },
 
-    getSession: async (): Promise<User | null> => {
+    getSession: async (): Promise<SessionData> => {
         try {
-            const result = await request<{ success: boolean; data: User }>('/api/auth/session');
+            const result = await request<{ success: boolean; data: SessionData }>('/api/auth/session', {
+                cache: 'no-store',
+            });
             return result.data;
         } catch {
-            return null;
+            return { authenticated: false, user: null };
         }
     },
 };
