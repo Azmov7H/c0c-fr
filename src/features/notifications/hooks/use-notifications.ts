@@ -1,5 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationsService } from '../services/notifications.service';
+import { useRealtimeStatus } from '@/hooks/use-realtime-status';
+import { useAuthStore } from '@/store/auth-store';
+import { getPollingIntervalMs } from '@/types/realtime';
 import { toast } from 'sonner';
 
 // Query keys
@@ -21,14 +24,19 @@ export function useNotifications(params?: { page?: number; limit?: number; isRea
 }
 
 /**
- * Get unread notification count
+ * Get unread notification count.
+ * State-aware polling (RT-06): the socket delivers updates while connected,
+ * so polling runs only as a fallback — and never after logout.
  */
 export function useUnreadCount() {
+    const status = useRealtimeStatus();
+    const user = useAuthStore((s) => s.user);
     return useQuery({
         queryKey: notificationsKeys.unread(),
         queryFn: () => notificationsService.getUnreadCount(),
         staleTime: 1000 * 15, // 15 seconds
-        refetchInterval: 1000 * 30, // Poll every 30 seconds
+        refetchInterval: getPollingIntervalMs(status, !!user) ?? false,
+        enabled: !!user,
     });
 }
 
