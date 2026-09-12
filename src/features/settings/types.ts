@@ -15,6 +15,4 @@ export interface UpdateProfileDTO {
     email?: string;
 }
 
-export interface UpdatePlanDTO {
-    plan: 'starter' | 'pro' | 'studio';
-}
+// SEC-06: UpdatePlanDTO removed — no self-service plan mutation surface.

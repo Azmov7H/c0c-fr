@@ -1,5 +1,5 @@
 import apiClient from '@/services/api-client';
-import { UserProfile, UpdateProfileDTO, UpdatePlanDTO } from '../types';
+import { UserProfile, UpdateProfileDTO } from '../types';
 import { ApiResponse } from '@/types';
 
 class SettingsService {
@@ -15,10 +15,8 @@ class SettingsService {
         return response.data.data;
     }
 
-    async updatePlan(data: UpdatePlanDTO): Promise<UserProfile> {
-        const response = await apiClient.patch<ApiResponse<UserProfile>>(`${this.baseUrl}/plan`, data);
-        return response.data.data;
-    }
+    // SEC-06: self-service plan mutation removed. Plans are read-only;
+    // changes go through billing/support (admin route).
 }
 
 export const settingsService = new SettingsService();

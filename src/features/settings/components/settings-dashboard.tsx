@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useProfile, useUpdateProfile, useUpdatePlan } from '../hooks/use-settings';
+import { useProfile, useUpdateProfile } from '../hooks/use-settings';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +24,6 @@ import { useLogout } from '@/features/auth/hooks/use-auth';
 export const SettingsDashboard = () => {
     const { data: profile, isLoading } = useProfile();
     const { mutate: updateProfile, isPending: isUpdatingProfile } = useUpdateProfile();
-    const { mutate: updatePlan, isPending: isUpdatingPlan } = useUpdatePlan();
     const { mutate: logout } = useLogout();
 
     const [formData, setFormData] = useState({
@@ -36,10 +35,6 @@ export const SettingsDashboard = () => {
     const handleUpdateProfile = (e: React.FormEvent) => {
         e.preventDefault();
         updateProfile(formData);
-    };
-
-    const handleUpgrade = (plan: 'starter' | 'pro' | 'studio') => {
-        updatePlan({ plan });
     };
 
     if (isLoading) {
@@ -158,13 +153,19 @@ export const SettingsDashboard = () => {
                                         </ul>
                                     </CardContent>
                                     <CardFooter>
+                                        {/* SEC-06/AUTHZ-08: plans are read-only. Upgrades go
+                                            through billing/support, never self-service. */}
                                         <Button
-                                            variant={profile?.plan === plan.id ? "ghost" : "default"}
+                                            variant={profile?.plan === plan.id ? "ghost" : "outline"}
                                             className="w-full"
-                                            disabled={profile?.plan === plan.id || isUpdatingPlan}
-                                            onClick={() => handleUpgrade(plan.id as any)}
+                                            disabled
+                                            title={
+                                                profile?.plan === plan.id
+                                                    ? 'Current plan'
+                                                    : 'Contact support to change plans'
+                                            }
                                         >
-                                            {profile?.plan === plan.id ? 'Current Plan' : 'Select Plan'}
+                                            {profile?.plan === plan.id ? 'Current Plan' : 'Contact Sales'}
                                         </Button>
                                     </CardFooter>
                                 </Card>

@@ -3,6 +3,15 @@ import { teamsService } from '../services/teams.service';
 import { CreateTeamDTO, InviteMemberDTO } from '../types';
 import { toast } from 'sonner';
 
+interface RequestErrorShape {
+    message?: string;
+    response?: { data?: { error?: { message?: string } } };
+}
+
+function getErrorMessage(error: RequestErrorShape, fallback: string): string {
+    return error?.message || error?.response?.data?.error?.message || fallback;
+}
+
 export const teamKeys = {
     all: ['teams'] as const,
     lists: () => [...teamKeys.all, 'list'] as const,
@@ -34,8 +43,8 @@ export const useCreateTeam = () => {
             toast.success('Team created');
             queryClient.invalidateQueries({ queryKey: ['teams'] });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to create team');
+        onError: (error: RequestErrorShape) => {
+            toast.error(getErrorMessage(error, 'Failed to create team'));
         },
     });
 };
@@ -50,8 +59,8 @@ export const useInviteMember = () => {
             toast.success('Member invited successfully');
             queryClient.invalidateQueries({ queryKey: ['teams', 'detail', data.id] });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to invite member');
+        onError: (error: RequestErrorShape) => {
+            toast.error(getErrorMessage(error, 'Failed to invite member'));
         },
     });
 };
@@ -65,6 +74,10 @@ export const useRemoveMember = () => {
         onSuccess: (data) => {
             toast.success('Member removed');
             queryClient.invalidateQueries({ queryKey: ['teams', 'detail', data.id] });
+        },
+        // AUTHZ-02: 403s (e.g. removing the owner) surface as toasts, never crashes.
+        onError: (error: RequestErrorShape) => {
+            toast.error(getErrorMessage(error, 'Failed to remove member'));
         },
     });
 };

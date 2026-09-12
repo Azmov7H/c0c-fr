@@ -1,7 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { settingsService } from '../services/settings.service';
-import { UpdateProfileDTO, UpdatePlanDTO } from '../types';
+import { UpdateProfileDTO } from '../types';
 import { toast } from 'sonner';
+
+interface RequestErrorShape {
+    message?: string;
+    response?: { data?: { error?: { message?: string } } };
+}
+
+function getErrorMessage(error: RequestErrorShape, fallback: string): string {
+    return error?.message || error?.response?.data?.error?.message || fallback;
+}
 
 export const useProfile = () => {
     return useQuery({
@@ -20,23 +29,10 @@ export const useUpdateProfile = () => {
             queryClient.invalidateQueries({ queryKey: ['user-profile'] });
             queryClient.invalidateQueries({ queryKey: ['user'] }); // Sync with auth hook if any
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to update profile');
+        onError: (error: RequestErrorShape) => {
+            toast.error(getErrorMessage(error, 'Failed to update profile'));
         },
     });
 };
 
-export const useUpdatePlan = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: (data: UpdatePlanDTO) => settingsService.updatePlan(data),
-        onSuccess: (data) => {
-            toast.success(`Successfully upgraded to ${data.plan.toUpperCase()}!`);
-            queryClient.invalidateQueries({ queryKey: ['user-profile'] });
-        },
-        onError: (error: any) => {
-            toast.error(error.message || 'Payment processing failed');
-        },
-    });
-};
+// SEC-06: useUpdatePlan removed — plans are read-only in the UI.
