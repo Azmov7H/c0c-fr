@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
+import type { Project } from "@/types"
+import { useState, useMemo } from "react"
 import Link from "next/link"
 import { useDebounce } from "@/hooks/use-debounce"
 
@@ -35,7 +36,7 @@ export function ProjectsView() {
 
   const projects = useMemo(() => {
     const all = data?.data ?? []
-    return all.filter((p: any) => {
+    return all.filter((p: Project) => {
       const matchSearch = !debouncedSearch ||
         p.title?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         p.idea?.toLowerCase().includes(debouncedSearch.toLowerCase())
@@ -140,7 +141,7 @@ export function ProjectsView() {
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project: any) => (
+          {projects.map((project: Project) => (
             <ProjectCard key={project._id} project={project} />
           ))}
         </div>

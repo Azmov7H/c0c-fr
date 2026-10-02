@@ -3,10 +3,8 @@
 import React from "react"
 import Link from "next/link"
 import {
-  ArrowRight, FileText, Play, Plus, TrendingUp,
-  Zap, CheckCircle2, Users, BarChart3,
-  Lightbulb, Sparkles, Calendar, Hash, MoreHorizontal,
-} from "lucide-react"
+  ArrowRight, FileText, Play, Plus, Zap, CheckCircle2, Users, BarChart3,
+  Lightbulb, Sparkles, Calendar, Hash, } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -16,6 +14,8 @@ import { useDashboardStats } from "@/features/dashboard/hooks/use-dashboard"
 import { useRecentActivity } from "@/features/dashboard/hooks/use-dashboard"
 import { usePlannerEvents } from "@/features/planner/hooks/use-planner"
 import { formatDistanceToNow } from "date-fns"
+import type { RecentActivityItem } from "@/features/dashboard/services/dashboard.service"
+import type { PlannerEvent } from "@/features/planner/services/planner.service"
 
 // ─── Metric Card ─────────────────────────────────────────────────────────────
 function MetricCard({
@@ -55,12 +55,6 @@ function MetricCard({
 }
 
 // ─── Kanban Item ──────────────────────────────────────────────────────────────
-const statusConfig: Record<string, { label: string; className: string }> = {
-  Scripting: { label: "Scripting", className: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
-  Editing: { label: "Editing", className: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
-  Scheduled: { label: "Scheduled", className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
-  "In Progress": { label: "In Progress", className: "bg-purple-500/10 text-purple-600 dark:text-purple-400" },
-}
 
 // ─── Main View ────────────────────────────────────────────────────────────────
 export function DashboardView() {
@@ -69,7 +63,6 @@ export function DashboardView() {
   const { data: plannerData } = usePlannerEvents({ limit: 3, status: 'pending' })
 
   const overview = stats?.overview
-  const platformStats = stats?.projectsByPlatform
   const trendVelocity = stats?.trendVelocity || []
   const calendarItems = plannerData?.data || []
 
@@ -239,7 +232,7 @@ export function DashboardView() {
               </div>
             ) : recentActivity && recentActivity.length > 0 ? (
               <div className="divide-y divide-border/40">
-                {recentActivity.map((item: any) => (
+                {recentActivity.map((item: RecentActivityItem) => (
                   <div
                     key={item.id}
                     className="flex items-center justify-between px-5 py-3.5 hover:bg-muted/30 transition-colors group cursor-pointer"
@@ -283,7 +276,7 @@ export function DashboardView() {
             </CardHeader>
             <CardContent className="p-3 space-y-2">
               {calendarItems.length > 0 ? (
-                calendarItems.map((item: any) => (
+                calendarItems.map((item: PlannerEvent) => (
                   <div key={item._id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-muted/40 transition-colors cursor-pointer group">
                     <div className="text-center shrink-0 w-10">
                       <p className="text-[9px] font-bold text-muted-foreground uppercase">{new Date(item.scheduledDate).toLocaleString('default', { month: 'short' })}</p>

@@ -64,7 +64,7 @@ export const useDeleteThumbnail = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id, projectId }: { id: string; projectId: string }) =>
+        mutationFn: ({ id }: { id: string; projectId: string }) =>
             thumbnailsService.deleteThumbnail(id),
         onSuccess: (_, variables) => {
             toast.success('Thumbnail deleted');

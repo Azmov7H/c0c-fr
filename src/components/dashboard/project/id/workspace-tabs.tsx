@@ -2,6 +2,7 @@
 
 import { FileText, ImageIcon, Music } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import type { Script } from "@/features/scripts/types"
 import {
     WorkspaceEmpty
 } from "./workspace-empty"
@@ -13,11 +14,17 @@ const TABS = [
     { value: "audio", label: "Audio", icon: Music },
 ]
 
+interface WorkspaceTabsProps {
+  activeScript?: Script | null
+  onGenerate: () => void
+  isGenerating: boolean
+}
+
 export function WorkspaceTabs({
     activeScript,
     onGenerate,
     isGenerating
-}: any) {
+}: WorkspaceTabsProps) {
 
     return (
         <Tabs defaultValue="script">

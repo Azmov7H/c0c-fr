@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import type { Project } from '@/types';
 
 const wizardSchema = z.object({
     title: z.string().min(3, 'Title must be at least 3 characters').max(100, 'Title is too long'),
@@ -34,6 +35,29 @@ const wizardSchema = z.object({
 });
 
 type WizardFormValues = z.infer<typeof wizardSchema>;
+
+const StepIndicator = ({ current, total }: { current: number; total: number }) => (
+    <div className="flex items-center gap-3 mb-10 w-full justify-center">
+        {Array.from({ length: total }).map((_, i) => (
+            <React.Fragment key={i}>
+                <div className={cn(
+                    "flex items-center justify-center w-10 h-10 rounded-2xl border-2 transition-all duration-300",
+                    i + 1 < current ? "bg-primary border-primary text-primary-foreground" :
+                        i + 1 === current ? "border-primary text-primary shadow-glow ring-4 ring-primary/10" :
+                            "border-muted text-muted-foreground bg-muted/20"
+                )}>
+                    {i + 1 < current ? <CheckCircle2 className="w-5 h-5" /> : <span className="text-sm font-bold">{i + 1}</span>}
+                </div>
+                {i < total - 1 && (
+                    <div className={cn(
+                        "h-1 w-12 rounded-full transition-all duration-500",
+                        i + 1 < current ? "bg-primary" : "bg-muted"
+                    )} />
+                )}
+            </React.Fragment>
+        ))}
+    </div>
+);
 
 export default function NewProjectWizard() {
     const [step, setStep] = useState(1);
@@ -67,34 +91,11 @@ export default function NewProjectWizard() {
 
     const onSubmit = (data: WizardFormValues) => {
         createProject(data, {
-            onSuccess: (project: any) => {
+            onSuccess: (project: Project) => {
                 router.push(`/projects/${project._id}`);
             }
         });
     };
-
-    const StepIndicator = ({ current, total }: { current: number; total: number }) => (
-        <div className="flex items-center gap-3 mb-10 w-full justify-center">
-            {Array.from({ length: total }).map((_, i) => (
-                <React.Fragment key={i}>
-                    <div className={cn(
-                        "flex items-center justify-center w-10 h-10 rounded-2xl border-2 transition-all duration-300",
-                        i + 1 < current ? "bg-primary border-primary text-primary-foreground" :
-                            i + 1 === current ? "border-primary text-primary shadow-glow ring-4 ring-primary/10" :
-                                "border-muted text-muted-foreground bg-muted/20"
-                    )}>
-                        {i + 1 < current ? <CheckCircle2 className="w-5 h-5" /> : <span className="text-sm font-bold">{i + 1}</span>}
-                    </div>
-                    {i < total - 1 && (
-                        <div className={cn(
-                            "h-1 w-12 rounded-full transition-all duration-500",
-                            i + 1 < current ? "bg-primary" : "bg-muted"
-                        )} />
-                    )}
-                </React.Fragment>
-            ))}
-        </div>
-    );
 
     return (
         <div className="max-w-3xl mx-auto py-10 px-4">

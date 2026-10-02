@@ -1,5 +1,5 @@
 import apiClient from '@/services/api-client';
-import { SEOAnalysis, CreateSEODTO, UpdateSEODTO } from '../types';
+import { SEOAnalysis, UpdateSEODTO } from '../types';
 import { ApiResponse } from '@/types';
 
 class SEOService {

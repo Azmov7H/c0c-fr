@@ -32,4 +32,4 @@ export interface CreateScriptDTO {
     status?: ScriptStatus;
 }
 
-export interface UpdateScriptDTO extends Partial<CreateScriptDTO> { }
+export type UpdateScriptDTO = Partial<CreateScriptDTO>;

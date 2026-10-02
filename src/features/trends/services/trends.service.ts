@@ -1,5 +1,5 @@
 import apiClient from '@/services/api-client';
-import { TrendReport, CreateTrendDTO } from '../types';
+import { TrendReport } from '../types';
 import { ApiResponse } from '@/types';
 
 class TrendsService {

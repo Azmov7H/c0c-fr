@@ -16,7 +16,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { FileText, Sparkles, Copy, Download, RotateCcw } from 'lucide-react';
 
-const PLATFORMS = ['youtube-shorts', 'tiktok', 'instagram-reels', 'youtube-long'] as const;
 const TONES = ['Educational', 'Hype', 'Storytelling', 'Conversational'] as const;
 
 export function ScriptGenerator() {

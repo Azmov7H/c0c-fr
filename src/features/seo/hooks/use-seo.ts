@@ -36,7 +36,7 @@ export const useUpdateSEO = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id, projectId, data }: { id: string; projectId: string; data: UpdateSEODTO }) =>
+        mutationFn: ({ id, data }: { id: string; projectId: string; data: UpdateSEODTO }) =>
             seoService.updateAnalysis(id, data),
         onSuccess: (_, variables) => {
             toast.success('SEO profile updated');

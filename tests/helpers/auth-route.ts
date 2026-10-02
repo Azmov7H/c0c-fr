@@ -15,7 +15,7 @@ export function buildBackendMock() {
         install: (responses: MockBackendResponse[]) => {
             const calls: Array<{ url: string; init?: RequestInit }> = [];
             let i = 0;
-            const fetchMock = vi.fn(async (url: any, init?: RequestInit) => {
+            const fetchMock = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
                 calls.push({ url: String(url), init });
                 if (i >= responses.length) {
                     throw new Error(
@@ -60,9 +60,7 @@ export function makeRequest(opts: {
 
 export function cookiesOf(res: Response): Array<{ name: string; value: string }> {
     // The real NextResponse exposes its cookies on `.cookies.getAll()`.
-    const all = (res as any).cookies.getAll() as Array<{
-        name: string;
-        value: string;
-    }>;
+    const all = (res as Response & { cookies: { getAll(): Array<{ name: string; value: string }> } })
+        .cookies.getAll();
     return all;
 }

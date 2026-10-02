@@ -6,7 +6,7 @@ import { FilterBar } from '@/components/shared/filter-bar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
@@ -16,9 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  Image as ImageIcon, Music, Video, FileAudio, FileImage,
-  Upload, Search, Copy, Trash2, Play, X,
-} from 'lucide-react';
+  Image as ImageIcon, Video, FileAudio, Search, Copy, Trash2, Play, } from 'lucide-react';
 import Image from 'next/image';
 
 const MOCK_ASSETS = [

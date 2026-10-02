@@ -81,7 +81,7 @@ export const useDeleteAudioSuggestion = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id, projectId }: { id: string; projectId: string }) =>
+        mutationFn: ({ id }: { id: string; projectId: string }) =>
             audioService.deleteSuggestion(id),
         onSuccess: (_, variables) => {
             toast.success('Audio profile deleted');

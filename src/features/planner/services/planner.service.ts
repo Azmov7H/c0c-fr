@@ -1,4 +1,5 @@
 import apiClient from '@/services/api-client';
+import type { PaginatedMeta } from '@/types';
 
 export interface PlannerEvent {
     _id: string;
@@ -25,7 +26,7 @@ export const plannerService = {
         endDate?: string;
         status?: string;
         projectId?: string;
-    }): Promise<{ data: PlannerEvent[]; meta: any }> {
+    }): Promise<{ data: PlannerEvent[]; meta: PaginatedMeta }> {
         const { data } = await apiClient.get('/planner/events', { params });
         return { data: data.data, meta: data.meta };
     },

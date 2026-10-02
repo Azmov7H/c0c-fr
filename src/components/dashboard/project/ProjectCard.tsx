@@ -8,7 +8,9 @@ import { Badge } from "@/components/ui/badge"
 
 import { getPlatformIcon, getStatusStyles } from "./helpers"
 
-export function ProjectCard({ project }: any) {
+import type { Project } from "@/types"
+
+export function ProjectCard({ project }: { project: Project }) {
   return (
     <Link href={`/projects/${project._id}`} className="group">
       <Card

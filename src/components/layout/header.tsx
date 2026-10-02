@@ -1,10 +1,10 @@
 "use client"
 
 import { usePathname, useRouter } from "next/navigation"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useSyncExternalStore } from "react"
 
 import {
-  Bell, Plus, Search, Sun, Moon, Monitor,
+  Plus, Search, Sun, Moon, Monitor,
   FileText, Upload, Zap, ChevronRight,
 } from "lucide-react"
 
@@ -26,7 +26,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Badge } from "@/components/ui/badge"
+
 import { CommandMenu } from "./command-menu"
 import { UserButton } from "./user-button"
 import { NotificationBell } from "@/features/notifications/components/notification-bell"
@@ -61,11 +61,15 @@ function useBreadcrumbs() {
   }))
 }
 
+const emptySubscribe = () => () => {}
+
 function ThemeCycler() {
   const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => setMounted(true), [])
+  // The resolved theme is unknown on the server, so subscribe to a no-op store
+  // until hydration completes. This replaces a `mounted` flag set from an effect,
+  // which triggered a cascading re-render on every header mount.
+  const hydrated = useSyncExternalStore(emptySubscribe, () => true, () => false)
 
   const next = theme === "dark" ? "light" : theme === "light" ? "system" : "dark"
   const icon =
@@ -73,7 +77,7 @@ function ThemeCycler() {
     theme === "light" ? <Sun className="w-4 h-4" /> :
     <Monitor className="w-4 h-4" />
 
-  if (!mounted) {
+  if (!hydrated) {
     return (
       <Button
         variant="ghost"
@@ -103,8 +107,6 @@ export function Header() {
   const router = useRouter()
   const breadcrumbs = useBreadcrumbs()
 
-  const [cmdOpen, setCmdOpen] = useState(false)
-
   const openCmd = useCallback(() => {
     // dispatch a keyboard event to trigger CommandMenu
     document.dispatchEvent(
@@ -133,7 +135,7 @@ export function Header() {
           {breadcrumbs.length > 0 && (
             <Breadcrumb className="hidden sm:flex">
               <BreadcrumbList>
-                {breadcrumbs.map((crumb, i) => (
+                {breadcrumbs.map((crumb) => (
                   <BreadcrumbItem key={crumb.href}>
                     {!crumb.isLast ? (
                       <>

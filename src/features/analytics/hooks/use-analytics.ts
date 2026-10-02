@@ -80,7 +80,7 @@ export const useDeleteAnalytics = () => {
 
     return useMutation({
         mutationFn: (id: string) => analyticsService.deleteReport(id),
-        onSuccess: (_, id) => {
+        onSuccess: () => {
             toast.success('Report deleted');
             queryClient.invalidateQueries({ queryKey: analyticsKeys.all });
         },

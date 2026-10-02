@@ -5,8 +5,6 @@ import {
     BarChart3,
     Search,
     Users,
-    Zap,
-    ShieldCheck
 } from 'lucide-react';
 
 const features = [

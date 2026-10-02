@@ -1,4 +1,6 @@
 import apiClient from '@/services/api-client';
+import type { Project, Platform, ProjectStatus } from '@/types';
+import type { PlannerEvent } from '@/features/planner/services/planner.service';
 
 export interface DashboardStats {
     overview: {
@@ -12,10 +14,19 @@ export interface DashboardStats {
         totalMediaItems: number;
     };
     projectsByPlatform: { youtube: number; tiktok: number; instagram: number };
-    recentProjects: any[];
-    upcomingEvents: any[];
+    recentProjects: Project[];
+    upcomingEvents: PlannerEvent[];
     trendVelocity: { date: string; count: number }[];
     weeklyActivity: { day: string; projects: number; scripts: number }[];
+}
+
+export interface RecentActivityItem {
+    id: string;
+    type: 'project' | 'script';
+    title: string;
+    platform?: Platform;
+    status: ProjectStatus | string;
+    createdAt: string;
 }
 
 export const dashboardService = {
@@ -24,7 +35,7 @@ export const dashboardService = {
         return data.data;
     },
 
-    async getRecentActivity(limit = 10): Promise<any[]> {
+    async getRecentActivity(limit = 10): Promise<RecentActivityItem[]> {
         const { data } = await apiClient.get('/dashboard/recent-activity', {
             params: { limit },
         });

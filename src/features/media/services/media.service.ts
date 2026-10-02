@@ -1,4 +1,5 @@
 import apiClient from '@/services/api-client';
+import type { PaginatedMeta } from '@/types';
 
 export interface MediaItem {
     _id: string;
@@ -28,7 +29,7 @@ export const mediaService = {
         category?: string;
         projectId?: string;
         search?: string;
-    }): Promise<{ data: MediaItem[]; meta: any }> {
+    }): Promise<{ data: MediaItem[]; meta: PaginatedMeta }> {
         const { data } = await apiClient.get('/media', { params });
         return { data: data.data, meta: data.meta };
     },
