@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { audioService } from '../services/audio.service';
 import { CreateAudioSuggestionDTO, UpdateAudioSuggestionDTO } from '../types';
 import { toast } from 'sonner';
+import { toApiError } from '@/lib/api-error';
 
 export const audioKeys = {
     all: ['audio'] as const,
@@ -36,8 +37,8 @@ export const useCreateAudioSuggestion = () => {
             toast.success('Audio analysis started');
             queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to start audio analysis');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to start audio analysis').message);
         },
     });
 };
@@ -53,8 +54,8 @@ export const useGenerateAudio = () => {
             queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
             queryClient.setQueryData(audioKeys.detail(data.id), data);
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'AI Audio generation failed');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'AI Audio generation failed').message);
         },
     });
 };
@@ -70,8 +71,8 @@ export const useUpdateAudioSuggestion = () => {
             queryClient.invalidateQueries({ queryKey: audioKeys.detail(data.id) });
             queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to update audio profile');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to update audio profile').message);
         },
     });
 };
@@ -86,8 +87,8 @@ export const useDeleteAudioSuggestion = () => {
             toast.success('Audio profile deleted');
             queryClient.invalidateQueries({ queryKey: audioKeys.list(variables.projectId) });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to delete audio profile');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to delete audio profile').message);
         },
     });
 };

@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { scriptsService } from '../services/scripts.service';
-import { CreateScriptDTO, UpdateScriptDTO } from '../types';
+import { CreateScriptDTO, UpdateScriptDTO, Script } from '../types';
 import { toast } from 'sonner';
+import { toApiError } from '@/lib/api-error';
 
 export const scriptsKeys = {
     all: ['scripts'] as const,
@@ -10,6 +11,15 @@ export const scriptsKeys = {
     details: () => [...scriptsKeys.all, 'detail'] as const,
     detail: (id: string) => [...scriptsKeys.details(), id] as const,
 };
+
+interface UpdateScriptVariables {
+    id: string;
+    data: UpdateScriptDTO;
+}
+
+interface UpdateScriptContext {
+    previousScript: Script | undefined;
+}
 
 export const useProjectScripts = (projectId: string) => {
     return useQuery({
@@ -36,8 +46,8 @@ export const useCreateScript = () => {
             toast.success('Script created successfully');
             queryClient.invalidateQueries({ queryKey: scriptsKeys.list(data.projectId) });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to create script');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to create script').message);
         },
     });
 };
@@ -52,8 +62,8 @@ export const useGenerateScript = () => {
             queryClient.invalidateQueries({ queryKey: scriptsKeys.list(data.projectId) });
             queryClient.setQueryData(scriptsKeys.detail(data.id), data);
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'AI Generation failed');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'AI Generation failed').message);
         },
     });
 };
@@ -61,29 +71,28 @@ export const useGenerateScript = () => {
 export const useUpdateScript = () => {
     const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: ({ id, data }: { id: string; data: UpdateScriptDTO }) =>
-            scriptsService.updateScript(id, data),
+    return useMutation<Script, Error, UpdateScriptVariables, UpdateScriptContext>({
+        mutationFn: ({ id, data }) => scriptsService.updateScript(id, data),
         onMutate: async ({ id, data }) => {
             await queryClient.cancelQueries({ queryKey: scriptsKeys.detail(id) });
-            const previousScript = queryClient.getQueryData(scriptsKeys.detail(id));
-            queryClient.setQueryData(scriptsKeys.detail(id), (old: any) => ({
-                ...old,
+            const previousScript = queryClient.getQueryData<Script>(scriptsKeys.detail(id));
+            queryClient.setQueryData<Script>(scriptsKeys.detail(id), (old) => ({
+                ...(old ?? ({} as Script)),
                 ...data,
             }));
             return { previousScript };
         },
-        onError: (err, { id }, context: any) => {
+        onError: (error, { id }, context) => {
             if (context?.previousScript) {
                 queryClient.setQueryData(scriptsKeys.detail(id), context.previousScript);
             }
-            toast.error('Failed to save script changes');
+            toast.error(toApiError(error, 'Failed to save script changes').message);
         },
         onSuccess: (data) => {
             toast.success('Script saved');
             queryClient.invalidateQueries({ queryKey: scriptsKeys.list(data.projectId) });
         },
-        onSettled: (data, error, { id }) => {
+        onSettled: (_data, _error, { id }) => {
             queryClient.invalidateQueries({ queryKey: scriptsKeys.detail(id) });
         },
     });
@@ -93,14 +102,14 @@ export const useDeleteScript = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id, projectId }: { id: string; projectId: string }) =>
+        mutationFn: ({ id }: { id: string; projectId: string }) =>
             scriptsService.deleteScript(id),
-        onSuccess: (_, variables) => {
+        onSuccess: (_data, variables) => {
             toast.success('Script deleted');
             queryClient.invalidateQueries({ queryKey: scriptsKeys.list(variables.projectId) });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to delete script');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to delete script').message);
         },
     });
 };

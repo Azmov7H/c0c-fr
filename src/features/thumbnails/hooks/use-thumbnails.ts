@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { thumbnailsService } from '../services/thumbnails.service';
 import { CreateThumbnailDTO, UpdateThumbnailDTO } from '../types';
 import { toast } from 'sonner';
+import { toApiError } from '@/lib/api-error';
 
 export const thumbnailsKeys = {
     all: ['thumbnails'] as const,
@@ -36,8 +37,8 @@ export const useCreateThumbnail = () => {
             toast.success('Thumbnail prompt submitted');
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(data.projectId) });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to submit thumbnail prompt');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to submit thumbnail prompt').message);
         },
     });
 };
@@ -53,8 +54,8 @@ export const useUpdateThumbnail = () => {
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.detail(data.id) });
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(data.projectId) });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to update thumbnail');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to update thumbnail').message);
         },
     });
 };
@@ -69,8 +70,8 @@ export const useDeleteThumbnail = () => {
             toast.success('Thumbnail deleted');
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(variables.projectId) });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to delete thumbnail');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to delete thumbnail').message);
         },
     });
 };
