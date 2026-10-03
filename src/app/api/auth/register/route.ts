@@ -3,6 +3,14 @@ import { SERVER_API_URL } from '@/services/server-api';
 import { SESSION_COOKIE, REFRESH_COOKIE, SESSION_COOKIE_MAX_AGE, authCookieOptions } from '@/lib/auth-cookies';
 
 export async function POST(request: NextRequest) {
+  const limit = checkAuthRateLimit(request);
+  if (limit.limited) {
+    return NextResponse.json(
+      { success: false, error: { code: 'TOO_MANY_REQUESTS', message: 'Too many attempts. Please try again later.' } },
+      { status: 429, headers: rateLimitHeaders(limit) }
+    );
+  }
+
   try {
     const body = await request.json();
     const { email, password, firstName, lastName } = body;
@@ -50,3 +58,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+import { checkAuthRateLimit, rateLimitHeaders } from '@/lib/rate-limit';
