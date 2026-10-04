@@ -70,7 +70,8 @@ describe('BFF full auth lifecycle (cookie-jar regression)', () => {
         expect(jar.find((c) => c.name === refreshName)?.value).toBe('refresh-2');
 
         // 3) logout: BFF calls backend with the (latest) access cookie, clears both.
-        const fetchMock = vi.fn(async () => new Response('', { status: 200 }));
+        const fetchMock = vi.fn(async (_url: string | URL | Request, _init?: RequestInit) =>
+            new Response('', { status: 200 }));
         vi.stubGlobal('fetch', fetchMock);
         const logoutRes = await logout(
             makeRequest({ cookies: { [sessionName]: 'access-2' } })

@@ -10,7 +10,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import {
     Image as ImageIcon,
-    Wand2,
     Download,
     RefreshCw,
     Palette,
@@ -191,7 +190,7 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
                                         {activeThumbnail.stylePreset.replace('-', ' ')}
                                     </Badge>
                                     <p className="text-white font-medium text-lg line-clamp-2 italic leading-relaxed opacity-80">
-                                        "{activeThumbnail.prompt}"
+                                        &quot;{activeThumbnail.prompt}&quot;
                                     </p>
                                 </div>
                             </div>
@@ -203,7 +202,7 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
                             </div>
                             <h3 className="text-3xl font-black text-foreground mb-4">The Void Awaits</h3>
                             <p className="text-muted-foreground font-medium text-lg max-w-md mx-auto leading-relaxed">
-                                Inject a visual directive in the architect panel to materialize your project's identity.
+                                Inject a visual directive in the architect panel to materialize your project&apos;s identity.
                             </p>
                         </div>
                     )}

@@ -2,15 +2,15 @@
 
 import { useState, useMemo } from "react"
 import {
-  TrendingUp, Filter, ExternalLink, Zap,
-  ChevronUp, ChevronDown, LayoutGrid, List, X,
+  Filter, Zap,
+  LayoutGrid, List, X,
   Flame, ArrowUpRight,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
+import { Card, CardContent } from "@/components/ui/card"
+
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Select,
@@ -27,6 +27,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
+import type { TrendReport } from "@/features/trends/types"
 import { useRouter } from "next/navigation"
 import { useTrends } from "../hooks/use-trends"
 
@@ -143,16 +144,16 @@ export function TrendsContent() {
   const { data: apiTrends, isLoading } = useTrends(platform === "All" ? undefined : platform)
   const hasApiData = apiTrends && apiTrends.length > 0
   const trends: Trend[] = hasApiData
-    ? apiTrends.map((t: any) => ({
-        id: t._id || t.id,
-        topic: t.topic || t.title,
-        category: t.category || "General",
-        platform: t.platform || "YouTube",
-        viralScore: t.viralScore || 50,
-        growth24h: t.growth24h || 0,
-        isRising: t.isRising ?? true,
-        description: t.description || "",
-        relatedTopics: t.relatedTopics || [],
+    ? apiTrends.map((t: TrendReport) => ({
+        id: t.id,
+        topic: t.risingKeywords[0]?.keyword ?? "General",
+        category: t.risingKeywords[0]?.category ?? t.competitionLevel ?? "General",
+        platform: t.platform,
+        viralScore: t.viralScore,
+        growth24h: t.risingKeywords[0]?.growth ?? 0,
+        isRising: (t.risingKeywords[0]?.growth ?? 0) > 0,
+        description: t.demographics.coreAudience,
+        relatedTopics: t.risingKeywords.map((k) => k.keyword),
       }))
     : MOCK_TRENDS
 

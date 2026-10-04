@@ -1,15 +1,26 @@
+import { TeamRole } from "@/features/teams/types"
+import type { Team } from "@/features/teams/types"
 import { Card,CardContent,CardHeader,CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+interface InviteFormProps {
+  inviteEmail: string
+  setInviteEmail: (email: string) => void
+  inviteRole: TeamRole
+  setInviteRole: (role: TeamRole) => void
+  inviteMember: (args: { teamId: string; data: { email: string; role: TeamRole } }) => void
+  activeTeam: Team
+  isInviting: boolean
+}
+
 export function InviteForm({
   inviteEmail,
   setInviteEmail,
   inviteRole,
-  setInviteRole,
   inviteMember,
   activeTeam,
   isInviting
-}: any) {
+}: InviteFormProps) {
 
   const handleInvite = () => {
     if (!inviteEmail) return

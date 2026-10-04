@@ -606,8 +606,11 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<"div"> & {
   showIcon?: boolean
 }) {
-  // Random width between 50 to 90%.
+  // Random width between 50 to 90%. Vendored shadcn/ui shimmer placeholder: the
+  // randomness is deliberate and memoised so it is stable for the component's
+  // lifetime. Tracked for cleanup with the rest of components/ui in T08.
   const width = React.useMemo(() => {
+    // eslint-disable-next-line react-hooks/purity
     return `${Math.floor(Math.random() * 40) + 50}%`
   }, [])
 

@@ -15,7 +15,6 @@ import {
     Mail,
     Plus,
     Settings,
-    Trash2,
     User as UserIcon,
     RefreshCw,
     CheckCircle2

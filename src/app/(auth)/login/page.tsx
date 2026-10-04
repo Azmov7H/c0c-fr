@@ -8,10 +8,9 @@ import * as z from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sparkles, Loader2, Github, Mail } from 'lucide-react';
+import { Sparkles, Loader2, Github } from 'lucide-react';
 import { useLogin } from '@/features/auth/hooks/use-auth';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Badge } from '@/components/ui/badge';
 
 const loginSchema = z.object({
     email: z.string().email('Please enter a valid email address'),

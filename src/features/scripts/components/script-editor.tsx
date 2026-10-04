@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useScript, useUpdateScript, useGenerateScript } from '../hooks/use-scripts';
-import { Script } from '../types';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
 import { Badge } from '@/components/ui/badge';
 import {
     Save,
@@ -14,7 +14,6 @@ import {
     Activity,
     Clock,
     BarChart3,
-    Wand2,
     Sparkles,
     Zap,
     Type,
@@ -35,14 +34,16 @@ export const ScriptEditor = ({ scriptId }: ScriptEditorProps) => {
 
     const [content, setContent] = useState('');
     const [isDirty, setIsDirty] = useState(false);
+    const [loadedScriptId, setLoadedScriptId] = useState<string | null>(null);
 
-    // Sync initial content or when script changes
-    useEffect(() => {
-        if (script && script.sections && script.sections.length > 0) {
-            setContent(script.sections[0]?.content || '');
-            setIsDirty(false);
-        }
-    }, [script]);
+    // Adjust state during render when the server sends a different script, rather
+    // than syncing from an effect. An effect would paint one frame with the previous
+    // script's content and would clobber unsaved edits on any refetch.
+    if (script && script.id !== loadedScriptId) {
+        setLoadedScriptId(script.id);
+        setContent(script.sections?.[0]?.content ?? '');
+        setIsDirty(false);
+    }
 
     const handleSave = () => {
         if (!script) return;

@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { FeatureHeader } from '@/components/shared/feature-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+
 import {
-  Calendar, CalendarDays, Clock, Plus, CheckCircle2, GripVertical, ArrowUpRight,
+  Calendar, Clock, CheckCircle2, GripVertical, ArrowUpRight,
 } from 'lucide-react';
 
 const MOCK_EVENTS = [

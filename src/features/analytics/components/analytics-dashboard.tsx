@@ -5,7 +5,7 @@ import { FeatureHeader } from '@/components/shared/feature-header';
 import { StatCard } from '@/components/shared/stat-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+
 import {
   Select,
   SelectContent,
@@ -14,8 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  TrendingUp, Users, Eye, BarChart3, Calendar, ArrowUpRight, ArrowDownRight,
-} from 'lucide-react';
+  TrendingUp, Users, Eye, BarChart3, Calendar, ArrowUpRight, } from 'lucide-react';
 import { TrendAreaChart, EngagementBarChart, AudiencePieChart } from '@/components/shared/charts';
 
 export function AnalyticsDashboard() {

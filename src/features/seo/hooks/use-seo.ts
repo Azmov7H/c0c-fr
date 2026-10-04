@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { seoService } from '../services/seo.service';
 import { UpdateSEODTO } from '../types';
 import { toast } from 'sonner';
+import { toApiError } from '@/lib/api-error';
 
 export const seoKeys = {
     all: ['seo'] as const,
@@ -25,8 +26,8 @@ export const useGenerateSEO = () => {
             toast.success('SEO and Hashtags generated');
             queryClient.invalidateQueries({ queryKey: seoKeys.project(data.projectId) });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to generate SEO metrics');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to generate SEO metrics').message);
         },
     });
 };
@@ -35,14 +36,14 @@ export const useUpdateSEO = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id, projectId, data }: { id: string; projectId: string; data: UpdateSEODTO }) =>
+        mutationFn: ({ id, data }: { id: string; projectId: string; data: UpdateSEODTO }) =>
             seoService.updateAnalysis(id, data),
         onSuccess: (_, variables) => {
             toast.success('SEO profile updated');
             queryClient.invalidateQueries({ queryKey: seoKeys.project(variables.projectId) });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to update SEO profile');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to update SEO profile').message);
         },
     });
 };

@@ -17,7 +17,6 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 
-const PLATFORMS = ['youtube', 'tiktok', 'instagram', 'blog'] as const;
 
 export function TitleGenerator() {
   const [topic, setTopic] = useState('');

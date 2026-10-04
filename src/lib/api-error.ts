@@ -18,3 +18,38 @@ export class ApiError extends Error {
         this.details = details;
     }
 }
+
+interface ApiErrorEnvelope {
+    error?: { message?: string; code?: string };
+}
+
+interface ApiErrorResponse {
+    response?: { data?: ApiErrorEnvelope };
+}
+
+/**
+ * Normalises anything thrown by the API layer into an ApiError so callers never
+ * have to narrow `unknown` by hand. Reads the backend's
+ * `{ success: false, error: { code, message } }` envelope, then the axios
+ * message, then falls back to the caller's own wording.
+ */
+export function toApiError(error: unknown, fallbackMessage: string): ApiError {
+    if (error instanceof ApiError) return error;
+
+    if (error instanceof Error) {
+        return new ApiError({
+            code: 'UNEXPECTED_ERROR',
+            message: error.message || fallbackMessage,
+            status: 0,
+        });
+    }
+
+    const { data } = (error as ApiErrorResponse)?.response ?? {};
+    const message = data?.error?.message ?? data?.error?.code;
+
+    return new ApiError({
+        code: data?.error?.code ?? 'UNEXPECTED_ERROR',
+        message: message || fallbackMessage,
+        status: 0,
+    });
+}

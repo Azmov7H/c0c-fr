@@ -6,14 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import {
-    Hash,
     Search,
     Sparkles,
     Copy,
     CheckCircle2,
     RefreshCw,
     Layout,
-    Type,
     TrendingUp,
     Target,
     Zap,
@@ -215,7 +213,7 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                             </div>
                         </div>
                         <div className="space-y-3">
-                            <h4 className="text-2xl font-black text-foreground tracking-tight underline decoration-primary decoration-4 underline-offset-8">"SUPREME CANDIDATE"</h4>
+                            <h4 className="text-2xl font-black text-foreground tracking-tight underline decoration-primary decoration-4 underline-offset-8">&quot;SUPREME CANDIDATE&quot;</h4>
                             <p className="text-sm text-muted-foreground font-medium max-w-[280px] leading-relaxed mx-auto italic mt-4">
                                 Exceptional coherence detected between narrative hooks and exponential trend clusters.
                             </p>

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { trendsService } from '../services/trends.service';
 import { toast } from 'sonner';
+import { toApiError } from '@/lib/api-error';
 
 export const trendKeys = {
     all: ['trends'] as const,
@@ -34,8 +35,8 @@ export const useGenerateTrends = () => {
             toast.success(`${data.platform.toUpperCase()} Marketplace analysis complete`);
             queryClient.invalidateQueries({ queryKey: trendKeys.all });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to analyze trends');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to analyze trends').message);
         },
     });
 };

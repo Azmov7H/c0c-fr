@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { analyticsService } from '../services/analytics.service';
 import { CreateAnalyticsDTO, UpdateAnalyticsDTO } from '../types';
 import { toast } from 'sonner';
+import { toApiError } from '@/lib/api-error';
 
 export const analyticsKeys = {
     all: ['analytics'] as const,
@@ -36,8 +37,8 @@ export const useGenerateAnalytics = () => {
             toast.success('AI analysis generated successfully');
             queryClient.invalidateQueries({ queryKey: analyticsKeys.list(data.projectId) });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to generate analysis');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to generate analysis').message);
         },
     });
 };
@@ -51,8 +52,8 @@ export const useCreateAnalytics = () => {
             toast.success('Report created');
             queryClient.invalidateQueries({ queryKey: analyticsKeys.list(data.projectId) });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to create report');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to create report').message);
         },
     });
 };
@@ -68,8 +69,8 @@ export const useUpdateAnalytics = () => {
             queryClient.invalidateQueries({ queryKey: analyticsKeys.detail(variables.id) });
             queryClient.invalidateQueries({ queryKey: analyticsKeys.list(data.projectId) });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to update report');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to update report').message);
         },
     });
 };
@@ -79,12 +80,12 @@ export const useDeleteAnalytics = () => {
 
     return useMutation({
         mutationFn: (id: string) => analyticsService.deleteReport(id),
-        onSuccess: (_, id) => {
+        onSuccess: () => {
             toast.success('Report deleted');
             queryClient.invalidateQueries({ queryKey: analyticsKeys.all });
         },
-        onError: (error: any) => {
-            toast.error(error.message || 'Failed to delete report');
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to delete report').message);
         },
     });
 };
