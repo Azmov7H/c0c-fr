@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SERVER_API_URL } from '@/services/server-api';
 import { SESSION_COOKIE } from '@/lib/auth-cookies';
+import { methodNotAllowed } from '@/lib/route-guards';
+
+export function POST() {
+  return methodNotAllowed(['GET']);
+}
 
 export async function GET(request: NextRequest) {
   const sessionCookie = request.cookies.get(SESSION_COOKIE);

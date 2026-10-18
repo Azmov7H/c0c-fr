@@ -1,19 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SERVER_API_URL } from '@/services/server-api';
 import { SESSION_COOKIE, REFRESH_COOKIE, SESSION_COOKIE_MAX_AGE, authCookieOptions } from '@/lib/auth-cookies';
+import { loginSchema } from '@/lib/auth-schemas';
+import { enforceAuthBodyLimit, methodNotAllowed, readValidatedJson } from '@/lib/route-guards';
+
+export function GET() {
+  return methodNotAllowed(['POST']);
+}
 
 export async function POST(request: NextRequest) {
+  const tooLarge = enforceAuthBodyLimit(request);
+  if (tooLarge) return tooLarge;
+
+  const parsed = await readValidatedJson(request, loginSchema);
+  if (!parsed.ok) return parsed.response;
+  const { email, password } = parsed.data;
+
   try {
-    const body = await request.json();
-    const { email, password } = body;
-
-    if (!email || !password) {
-      return NextResponse.json(
-        { success: false, error: { code: 'MISSING_FIELDS', message: 'Email and password are required.' } },
-        { status: 400 }
-      );
-    }
-
     const response = await fetch(`${SERVER_API_URL}/api/v1/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

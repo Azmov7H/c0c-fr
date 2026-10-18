@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SERVER_API_URL } from '@/services/server-api';
 import { SESSION_COOKIE, REFRESH_COOKIE, clearCookieOptions } from '@/lib/auth-cookies';
+import { enforceAuthBodyLimit, methodNotAllowed } from '@/lib/route-guards';
 
 const REVOCATION_TIMEOUT_MS = 2000;
 
+export function GET() {
+  return methodNotAllowed(['POST']);
+}
+
 export async function POST(request: NextRequest) {
+  const tooLarge = enforceAuthBodyLimit(request);
+  if (tooLarge) return tooLarge;
+
   const sessionCookie = request.cookies.get(SESSION_COOKIE);
 
   // Best-effort revocation of the backend refresh family. Always clear local

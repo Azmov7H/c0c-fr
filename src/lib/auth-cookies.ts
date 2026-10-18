@@ -2,6 +2,12 @@
 // Production uses the __Host- prefix (requires Secure + path=/).
 // Development (over http://localhost) falls back to unprefixed names because
 // __Host- mandates Secure, which the browser rejects on non-secure origins.
+//
+// CSRF (T09, documented deliberately): there is no CSRF token, by design.
+// The browser only ever talks to this origin; mutations go through the BFF,
+// and sameSite=lax blocks cross-site POSTs. If the topology ever changes
+// (separate API origin, cross-site embed, third-party callback), this
+// reasoning must be revisited as a conscious decision — not assumed to hold.
 
 const IS_PROD = process.env.NODE_ENV === 'production';
 
