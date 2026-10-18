@@ -1,3 +1,5 @@
+import 'server-only';
+
 // Server-only helper: base URL of the external backend.
 // Used by BFF route handlers (src/app/api/**) to call the backend directly.
 // NOT imported from client components (server runtime only).

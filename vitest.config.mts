@@ -5,11 +5,21 @@ export default defineConfig({
     test: {
         globals: true,
         environment: 'node',
-        include: ['src/app/api/auth/**/*.test.ts', 'src/types/**/*.test.ts'],
+        include: [
+            'src/app/api/auth/**/*.test.ts',
+            'src/types/**/*.test.ts',
+            'src/styles/**/*.test.ts',
+            'src/styles/**/*.test.tsx',
+            'src/middleware.test.ts',
+            'tests/security/**/*.test.ts',
+        ],
     },
     resolve: {
         alias: {
             '@': path.resolve(import.meta.dirname, 'src'),
+            // See tests/helpers/empty-module.ts — vitest has no react-server
+            // condition, so the real package would throw on import.
+            'server-only': path.resolve(import.meta.dirname, 'tests/helpers/empty-module.ts'),
         },
     },
 });

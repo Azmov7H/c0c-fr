@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SERVER_API_URL } from '@/services/server-api';
 import { SESSION_COOKIE, REFRESH_COOKIE, SESSION_COOKIE_MAX_AGE, authCookieOptions, clearCookieOptions } from '@/lib/auth-cookies';
+import { enforceAuthBodyLimit, methodNotAllowed } from '@/lib/route-guards';
+
+export function GET() {
+  return methodNotAllowed(['POST']);
+}
 
 export async function POST(request: NextRequest) {
+  const tooLarge = enforceAuthBodyLimit(request);
+  if (tooLarge) return tooLarge;
+
   const sessionCookie = request.cookies.get(SESSION_COOKIE);
   const refreshTokenCookie = request.cookies.get(REFRESH_COOKIE);
 
