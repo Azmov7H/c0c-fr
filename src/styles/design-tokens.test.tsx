@@ -20,6 +20,11 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const GLOBALS_CSS = path.join(ROOT, 'src/styles/globals.css');
 const LAYOUT_TSX = path.join(ROOT, 'src/app/layout.tsx');
+// T11 split the providers: the theme provider moved to AppProviders
+// ((auth)/(dashboard) groups) and marketing routes get the dependency-free
+// pre-paint script instead — both are asserted where they now live.
+const APP_PROVIDERS_TSX = path.join(ROOT, 'src/components/app-providers.tsx');
+const PRE_PAINT_TSX = path.join(ROOT, 'src/components/theme-pre-paint-script.tsx');
 
 async function compileGlobalsCss(): Promise<string> {
     const source = readFileSync(GLOBALS_CSS, 'utf8');
@@ -113,7 +118,17 @@ describe('font wiring in layout.tsx', () => {
     });
 
     it('defaults the theme to system and does not suppress the colour transition', () => {
-        expect(layout).toContain('defaultTheme="system"');
-        expect(layout).not.toContain('disableTransitionOnChange');
+        const appProviders = readFileSync(APP_PROVIDERS_TSX, 'utf8');
+        expect(appProviders).toContain('defaultTheme="system"');
+        expect(appProviders).toContain('enableSystem');
+        expect(appProviders).not.toContain('disableTransitionOnChange');
+    });
+
+    it('marketing pre-paint script honours a stored preference and defaults to system', () => {
+        const prePaint = readFileSync(PRE_PAINT_TSX, 'utf8');
+        // Reads the same localStorage key next-themes uses…
+        expect(prePaint).toContain("localStorage.getItem('theme')");
+        // …and falls back to prefers-color-scheme when nothing is stored.
+        expect(prePaint).toContain('prefers-color-scheme: dark');
     });
 });

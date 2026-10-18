@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import '../styles/globals.css';
-import { Providers } from '@/components/providers';
-import { Toaster } from '@/components/ui/sonner';
 
 // Both faces are variable fonts — no `weight` array, so next/font ships the
 // variable axis rather than several static files. `display: 'swap'` is next/font's
@@ -22,6 +20,10 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
+  // Absolute URLs for OG/Twitter images resolve against this (T11 — removes
+  // the "metadataBase not set" build warning and pins canonical media URLs
+  // to the production domain).
+  metadataBase: new URL('https://aicontentengine.com'),
   title: {
     template: '%s | AI Content Engine',
     default: 'AI Content Engine - Transform raw concepts into high-performing content',
@@ -50,14 +52,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans`}>
-        <Providers
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-        >
-          {children}
-          <Toaster />
-        </Providers>
+        {/* ThemeProvider lives in AppProviders ((auth)/(dashboard) groups).
+            Marketing routes use the dependency-free toggle + pre-paint script
+            — see theme-pre-paint-script.tsx for the T11 budget reasoning. */}
+        {children}
       </body>
     </html>
   );

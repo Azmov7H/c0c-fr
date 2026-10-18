@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { authService } from '@/features/auth/services/auth.service';
 import { useAuthStore } from '@/store/auth-store';
 
-const AUTH_PAGES = ['/login', '/register'];
+const AUTH_PAGES = ['/login', '/register', '/signup'];
 
 /**
  * T13 lands the onboarding flow (route + backend flag). Until then this seam
