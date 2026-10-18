@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FeatureHeader } from '@/components/shared/feature-header';
+import { PageHeader } from '@/components/shared/page-header';
 import { TwoPanelLayout } from '@/components/shared/two-panel-layout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -93,7 +93,7 @@ export function ThumbnailStudio() {
         </Button>
       </div>
       <div className="aspect-video rounded-xl bg-muted/40 flex items-center justify-center overflow-hidden">
-        <div className="w-full h-full bg-gradient-to-br from-primary/20 via-muted to-purple-500/20 flex items-center justify-center">
+        <div className="w-full h-full bg-gradient-to-br from-primary/20 via-muted to-brand-violet/20 flex items-center justify-center">
           <ImageIcon className="w-16 h-16 text-muted-foreground/30" />
         </div>
       </div>
@@ -113,7 +113,7 @@ export function ThumbnailStudio() {
 
   return (
     <div className="space-y-6">
-      <FeatureHeader
+      <PageHeader
         title="Thumbnail Studio"
         description="Create eye-catching thumbnails with AI-powered generation."
       />

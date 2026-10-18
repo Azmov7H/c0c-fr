@@ -29,6 +29,13 @@ export interface RecentActivityItem {
     createdAt: string;
 }
 
+export interface HealthReady {
+    status: 'ready' | 'degraded';
+    checks: {
+        database: string;
+    };
+}
+
 export const dashboardService = {
     async getStats(): Promise<DashboardStats> {
         const { data } = await apiClient.get('/dashboard/stats');
@@ -39,6 +46,16 @@ export const dashboardService = {
         const { data } = await apiClient.get('/dashboard/recent-activity', {
             params: { limit },
         });
+        return data.data;
+    },
+
+    /**
+     * Public endpoint — it reports dependency state, never internals.
+     * `checks.database` is the mongoose connection state name (`connected`,
+     * `connecting`, `disconnected`, …).
+     */
+    async getHealthReady(): Promise<HealthReady> {
+        const { data } = await apiClient.get('/health/ready');
         return data.data;
     },
 };

@@ -60,7 +60,7 @@ const CATEGORIES = ["All", "Tech", "Finance", "Gaming", "Lifestyle", "Business",
 const PLATFORMS = ["All", "YouTube", "TikTok", "Instagram"]
 
 function ViralScoreBar({ score }: { score: number }) {
-  const color = score >= 90 ? "bg-rose-500" : score >= 75 ? "bg-amber-500" : "bg-primary"
+  const color = score >= 90 ? "bg-negative" : score >= 75 ? "bg-warning" : "bg-primary"
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
@@ -82,7 +82,7 @@ function TrendCard({ trend, onClick }: { trend: Trend; onClick: () => void }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 mb-1">
               {trend.isRising && (
-                <Flame className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                <Flame className="w-3.5 h-3.5 text-negative shrink-0" />
               )}
               <p className="font-bold text-sm group-hover:text-primary transition-colors truncate">{trend.topic}</p>
             </div>
@@ -92,7 +92,7 @@ function TrendCard({ trend, onClick }: { trend: Trend; onClick: () => void }) {
             </div>
           </div>
           <div className="text-right shrink-0">
-            <p className={`text-sm font-bold ${trend.growth24h > 0 ? "text-emerald-500" : "text-rose-500"}`}>
+            <p className={`text-sm font-bold ${trend.growth24h > 0 ? "text-success" : "text-negative"}`}>
               {trend.growth24h > 0 ? "+" : ""}{trend.growth24h}%
             </p>
             <p className="text-[10px] text-muted-foreground">24h</p>
@@ -112,7 +112,7 @@ function TrendRow({ trend, onClick }: { trend: Trend; onClick: () => void }) {
       onClick={onClick}
     >
       <div className="flex-1 min-w-0 flex items-center gap-3">
-        {trend.isRising && <Flame className="w-4 h-4 text-rose-500 shrink-0" />}
+        {trend.isRising && <Flame className="w-4 h-4 text-negative shrink-0" />}
         <div className="min-w-0">
           <p className="font-semibold text-sm group-hover:text-primary transition-colors truncate">{trend.topic}</p>
           <div className="flex items-center gap-1.5 mt-0.5">
@@ -124,7 +124,7 @@ function TrendRow({ trend, onClick }: { trend: Trend; onClick: () => void }) {
       <div className="w-32 shrink-0">
         <ViralScoreBar score={trend.viralScore} />
       </div>
-      <div className={`w-16 text-right text-sm font-bold shrink-0 ${trend.growth24h > 0 ? "text-emerald-500" : "text-rose-500"}`}>
+      <div className={`w-16 text-right text-sm font-bold shrink-0 ${trend.growth24h > 0 ? "text-success" : "text-negative"}`}>
         {trend.growth24h > 0 ? "+" : ""}{trend.growth24h}%
       </div>
       <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
@@ -278,7 +278,7 @@ export function TrendsContent() {
             <>
               <SheetHeader className="p-6 border-b border-border/60">
                 <div className="flex items-center gap-2 mb-2">
-                  {selectedTrend.isRising && <Flame className="w-5 h-5 text-rose-500" />}
+                  {selectedTrend.isRising && <Flame className="w-5 h-5 text-negative" />}
                   <Badge variant="outline" className="text-xs">{selectedTrend.platform}</Badge>
                   <Badge variant="outline" className="text-xs text-muted-foreground">{selectedTrend.category}</Badge>
                 </div>
@@ -296,7 +296,7 @@ export function TrendsContent() {
                   </div>
                   <div className="p-4 rounded-xl bg-muted/40 border border-border/40">
                     <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">24h Growth</p>
-                    <p className={`text-3xl font-black mt-1 ${selectedTrend.growth24h > 0 ? "text-emerald-500" : "text-rose-500"}`}>
+                    <p className={`text-3xl font-black mt-1 ${selectedTrend.growth24h > 0 ? "text-success" : "text-negative"}`}>
                       {selectedTrend.growth24h > 0 ? "+" : ""}{selectedTrend.growth24h}%
                     </p>
                     <p className="text-[10px] text-muted-foreground mt-1">

@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useDashboardStats } from "@/features/dashboard/hooks/use-dashboard"
 import { useRecentActivity } from "@/features/dashboard/hooks/use-dashboard"
+import { useHealthReady } from "@/features/dashboard/hooks/use-dashboard"
 import { usePlannerEvents } from "@/features/planner/hooks/use-planner"
 import { formatDistanceToNow } from "date-fns"
 import type { RecentActivityItem } from "@/features/dashboard/services/dashboard.service"
@@ -44,7 +45,7 @@ function MetricCard({
           {sub && <span className="text-sm text-muted-foreground font-medium">{sub}</span>}
         </div>
         <p className="text-xs font-medium text-muted-foreground mt-2 flex items-center gap-1.5">
-          <span className={trendUp ? "text-emerald-500" : "text-rose-500"}>
+          <span className={trendUp ? "text-success" : "text-negative"}>
             {trendUp ? "↑" : "↓"}
           </span>
           {trend}
@@ -57,6 +58,53 @@ function MetricCard({
 // ─── Kanban Item ──────────────────────────────────────────────────────────────
 
 // ─── Main View ────────────────────────────────────────────────────────────────
+// ─── System Status ───────────────────────────────────────────────────────────
+// Backed by `GET /health/ready`. The previous version reported "All Systems
+// Operational / Connected to backend" as a hardcoded string — an indicator that
+// could not go red, on a page whose whole job is telling you the system is up.
+function SystemStatus() {
+  const { data, isPending, isError } = useHealthReady();
+
+  if (isPending) {
+    return (
+      <div className="flex items-center gap-3 p-4 rounded-xl border border-border/50 bg-muted/30">
+        <Skeleton className="h-2 w-2 rounded-full" />
+        <Skeleton className="h-3 w-36" />
+      </div>
+    );
+  }
+
+  const degraded = isError || data?.status !== 'ready';
+  const label = isError
+    ? "Status unavailable — cannot reach the API"
+    : data.status === 'ready'
+      ? "All systems operational"
+      : `Degraded — database ${data.checks.database}`;
+
+  return (
+    <div
+      className={`flex items-center gap-3 p-4 rounded-xl border ${
+        degraded
+          ? "bg-warning/5 border-warning/20"
+          : "bg-success/5 border-success/20"
+      }`}
+    >
+      <div
+        className={`w-2 h-2 rounded-full ${
+          degraded ? "bg-warning" : "bg-success animate-pulse"
+        }`}
+      />
+      <p
+        className={`text-xs font-semibold ${
+          degraded ? "text-warning" : "text-success"
+        }`}
+      >
+        {label}
+      </p>
+    </div>
+  );
+}
+
 export function DashboardView() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats()
   const { data: recentActivity, isLoading: activityLoading } = useRecentActivity(5)
@@ -68,9 +116,9 @@ export function DashboardView() {
 
   const quickTools = [
     { title: "Generate Script", sub: "AI Content Engine", icon: Zap, color: "bg-primary/10 text-primary", href: "/scripts" },
-    { title: "Explore Trends", sub: "Global Intelligence", icon: Lightbulb, color: "bg-amber-500/10 text-amber-500", href: "/trends" },
-    { title: "Analyze Performance", sub: "Creator Analytics", icon: BarChart3, color: "bg-emerald-500/10 text-emerald-500", href: "/analytics" },
-    { title: "Team Overview", sub: "Workspace Collaboration", icon: Users, color: "bg-purple-500/10 text-purple-500", href: "/team" },
+    { title: "Explore Trends", sub: "Global Intelligence", icon: Lightbulb, color: "bg-warning/10 text-warning", href: "/trends" },
+    { title: "Analyze Performance", sub: "Creator Analytics", icon: BarChart3, color: "bg-success/10 text-success", href: "/analytics" },
+    { title: "Team Overview", sub: "Workspace Collaboration", icon: Users, color: "bg-brand-violet/10 text-brand-violet", href: "/team" },
   ]
 
   const hashtags = ["#AIContent", "#ViralStrategy", "#ContentEngine", "#CreatorTips", "#Trending2026", "#ShortForm"]
@@ -97,9 +145,9 @@ export function DashboardView() {
   }
 
   const metrics = [
-    { label: "Total Projects", value: String(overview?.totalProjects || 0), trend: "All time", trendUp: true, icon: FileText, color: "text-blue-500" },
-    { label: "Active", value: String(overview?.activeProjects || 0), trend: "In progress", trendUp: true, icon: Zap, color: "text-amber-500" },
-    { label: "Completed", value: String(overview?.completedProjects || 0), trend: "Finished", trendUp: true, icon: CheckCircle2, color: "text-emerald-500", highlighted: true },
+    { label: "Total Projects", value: String(overview?.totalProjects || 0), trend: "All time", trendUp: true, icon: FileText, color: "text-info" },
+    { label: "Active", value: String(overview?.activeProjects || 0), trend: "In progress", trendUp: true, icon: Zap, color: "text-warning" },
+    { label: "Completed", value: String(overview?.completedProjects || 0), trend: "Finished", trendUp: true, icon: CheckCircle2, color: "text-success", highlighted: true },
     { label: "Scripts", value: String(overview?.totalScripts || 0), trend: "Generated", trendUp: true, icon: BarChart3, color: "text-primary" },
   ]
 
@@ -148,7 +196,7 @@ export function DashboardView() {
               <CardTitle className="text-base font-bold">Trend Velocity</CardTitle>
               <p className="text-xs text-muted-foreground mt-0.5">Projects created over time</p>
             </div>
-            <Badge variant="outline" className="text-emerald-500 border-emerald-500/30 bg-emerald-500/10 font-semibold text-[10px]">
+            <Badge variant="outline" className="text-success border-success/30 bg-success/10 font-semibold text-[10px]">
               ↑ Live
             </Badge>
           </CardHeader>
@@ -330,12 +378,7 @@ export function DashboardView() {
         </div>
       </div>
 
-      {/* System Status Bar */}
-      <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
-        <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">All Systems Operational</p>
-        <span className="text-[10px] text-emerald-600/60 dark:text-emerald-400/60">Connected to backend</span>
-      </div>
+      <SystemStatus />
 
     </div>
   )

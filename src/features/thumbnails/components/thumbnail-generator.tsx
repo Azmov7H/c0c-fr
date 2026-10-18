@@ -167,7 +167,7 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
                         </div>
                     ) : isGenerating || (activeThumbnail?.status === 'generating') ? (
                         <div className="w-full aspect-video rounded-[40px] border border-primary/20 bg-primary/5 flex flex-col items-center justify-center text-center p-12 relative overflow-hidden shadow-inner-glow">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-purple-500/10 animate-pulse opacity-50" />
+                            <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-brand-violet/10 animate-pulse opacity-50" />
                             <div className="relative z-10">
                                 <RefreshCw className="w-20 h-20 text-primary animate-spin-slow mb-8 filter drop-shadow-glow" />
                                 <h3 className="text-3xl font-black text-foreground mb-4">Neural Assembly</h3>

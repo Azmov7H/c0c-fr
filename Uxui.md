@@ -247,6 +247,38 @@ No decorative empty states
 - Match final layout structure
 - No layout shift
 
+### DataState
+
+Every data-driven view wraps its content in `DataState`
+(`src/components/shared/data-state.tsx`), which renders exactly one of four
+states — loading, error, empty, success — in that precedence:
+
+```tsx
+<DataState
+  isLoading={isLoading}
+  error={error}
+  isEmpty={items.length === 0}
+  emptyTitle="No projects found"
+  emptyDescription="Create your first project to start generating content."
+  emptyAction={{ label: "New Project", onClick: () => router.push("/projects/new") }}
+  loadingFallback={<MyGridSkeleton />}   // optional: shape the skeleton like the content
+>
+  <MyContent />
+</DataState>
+```
+
+Rules:
+
+- Never render a bare spinner as a page's only loading affordance — the loading
+  branch shows a skeleton that mirrors the final layout (pass `loadingFallback`
+  for grids and card rows; the default is a skeleton list).
+- Never render a bare "No data" — the empty branch requires an icon, a title,
+  a short explanation and (where an action exists) one primary CTA, per §7.2.
+- Errors render an `Alert` with a human-readable message; do not swallow a
+  failed query into the empty state, they mean different things.
+- Mock/demo data pages additionally render `MockDataBanner` so a screenshot can
+  never be mistaken for a working integration.
+
 ---
 
 # 8. Interaction System

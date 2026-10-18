@@ -29,6 +29,6 @@ export const getStatusStyles = (status: string) => {
     case "archived":
       return "bg-muted text-muted-foreground"
     default:
-      return "bg-yellow-500/10 text-yellow-500"
+      return "bg-warning/10 text-warning"
   }
 }

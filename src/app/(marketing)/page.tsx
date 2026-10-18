@@ -27,7 +27,7 @@ export default function LandingPage() {
                         </span>
                         <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
                             Transform ideas into <br className="hidden sm:inline" />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600 dark:from-primary dark:to-blue-400">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-info">
                                 high-performing content
                             </span>
                         </h1>
@@ -56,9 +56,9 @@ export default function LandingPage() {
                         {/* Mock Dashboard Header */}
                         <div className="flex h-12 items-center border-b border-border bg-card px-4">
                             <div className="flex space-x-2">
-                                <div className="h-3 w-3 rounded-full bg-rose-500/80" />
-                                <div className="h-3 w-3 rounded-full bg-amber-500/80" />
-                                <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
+                                <div className="h-3 w-3 rounded-full bg-negative/80" />
+                                <div className="h-3 w-3 rounded-full bg-warning/80" />
+                                <div className="h-3 w-3 rounded-full bg-success/80" />
                             </div>
                         </div>
                         {/* Mock Dashboard Body */}

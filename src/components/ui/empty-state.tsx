@@ -10,6 +10,9 @@ interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
     action?: {
         label: string
         onClick: () => void
+        /** Replaces the default `Plus` glyph, e.g. a spinner while pending. */
+        icon?: React.ReactNode
+        disabled?: boolean
     }
 }
 
@@ -41,8 +44,8 @@ export function EmptyState({
                 {description}
             </p>
             {action && (
-                <Button onClick={action.onClick} className="h-11 px-8 shadow-sm">
-                    <Plus className="mr-2 h-4 w-4" />
+                <Button onClick={action.onClick} disabled={action.disabled} className="h-11 px-8 shadow-sm">
+                    {action.icon ?? <Plus className="mr-2 h-4 w-4" />}
                     {action.label}
                 </Button>
             )}

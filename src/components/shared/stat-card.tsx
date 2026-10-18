@@ -48,7 +48,7 @@ export function StatCard({
         </div>
         {trend && (
           <p className="text-xs font-medium text-muted-foreground mt-2 flex items-center gap-1.5">
-            <span className={trendUp ? "text-emerald-500" : "text-rose-500"}>
+            <span className={trendUp ? "text-success" : "text-negative"}>
               {trendUp ? "\u2191" : "\u2193"}
             </span>
             {trend}

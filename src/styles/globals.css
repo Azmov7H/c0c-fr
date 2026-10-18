@@ -5,9 +5,26 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  /* Typography */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), monospace;
+  /* Typography — the raw variables come from next/font in `src/app/layout.tsx`.
+     Previously this referenced `--font-inter` and `--font-geist-mono`, neither of
+     which was ever defined, so every page silently fell back to the system stack
+     and the brand typography never rendered.
+
+     The stacks themselves are declared in `:root` below and mapped here by name,
+     which is the documented `inline` pattern: the utility inlines
+     `var(--font-display)` and the variable resolves at the point of use. Putting
+     the stack directly here instead would make the utility resolve `--font-sans`
+     from the theme layer only, and a computed `--font-display` would be empty —
+     which this stylesheet previously was.
+
+     Inter and Space Grotesk are both variable fonts, so no `weight` array is
+     passed to `next/font` — requesting fixed weights would ship several static
+     files instead of the axis. next/font self-hosts both (no external request on
+     first paint) and generates size-adjusted fallback faces via
+     `adjustFontFallback`, which is what keeps the CLS contribution near zero. */
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 
   /* Colors */
   --color-background: var(--background);
@@ -38,6 +55,29 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
 
+  /* Semantic state colours (T08) — DESIGN_SPEC §10 defines none, and Uxui.md §3.1
+     requires them, which is why state UI had been writing raw palette classes
+     (`text-emerald-500`). Hues match the classes they replace. */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-negative: var(--negative);
+
+  /* Brand/platform colours — intentionally fixed across themes so the platform
+     marks (YouTube, TikTok) stay recognisable, and `brand-violet`/`brand-pink`
+     feed the decorative gradients that would otherwise be palette classes. */
+  --color-brand-red: var(--brand-red);
+  --color-brand-cyan: var(--brand-cyan);
+  --color-brand-pink: var(--brand-pink);
+  --color-brand-violet: var(--brand-violet);
+
+  /* Chart series colours, consumed by the shadcn chart wrapper. */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
   /* Radius */
   --radius-xs: calc(var(--radius) - 6px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -55,6 +95,14 @@
 :root {
   --radius: 0.75rem;
 
+  /* Font stacks — the real definitions. `--font-body` (Inter) and
+     `--font-space-grotesk` (Space Grotesk) are injected by next/font on <body>;
+     the generic fallbacks after them are what renders during font swap, and
+     next/font's size-adjusted fallback faces keep that swap from shifting
+     layout. */
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+
   /* Light Theme - Content Creator Cloud */
   --background: hsl(0, 0%, 98%); /* #FAFAFA */
   --foreground: hsl(240, 10%, 4%); /* zinc-950 */
@@ -65,7 +113,7 @@
   --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(240, 10%, 4%);
 
-  --primary: hsl(238, 82%, 67%); /* #6366F1 */
+  --primary: hsl(238, 82%, 65%); /* was 67% / #6366F1 — darkened 2% for WCAG AA, see T08 */
   --primary-foreground: hsl(0, 0%, 100%);
 
   --secondary: hsl(240, 5%, 96%); /* #F4F4F5 */
@@ -82,17 +130,37 @@
 
   --border: hsl(240, 6%, 90%); /* #E4E4E7 */
   --input: hsl(240, 6%, 90%);
-  --ring: hsl(238, 82%, 67%);
+  --ring: hsl(238, 82%, 65%);
+
+  /* State — see the note in @theme inline. Values are the raw classes these
+     replace (emerald-500, amber-500, blue-500, rose-500), promoted to tokens. */
+  --success: hsl(160, 84%, 39%);
+  --warning: hsl(38, 92%, 50%);
+  --info: hsl(217, 91%, 60%);
+  --negative: hsl(350, 89%, 60%);
+
+  /* Brand — theme-independent (declared once outside :root/.dark via inheritance). */
+  --brand-red: hsl(0, 84%, 60%);
+  --brand-cyan: hsl(189, 94%, 43%);
+  --brand-pink: hsl(330, 81%, 60%);
+  --brand-violet: hsl(271, 91%, 65%);
+
+  /* Charts — light: indigo, emerald, violet, amber, blue. */
+  --chart-1: hsl(238, 82%, 67%);
+  --chart-2: hsl(160, 84%, 39%);
+  --chart-3: hsl(271, 91%, 65%);
+  --chart-4: hsl(38, 92%, 50%);
+  --chart-5: hsl(217, 91%, 60%);
 
   /* Sidebar - solid, no glass */
   --sidebar-background: hsl(0, 0%, 100%);
   --sidebar-foreground: hsl(240, 10%, 4%);
-  --sidebar-primary: hsl(238, 82%, 67%);
+  --sidebar-primary: hsl(238, 82%, 65%);
   --sidebar-primary-foreground: hsl(0, 0%, 100%);
   --sidebar-accent: hsl(240, 5%, 96%);
   --sidebar-accent-foreground: hsl(240, 10%, 4%);
   --sidebar-border: hsl(240, 6%, 90%);
-  --sidebar-ring: hsl(238, 82%, 67%);
+  --sidebar-ring: hsl(238, 82%, 65%);
 }
 
 .dark {
@@ -125,6 +193,20 @@
   --input: hsl(240, 4%, 16%);
   --ring: hsl(234, 89%, 74%);
 
+  /* State — one step lighter than light mode (emerald-400, amber-400, blue-400,
+     rose-400) so state text stays legible against the dark canvas. */
+  --success: hsl(158, 64%, 52%);
+  --warning: hsl(43, 96%, 56%);
+  --info: hsl(213, 94%, 68%);
+  --negative: hsl(351, 95%, 71%);
+
+  /* Charts — dark: the same five hues, tuned for the dark canvas. */
+  --chart-1: hsl(234, 89%, 74%);
+  --chart-2: hsl(158, 64%, 52%);
+  --chart-3: hsl(270, 95%, 75%);
+  --chart-4: hsl(43, 96%, 56%);
+  --chart-5: hsl(213, 94%, 68%);
+
   /* Sidebar - solid, no glass */
   --sidebar-background: hsl(240, 10%, 4%);
   --sidebar-foreground: hsl(0, 0%, 100%);
@@ -139,6 +221,24 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+  /* DESIGN_SPEC §11: a 150 ms colour transition so theme switching is smooth
+     rather than a hard flip. Scoped to colour/background/border only — a blanket
+     `transition: all` would animate layout and turn every hover into a jitter. */
+  *,
+  ::before,
+  ::after {
+    transition-property: color, background-color, border-color, outline-color,
+      text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      transition-duration: 0.01ms;
+    }
   }
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20;

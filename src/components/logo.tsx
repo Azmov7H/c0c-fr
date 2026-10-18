@@ -16,7 +16,7 @@ export default function Logo() {
         rounded-lg
         bg-gradient-to-br
         from-primary
-        to-purple-500
+        to-brand-violet
         text-white
         shadow-sm
       ">

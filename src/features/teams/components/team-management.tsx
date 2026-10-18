@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { ColumnDef } from '@tanstack/react-table';
 import { useTeams, useCreateTeam, useInviteMember, useRemoveMember } from '../hooks/use-teams';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,10 @@ import {
     CheckCircle2
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TeamRole } from '../types';
+import { DataTable } from '@/components/ui/data-table';
+import { DataState } from '@/components/shared/data-state';
+import { PageHeader } from '@/components/shared/page-header';
+import { TeamRole, type TeamMember } from '../types';
 import {
     Dialog,
     DialogContent,
@@ -39,7 +43,7 @@ import {
 } from "@/components/ui/select";
 
 export const TeamManagement = () => {
-    const { data: teams, isLoading } = useTeams();
+    const { data: teams, isLoading, error } = useTeams();
     const { mutate: createTeam, isPending: isCreatingTeam } = useCreateTeam();
     const { mutate: inviteMember, isPending: isInviting } = useInviteMember();
     const { mutate: removeMember } = useRemoveMember();
@@ -48,6 +52,7 @@ export const TeamManagement = () => {
     const [inviteEmail, setInviteEmail] = useState('');
     const [inviteRole, setInviteRole] = useState<TeamRole>(TeamRole.EDITOR);
     const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+    const [createOpen, setCreateOpen] = useState(false);
 
     const activeTeam = teams && teams.length > 0 ? (selectedTeamId ? teams.find(t => t.id === selectedTeamId) : teams[0]) : null;
 
@@ -68,36 +73,39 @@ export const TeamManagement = () => {
 
     const roleColors = {
         owner: 'bg-primary/10 text-primary border-primary/20',
-        admin: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-        editor: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+        admin: 'bg-brand-violet/10 text-brand-violet border-brand-violet/20',
+        editor: 'bg-info/10 text-info border-info/20',
         viewer: 'bg-muted text-muted-foreground border-border/50',
     };
 
-    if (isLoading) {
+    if (isLoading || error) {
         return (
-            <div className="space-y-8">
-                <div className="flex justify-between">
-                    <Skeleton className="h-10 w-64" />
-                    <Skeleton className="h-10 w-32" />
-                </div>
-                <Skeleton className="h-96 w-full rounded-2xl" />
-            </div>
+            <DataState
+                isLoading={isLoading}
+                error={error}
+                loadingFallback={
+                    <div className="space-y-8">
+                        <div className="flex justify-between">
+                            <Skeleton className="h-10 w-64" />
+                            <Skeleton className="h-10 w-32" />
+                        </div>
+                        <Skeleton className="h-96 w-full rounded-2xl" />
+                    </div>
+                }
+            >
+                {null}
+            </DataState>
         );
     }
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
 
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-                <div>
-                    <h1 className="text-3xl font-bold flex items-center gap-3">
-                        <Users className="w-8 h-8 text-primary" />
-                        Workspace Teams
-                    </h1>
-                    <p className="text-muted-foreground mt-2">Manage collaborators and permissions for your AI projects</p>
-                </div>
-
-                <Dialog>
+            <PageHeader
+                title="Workspace Teams"
+                description="Manage collaborators and permissions for your AI projects"
+                actions={
+                    <Dialog open={createOpen} onOpenChange={setCreateOpen}>
                     <DialogTrigger asChild>
                         <Button>
                             <Plus className="w-4 h-4 mr-2" />
@@ -126,18 +134,20 @@ export const TeamManagement = () => {
                             </Button>
                         </DialogFooter>
                     </DialogContent>
-                </Dialog>
-            </div>
+                    </Dialog>
+                }
+            />
 
             {!activeTeam ? (
-                <Card className="border-dashed border-2 py-20">
-                    <CardContent className="flex flex-col items-center text-center">
-                        <Users className="w-16 h-16 text-muted-foreground/30 mb-6" />
-                        <h3 className="text-xl font-semibold mb-2">You don&apos;t belong to any teams yet</h3>
-                        <p className="text-muted-foreground max-w-sm mb-8">Create your first workspace to start collaborating with other AI content creators.</p>
-                        <Button>Create Your First Team</Button>
-                    </CardContent>
-                </Card>
+                <DataState
+                    isEmpty
+                    emptyIcon={Users}
+                    emptyTitle="You don't belong to any teams yet"
+                    emptyDescription="Create your first workspace to start collaborating with other AI content creators."
+                    emptyAction={{ label: "Create Your First Team", onClick: () => setCreateOpen(true) }}
+                >
+                    {null}
+                </DataState>
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
@@ -220,43 +230,57 @@ export const TeamManagement = () => {
                             </Button>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <div className="divide-y">
-                                {activeTeam.members.map((member) => (
-                                    <div key={member.user.id} className="flex items-center justify-between p-6 hover:bg-muted/40 transition-colors group">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/20">
-                                                <UserIcon className="w-5 h-5 text-primary" />
+                            <DataTable
+                                columns={[
+                                    {
+                                        id: 'member',
+                                        accessorFn: (m) => `${m.user.firstName} ${m.user.lastName}`,
+                                        header: 'Member',
+                                        cell: ({ row }) => (
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/20">
+                                                    <UserIcon className="w-5 h-5 text-primary" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold flex items-center gap-2">
+                                                        {row.original.user.firstName} {row.original.user.lastName}
+                                                        {row.original.user.id === activeTeam.owner.id && <Shield className="w-3 h-3 text-warning" />}
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">{row.original.user.email}</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="text-sm font-semibold flex items-center gap-2">
-                                                    {member.user.firstName} {member.user.lastName}
-                                                    {member.user.id === activeTeam.owner.id && <Shield className="w-3 h-3 text-amber-500" />}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">{member.user.email}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-6">
-                                            <Badge variant="outline" className={`capitalize font-mono text-[10px] ${roleColors[member.role]}`}>
-                                                {member.role}
+                                        ),
+                                    },
+                                    {
+                                        accessorKey: 'role',
+                                        header: 'Role',
+                                        cell: ({ row }) => (
+                                            <Badge variant="outline" className={`capitalize font-mono text-[10px] ${roleColors[row.original.role]}`}>
+                                                {row.original.role}
                                             </Badge>
-
-                                            <div className="hidden group-hover:block transition-all animate-in fade-in slide-in-from-right-2">
-                                                {member.role !== TeamRole.OWNER && (
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                                        onClick={() => removeMember({ teamId: activeTeam.id, userId: member.user.id })}
-                                                    >
-                                                        <UserMinus className="w-4 h-4" />
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                        ),
+                                    },
+                                    {
+                                        id: 'actions',
+                                        header: '',
+                                        enableSorting: false,
+                                        cell: ({ row }) =>
+                                            row.original.role !== TeamRole.OWNER && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                                    onClick={() => removeMember({ teamId: activeTeam.id, userId: row.original.user.id })}
+                                                >
+                                                    <UserMinus className="w-4 h-4" />
+                                                </Button>
+                                            ),
+                                    },
+                                ] satisfies ColumnDef<TeamMember>[]}
+                                data={activeTeam.members}
+                                emptyMessage="No members yet."
+                                className="rounded-none border-0 border-t"
+                            />
                         </CardContent>
                     </Card>
 

@@ -1,24 +1,40 @@
 'use client';
 
 import {
-  AreaChart,
   Area,
-  BarChart,
+  AreaChart,
   Bar,
-  PieChart,
-  Pie,
+  BarChart,
+  CartesianGrid,
   Cell,
-  LineChart,
-  Line,
+  Pie,
+  PieChart,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
 } from 'recharts';
 
-// ─── Area Chart (Views Over Time) ─────────────────────────────────────────────
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '@/components/ui/chart';
+
+/**
+ * Chart compositions for the analytics views, built on the shadcn chart wrapper
+ * (T08). Previously these passed raw `hsl(...)` strings to Recharts, including
+ * `hsl(var(--primary))` — invalid now that the tokens hold complete colours, so
+ * those series rendered in the SVG fallback. Series colours now come from
+ * `--chart-1..5`, which are theme-aware by construction.
+ */
+
+const areaConfig = {
+  views: { label: 'Your Views', color: 'var(--chart-1)' },
+  average: { label: 'Platform Average', color: 'var(--chart-5)' },
+} satisfies ChartConfig;
+
 interface AreaChartData {
   name: string;
   views: number;
@@ -27,55 +43,36 @@ interface AreaChartData {
 
 export function TrendAreaChart({ data }: { data: AreaChartData[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <AreaChart data={data}>
-        <defs>
-          <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="hsl(238, 82%, 67%)" stopOpacity={0.3} />
-            <stop offset="95%" stopColor="hsl(238, 82%, 67%)" stopOpacity={0} />
-          </linearGradient>
-          <linearGradient id="colorAvg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="hsl(240, 5%, 65%)" stopOpacity={0.2} />
-            <stop offset="95%" stopColor="hsl(240, 5%, 65%)" stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
-        <XAxis dataKey="name" className="text-xs" tick={{ fontSize: 11 }} />
-        <YAxis className="text-xs" tick={{ fontSize: 11 }} />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: 'hsl(var(--card))',
-            border: '1px solid hsl(var(--border))',
-            borderRadius: '8px',
-            fontSize: '12px',
-          }}
-        />
-        <Legend wrapperStyle={{ fontSize: '12px' }} />
+    <ChartContainer config={areaConfig} className="h-[280px] w-full">
+      <AreaChart accessibilityLayer data={data}>
+        <CartesianGrid vertical={false} />
+        <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
+        <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+        <ChartTooltip content={<ChartTooltipContent />} />
+        <ChartLegend content={<ChartLegendContent />} />
         <Area
           type="monotone"
           dataKey="views"
-          name="Your Views"
-          stroke="hsl(var(--primary))"
-          fillOpacity={1}
-          fill="url(#colorViews)"
+          stroke="var(--color-views)"
+          fill="var(--color-views)"
+          fillOpacity={0.2}
         />
-        {data[0]?.average !== undefined && (
-          <Area
-            type="monotone"
-            dataKey="average"
-            name="Platform Avg"
-            stroke="hsl(var(--muted-foreground))"
-            fillOpacity={1}
-            fill="url(#colorAvg)"
-            strokeDasharray="5 5"
-          />
-        )}
+        <Area
+          type="monotone"
+          dataKey="average"
+          stroke="var(--color-average)"
+          fill="var(--color-average)"
+          fillOpacity={0.1}
+        />
       </AreaChart>
-    </ResponsiveContainer>
+    </ChartContainer>
   );
 }
 
-// ─── Bar Chart (Engagement Funnel) ────────────────────────────────────────────
+const barConfig = {
+  value: { label: 'Count', color: 'var(--chart-1)' },
+} satisfies ChartConfig;
+
 interface BarChartData {
   name: string;
   value: number;
@@ -83,111 +80,45 @@ interface BarChartData {
 
 export function EngagementBarChart({ data }: { data: BarChartData[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <BarChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
-        <XAxis dataKey="name" className="text-xs" tick={{ fontSize: 11 }} />
-        <YAxis className="text-xs" tick={{ fontSize: 11 }} />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: 'hsl(var(--card))',
-            border: '1px solid hsl(var(--border))',
-            borderRadius: '8px',
-            fontSize: '12px',
-          }}
-        />
-        <Bar dataKey="value" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+    <ChartContainer config={barConfig} className="h-[280px] w-full">
+      <BarChart accessibilityLayer data={data}>
+        <CartesianGrid vertical={false} />
+        <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
+        <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+        <ChartTooltip content={<ChartTooltipContent />} />
+        <Bar dataKey="value" fill="var(--color-value)" radius={[6, 6, 0, 0]} />
       </BarChart>
-    </ResponsiveContainer>
+    </ChartContainer>
   );
 }
 
-// ─── Pie Chart (Audience Demographics) ────────────────────────────────────────
+const pieConfig = {
+  value: { label: 'Audience' },
+  '18-24': { label: '18-24', color: 'var(--chart-1)' },
+  '25-34': { label: '25-34', color: 'var(--chart-2)' },
+  '35-44': { label: '35-44', color: 'var(--chart-3)' },
+  '45+': { label: '45+', color: 'var(--chart-4)' },
+} satisfies ChartConfig;
+
 interface PieChartData {
   name: string;
   value: number;
 }
 
-const COLORS = [
-  'hsl(var(--primary))',
-  'hsl(var(--accent))',
-  'hsl(38, 92%, 50%)',
-  'hsl(270, 70%, 60%)',
-  'hsl(0, 84%, 60%)',
-];
-
 export function AudiencePieChart({ data }: { data: PieChartData[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ChartContainer config={pieConfig} className="mx-auto aspect-square h-[280px]">
       <PieChart>
-        <Pie
-          data={data}
-          cx="50%"
-          cy="50%"
-          labelLine={false}
-          label={({ name, percent }) => `${name} (${((percent ?? 0) * 100).toFixed(0)}%)`}
-          outerRadius={90}
-          fill="hsl(var(--primary))"
-          dataKey="value"
-        >
-          {data.map((_, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+        <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
+        <Pie data={data} dataKey="value" nameKey="name" innerRadius={60}>
+          {data.map((entry, index) => (
+            <Cell
+              key={entry.name}
+              fill={`var(--chart-${(index % 5) + 1})`}
+            />
           ))}
         </Pie>
-        <Tooltip
-          contentStyle={{
-            backgroundColor: 'hsl(var(--card))',
-            border: '1px solid hsl(var(--border))',
-            borderRadius: '8px',
-            fontSize: '12px',
-          }}
-        />
       </PieChart>
-    </ResponsiveContainer>
-  );
-}
-
-// ─── Line Chart (Growth Comparison) ───────────────────────────────────────────
-interface LineChartData {
-  name: string;
-  thisYear: number;
-  lastYear: number;
-}
-
-export function GrowthLineChart({ data }: { data: LineChartData[] }) {
-  return (
-    <ResponsiveContainer width="100%" height={280}>
-      <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
-        <XAxis dataKey="name" className="text-xs" tick={{ fontSize: 11 }} />
-        <YAxis className="text-xs" tick={{ fontSize: 11 }} />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: 'hsl(var(--card))',
-            border: '1px solid hsl(var(--border))',
-            borderRadius: '8px',
-            fontSize: '12px',
-          }}
-        />
-        <Legend wrapperStyle={{ fontSize: '12px' }} />
-        <Line
-          type="monotone"
-          dataKey="thisYear"
-          name="This Year"
-          stroke="hsl(var(--primary))"
-          strokeWidth={2}
-          dot={{ r: 3 }}
-        />
-        <Line
-          type="monotone"
-          dataKey="lastYear"
-          name="Last Year"
-          stroke="hsl(var(--muted-foreground))"
-          strokeWidth={2}
-          dot={{ r: 3 }}
-          strokeDasharray="5 5"
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    </ChartContainer>
   );
 }
