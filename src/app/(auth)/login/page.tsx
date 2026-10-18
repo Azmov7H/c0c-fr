@@ -163,7 +163,7 @@ export default function LoginPage() {
                         <p className="text-sm text-muted-foreground">
                             New to Arch-AI?{' '}
                             <Link
-                                href="/register"
+                                href="/signup"
                                 className="font-bold text-primary hover:underline transition-all"
                             >
                                 Create Free Account

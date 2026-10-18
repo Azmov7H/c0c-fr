@@ -307,3 +307,42 @@ frontend/
 ├── tailwind.config.ts                 # Extended with design system variables
 └── components.json                    # shadcn/ui configuration
 ```
+
+## 14. Marketing / Landing Page (T11)
+
+Route `/` — `src/app/(marketing)/page.tsx`, a server component composing
+`src/features/landing/components/*` (hero, problem, assets, how-it-works,
+collaboration, proof, pricing-teaser, final-cta). Copy rules: no fabricated
+proof (the proof section is a marked placeholder), no dollar figures (tiers
+show the real entitlement matrix with "Announced at launch"), and every link
+resolves — `marketing-links.test.ts` walks header/footer/CTA hrefs.
+
+- Hero visual: `public/landing/dashboard.jpg` (1600×1000) — a capture of the
+  shipped Ideas & Trends surface (product components, sample data) in dark
+  theme; rendered through `next/image` with explicit dimensions, `priority`
+  only here.
+- Theme: this route does not mount `next-themes`. A pre-paint inline script
+  (`theme-pre-paint-script.tsx`) applies the stored `theme` localStorage key
+  (falling back to `prefers-color-scheme`) before first paint;
+  `ThemeQuickToggle` is the plain light/dark button. Query/tooltip/session/
+  websocket providers moved to `app-providers.tsx`, mounted by the
+  `(dashboard)` and `(auth)` layouts only.
+- SEO: `src/lib/public-routes.ts` is the single route table behind `robots.ts`
+  and `sitemap.ts` (only `/`, `/privacy`, `/terms`; auth pages excluded by
+  policy). `(marketing)/opengraph-image.tsx` renders the 1200×630 card using
+  vendored Inter woffs (`assets/fonts/`) so builds never depend on the Google
+  Fonts CDN. Icons: `src/app/icon.svg`, `public/favicon.ico`,
+  `src/app/apple-icon.png`.
+- Legal: `/privacy` and `/terms` are minimal, clearly marked template
+  placeholders pending legal review. `/signup` is a re-export of
+  `(auth)/register` until T12 turns it into the real page.
+- CSP: the route stays statically rendered (○ in the build route table). T09's
+  nonce policy remains report-only; enforcement on static routes needs a
+  script-hash pipeline because prerendered HTML carries no nonces (see
+  `tasks/T11-STATUS.md`).
+- Budget: measured modern first-load 151.2 kB gzip vs the 140 kB card budget —
+  the gap is the framework floor (react-dom 69.1 + app-router 36.2 + shared
+  40.6) plus the AC-mandated `next/image` runtime (5.3). The route's own client
+  JS is ~0 kB; the 38.5 kB legacy polyfill is `<script nomodule>` and is never
+  fetched by modern browsers. Screenshots live in `docs/screenshots/`,
+  Lighthouse reports in `docs/lighthouse/`.

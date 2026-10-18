@@ -37,7 +37,7 @@ const protectedPrefixes = [
     '/settings',
 ];
 
-const authPrefixes = ['/login', '/register'];
+const authPrefixes = ['/login', '/register', '/signup'];
 
 /**
  * Both names are checked regardless of NODE_ENV: the middleware bundle can be
@@ -75,7 +75,7 @@ function createNonce(): string {
     return btoa(String.fromCharCode(...bytes));
 }
 
-export function buildContentSecurityPolicy(scriptNonce: string): string {
+export function buildContentSecurityPolicy(scriptNonce: string, enforce = false): string {
     return [
         "default-src 'self'",
         // Per-request nonce + strict-dynamic: no 'unsafe-inline' for scripts, ever.
@@ -94,7 +94,9 @@ export function buildContentSecurityPolicy(scriptNonce: string): string {
         "base-uri 'self'",
         "form-action 'self'",
         "object-src 'none'",
-        'upgrade-insecure-requests',
+        // Meaningless inside a report-only policy — browsers log console errors
+        // and ignore it (T11 Lighthouse a11y/BP pass). Enforcing policies get it.
+        ...(enforce ? ['upgrade-insecure-requests'] : []),
     ].join('; ');
 }
 
@@ -160,11 +162,9 @@ export async function middleware(request: NextRequest) {
     requestHeaders.set('x-nonce', scriptNonce);
 
     const response = NextResponse.next({ request: { headers: requestHeaders } });
-    const headerName =
-        process.env.CSP_ENFORCE === 'true'
-            ? 'Content-Security-Policy'
-            : 'Content-Security-Policy-Report-Only';
-    response.headers.set(headerName, buildContentSecurityPolicy(scriptNonce));
+    const enforce = process.env.CSP_ENFORCE === 'true';
+    const headerName = enforce ? 'Content-Security-Policy' : 'Content-Security-Policy-Report-Only';
+    response.headers.set(headerName, buildContentSecurityPolicy(scriptNonce, enforce));
 
     return response;
 }

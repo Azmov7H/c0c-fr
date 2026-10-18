@@ -1,54 +1,63 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Sparkles, ArrowRight, Play, CheckCircle2 } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowRight } from 'lucide-react';
 
-export const Hero = () => {
+import { Button } from '@/components/ui/button';
+
+/**
+ * Above the fold: headline, subhead, one primary CTA, one secondary CTA, one
+ * visual. Nothing else — no stats strip, no logo wall (the old page's
+ * "Trusted by Agencies" / "10k+ Generations" strip was fabricated and is
+ * gone, not restyled).
+ *
+ * The visual is a real capture of the running product (see
+ * docs/screenshots + T11-STATUS for how it was taken), not an illustration.
+ * It is the only `priority` image on the page — it is the LCP element.
+ */
+export function Hero() {
     return (
-        <div className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-            {/* Background Glows */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
-                <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[30%] bg-brand-violet/10 rounded-full blur-[100px]" />
+        <section className="relative overflow-hidden">
+            <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -z-10"
+            >
+                <div className="absolute left-1/2 top-[-20%] h-[480px] w-[720px] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px] motion-reduce:animate-none" />
+                <div className="absolute bottom-[-30%] right-[-10%] h-[360px] w-[360px] rounded-full bg-brand-violet/10 blur-[100px] motion-reduce:animate-none" />
             </div>
 
-            <div className="container px-4 mx-auto text-center relative z-10">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-primary mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <Sparkles className="w-3 h-3" />
-                    <span>v1.0 is now live with Neural Audio & SFX</span>
-                </div>
-
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight  mb-8 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-                    The Engineering Hub <br className="hidden md:block" />
-                    <span className="bg-linear-120 from-primary via-brand-violet to-brand-pink bg-clip-text text-transparent">
-                        for AI Multi-Content
-                    </span>
+            <div className="container mx-auto max-w-6xl px-4 pb-16 pt-16 text-center md:pt-24">
+                <h1 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-6xl">
+                    Everything a video needs, in one place.
                 </h1>
-
-                <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-                    Bridge the gap between vision and reality. The first modular monolith architecture built for high-scale, cinematic AI content generation.
+                <p className="mx-auto mt-6 max-w-2xl text-balance text-lg text-muted-foreground md:text-xl">
+                    Thumbnails, scripts, sound effects and images — generated around
+                    your brief, kept in one project, ready to publish.
                 </p>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-300">
-                    <Link href="/register">
-                        <Button size="lg" className="h-14 px-8 text-base bg-primary hover:bg-primary/90 shadow-[0_0_20px_rgba(43,108,238,0.3)]">
-                            Build Your First Project
-                            <ArrowRight className="w-4 h-4 ml-2" />
-                        </Button>
-                    </Link>
-                    <Button size="lg" variant="outline" className="h-14 px-8 text-base border-white/10 hover:bg-white/5">
-                        <Play className="w-4 h-4 mr-2 fill-current" />
-                        Watch Showreel
+                <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                    <Button size="lg" className="h-12 px-8 text-base" asChild>
+                        <Link href="/signup">
+                            Start creating — free
+                            <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+                        </Link>
+                    </Button>
+                    <Button size="lg" variant="outline" className="h-12 px-8 text-base" asChild>
+                        <Link href="#assets">See the four assets</Link>
                     </Button>
                 </div>
 
-                <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto opacity-50">
-                    {['Trusted by Agencies', '10k+ Generations', 'Clean Architecture', 'Real-time Analytics'].map(t => (
-                        <div key={t} className="flex items-center justify-center gap-2 text-xs font-mono tracking-widest uppercase">
-                            <CheckCircle2 className="w-3 h-3 text-primary" /> {t}
-                        </div>
-                    ))}
+                <div className="mx-auto mt-14 max-w-5xl">
+                    <Image
+                        src="/landing/dashboard.jpg"
+                        alt="The Ideas & Trends workspace ranking viral topics with score bars and growth percentages"
+                        width={1600}
+                        height={1000}
+                        priority
+                        sizes="(max-width: 768px) 100vw, 1024px"
+                        className="rounded-xl border border-border/60 shadow-2xl"
+                    />
                 </div>
             </div>
-        </div>
+        </section>
     );
-};
+}
