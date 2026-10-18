@@ -142,13 +142,22 @@ describe('public route table (robots / sitemap)', () => {
         expect(leaked.map((route) => route.path)).toEqual([]);
     });
 
-    it('robots.txt no longer enumerates private prefixes', async () => {
+    it('robots.txt disallows auth-flow pages but still does not enumerate private prefixes', async () => {
         const { default: robots } = await import('@/app/robots');
         const result = robots();
         const rules = Array.isArray(result.rules) ? result.rules : [result.rules];
-        for (const rule of rules) {
-            expect(rule?.disallow ?? []).toEqual([]);
-        }
+        const disallow = rules.flatMap((rule) => rule?.disallow ?? []);
+        // T12: the auth pages are linked from public pages, so they are listed
+        // explicitly. Private prefixes (/dashboard, /settings, …) stay out —
+        // see robots.ts for the rationale.
+        expect(disallow).toEqual([
+            '/login',
+            '/signup',
+            '/register',
+            '/forgot-password',
+            '/reset-password',
+            '/verify-email',
+        ]);
         expect(result.sitemap).toBe(`${SITE_URL}/sitemap.xml`);
     });
 

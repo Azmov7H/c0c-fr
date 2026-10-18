@@ -3,9 +3,18 @@
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { authService } from '@/features/auth/services/auth.service';
+import { safeCallbackUrl } from '@/features/auth/lib/callback-url';
 import { useAuthStore } from '@/store/auth-store';
 
-const AUTH_PAGES = ['/login', '/register', '/signup'];
+/**
+ * Pages a signed-out visitor may view. Reset and verify flows live here so an
+ * unauthenticated user opening an email link is never bounced to /login
+ * (T12); /register is absent because it 301s server-side before hydration.
+ */
+const AUTH_FLOW_PAGES = ['/login', '/signup', '/forgot-password', '/reset-password', '/verify-email'];
+
+/** Of those, pages where a signed-in user has no business being. */
+const REDIRECT_WHEN_AUTHENTICATED = ['/login', '/signup', '/forgot-password'];
 
 /**
  * T13 lands the onboarding flow (route + backend flag). Until then this seam
@@ -13,15 +22,6 @@ const AUTH_PAGES = ['/login', '/register', '/signup'];
  * freshly registered user, which is worse than skipping onboarding.
  */
 const ONBOARDING_ROUTE_READY = false;
-
-function safeCallbackUrl(pathname: string | null): string | null {
-    if (!pathname) return null;
-    // Same-origin, single-slash paths only — mirrors the middleware guard.
-    if (!pathname.startsWith('/') || pathname.startsWith('//') || pathname.startsWith('/\\')) {
-        return null;
-    }
-    return pathname;
-}
 
 export function SessionInitializer() {
     const { setUser, setLoading } = useAuthStore();
@@ -51,9 +51,9 @@ export function SessionInitializer() {
                         return;
                     }
 
-                    // Authenticated users have no business on /login or /register.
-                    const isAuthPage = AUTH_PAGES.some((p) => pathname?.startsWith(p));
-                    if (isAuthPage) {
+                    // Authenticated users have no business on login/signup/forgot.
+                    const isRedirectPage = REDIRECT_WHEN_AUTHENTICATED.some((p) => pathname?.startsWith(p));
+                    if (isRedirectPage) {
                         const params = new URLSearchParams(window.location.search);
                         const callbackUrl =
                             safeCallbackUrl(params.get('callbackUrl') || params.get('from'));
@@ -61,8 +61,8 @@ export function SessionInitializer() {
                     }
                 } else {
                     setUser(null);
-                    const isAuthPage = AUTH_PAGES.some((p) => pathname?.startsWith(p));
-                    if (!isAuthPage) {
+                    const isAuthFlowPage = AUTH_FLOW_PAGES.some((p) => pathname?.startsWith(p));
+                    if (!isAuthFlowPage) {
                         const cb = safeCallbackUrl(pathname);
                         router.replace(`/login${cb ? `?callbackUrl=${encodeURIComponent(cb)}` : ''}`);
                     }

@@ -48,8 +48,37 @@ describe('BFF /api/auth/login', () => {
         expect(cookies.some((c) => c.name.includes('user_info'))).toBe(false);
     });
 
-    it('passes through backend 401 with backend error envelope', async () => {
+    it('promotes the backend Set-Cookie refresh token when the body has none (T02 contract)', async () => {
         backend.install([
+            {
+                status: 200,
+                body: {
+                    success: true,
+                    data: {
+                        user: { id: 'u1', email: 'a@b.c', firstName: 'A', lastName: 'B' },
+                        accessToken: 'access-xyz',
+                    },
+                },
+                headers: {
+                    'Set-Cookie':
+                        'refreshToken=backend-refresh-1; Max-Age=604800; Path=/api/v1/auth; HttpOnly; SameSite=Strict',
+                },
+            },
+        ]);
+
+        const res = await POST(
+            makeRequest({ body: { email: 'a@b.c', password: 'Password123' } })
+        );
+
+        expect(res.status).toBe(200);
+        const cookies = cookiesOf(res);
+        expect(cookies.find((c) => c.name === sessionName)?.value).toBe('access-xyz');
+        // Without this promotion, /api/auth/refresh has nothing to rotate and
+        // every session silently dies when the access token expires.
+        expect(cookies.find((c) => c.name === refreshName)?.value).toBe('backend-refresh-1');
+    });
+
+    it('passes through backend 401 with backend error envelope', async () => {        backend.install([
             {
                 status: 401,
                 body: {

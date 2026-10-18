@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SERVER_API_URL } from '@/services/server-api';
 import { SESSION_COOKIE, REFRESH_COOKIE, SESSION_COOKIE_MAX_AGE, authCookieOptions } from '@/lib/auth-cookies';
+import { extractRefreshToken, getSetCookieHeaders } from '@/lib/auth-relay';
 import { loginSchema } from '@/lib/auth-schemas';
 import { enforceAuthBodyLimit, methodNotAllowed, readValidatedJson } from '@/lib/route-guards';
 
@@ -32,7 +33,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { user, accessToken, refreshToken } = result.data;
+    const { user, accessToken } = result.data;
+    // The backend no longer returns the refresh token in the body (T02 moves
+    // it to an httpOnly cookie scoped to /api/v1/auth) — promote that cookie.
+    const refreshToken = extractRefreshToken(result, getSetCookieHeaders(response));
 
     const res = NextResponse.json({
       success: true,

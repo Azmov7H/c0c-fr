@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SERVER_API_URL } from '@/services/server-api';
 import { SESSION_COOKIE, REFRESH_COOKIE, SESSION_COOKIE_MAX_AGE, authCookieOptions } from '@/lib/auth-cookies';
+import { extractRefreshToken, getSetCookieHeaders } from '@/lib/auth-relay';
 import { registerSchema } from '@/lib/auth-schemas';
 import { enforceAuthBodyLimit, methodNotAllowed, readValidatedJson } from '@/lib/route-guards';
 
@@ -32,7 +33,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { user, accessToken, refreshToken } = result.data;
+    const { user, accessToken } = result.data;
+    // Same T02 contract as login: the refresh token arrives as a backend
+    // Set-Cookie, not in the JSON body.
+    const refreshToken = extractRefreshToken(result, getSetCookieHeaders(response));
 
     const res = NextResponse.json({
       success: true,

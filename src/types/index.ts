@@ -12,6 +12,12 @@ export interface User {
     plan: UserPlan;
     /** Set by the backend (auth.model.ts). Optional: older payloads omit it. */
     onboardingCompleted?: boolean;
+    /**
+     * T12: drives the dashboard verification banner. Exposed by the backend's
+     * sanitizeUser since T12; optional because sessions minted before the
+     * deploy carry no field (we then show nothing rather than nag wrongly).
+     */
+    emailVerified?: boolean;
     createdAt: string;
     updatedAt: string;
 }

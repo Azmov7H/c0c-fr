@@ -4,6 +4,7 @@ import { vi } from 'vitest';
 export interface MockBackendResponse {
     status: number;
     body: unknown;
+    headers?: Record<string, string>;
 }
 
 export function buildBackendMock() {
@@ -25,7 +26,7 @@ export function buildBackendMock() {
                 const r = responses[i++];
                 return new Response(JSON.stringify(r.body), {
                     status: r.status,
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', ...(r.headers ?? {}) },
                 });
             });
             vi.stubGlobal('fetch', fetchMock);
