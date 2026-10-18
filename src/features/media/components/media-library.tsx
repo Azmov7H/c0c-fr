@@ -104,14 +104,14 @@ export function MediaLibrary() {
                         {/* Hover overlay */}
                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                           {asset.type === 'video' && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white" aria-label={`Play ${asset.name}`}>
                               <Play className="w-4 h-4" />
                             </Button>
                           )}
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-white">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-white" aria-label={`Copy link to ${asset.name}`}>
                             <Copy className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-white">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-white" aria-label={`Delete ${asset.name}`}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>

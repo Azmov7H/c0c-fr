@@ -11,6 +11,8 @@ export default defineConfig({
             'src/styles/**/*.test.ts',
             'src/styles/**/*.test.tsx',
             'src/middleware.test.ts',
+            'src/lib/**/*.test.ts',
+            'src/store/**/*.test.tsx',
             'tests/security/**/*.test.ts',
         ],
     },

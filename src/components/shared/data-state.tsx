@@ -1,9 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, RotateCcw } from 'lucide-react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -34,6 +35,11 @@ interface DataStateProps {
         icon?: React.ReactNode;
         disabled?: boolean;
     };
+    /**
+     * Error branch recovery (T10): a retry that re-runs the failing query.
+     * "Try again in a moment" without a button was a dead end.
+     */
+    onRetry?: () => void;
     /** Number of skeleton rows in the loading branch. Match the content height. */
     skeletonRows?: number;
     /**
@@ -59,6 +65,7 @@ export function DataState({
     emptyDescription = 'There is no data to show for this view.',
     emptyIcon,
     emptyAction,
+    onRetry,
     skeletonRows = 4,
     loadingFallback,
     className,
@@ -99,6 +106,14 @@ export function DataState({
                             'The data could not be loaded. Try again in a moment.'}
                     </AlertDescription>
                 </Alert>
+                {onRetry ? (
+                    <div className="mt-4">
+                        <Button variant="outline" size="sm" className="gap-2" onClick={onRetry}>
+                            <RotateCcw className="size-4" aria-hidden="true" />
+                            Try again
+                        </Button>
+                    </div>
+                ) : null}
             </div>
         );
     }

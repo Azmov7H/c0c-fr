@@ -5,10 +5,12 @@ import { toApiError } from '@/lib/api-error';
 
 const PROJECTS_KEY = 'projects';
 
-export function useProjects(query?: ProjectsQuery) {
+export function useProjects(query?: ProjectsQuery, options?: { enabled?: boolean }) {
     return useQuery({
         queryKey: [PROJECTS_KEY, query],
         queryFn: () => projectsService.getAll(query),
+        // The command palette fetches the first page lazily (only while open).
+        enabled: options?.enabled ?? true,
     });
 }
 

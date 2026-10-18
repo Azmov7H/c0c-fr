@@ -44,7 +44,7 @@ export function NotificationBell() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="relative"
+                    className="relative max-md:size-11"
                     aria-label="Notifications"
                 >
                     <Bell className="size-5" />

@@ -2,19 +2,15 @@
 
 import { useState } from 'react';
 import { useProfile, useUpdateProfile } from '../hooks/use-settings';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     User,
-    CreditCard,
     Key,
     Shield,
-    Zap,
-    Check,
-    Star,
     RefreshCw,
     LogOut,
     Info
@@ -24,10 +20,22 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { DataState } from '@/components/shared/data-state';
 import { useLogout } from '@/features/auth/hooks/use-auth';
 
-export const SettingsDashboard = () => {
+const VALID_TABS = ['profile', 'api', 'security'] as const;
+type SettingsTab = (typeof VALID_TABS)[number];
+
+interface SettingsDashboardProps {
+    /** Deep link support (`/settings?tab=api`) for the user menu, T10. */
+    defaultTab?: string;
+}
+
+export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
     const { data: profile, isLoading } = useProfile();
     const { mutate: updateProfile, isPending: isUpdatingProfile } = useUpdateProfile();
     const { mutate: logout } = useLogout();
+
+    const initialTab: SettingsTab = (VALID_TABS as readonly string[]).includes(defaultTab ?? '')
+        ? (defaultTab as SettingsTab)
+        : 'profile';
 
     const [formData, setFormData] = useState({
         firstName: profile?.firstName || '',
@@ -67,14 +75,11 @@ export const SettingsDashboard = () => {
                 <p className="text-muted-foreground mt-2">Manage your account preferences, billing, and API access.</p>
             </div>
 
-            <Tabs defaultValue="profile" className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+            <Tabs defaultValue={initialTab} className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
 
                 <TabsList className="flex flex-col h-auto bg-transparent gap-2 items-start lg:col-span-1 p-0">
                     <TabsTrigger value="profile" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-muted transition-all">
                         <User className="w-4 h-4" /> My Profile
-                    </TabsTrigger>
-                    <TabsTrigger value="billing" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-muted transition-all">
-                        <CreditCard className="w-4 h-4" /> Billing & Plans
                     </TabsTrigger>
                     <TabsTrigger value="api" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-muted transition-all">
                         <Key className="w-4 h-4" /> AI API Keys
@@ -132,57 +137,29 @@ export const SettingsDashboard = () => {
                         </Card>
                     </TabsContent>
 
-                    <TabsContent value="billing" className="mt-0 space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {[
-                                { id: 'starter', name: 'Starter', price: '0', icon: Zap, features: ['10 Projects/mo', 'Basic AI Models', 'Standard Export'] },
-                                { id: 'pro', name: 'Pro Studio', price: '49', icon: Star, features: ['Unlimited Projects', 'Advanced AI Models', 'Priority Generation', 'Team Collaboration'] },
-                                { id: 'studio', name: 'Enterprise', price: '199', icon: Shield, features: ['Custom AI Training', 'Dedicated Support', 'API Access', 'SSO & Security'] }
-                            ].map((plan) => (
-                                <Card key={plan.id} className={`relative overflow-hidden transition-all ${profile?.plan === plan.id ? 'border-primary ring-1 ring-primary' : 'hover:border-border/80'}`}>
-                                    {profile?.plan === plan.id && (
-                                        <div className="absolute top-0 right-0 p-1 bg-primary text-primary-foreground rounded-bl-lg">
-                                            <Check className="w-3 h-3" />
-                                        </div>
-                                    )}
-                                    <CardHeader>
-                                        <plan.icon className={`w-8 h-8 ${profile?.plan === plan.id ? 'text-primary' : 'text-muted-foreground'}`} />
-                                        <CardTitle className="mt-4">{plan.name}</CardTitle>
-                                        <div className="flex items-baseline gap-1">
-                                            <span className="text-2xl font-bold">${plan.price}</span>
-                                            <span className="text-xs text-muted-foreground">/mo</span>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <ul className="space-y-2">
-                                            {plan.features.map(f => (
-                                                <li key={f} className="text-xs text-muted-foreground flex items-center gap-2">
-                                                    <Check className="w-3 h-3 text-primary" /> {f}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </CardContent>
-                                    <CardFooter>
-                                        {/* SEC-06/AUTHZ-08: plans are read-only. Upgrades go
-                                            through billing/support, never self-service. */}
-                                        <Button
-                                            variant={profile?.plan === plan.id ? "ghost" : "outline"}
-                                            className="w-full"
-                                            disabled
-                                            title={
-                                                profile?.plan === plan.id
-                                                    ? 'Current plan'
-                                                    : 'Contact support to change plans'
-                                            }
-                                        >
-                                            {profile?.plan === plan.id ? 'Current Plan' : 'Contact Sales'}
-                                        </Button>
-                                    </CardFooter>
-                                </Card>
-                            ))}
-                        </div>
+                    <TabsContent value="security" className="mt-0 space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Account Security</CardTitle>
+                                <CardDescription>Sessions, credentials and account protection.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <Alert>
+                                    <Info className="h-4 w-4" />
+                                    <AlertTitle>Password &amp; 2FA changes are not self-service yet</AlertTitle>
+                                    <AlertDescription>
+                                        Sessions are issued and rotated by the platform backend.
+                                        Changing your password or enabling two-factor authentication
+                                        is not part of the current release — contact support if your
+                                        credentials are at risk.
+                                    </AlertDescription>
+                                </Alert>
+                                <Button variant="outline" className="gap-2" onClick={() => logout()}>
+                                    <LogOut className="w-4 h-4" /> Sign out of this session
+                                </Button>
+                            </CardContent>
+                        </Card>
                     </TabsContent>
-
                     <TabsContent value="api" className="mt-0 space-y-6">
                         <Card>
                             <CardHeader>

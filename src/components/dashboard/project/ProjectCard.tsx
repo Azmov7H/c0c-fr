@@ -46,6 +46,7 @@ export function ProjectCard({ project }: { project: Project }) {
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground"
+            aria-label="Project actions"
           >
             <MoreVertical className="h-4 w-4" />
           </Button>
