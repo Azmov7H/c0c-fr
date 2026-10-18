@@ -215,14 +215,14 @@ export function Header() {
                 className="gap-2 cursor-pointer"
                 onClick={() => router.push("/projects/new")}
               >
-                <Zap className="w-4 h-4 text-amber-500" />
+                <Zap className="w-4 h-4 text-warning" />
                 New Project
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="gap-2 cursor-pointer"
                 onClick={() => router.push("/media")}
               >
-                <Upload className="w-4 h-4 text-emerald-500" />
+                <Upload className="w-4 h-4 text-success" />
                 Upload Media
               </DropdownMenuItem>
             </DropdownMenuContent>

@@ -179,7 +179,9 @@ A robust asset management system.
 ## 9. Design System
 
 - **Typography Scale:**
-  - Font Families: `Inter` (sans) for UI/Body. `Cal Sans` or `Clash Display` for expressive, creator-vibe Headings.
+  - Font Families: `Inter` (sans) for UI/Body, loaded with `next/font` onto `--font-body` and exposed as the `--font-sans` / `font-sans` token.
+    `Space Grotesk` (variable) is the display face, loaded onto `--font-space-grotesk` and exposed as `--font-display` / `font-display` — used for page titles and expressive headings.
+    Both are self-hosted by `next/font` with size-adjusted fallbacks; no external font request is made at runtime.
   - Desktop H1: `text-4xl font-extrabold tracking-tight`
   - Desktop H2: `text-3xl font-bold tracking-tight`
   - Body: `text-base font-normal leading-7`
@@ -215,6 +217,15 @@ Built using CSS variables required by Tailwind mapping to the shadcn setup.
 - **Muted**: `#27272A` (zinc-800) / Text: `#A1A1AA` (zinc-400).
 - **Border**: `#27272A` (zinc-800) – faint separation lines.
 
+**Semantic state colours (added T08):** §10 previously defined no success/warning/info,
+so state UI wrote raw palette classes. These tokens now cover it — `--success`
+(emerald-500 / dark: emerald-400), `--warning` (amber-500 / amber-400), `--info`
+(blue-500 / blue-400), `--negative` (rose-500 / rose-400). Fixed brand hues are
+tokens too (`--brand-red`, `--brand-cyan`, `--brand-pink`, `--brand-violet`) so
+platform marks and decorative gradients stop using palette classes. `--chart-1..5`
+provide theme-aware series colours for the chart wrapper. Raw palette classes are
+banned outside `globals.css` by an ESLint rule (`design-system/no-raw-palette-classes`).
+
 ---
 
 ## 11. Dark Mode Implementation
@@ -222,7 +233,7 @@ Built using CSS variables required by Tailwind mapping to the shadcn setup.
 - **Library:** `next-themes` setup wrapping the main layout in `<ThemeProvider attribute="class" defaultTheme="system" enableSystem>`.
 - **Theme Switcher:** Toggled via the Header. Dropdown contains: "Light", "Dark", "System".
 - **Preference Detection:** The `system` setup reads the user's `prefers-color-scheme` automatically.
-- **Transitions:** Global CSS snippet added: `* { transition-property: color, background-color, border-color; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }` ensures smooth transition without flash unstyled content (FOUC).
+- **Transitions:** Implemented in `globals.css` `@layer base`: a 150 ms transition on colour, background, border, outline, fill and stroke for all elements, with `prefers-reduced-motion` collapsing it to 0.01 ms. Scoped to colour properties only — no layout/animation properties are transitioned. `disableTransitionOnChange` is **not** set on the provider, since it would suppress exactly this.
 
 ---
 
@@ -236,7 +247,7 @@ All built utilizing `shadcn/ui` and Radix primitives:
 - `Tabs` (Filters on Media/Trends).
 - `Dialog` & `Sheet` (Modals for asset preview, Sheets for mobile sidebar and trend details).
 - `Toast` (Integrated via `sonner` for non-intrusive copy confirmations / generation success).
-- `DataTable` (`@tanstack/react-table` driven, sortable, paginated).
+- `DataTable` (`@tanstack/react-table` driven, sortable, paginated) — `src/components/ui/data-table.tsx`.
 - `Chart` (shadcn-wrapped Recharts).
 - `Popover` & `Calendar` (DatePicker logic).
 - `Badge` (Small statuses, tags, hashtags).
@@ -245,6 +256,15 @@ All built utilizing `shadcn/ui` and Radix primitives:
 - `Command` (Cmd+K searching interface).
 - `Breadcrumb` (Header depth mapping).
 - `ScrollArea` (Custom scrollbars for specific bounded sections).
+- `Alert` (`src/components/ui/alert.tsx`) — inline status/notice blocks, used by `DataState`'s error branch.
+- `Accordion`, `Popover`, `Calendar`, `Pagination` — added in T08 for T14/T17/T18; `Pagination` is consumed by `DataTable`.
+
+### Layout primitives (T08)
+
+- `PageHeader` (`src/components/shared/page-header.tsx`) — title (rendered in `font-display`), description, `breadcrumb` slot, `actions` slot. Supersedes the removed `FeatureHeader`.
+- `SectionCard` (`src/components/shared/section-card.tsx`) — card with a standard header (title, description, actions) and content padding.
+- `DataState` (`src/components/shared/data-state.tsx`) — one component covering **loading / empty / error / success** for any data-driven view; loading renders a skeleton (never a spinner-only affordance), empty renders `EmptyState`, error renders an `Alert`. Precedence: loading → error → empty → content.
+- `MockDataBanner` (`src/components/shared/mock-data-banner.tsx`) — visible dev-only marker for pages backed by demo data; the demo data itself is gated in `src/lib/dev-mocks.ts` and eliminated from production builds.
 
 ---
 

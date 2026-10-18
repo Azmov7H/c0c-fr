@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FeatureHeader } from '@/components/shared/feature-header';
+import { PageHeader } from '@/components/shared/page-header';
 import { TwoPanelLayout } from '@/components/shared/two-panel-layout';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -132,7 +132,7 @@ export function ScriptGenerator() {
 
   return (
     <div className="space-y-6">
-      <FeatureHeader
+      <PageHeader
         title="Script Generator"
         description="AI-powered script generation with platform-specific formatting and tone control."
       />

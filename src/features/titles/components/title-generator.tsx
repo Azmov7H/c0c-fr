@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FeatureHeader } from '@/components/shared/feature-header';
+import { PageHeader } from '@/components/shared/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -45,7 +45,7 @@ export function TitleGenerator() {
 
   return (
     <div className="space-y-6">
-      <FeatureHeader
+      <PageHeader
         title="Title Generator"
         description="Generate high-CTR titles optimized for your platform."
       />

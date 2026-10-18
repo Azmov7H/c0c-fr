@@ -8,7 +8,7 @@ export const Hero = () => {
             {/* Background Glows */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
-                <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[30%] bg-purple-500/10 rounded-full blur-[100px]" />
+                <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[30%] bg-brand-violet/10 rounded-full blur-[100px]" />
             </div>
 
             <div className="container px-4 mx-auto text-center relative z-10">
@@ -19,7 +19,7 @@ export const Hero = () => {
 
                 <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight  mb-8 animate-in fade-in slide-in-from-bottom-6 duration-1000">
                     The Engineering Hub <br className="hidden md:block" />
-                    <span className="bg-linear-120 from-primary via-purple-400 to-pink-500 bg-clip-text text-transparent">
+                    <span className="bg-linear-120 from-primary via-brand-violet to-brand-pink bg-clip-text text-transparent">
                         for AI Multi-Content
                     </span>
                 </h1>

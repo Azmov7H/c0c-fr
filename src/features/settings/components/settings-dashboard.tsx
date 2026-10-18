@@ -16,9 +16,12 @@ import {
     Check,
     Star,
     RefreshCw,
-    LogOut
+    LogOut,
+    Info
 } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DataState } from '@/components/shared/data-state';
 import { useLogout } from '@/features/auth/hooks/use-auth';
 
 export const SettingsDashboard = () => {
@@ -39,13 +42,20 @@ export const SettingsDashboard = () => {
 
     if (isLoading) {
         return (
-            <div className="space-y-8">
-                <Skeleton className="h-10 w-48" />
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                    <Skeleton className="h-64 lg:col-span-1 rounded-xl" />
-                    <Skeleton className="h-96 lg:col-span-3 rounded-xl" />
-                </div>
-            </div>
+            <DataState
+                isLoading
+                loadingFallback={
+                    <div className="space-y-8">
+                        <Skeleton className="h-10 w-48" />
+                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                            <Skeleton className="h-64 lg:col-span-1 rounded-xl" />
+                            <Skeleton className="h-96 lg:col-span-3 rounded-xl" />
+                        </div>
+                    </div>
+                }
+            >
+                {null}
+            </DataState>
         );
     }
 
@@ -177,26 +187,34 @@ export const SettingsDashboard = () => {
                         <Card>
                             <CardHeader>
                                 <CardTitle>AI Provider Tokens</CardTitle>
-                                <CardDescription>Securely store your own API keys to bypass rate limits.</CardDescription>
+                                <CardDescription>How model access is configured for this workspace.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
+                                <Alert>
+                                    <Info className="h-4 w-4" />
+                                    <AlertTitle>Managed server-side</AlertTitle>
+                                    <AlertDescription>
+                                        Provider keys are configured by the deployment and are never
+                                        entered in the browser. Per-user key storage is not part of the
+                                        current release.
+                                    </AlertDescription>
+                                </Alert>
                                 <div className="space-y-4">
                                     <div className="space-y-2">
                                         <Label className="flex justify-between">
                                             <span>OpenAI API Key</span>
-                                            <span className="text-[10px] text-emerald-500 font-mono">ENCRYPTED</span>
+                                            <span className="text-[10px] text-muted-foreground font-mono">NOT CONFIGURED PER USER</span>
                                         </Label>
-                                        <Input type="password" value="sk-........................" readOnly />
+                                        <Input value="Managed by the server" readOnly disabled />
                                     </div>
                                     <div className="space-y-2">
                                         <Label className="flex justify-between">
                                             <span>Anthropic Key</span>
-                                            <span className="text-[10px] text-muted-foreground font-mono">NOT SET</span>
+                                            <span className="text-[10px] text-muted-foreground font-mono">NOT CONFIGURED PER USER</span>
                                         </Label>
-                                        <Input type="password" placeholder="sk-ant-..." />
+                                        <Input value="Managed by the server" readOnly disabled />
                                     </div>
                                 </div>
-                                <Button variant="outline">Rotate All Keys</Button>
                             </CardContent>
                         </Card>
                     </TabsContent>

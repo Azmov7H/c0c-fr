@@ -18,9 +18,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+import { useRouter } from "next/navigation"
 import { useProjects } from "@/features/projects/hooks/use-projects"
 import { ProjectCard } from "@/components/dashboard/project/ProjectCard"
-import { EmptyState } from "@/components/ui/empty-state"
+import { PageHeader } from "@/components/shared/page-header"
+import { DataState } from "@/components/shared/data-state"
 
 const STATUS_OPTIONS = ["All", "draft", "processing", "completed", "error"]
 const PLATFORM_OPTIONS = ["All", "youtube", "tiktok", "instagram", "shorts", "reels"]
@@ -32,7 +34,8 @@ export function ProjectsView() {
 
   const debouncedSearch = useDebounce(search, 300)
 
-  const { data, isLoading } = useProjects()
+  const router = useRouter()
+  const { data, isLoading, error } = useProjects()
 
   const projects = useMemo(() => {
     const all = data?.data ?? []
@@ -51,19 +54,18 @@ export function ProjectsView() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Projects</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage your content workflows.</p>
-        </div>
-        <Link href="/projects/new">
-          <Button className="h-9 px-4 rounded-xl shadow-premium hover:shadow-glow transition-all">
-            <Plus className="w-4 h-4 mr-2" />
-            New Project
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        title="Projects"
+        description="Manage your content workflows."
+        actions={
+          <Link href="/projects/new">
+            <Button className="h-9 px-4 rounded-xl shadow-premium hover:shadow-glow transition-all">
+              <Plus className="w-4 h-4 mr-2" />
+              New Project
+            </Button>
+          </Link>
+        }
+      />
 
       {/* Search + Filters */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -128,24 +130,35 @@ export function ProjectsView() {
       )}
 
       {/* Content */}
-      {isLoading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-[180px] rounded-xl" />
-          ))}
-        </div>
-      ) : projects.length === 0 ? (
-        <EmptyState
-          title="No projects found"
-          description="Create your first project to start generating AI-powered content."
-        />
-      ) : (
+      <DataState
+        isLoading={isLoading}
+        error={error}
+        isEmpty={projects.length === 0}
+        emptyTitle={hasFilters ? "No matching projects" : "No projects found"}
+        emptyDescription={
+          hasFilters
+            ? "No projects match the current search and filters."
+            : "Create your first project to start generating AI-powered content."
+        }
+        emptyAction={
+          hasFilters
+            ? undefined
+            : { label: "New Project", onClick: () => router.push("/projects/new") }
+        }
+        loadingFallback={
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-[180px] rounded-xl" />
+            ))}
+          </div>
+        }
+      >
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((project: Project) => (
             <ProjectCard key={project._id} project={project} />
           ))}
         </div>
-      )}
+      </DataState>
 
     </div>
   )

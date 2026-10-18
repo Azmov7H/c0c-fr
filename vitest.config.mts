@@ -5,7 +5,12 @@ export default defineConfig({
     test: {
         globals: true,
         environment: 'node',
-        include: ['src/app/api/auth/**/*.test.ts', 'src/types/**/*.test.ts'],
+        include: [
+            'src/app/api/auth/**/*.test.ts',
+            'src/types/**/*.test.ts',
+            'src/styles/**/*.test.ts',
+            'src/styles/**/*.test.tsx',
+        ],
     },
     resolve: {
         alias: {

@@ -1,13 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { FeatureHeader } from '@/components/shared/feature-header';
+import { PageHeader } from '@/components/shared/page-header';
 import { FilterBar } from '@/components/shared/filter-bar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DataState } from '@/components/shared/data-state';
+import { MockDataBanner } from '@/components/shared/mock-data-banner';
+import { MOCK_ASSETS } from '@/lib/dev-mocks';
 import {
   Dialog,
   DialogContent,
@@ -16,17 +19,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  Image as ImageIcon, Video, FileAudio, Search, Copy, Trash2, Play, } from 'lucide-react';
+  Image as ImageIcon, Video, FileAudio, Search, Copy, Trash2, Play, Plus, } from 'lucide-react';
 import Image from 'next/image';
-
-const MOCK_ASSETS = [
-  { id: '1', name: 'hero-banner.png', type: 'image', url: '/placeholder.png', size: '2.4 MB', date: '2026-04-10', tags: ['banner', 'hero'] },
-  { id: '2', name: 'intro-clip.mp4', type: 'video', url: '', size: '14.1 MB', date: '2026-04-09', tags: ['intro', 'clip'] },
-  { id: '3', name: 'bg-music.mp3', type: 'audio', url: '', size: '3.2 MB', date: '2026-04-08', tags: ['music', 'background'] },
-  { id: '4', name: 'thumbnail-v1.png', type: 'image', url: '/placeholder.png', size: '890 KB', date: '2026-04-07', tags: ['thumbnail'] },
-  { id: '5', name: 'outro-transition.mp4', type: 'video', url: '', size: '5.6 MB', date: '2026-04-06', tags: ['outro'] },
-  { id: '6', name: 'sfx-whoosh.mp3', type: 'audio', url: '', size: '120 KB', date: '2026-04-05', tags: ['sfx', 'transition'] },
-];
 
 const assetIcons: Record<string, React.ElementType> = {
   image: ImageIcon,
@@ -47,12 +41,18 @@ export function MediaLibrary() {
 
   return (
     <div className="space-y-6">
-      <FeatureHeader
+      <PageHeader
         title="Media Library"
         description="Manage all your media assets — images, videos, and audio files."
-        ctaLabel="Upload"
-        onCtaClick={() => {}}
+        actions={
+          <Button className="h-9 px-4 rounded-xl shadow-premium hover:shadow-glow transition-all">
+            <Plus className="w-4 h-4 mr-2" />
+            Upload
+          </Button>
+        }
       />
+
+      <MockDataBanner />
 
       <FilterBar
         searchValue={search}
@@ -72,13 +72,18 @@ export function MediaLibrary() {
 
         <TabsContent value={activeTab} className="mt-6">
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                <Search className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">No assets found</h3>
-              <p className="text-muted-foreground text-sm">Try adjusting your search or filters.</p>
-            </div>
+            <DataState
+              isEmpty
+              emptyIcon={Search}
+              emptyTitle={search || activeTab !== 'all' ? 'No assets found' : 'No assets yet'}
+              emptyDescription={
+                search || activeTab !== 'all'
+                  ? 'Try adjusting your search or filters.'
+                  : 'Uploads are not connected to the backend yet.'
+              }
+            >
+              {null}
+            </DataState>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4">
               {filtered.map((asset) => {

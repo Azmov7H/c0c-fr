@@ -185,9 +185,9 @@ export default function NewProjectWizard() {
                                                 <FormLabel className="text-sm font-bold uppercase tracking-wider text-muted-foreground text-center block">Target Platform</FormLabel>
                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                                     {[
-                                                        { id: 'youtube', label: 'YouTube', icon: Youtube, color: 'text-red-500', bg: 'bg-red-500/10' },
-                                                        { id: 'tiktok', label: 'TikTok', icon: Layout, color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
-                                                        { id: 'instagram', label: 'Reels', icon: Instagram, color: 'text-pink-500', bg: 'bg-pink-500/10' },
+                                                        { id: 'youtube', label: 'YouTube', icon: Youtube, color: 'text-brand-red', bg: 'bg-brand-red/10' },
+                                                        { id: 'tiktok', label: 'TikTok', icon: Layout, color: 'text-brand-cyan', bg: 'bg-brand-cyan/10' },
+                                                        { id: 'instagram', label: 'Reels', icon: Instagram, color: 'text-brand-pink', bg: 'bg-brand-pink/10' },
                                                     ].map((platform) => (
                                                         <div
                                                             key={platform.id}

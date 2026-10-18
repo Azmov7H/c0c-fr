@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FeatureHeader } from '@/components/shared/feature-header';
+import { PageHeader } from '@/components/shared/page-header';
 import { StatCard } from '@/components/shared/stat-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,16 +21,16 @@ export function AnalyticsDashboard() {
   const [period, setPeriod] = useState('7d');
 
   const stats = [
-    { label: 'Total Views', value: '2.4M', trend: '+18%', trendUp: true, icon: Eye, iconColor: 'text-blue-500' },
-    { label: 'Engagement Rate', value: '8.7%', trend: '+2.1%', trendUp: true, icon: TrendingUp, iconColor: 'text-emerald-500' },
-    { label: 'Avg. Watch Time', value: '3:42', trend: '-0.8%', trendUp: false, icon: BarChart3, iconColor: 'text-amber-500' },
+    { label: 'Total Views', value: '2.4M', trend: '+18%', trendUp: true, icon: Eye, iconColor: 'text-info' },
+    { label: 'Engagement Rate', value: '8.7%', trend: '+2.1%', trendUp: true, icon: TrendingUp, iconColor: 'text-success' },
+    { label: 'Avg. Watch Time', value: '3:42', trend: '-0.8%', trendUp: false, icon: BarChart3, iconColor: 'text-warning' },
     { label: 'Subscribers', value: '12.4K', trend: '+840', trendUp: true, icon: Users, iconColor: 'text-primary' },
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <FeatureHeader
+        <PageHeader
           title="Analytics"
           description="Track your content performance across all platforms."
         />
@@ -63,7 +63,7 @@ export function AnalyticsDashboard() {
             <CardTitle className="text-base font-bold">Views Over Time</CardTitle>
             <p className="text-xs text-muted-foreground mt-0.5">Cross-platform view count trend</p>
           </div>
-          <Badge variant="outline" className="text-emerald-500 border-emerald-500/30 bg-emerald-500/10 font-semibold text-[10px]">
+          <Badge variant="outline" className="text-success border-success/30 bg-success/10 font-semibold text-[10px]">
             <ArrowUpRight className="w-3 h-3 mr-1" /> +18%
           </Badge>
         </CardHeader>
@@ -123,7 +123,7 @@ export function AnalyticsDashboard() {
                   <p className="font-semibold text-sm truncate">{item.title}</p>
                   <p className="text-xs text-muted-foreground">{item.views} views</p>
                 </div>
-                <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30 font-semibold text-xs">
+                <Badge className="bg-success/10 text-success border-success/30 font-semibold text-xs">
                   <ArrowUpRight className="w-3 h-3 mr-1" />{item.growth}
                 </Badge>
               </div>

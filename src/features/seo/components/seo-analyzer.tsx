@@ -110,7 +110,7 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                                 <div className="absolute top-1/2 -translate-y-1/2 right-4">
                                     <div className={cn(
                                         "h-10 w-10 rounded-xl flex items-center justify-center transition-all",
-                                        copiedId === `title-${i}` ? "bg-green-500/20 text-green-500" : "bg-muted/50 text-muted-foreground group-hover:text-primary group-hover:bg-primary/10"
+                                        copiedId === `title-${i}` ? "bg-success/20 text-success" : "bg-muted/50 text-muted-foreground group-hover:text-primary group-hover:bg-primary/10"
                                     )}>
                                         {copiedId === `title-${i}` ? <Check className="w-5 h-5" /> : <Copy className="w-4 h-4" />}
                                     </div>
@@ -178,7 +178,7 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                 </Card>
 
                 <Card className="glass border-border/50 rounded-[32px] shadow-premium overflow-hidden group/potential">
-                    <div className="h-1.5 w-full bg-gradient-to-r from-primary via-blue-400 to-indigo-600 shadow-glow" />
+                    <div className="h-1.5 w-full bg-gradient-to-r from-primary via-info to-primary shadow-glow" />
                     <CardHeader className="bg-muted/10 pt-8 px-8">
                         <CardTitle className="text-xl font-extrabold flex items-center justify-between">
                             Growth Projection

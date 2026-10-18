@@ -1,11 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { FeatureHeader } from '@/components/shared/feature-header';
+import { PageHeader } from '@/components/shared/page-header';
 import { TwoPanelLayout } from '@/components/shared/two-panel-layout';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { DataState } from '@/components/shared/data-state';
+import { MockDataBanner } from '@/components/shared/mock-data-banner';
+import { MOCK_TRACKS } from '@/lib/dev-mocks';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import {
@@ -17,13 +20,6 @@ const MOODS = [
   { id: 'suspenseful', label: 'Suspenseful Epic', icon: Flame, description: 'Deep bass, cinematic tension' },
   { id: 'chill', label: 'Lo-fi & Chill', icon: Waves, description: 'Relaxed vibes, atmospheric' },
   { id: 'educational', label: 'Educational', icon: Mic2, description: 'Clear, unobtrusive ambient' },
-];
-
-const MOCK_TRACKS = [
-  { title: 'Neon Pulse', genre: 'Synthwave', bpm: 128, duration: '3:42', mood: 'energetic' },
-  { title: 'Dark Horizon', genre: 'Cinematic', bpm: 90, duration: '4:15', mood: 'suspenseful' },
-  { title: 'Rainy Thoughts', genre: 'Lo-fi', bpm: 72, duration: '2:58', mood: 'chill' },
-  { title: 'Focus Flow', genre: 'Ambient', bpm: 65, duration: '5:10', mood: 'educational' },
 ];
 
 export function AudioStudio() {
@@ -84,7 +80,16 @@ export function AudioStudio() {
         <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Suggested Tracks</h4>
         <Badge variant="outline" className="text-[10px]">AI Matched</Badge>
       </div>
-      {MOCK_TRACKS.map((track, i) => (
+      {MOCK_TRACKS.length === 0 ? (
+        <DataState
+          isEmpty
+          emptyIcon={Waves}
+          emptyTitle="No tracks yet"
+          emptyDescription="Audio generation is not connected to the backend yet."
+        >
+          {null}
+        </DataState>
+      ) : MOCK_TRACKS.map((track, i) => (
         <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:bg-muted/40 transition-colors group cursor-pointer">
           <div className="flex items-center gap-3">
             <Button variant="secondary" size="icon" className="rounded-lg h-10 w-10 shrink-0">
@@ -106,10 +111,12 @@ export function AudioStudio() {
 
   return (
     <div className="space-y-6">
-      <FeatureHeader
+      <PageHeader
         title="Audio Effects"
         description="Generate AI-powered music, sound effects, and audio landscapes."
       />
+      <MockDataBanner />
+
       <TwoPanelLayout
         leftTitle="Sonic Architecture"
         leftDescription="Select mood and generate"
