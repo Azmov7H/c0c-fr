@@ -346,3 +346,43 @@ resolves — `marketing-links.test.ts` walks header/footer/CTA hrefs.
   JS is ~0 kB; the 38.5 kB legacy polyfill is `<script nomodule>` and is never
   fetched by modern browsers. Screenshots live in `docs/screenshots/`,
   Lighthouse reports in `docs/lighthouse/`.
+
+## 15. Auth Pages & Account Recovery (T12)
+
+Canonical surface: `/signup` (real page), `/login`, `/forgot-password`,
+`/reset-password`, `/verify-email` — all inside `(auth)/`, sharing one
+`AuthFormLayout` shell (heading/card/footer). `/register` is a route handler
+returning **301 → /signup** (GET + HEAD), replacing the old page.
+
+- **One password policy**: `src/lib/password-policy.ts` (`passwordSchema`,
+  `passwordChecks`, `passwordScore`) is consumed by the BFF request schemas,
+  every form's zod schema and the strength meter — the meter cannot mark valid
+  what the API rejects. A behavioural matrix test pins it to the backend rule
+  (≥ 8, upper, lower, digit, ≤ 200).
+- **BFF routes** (`src/app/api/auth/`): `forgot-password`, `reset-password`,
+  `verify-email`, `change-password`, `logout-all`, plus `resend-verification`
+  for the banner. All Zod-validated (strict), relayed through
+  `src/lib/auth-relay.ts`, no request or response carries account-existence
+  signals. On 5xx/network the BFF attaches an `AUTH-<8hex>` support reference
+  (logged with the upstream status); 4xx carry none.
+- **Token hygiene**: reset/verify tokens are captured on first render, scrubbed
+  from the URL immediately (`router.replace`), held only in component state,
+  and exchanged only on explicit user action — auto-exchange would let link
+  scanners burn single-use tokens. Expired vs used reset tokens are a single
+  backend message by design (enumeration oracle); malformed links (< 20 chars)
+  are caught before any request.
+- **Sessions**: T02 delivers the refresh token as a backend-scoped httpOnly
+  cookie; the BFF login/register routes promote it onto the BFF-owned
+  `__Host-refresh_token` cookie (`extractRefreshToken`), restoring session
+  renewal. Reset/change-password succeed by **clearing** cookies (the backend
+  issues no replacement tokens): reset → `/login?reset=1`, change →
+  `/login?changed=1`, sign-out-everywhere → `/login?signout=1`, verification →
+  `/login?verified=1` when no session exists.
+- **Verification banner** (`(dashboard)` layout): renders only for
+  `emailVerified === false` (new backend field, `sanitizeUser`); resend is
+  click-only with a 60 s `sessionStorage` cooldown; never blocks the app.
+- **Indexing**: `robots.ts` disallows all six auth paths and the `(auth)`
+  layout emits a `noindex, nofollow` meta (the meta is what removes an
+  already-indexed URL).
+- Screenshots: `docs/screenshots/auth-{page}-{size}-{theme}.png` (5 pages ×
+  desktop/mobile × light/dark).

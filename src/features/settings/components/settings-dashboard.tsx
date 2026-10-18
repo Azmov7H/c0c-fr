@@ -18,7 +18,8 @@ import {
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DataState } from '@/components/shared/data-state';
-import { useLogout } from '@/features/auth/hooks/use-auth';
+import { useLogout, useLogoutAll } from '@/features/auth/hooks/use-auth';
+import { ChangePasswordForm } from '@/features/auth/components/change-password-form';
 
 const VALID_TABS = ['profile', 'api', 'security'] as const;
 type SettingsTab = (typeof VALID_TABS)[number];
@@ -32,6 +33,7 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
     const { data: profile, isLoading } = useProfile();
     const { mutate: updateProfile, isPending: isUpdatingProfile } = useUpdateProfile();
     const { mutate: logout } = useLogout();
+    const { mutate: logoutAll, isPending: isLoggingOutAll } = useLogoutAll();
 
     const initialTab: SettingsTab = (VALID_TABS as readonly string[]).includes(defaultTab ?? '')
         ? (defaultTab as SettingsTab)
@@ -140,22 +142,32 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
                     <TabsContent value="security" className="mt-0 space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Account Security</CardTitle>
-                                <CardDescription>Sessions, credentials and account protection.</CardDescription>
+                                <CardTitle>Change Password</CardTitle>
+                                <CardDescription>
+                                    Update your password. For security this signs you out on every device.
+                                </CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-6">
-                                <Alert>
-                                    <Info className="h-4 w-4" />
-                                    <AlertTitle>Password &amp; 2FA changes are not self-service yet</AlertTitle>
-                                    <AlertDescription>
-                                        Sessions are issued and rotated by the platform backend.
-                                        Changing your password or enabling two-factor authentication
-                                        is not part of the current release — contact support if your
-                                        credentials are at risk.
-                                    </AlertDescription>
-                                </Alert>
+                            <CardContent>
+                                <ChangePasswordForm />
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Sessions</CardTitle>
+                                <CardDescription>Sign out of this device, or everywhere at once.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex flex-wrap gap-3">
                                 <Button variant="outline" className="gap-2" onClick={() => logout()}>
                                     <LogOut className="w-4 h-4" /> Sign out of this session
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                    onClick={() => logoutAll()}
+                                    disabled={isLoggingOutAll}
+                                >
+                                    <LogOut className="w-4 h-4" /> Sign out everywhere
                                 </Button>
                             </CardContent>
                         </Card>

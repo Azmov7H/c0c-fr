@@ -1,31 +1,26 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { authService } from '../services/auth.service';
 import { useAuthStore } from '@/store/auth-store';
 import { LoginCredentials, RegisterCredentials } from '@/types';
+import { safeCallbackUrl } from '../lib/callback-url';
+import { trackEvent } from '@/lib/analytics';
 
 const DEFAULT_AUTH_REDIRECT = '/dashboard';
-
-interface RequestErrorShape {
-    message?: string;
-    code?: string;
-    status?: number;
-    response?: { data?: { error?: { message?: string } } };
-}
-
-function getErrorMessage(error: RequestErrorShape, fallback: string): string {
-    return error?.message || error?.response?.data?.error?.message || fallback;
-}
 
 function getCallbackUrl(): string | null {
     if (typeof window === 'undefined') return null;
     const params = new URLSearchParams(window.location.search);
-    const cb = params.get('callbackUrl') || params.get('from');
-    if (cb && cb.startsWith('/')) return cb;
-    return null;
+    return safeCallbackUrl(params.get('callbackUrl') || params.get('from'));
 }
 
+/**
+ * T12: form hooks no longer toast errors — the forms render mapped, inline,
+ * non-jumping errors (role="alert") instead. Success toasts stay: they confirm
+ * a completed action before the redirect lands. `mapAuthError` in
+ * ../lib/auth-error-map.ts is the one place error copy is chosen.
+ */
 export function useLogin() {
     const router = useRouter();
     const setUser = useAuthStore((state) => state.setUser);
@@ -38,10 +33,6 @@ export function useLogin() {
             router.push(getCallbackUrl() || DEFAULT_AUTH_REDIRECT);
             router.refresh();
         },
-        onError: (error: RequestErrorShape) => {
-            const message = getErrorMessage(error, 'Failed to sign in. Please check your credentials.');
-            toast.error(message);
-        },
     });
 }
 
@@ -53,13 +44,10 @@ export function useRegister() {
         mutationFn: (credentials: RegisterCredentials) => authService.register(credentials),
         onSuccess: (data) => {
             setUser(data.user);
+            trackEvent('signup_completed');
             toast.success('Account created successfully!');
             router.push(getCallbackUrl() || DEFAULT_AUTH_REDIRECT);
             router.refresh();
-        },
-        onError: (error: RequestErrorShape) => {
-            const message = getErrorMessage(error, 'Failed to create account. Please try again.');
-            toast.error(message);
         },
     });
 }
@@ -81,6 +69,76 @@ export function useLogout() {
             logout();
             const from = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '';
             router.push(`/login${from && from !== '/' ? `?from=${encodeURIComponent(from)}` : ''}`);
+            router.refresh();
+        },
+    });
+}
+
+export function useForgotPassword() {
+    return useMutation({
+        mutationFn: (email: string) => authService.forgotPassword(email),
+    });
+}
+
+export function useResetPassword() {
+    const router = useRouter();
+
+    return useMutation({
+        mutationFn: (input: { token: string; newPassword: string }) => authService.resetPassword(input),
+        onSuccess: () => {
+            // Completion event only — never the password itself (src/lib/analytics.ts).
+            trackEvent('password_reset_completed');
+            router.push('/login?reset=1');
+            router.refresh();
+        },
+    });
+}
+
+export function useVerifyEmail() {
+    return useMutation({
+        mutationFn: (token: string) => authService.verifyEmail(token),
+    });
+}
+
+export function useResendVerification() {
+    return useMutation({
+        mutationFn: () => authService.resendVerification(),
+    });
+}
+
+/**
+ * Password change ends every session, including this one (T02 bumps
+ * tokenVersion and revokes refresh tokens). The whole client cache is dropped
+ * before the redirect so no private data survives the sign-out.
+ */
+export function useChangePassword() {
+    const router = useRouter();
+    const logout = useAuthStore((state) => state.logout);
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (input: { currentPassword: string; newPassword: string }) =>
+            authService.changePassword(input),
+        onSuccess: () => {
+            queryClient.clear();
+            logout();
+            router.push('/login?changed=1');
+            router.refresh();
+        },
+    });
+}
+
+export function useLogoutAll() {
+    const router = useRouter();
+    const logout = useAuthStore((state) => state.logout);
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: () => authService.logoutAll(),
+        onSuccess: () => {
+            queryClient.clear();
+            logout();
+            router.push('/login?signout=1');
             router.refresh();
         },
     });

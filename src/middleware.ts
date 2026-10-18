@@ -37,7 +37,12 @@ const protectedPrefixes = [
     '/settings',
 ];
 
-const authPrefixes = ['/login', '/register', '/signup'];
+/**
+ * Pages a signed-in user is redirected away from. `/register` is not here:
+ * it is a 301 handler to /signup (T12), and reset/verify pages must stay
+ * reachable regardless of session state (see session-initializer.tsx).
+ */
+const authPrefixes = ['/login', '/signup', '/forgot-password'];
 
 /**
  * Both names are checked regardless of NODE_ENV: the middleware bundle can be

@@ -9,7 +9,8 @@ export interface ApiEnvelope<T> {
     error?: { code: string; message: string; details?: unknown };
 }
 
-const AUTH_ROUTE_PATTERN = /\/api\/auth\/(login|register|refresh|logout|session|ws-token)$/;
+const AUTH_ROUTE_PATTERN =
+    /\/api\/auth\/(login|register|refresh|logout|logout-all|session|ws-token|forgot-password|reset-password|verify-email|resend-verification|change-password)$/;
 
 const apiClient = axios.create({
     baseURL: config.apiUrl,
