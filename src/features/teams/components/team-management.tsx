@@ -271,6 +271,7 @@ export const TeamManagement = () => {
                                                     size="icon"
                                                     className="h-8 w-8 text-destructive hover:bg-destructive/10"
                                                     onClick={() => removeMember({ teamId: activeTeam.id, userId: row.original.user.id })}
+                                                    aria-label="Remove member from team"
                                                 >
                                                     <UserMinus className="w-4 h-4" />
                                                 </Button>

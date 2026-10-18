@@ -10,6 +10,8 @@ export interface User {
     avatar?: string;
     role: UserRole;
     plan: UserPlan;
+    /** Set by the backend (auth.model.ts). Optional: older payloads omit it. */
+    onboardingCompleted?: boolean;
     createdAt: string;
     updatedAt: string;
 }

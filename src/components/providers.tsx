@@ -2,28 +2,19 @@
 
 import * as React from 'react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { SessionInitializer } from '@/components/session-initializer'
 import { WebSocketInitializer } from '@/components/websocket-initializer'
+import { getQueryClient } from '@/lib/query-client'
 
 export function Providers({
     children,
     ...props
 }: React.ComponentProps<typeof NextThemesProvider>) {
-    const [queryClient] = React.useState(
-        () =>
-            new QueryClient({
-                defaultOptions: {
-                    queries: {
-                        staleTime: 5 * 60 * 1000,
-                        gcTime: 10 * 60 * 1000,
-                        retry: 1,
-                        refetchOnWindowFocus: false,
-                    },
-                },
-            })
-    )
+    // getQueryClient(): singleton in the browser, fresh per SSR render —
+    // see src/lib/query-client.ts for why.
+    const [queryClient] = React.useState(getQueryClient)
 
     return (
         <QueryClientProvider client={queryClient}>

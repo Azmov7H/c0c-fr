@@ -32,9 +32,9 @@ const protectedPrefixes = [
     '/planner',
     '/titles',
     '/hashtags',
+    '/seo',
     '/team',
     '/settings',
-    '/panel',
 ];
 
 const authPrefixes = ['/login', '/register'];

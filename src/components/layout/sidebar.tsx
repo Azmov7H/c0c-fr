@@ -23,74 +23,18 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-import {
-  LayoutDashboard,
-  Lightbulb,
-  FileText,
-  CalendarDays,
-  Type,
-  Hash,
-  Image,
-  Folder,
-  Music,
-  LayoutTemplate,
-  BarChart3,
-  Users,
-  Settings,
-} from "lucide-react"
-
 import Logo from "../logo"
 import { ThemeToggle } from "../theme-toggle"
 import { UserButton } from "./user-button"
 import { useAuthStore } from "@/store/auth-store"
-
-const navGroups = [
-  {
-    label: "Overview",
-    items: [
-      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-    ],
-  },
-  {
-    label: "Content Engine",
-    items: [
-      { title: "Ideas & Trends", url: "/trends", icon: Lightbulb },
-      { title: "Script Generator", url: "/scripts", icon: FileText },
-      { title: "Content Planner", url: "/planner", icon: CalendarDays },
-      { title: "Title Generator", url: "/titles", icon: Type },
-      { title: "Hashtag Generator", url: "/hashtags", icon: Hash },
-    ],
-  },
-  {
-    label: "Studio Tools",
-    items: [
-      { title: "Thumbnail Studio", url: "/thumbnails", icon: Image },
-      { title: "Media Library", url: "/media", icon: Folder },
-      { title: "Audio Effects", url: "/audio", icon: Music },
-      { title: "Templates", url: "/templates", icon: LayoutTemplate },
-    ],
-  },
-  {
-    label: "Insights",
-    items: [
-      { title: "Analytics", url: "/analytics", icon: BarChart3 },
-    ],
-  },
-  {
-    label: "Management",
-    items: [
-      { title: "Team", url: "/team", icon: Users },
-      { title: "Settings", url: "/settings", icon: Settings },
-    ],
-  },
-]
+import { NAV_GROUPS, getActiveNavUrl, type NavItem as NavConfigItem } from "@/lib/navigation"
 
 function NavItem({
   item,
   active,
   collapsed,
 }: {
-  item: { title: string; url: string; icon: React.ElementType }
+  item: NavConfigItem
   active: boolean
   collapsed: boolean
 }) {
@@ -99,7 +43,7 @@ function NavItem({
       asChild
       isActive={active}
       className="
-        h-9 rounded-lg transition-all duration-150
+        h-9 max-md:h-11 rounded-lg transition-all duration-150
         text-muted-foreground
         hover:bg-muted/60 hover:text-foreground
         data-[active=true]:bg-primary/10 data-[active=true]:text-primary
@@ -107,7 +51,11 @@ function NavItem({
         data-[active=true]:border-primary data-[active=true]:pl-[calc(0.75rem-2px)]
       "
     >
-      <Link href={item.url} className="flex items-center gap-3 px-3">
+      <Link
+        href={item.url}
+        aria-current={active ? "page" : undefined}
+        className="flex items-center gap-3 px-3"
+      >
         <item.icon size={17} className="shrink-0" />
         <span className="text-sm truncate">{item.title}</span>
       </Link>
@@ -133,6 +81,7 @@ export function AppSidebar() {
   const pathname = usePathname()
   const { state } = useSidebar()
   const collapsed = state === "collapsed"
+  const activeUrl = getActiveNavUrl(pathname)
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border/60">
@@ -144,30 +93,32 @@ export function AppSidebar() {
 
       {/* Navigation */}
       <SidebarContent className="px-2 py-3 gap-0">
-        {navGroups.map((group, groupIdx) => (
-          <div key={group.label}>
-            {groupIdx > 0 && (
-              <Separator className="my-2 bg-border/50" />
-            )}
-            <SidebarGroup className="py-0">
-              {!collapsed && (
-                <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-3 py-2 h-auto">
-                  {group.label}
-                </SidebarGroupLabel>
+        <nav aria-label="Primary" className="flex flex-col">
+          {NAV_GROUPS.map((group, groupIdx) => (
+            <div key={group.label}>
+              {groupIdx > 0 && (
+                <Separator className="my-2 bg-border/50" />
               )}
-              <SidebarMenu className="gap-0.5">
-                {group.items.map((item) => {
-                  const active = pathname === item.url || pathname.startsWith(item.url + "/")
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <NavItem item={item} active={active} collapsed={collapsed} />
-                    </SidebarMenuItem>
-                  )
-                })}
-              </SidebarMenu>
-            </SidebarGroup>
-          </div>
-        ))}
+              <SidebarGroup className="py-0">
+                {!collapsed && (
+                  <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-3 py-2 h-auto">
+                    {group.label}
+                  </SidebarGroupLabel>
+                )}
+                <SidebarMenu className="gap-0.5">
+                  {group.items.map((item) => {
+                    const active = item.url === activeUrl
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <NavItem item={item} active={active} collapsed={collapsed} />
+                      </SidebarMenuItem>
+                    )
+                  })}
+                </SidebarMenu>
+              </SidebarGroup>
+            </div>
+          ))}
+        </nav>
       </SidebarContent>
 
       {/* Footer */}

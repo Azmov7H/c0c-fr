@@ -92,7 +92,7 @@ export function AudioStudio() {
       ) : MOCK_TRACKS.map((track, i) => (
         <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:bg-muted/40 transition-colors group cursor-pointer">
           <div className="flex items-center gap-3">
-            <Button variant="secondary" size="icon" className="rounded-lg h-10 w-10 shrink-0">
+            <Button variant="secondary" size="icon" className="rounded-lg h-10 w-10 shrink-0" aria-label={`Play ${track.title}`}>
               <Play className="w-4 h-4 translate-x-0.5 fill-current" />
             </Button>
             <div>

@@ -217,6 +217,8 @@ export function TrendsContent() {
               size="icon"
               className={`h-9 w-9 rounded-none ${view === "grid" ? "bg-muted" : ""}`}
               onClick={() => setView("grid")}
+              aria-label="Grid view"
+              aria-pressed={view === "grid"}
             >
               <LayoutGrid className="w-4 h-4" />
             </Button>
@@ -225,6 +227,8 @@ export function TrendsContent() {
               size="icon"
               className={`h-9 w-9 rounded-none ${view === "list" ? "bg-muted" : ""}`}
               onClick={() => setView("list")}
+              aria-label="List view"
+              aria-pressed={view === "list"}
             >
               <List className="w-4 h-4" />
             </Button>

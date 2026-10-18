@@ -1,11 +1,12 @@
 "use client"
 
+import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useCallback, useSyncExternalStore } from "react"
 
 import {
   Plus, Search, Sun, Moon, Monitor,
-  FileText, Upload, Zap, ChevronRight,
+  ChevronRight,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -31,31 +32,14 @@ import { CommandMenu } from "./command-menu"
 import { UserButton } from "./user-button"
 import { NotificationBell } from "@/features/notifications/components/notification-bell"
 import { useTheme } from "next-themes"
-
-// Map paths → breadcrumb labels
-const pathLabels: Record<string, string> = {
-  dashboard: "Dashboard",
-  projects: "Projects",
-  trends: "Ideas & Trends",
-  scripts: "Script Generator",
-  planner: "Content Planner",
-  titles: "Title Generator",
-  hashtags: "Hashtag Generator",
-  media: "Media Library",
-  audio: "Audio Effects",
-  thumbnails: "Thumbnail Studio",
-  templates: "Templates",
-  analytics: "Analytics",
-  team: "Team",
-  settings: "Settings",
-  new: "New",
-}
+import { QUICK_ACTIONS, ROUTE_LABELS } from "@/lib/navigation"
 
 function useBreadcrumbs() {
   const pathname = usePathname()
   const segments = pathname.split("/").filter(Boolean)
+
   return segments.map((seg, i) => ({
-    label: pathLabels[seg] ?? seg.charAt(0).toUpperCase() + seg.slice(1),
+    label: ROUTE_LABELS[seg] ?? seg.charAt(0).toUpperCase() + seg.slice(1),
     href: "/" + segments.slice(0, i + 1).join("/"),
     isLast: i === segments.length - 1,
   }))
@@ -82,7 +66,7 @@ function ThemeCycler() {
       <Button
         variant="ghost"
         size="icon"
-        className="h-9 w-9 text-muted-foreground hover:text-foreground transition-colors"
+        className="h-9 w-9 max-md:h-11 max-md:w-11 text-muted-foreground hover:text-foreground transition-colors"
         aria-label="Toggle theme"
       >
         <Monitor className="w-4 h-4" />
@@ -94,7 +78,7 @@ function ThemeCycler() {
     <Button
       variant="ghost"
       size="icon"
-      className="h-9 w-9 text-muted-foreground hover:text-foreground transition-colors"
+      className="h-9 w-9 max-md:h-11 max-md:w-11 text-muted-foreground hover:text-foreground transition-colors"
       onClick={() => setTheme(next)}
       aria-label="Toggle theme"
     >
@@ -107,12 +91,15 @@ export function Header() {
   const router = useRouter()
   const breadcrumbs = useBreadcrumbs()
 
+  // The palette owns its open state; a synthetic ⌘K event is the shared
+  // open path for both the mobile button and the desktop search field.
   const openCmd = useCallback(() => {
-    // dispatch a keyboard event to trigger CommandMenu
     document.dispatchEvent(
       new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true })
     )
   }, [])
+
+  const newProject = QUICK_ACTIONS[0]
 
   return (
     <>
@@ -129,7 +116,7 @@ export function Header() {
       >
         {/* Left: Trigger + Breadcrumbs */}
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <SidebarTrigger className="shrink-0 text-muted-foreground hover:text-foreground transition-colors" />
+          <SidebarTrigger className="shrink-0 max-md:size-11 text-muted-foreground hover:text-foreground transition-colors" />
 
           {/* Breadcrumbs — hidden on small screens */}
           {breadcrumbs.length > 0 && (
@@ -165,6 +152,7 @@ export function Header() {
         <Button
           variant="outline"
           onClick={openCmd}
+          aria-label="Search workspace"
           className="
             hidden md:flex h-9 w-full max-w-xs
             items-center justify-between gap-2
@@ -185,46 +173,65 @@ export function Header() {
         {/* Right: Actions */}
         <div className="flex items-center gap-1.5 shrink-0">
 
-          {/* Create CTA */}
+          {/* Mobile-only palette access — ⌘K is not a phone gesture. */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={openCmd}
+            aria-label="Search workspace"
+            className="md:hidden size-11 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Search className="w-4 h-4" />
+          </Button>
+
+          {/* Primary action — always visible, per the brief. */}
+          <Button
+            asChild
+            size="sm"
+            className="
+              h-9 max-md:h-11 max-md:px-3 px-3 gap-1.5 rounded-lg
+              bg-primary text-primary-foreground text-xs font-semibold
+              hover:bg-primary/90 active:scale-[0.97]
+              transition-all shadow-sm hover:shadow-glow
+            "
+          >
+            <Link href={newProject.url} aria-label={newProject.title}>
+              <Plus className="w-3.5 h-3.5" />
+              <span className="max-md:hidden">{newProject.title}</span>
+            </Link>
+          </Button>
+
+          {/* Create dropdown — the remaining quick actions. */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
+                variant="outline"
                 size="sm"
+                aria-label="Create"
                 className="
-                  hidden sm:flex h-8 px-3 gap-1.5 rounded-lg
-                  bg-primary text-primary-foreground text-xs font-semibold
-                  hover:bg-primary/90 active:scale-[0.97]
-                  transition-all shadow-sm hover:shadow-glow
+                  h-9 max-md:h-11 px-3 gap-1.5 rounded-lg
+                  text-xs font-semibold
                 "
               >
-                <Plus className="w-3.5 h-3.5" />
                 Create
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel className="text-xs text-muted-foreground">Quick Create</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="gap-2 cursor-pointer"
-                onClick={() => router.push("/scripts")}
-              >
-                <FileText className="w-4 h-4 text-primary" />
-                New Script
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="gap-2 cursor-pointer"
-                onClick={() => router.push("/projects/new")}
-              >
-                <Zap className="w-4 h-4 text-warning" />
-                New Project
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="gap-2 cursor-pointer"
-                onClick={() => router.push("/media")}
-              >
-                <Upload className="w-4 h-4 text-success" />
-                Upload Media
-              </DropdownMenuItem>
+              {QUICK_ACTIONS.map((action) => (
+                <DropdownMenuItem
+                  key={action.id}
+                  className="gap-2 cursor-pointer"
+                  onClick={() => router.push(action.url)}
+                >
+                  <action.icon className="w-4 h-4 text-primary" />
+                  {action.title}
+                  <kbd className="ml-auto text-[10px] font-mono text-muted-foreground tracking-wider">
+                    G&thinsp;{action.shortcutKey.toUpperCase()}
+                  </kbd>
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
 
