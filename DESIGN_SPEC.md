@@ -202,7 +202,7 @@ Built using CSS variables required by Tailwind mapping to the shadcn setup.
 **Light Mode Palette (`:root`):**
 - **Background**: `#FAFAFA` (zinc-50) – slightly off-white to reduce eye strain.
 - **Card**: `#FFFFFF` (white) – clean contrast against background.
-- **Primary**: `#6366F1` (indigo-500) – energetic, creative SaaS accent.
+- **Primary**: `#5D61EF` (was `#6366F1`; darkened 2% lightness in T08 to reach WCAG AA on background, 4.53:1).
 - **Secondary**: `#F4F4F5` (zinc-100) – low-contrast backgrounds.
 - **Accent**: `#10B981` (emerald-500) – for positive actions/growth metrics.
 - **Muted**: `#F4F4F5` (zinc-100) / Text: `#71717A` (zinc-500).

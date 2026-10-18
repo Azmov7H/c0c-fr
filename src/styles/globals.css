@@ -113,7 +113,7 @@
   --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(240, 10%, 4%);
 
-  --primary: hsl(238, 82%, 67%); /* #6366F1 */
+  --primary: hsl(238, 82%, 65%); /* was 67% / #6366F1 — darkened 2% for WCAG AA, see T08 */
   --primary-foreground: hsl(0, 0%, 100%);
 
   --secondary: hsl(240, 5%, 96%); /* #F4F4F5 */
@@ -130,7 +130,7 @@
 
   --border: hsl(240, 6%, 90%); /* #E4E4E7 */
   --input: hsl(240, 6%, 90%);
-  --ring: hsl(238, 82%, 67%);
+  --ring: hsl(238, 82%, 65%);
 
   /* State — see the note in @theme inline. Values are the raw classes these
      replace (emerald-500, amber-500, blue-500, rose-500), promoted to tokens. */
@@ -155,12 +155,12 @@
   /* Sidebar - solid, no glass */
   --sidebar-background: hsl(0, 0%, 100%);
   --sidebar-foreground: hsl(240, 10%, 4%);
-  --sidebar-primary: hsl(238, 82%, 67%);
+  --sidebar-primary: hsl(238, 82%, 65%);
   --sidebar-primary-foreground: hsl(0, 0%, 100%);
   --sidebar-accent: hsl(240, 5%, 96%);
   --sidebar-accent-foreground: hsl(240, 10%, 4%);
   --sidebar-border: hsl(240, 6%, 90%);
-  --sidebar-ring: hsl(238, 82%, 67%);
+  --sidebar-ring: hsl(238, 82%, 65%);
 }
 
 .dark {
