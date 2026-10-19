@@ -16,12 +16,15 @@ import { verifySessionToken } from '@/lib/auth-verify';
  *   presence — pre-T09 behaviour (cookie presence only); rollback escape hatch
  *   off      — no auth gate at all (last resort)
  *
- * Protected prefixes are an explicit list (FE-04); /onboarding joins when T13
- * lands.
+ * Protected prefixes are an explicit list (FE-04); /onboarding joined in T13 —
+ * a signed-out visitor gets bounced to login with a callback, while the
+ * completed/incomplete routing itself is client-side (the flag lives in the
+ * session payload, and the backend's 428 remains the real boundary).
  */
 
 const protectedPrefixes = [
     '/dashboard',
+    '/onboarding',
     '/projects',
     '/trends',
     '/scripts',

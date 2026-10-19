@@ -99,6 +99,9 @@ export const NAV_URLS: string[] = NAV_ITEMS.map((item) => item.url);
 export const ROUTE_LABELS: Record<string, string> = {
     ...Object.fromEntries(NAV_ITEMS.map((item) => [item.url.split('/').pop()!, item.title])),
     new: 'New',
+    // T13: focused flow, no header/breadcrumb in the shell, but every route
+    // segment still carries a label (navigation.test.ts enforces it).
+    onboarding: 'Get started',
 };
 
 /**

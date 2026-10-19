@@ -12,6 +12,8 @@ export interface User {
     plan: UserPlan;
     /** Set by the backend (auth.model.ts). Optional: older payloads omit it. */
     onboardingCompleted?: boolean;
+    /** T13: resumable onboarding position, exposed alongside the flag. */
+    onboardingStep?: number;
     /**
      * T12: drives the dashboard verification banner. Exposed by the backend's
      * sanitizeUser since T12; optional because sessions minted before the

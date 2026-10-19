@@ -1,12 +1,15 @@
 "use client"
 
 import React from "react"
+import { usePathname } from "next/navigation"
 import { AppSidebar } from "./sidebar"
 import { Header } from "./header"
 import { ConnectionBanner } from "./connection-banner"
+import { EmailVerificationBanner } from "@/features/auth/components/email-verification-banner"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuthStore } from "@/store/auth-store"
+import { ONBOARDING_PATH } from "@/lib/onboarding-gate"
 
 /**
  * Rendered while the session is still resolving, shaped like the real shell
@@ -65,6 +68,32 @@ function ShellSkeleton() {
 }
 
 /**
+ * Focused flow chrome for /onboarding (T13): the wizard is a task, not
+ * navigation, so the sidebar and the verification nag are suppressed. It stays
+ * inside the shell so the session gate, providers and skip link are unchanged.
+ */
+function OnboardingChrome({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="flex min-h-screen w-full flex-col bg-background">
+            <a
+                href="#main-content"
+                className="
+                    sr-only focus:not-sr-only
+                    focus:fixed focus:left-4 focus:top-4 focus:z-50
+                    focus:rounded-md focus:bg-background focus:px-3 focus:py-2
+                    focus:text-sm focus:font-medium focus:ring-2 focus:ring-ring
+                "
+            >
+                Skip to content
+            </a>
+            <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto">
+                <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8">{children}</div>
+            </main>
+        </div>
+    )
+}
+
+/**
  * Client gate around the whole authenticated shell (T10):
  * the app chrome only paints once the session has resolved AND a user is
  * present. Without this, a signed-out visitor watched the full sidebar and
@@ -74,9 +103,14 @@ function ShellSkeleton() {
 export function AppShell({ children }: { children: React.ReactNode }) {
     const isLoading = useAuthStore((s) => s.isLoading)
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+    const pathname = usePathname()
 
     if (isLoading || !isAuthenticated) {
         return <ShellSkeleton />
+    }
+
+    if (pathname === ONBOARDING_PATH) {
+        return <OnboardingChrome>{children}</OnboardingChrome>
     }
 
     return (
@@ -116,6 +150,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     {/* Page Content */}
                     <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto">
                         <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-2 duration-500 motion-reduce:animate-none">
+                            {/* Moved here from the dashboard layout in T13 so the
+                                focused onboarding flow can suppress it. */}
+                            <EmailVerificationBanner />
                             {children}
                         </div>
                     </main>

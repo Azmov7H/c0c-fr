@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useProfile, useUpdateProfile } from '../hooks/use-settings';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,8 @@ import {
     Shield,
     RefreshCw,
     LogOut,
-    Info
+    Info,
+    Compass
 } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -30,6 +32,7 @@ interface SettingsDashboardProps {
 }
 
 export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
+    const router = useRouter();
     const { data: profile, isLoading } = useProfile();
     const { mutate: updateProfile, isPending: isUpdatingProfile } = useUpdateProfile();
     const { mutate: logout } = useLogout();
@@ -135,6 +138,28 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
                                         {isUpdatingProfile ? <RefreshCw className="animate-spin w-4 h-4 mr-2" /> : 'Save Changes'}
                                     </Button>
                                 </form>
+                            </CardContent>
+                        </Card>
+
+                        {/* T13: reopen the wizard without resetting completion or
+                            seeding a second project (?edit=1). */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Interests &amp; personalisation</CardTitle>
+                                <CardDescription>
+                                    The topics and platforms behind your dashboard, trending feed and
+                                    suggestions.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="gap-2"
+                                    onClick={() => router.push('/onboarding?edit=1')}
+                                >
+                                    <Compass className="w-4 h-4" /> Update your interests
+                                </Button>
                             </CardContent>
                         </Card>
                     </TabsContent>
