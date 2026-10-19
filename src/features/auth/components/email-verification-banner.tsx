@@ -42,7 +42,9 @@ export function EmailVerificationBanner() {
 
     React.useEffect(() => {
         if (cooldownUntil <= Date.now()) return;
-        setNow(Date.now());
+        // The interval alone drives the countdown; `onSuccess` already set
+        // `now` when the cooldown started, so there is no setState here
+        // (react-hooks/set-state-in-effect).
         const timer = setInterval(() => setNow(Date.now()), 1000);
         return () => clearInterval(timer);
     }, [cooldownUntil]);

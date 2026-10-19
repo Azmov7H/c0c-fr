@@ -386,3 +386,76 @@ returning **301 → /signup** (GET + HEAD), replacing the old page.
   already-indexed URL).
 - Screenshots: `docs/screenshots/auth-{page}-{size}-{theme}.png` (5 pages ×
   desktop/mobile × light/dark).
+
+## 16. Onboarding Flow (T13)
+
+**Route and shell.** `/onboarding` lives inside the existing `(dashboard)` route group
+but `AppShell` swaps the sidebar/topbar for a minimal wordmark-only chrome, so the wizard
+is a focused flow rather than navigation. The email-verification banner now mounts in
+`AppShell` so it survives this swap and still never appears inside the wizard.
+
+**Gate.** The optimistic client gate lives in `src/lib/onboarding-gate.ts` as pure
+functions, fed by the session payload (`onboardingCompleted`, added to `sanitizeUser`
+backend-side for this card):
+
+| Session | Route | Result |
+|---|---|---|
+| anonymous | any protected route | `/login?callbackUrl=…` (middleware) |
+| incomplete | any protected route except `/onboarding` | `/onboarding` |
+| incomplete | `/onboarding` | stays (the no-loop rule) |
+| complete | `/onboarding` | `/dashboard` |
+| complete | `/onboarding?edit=1` | stays (re-onboarding) |
+| authenticated | `/login`, `/signup`, `/forgot-password` | post-auth target: `/onboarding` or `/dashboard` |
+
+`/onboarding` is in the middleware's protected list. The gate is UI affordance only; the
+backend's 428 `ONBOARDING_INCOMPLETE` on project creation remains the real boundary.
+
+**Wizard.** Six steps from the API taxonomy, one question per screen:
+niche → subtopics → platforms → experience → goals → review. Position is shown three
+ways (words, bar, numeric) and the final stop is labelled **Finish**, never "Step 6".
+The progress list marks the active stop with `aria-current="step"`. Selection controls
+are real `radio`/`checkbox` inputs with `aria-checked`; all interactive targets are at
+least 44 px; animations are `motion-safe:` only.
+
+**State model.**
+- The draft is *derived*: `draftFromState(serverState, options)` overlaid with per-field
+  user edits. No initialise-once effect, so React's compiler rules stay satisfied and an
+  optimistic save shows through immediately.
+- Each advance `PUT`s exactly one step. A failed save rolls the cache back and turns the
+  advance button into "Try again"; typed/chosen answers never disappear.
+- An advance whose input matches the server's current answer performs no write. T04's
+  `saveStep` rewrites `onboardingStep` on every call, so skipping no-op writes keeps a
+  Back/Continue round-trip from moving the resume point backwards.
+- Resume is `min(max(onboardingStep, 0), 5)` from the server; reloading returns to the
+  last completed step.
+
+**Niche on resume (T04 model gap).** There is no `niche` column. The state endpoint
+returns `niche` as `interests[0].topic`, and saving subtopics prepends them, leaving the
+old niche slug as an extra interest. `draftFromState` keeps only topics that appear as
+subtopics of some niche and infers the niche by best match. In this UI the inference is
+exact because only the selected niche's subtopics are offered; changing the niche clears
+the subtopic overlay so stale answers cannot be submitted.
+
+**Skip.** Available from step 1, rendered as a secondary ghost action, behind a dialog
+that states the consequence. It calls `POST /skip`; the backend applies generic defaults,
+marks completion and step 6, and the dashboard works immediately.
+
+**Completion.** `POST /complete` seeds one draft project (idempotent: it seeds only when
+the user has zero projects). The UI shows a single confirmation line and a link into the
+seeded project, updates the auth store, clears the onboarding query cache, invalidates
+projects/dashboard, and redirects to `/dashboard` after 2.5 s.
+
+**Re-onboarding.** Settings → "Interests & personalisation" → `/onboarding?edit=1`.
+The wizard starts at step 0 with existing answers, saves edited steps through the same
+PUTs, and "Save and return" navigates without calling `complete` — completion is not
+reset and a second seed is impossible.
+
+**Taxonomy.** `GET /users/onboarding/options` is the single source of truth
+(`staleTime: Infinity`). Loading renders a skeleton, failure renders a retryable error —
+never an empty picker. A search field appears only when the visible list exceeds 15
+items. No topic strings exist in the feature source, including test fixtures (synthetic
+names by design; asserted by grep in the evidence run).
+
+**Screenshots.** `docs/screenshots/onboarding-{niche|subtopics|platforms|experience|goals|review}-{desktop|mobile}-{light|dark}.png`,
+plus `onboarding-edit-desktop-light.png` and `onboarding-complete-desktop-light.png`
+(26 files).

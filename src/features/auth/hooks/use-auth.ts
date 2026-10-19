@@ -3,16 +3,25 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { authService } from '../services/auth.service';
 import { useAuthStore } from '@/store/auth-store';
-import { LoginCredentials, RegisterCredentials } from '@/types';
+import { LoginCredentials, RegisterCredentials, User } from '@/types';
 import { safeCallbackUrl } from '../lib/callback-url';
+import { defaultPostAuthTarget } from '@/lib/onboarding-gate';
 import { trackEvent } from '@/lib/analytics';
-
-const DEFAULT_AUTH_REDIRECT = '/dashboard';
 
 function getCallbackUrl(): string | null {
     if (typeof window === 'undefined') return null;
     const params = new URLSearchParams(window.location.search);
     return safeCallbackUrl(params.get('callbackUrl') || params.get('from'));
+}
+
+/**
+ * T13: a freshly authed user who has not onboarded goes to the wizard, not the
+ * dashboard — the backend 428s project creation until then. The onboarding rule
+ * outranks a callback URL for the same reason.
+ */
+function postAuthTarget(user: User): string {
+    if (user.onboardingCompleted === false) return defaultPostAuthTarget(false);
+    return getCallbackUrl() ?? defaultPostAuthTarget(true);
 }
 
 /**
@@ -30,7 +39,7 @@ export function useLogin() {
         onSuccess: (data) => {
             setUser(data.user);
             toast.success('Welcome back!');
-            router.push(getCallbackUrl() || DEFAULT_AUTH_REDIRECT);
+            router.push(postAuthTarget(data.user));
             router.refresh();
         },
     });
@@ -46,7 +55,7 @@ export function useRegister() {
             setUser(data.user);
             trackEvent('signup_completed');
             toast.success('Account created successfully!');
-            router.push(getCallbackUrl() || DEFAULT_AUTH_REDIRECT);
+            router.push(postAuthTarget(data.user));
             router.refresh();
         },
     });

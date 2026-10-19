@@ -85,6 +85,14 @@ describe('middleware session verification (AC: verify, do not merely check)', ()
         expect(loc).toContain('callbackUrl=%2Fdashboard%2Fprojects');
     });
 
+    it('T13: /onboarding is protected for a signed-out visitor', async () => {
+        const res = await middleware(makeRequest('/onboarding'));
+        expect(res.status).toBe(307);
+        const loc = locationOf(res);
+        expect(loc).toContain('/login');
+        expect(loc).toContain('callbackUrl=%2Fonboarding');
+    });
+
     it('valid token → request passes through', async () => {
         const res = await middleware(
             makeRequest('/dashboard', { cookies: { [SESSION_COOKIE]: await signToken() } })

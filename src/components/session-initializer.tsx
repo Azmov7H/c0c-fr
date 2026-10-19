@@ -4,24 +4,20 @@ import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { authService } from '@/features/auth/services/auth.service';
 import { safeCallbackUrl } from '@/features/auth/lib/callback-url';
+import { defaultPostAuthTarget, onboardingRedirect } from '@/lib/onboarding-gate';
 import { useAuthStore } from '@/store/auth-store';
 
 /**
  * Pages a signed-out visitor may view. Reset and verify flows live here so an
  * unauthenticated user opening an email link is never bounced to /login
  * (T12); /register is absent because it 301s server-side before hydration.
+ * /onboarding is deliberately absent: an unauthenticated visitor is sent to
+ * login with a callback (T13 AC).
  */
 const AUTH_FLOW_PAGES = ['/login', '/signup', '/forgot-password', '/reset-password', '/verify-email'];
 
 /** Of those, pages where a signed-in user has no business being. */
 const REDIRECT_WHEN_AUTHENTICATED = ['/login', '/signup', '/forgot-password'];
-
-/**
- * T13 lands the onboarding flow (route + backend flag). Until then this seam
- * stays inert: redirecting to a route that does not exist would 404 every
- * freshly registered user, which is worse than skipping onboarding.
- */
-const ONBOARDING_ROUTE_READY = false;
 
 export function SessionInitializer() {
     const { setUser, setLoading } = useAuthStore();
@@ -40,14 +36,17 @@ export function SessionInitializer() {
                 if (session.authenticated && session.user) {
                     setUser(session.user);
 
-                    // T13 seam: route to /onboarding when the backend says the
-                    // flow is incomplete (see ONBOARDING_ROUTE_READY above).
-                    if (
-                        ONBOARDING_ROUTE_READY &&
-                        session.user.onboardingCompleted === false &&
-                        pathname !== '/onboarding'
-                    ) {
-                        router.replace('/onboarding');
+                    // T13 gate: incomplete users are routed to the wizard,
+                    // finished users away from it. The helper returns null on
+                    // /onboarding itself, which is what prevents a loop.
+                    const gate = onboardingRedirect({
+                        pathname,
+                        search: window.location.search,
+                        authenticated: true,
+                        onboardingCompleted: session.user.onboardingCompleted,
+                    });
+                    if (gate) {
+                        router.replace(gate);
                         return;
                     }
 
@@ -57,7 +56,9 @@ export function SessionInitializer() {
                         const params = new URLSearchParams(window.location.search);
                         const callbackUrl =
                             safeCallbackUrl(params.get('callbackUrl') || params.get('from'));
-                        router.replace(callbackUrl || '/dashboard');
+                        router.replace(
+                            callbackUrl ?? defaultPostAuthTarget(session.user.onboardingCompleted)
+                        );
                     }
                 } else {
                     setUser(null);
