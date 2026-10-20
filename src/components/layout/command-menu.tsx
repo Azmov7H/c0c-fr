@@ -21,6 +21,14 @@ import { useTheme } from "next-themes"
 
 const G_PREFIX_WINDOW_MS = 1200
 
+/**
+ * The palette returns to the list after creation (T15 §3), unlike the header
+ * and dashboard CTAs, which go straight into the new workspace.
+ */
+function commandUrl(action: { id: string; url: string }): string {
+  return action.id === 'new-project' ? '/projects/new?returnTo=projects' : action.url
+}
+
 function isTypingTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false
   return !!target.closest('input, textarea, select, [contenteditable="true"]')
@@ -73,7 +81,7 @@ export function CommandMenu() {
       lastG = 0
       if (action) {
         e.preventDefault()
-        router.push(action.url)
+        router.push(commandUrl(action))
       }
     }
     document.addEventListener("keydown", handler)
@@ -131,7 +139,7 @@ export function CommandMenu() {
                 key={action.id}
                 value={`action-${action.id}`}
                 keywords={[action.title]}
-                onSelect={() => runCommand(() => router.push(action.url))}
+                onSelect={() => runCommand(() => router.push(commandUrl(action)))}
                 className="flex items-center gap-3 cursor-pointer"
               >
                 <action.icon className="w-4 h-4 text-muted-foreground" />
