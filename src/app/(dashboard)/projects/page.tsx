@@ -1,5 +1,8 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
+
 import { ProjectsView } from "@/features/projects/components/projects-view"
+import { ProjectGridSkeleton } from "@/features/projects/components/projects-skeletons"
 
 export const metadata: Metadata = {
   title: "Projects",
@@ -7,5 +10,9 @@ export const metadata: Metadata = {
 }
 
 export default function ProjectsPage() {
-  return <ProjectsView />
+  return (
+    <Suspense fallback={<ProjectGridSkeleton />}>
+      <ProjectsView />
+    </Suspense>
+  )
 }

@@ -1,165 +1,246 @@
-"use client"
+'use client';
 
-import type { Project } from "@/types"
-import { useState, useMemo } from "react"
-import Link from "next/link"
-import { useDebounce } from "@/hooks/use-debounce"
+import { useCallback, useMemo } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Archive, FolderOpen, Plus, SearchX, X } from 'lucide-react';
 
-import { Search, Plus, SlidersHorizontal } from "lucide-react"
+import { Button } from '@/components/ui/button';
+import { DataState } from '@/components/shared/data-state';
+import { PageHeader } from '@/components/shared/page-header';
+import { cn } from '@/lib/utils';
+import type { Platform, ProjectStatus } from '@/types';
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useProjectView } from '../hooks/use-project-view';
+import { useProjects } from '../hooks/use-projects';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+    EMPTY_FILTERS,
+    filtersToQuery,
+    hasProjectFilters,
+    parseProjectFilters,
+    serializeProjectFilters,
+    type ProjectFilters,
+} from '../lib/project-filters';
+import { PLATFORM_LABEL, STATUS_LABEL } from '../lib/project-schemas';
+import { ProjectCard } from './project-card';
+import { ProjectsSkeleton } from './projects-skeletons';
+import { ProjectsTable } from './projects-table';
+import { ProjectsToolbar } from './projects-toolbar';
 
-import { useRouter } from "next/navigation"
-import { useProjects } from "@/features/projects/hooks/use-projects"
-import { ProjectCard } from "@/components/dashboard/project/ProjectCard"
-import { PageHeader } from "@/components/shared/page-header"
-import { DataState } from "@/components/shared/data-state"
-
-const STATUS_OPTIONS = ["All", "draft", "processing", "completed", "error"]
-const PLATFORM_OPTIONS = ["All", "youtube", "tiktok", "instagram", "shorts", "reels"]
+function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
+    return (
+        <span className="inline-flex h-8 items-center gap-1 rounded-full border border-border/60 bg-muted/40 pl-3 pr-1 text-xs font-medium">
+            {label}
+            <button
+                type="button"
+                aria-label={`Remove filter ${label}`}
+                className="flex size-6 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                onClick={onRemove}
+            >
+                <X className="size-3" aria-hidden="true" />
+            </button>
+        </span>
+    );
+}
 
 export function ProjectsView() {
-  const [search, setSearch] = useState("")
-  const [status, setStatus] = useState("All")
-  const [platform, setPlatform] = useState("All")
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const router = useRouter();
+    const [view, setView] = useProjectView();
 
-  const debouncedSearch = useDebounce(search, 300)
+    const rawQuery = searchParams.toString();
+    const filters = useMemo(
+        () => parseProjectFilters(new URLSearchParams(rawQuery)),
+        [rawQuery]
+    );
 
-  const router = useRouter()
-  const { data, isLoading, error } = useProjects()
+    const updateFilters = useCallback(
+        (next: ProjectFilters) => {
+            const query = serializeProjectFilters(next);
+            router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+        },
+        [pathname, router]
+    );
 
-  const projects = useMemo(() => {
-    const all = data?.data ?? []
-    return all.filter((p: Project) => {
-      const matchSearch = !debouncedSearch ||
-        p.title?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        p.idea?.toLowerCase().includes(debouncedSearch.toLowerCase())
-      const matchStatus = status === "All" || p.status === status
-      const matchPlatform = platform === "All" || p.platform === platform
-      return matchSearch && matchStatus && matchPlatform
-    })
-  }, [data, debouncedSearch, status, platform])
+    const clearFilters = useCallback(() => {
+        updateFilters({ ...EMPTY_FILTERS });
+    }, [updateFilters]);
 
-  const hasFilters = search || status !== "All" || platform !== "All"
+    const apiQuery = useMemo(() => filtersToQuery(filters), [filters]);
 
-  return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    const { data, isLoading, isError, error, refetch } = useProjects(apiQuery);
 
-      <PageHeader
-        title="Projects"
-        description="Manage your content workflows."
-        actions={
-          <Link href="/projects/new">
-            <Button className="h-9 px-4 rounded-xl shadow-premium hover:shadow-glow transition-all">
-              <Plus className="w-4 h-4 mr-2" />
-              New Project
-            </Button>
-          </Link>
-        }
-      />
+    const projects = data?.data ?? [];
+    const meta = data?.meta;
+    const total = meta?.total ?? 0;
+    const hasFilters = hasProjectFilters(filters);
+    const isArchive = filters.statuses.length === 1 && filters.statuses[0] === 'archived';
 
-      {/* Search + Filters */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            id="projects-search"
-            placeholder="Search projects..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-9 rounded-xl bg-muted/30 border-border/60 focus-visible:ring-1"
-          />
-        </div>
+    const removeStatus = (status: ProjectStatus) =>
+        updateFilters({
+            ...filters,
+            statuses: filters.statuses.filter((value) => value !== status),
+            page: 1,
+        });
 
-        <div className="flex items-center gap-2">
-          <SlidersHorizontal className="w-4 h-4 text-muted-foreground shrink-0" />
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="h-9 w-36 rounded-xl border-border/60 text-xs">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map((s) => (
-                <SelectItem key={s} value={s} className="capitalize">
-                  {s === "All" ? "All Status" : s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    const removePlatform = (platform: Platform) =>
+        updateFilters({
+            ...filters,
+            platforms: filters.platforms.filter((value) => value !== platform),
+            page: 1,
+        });
 
-          <Select value={platform} onValueChange={setPlatform}>
-            <SelectTrigger className="h-9 w-36 rounded-xl border-border/60 text-xs">
-              <SelectValue placeholder="Platform" />
-            </SelectTrigger>
-            <SelectContent>
-              {PLATFORM_OPTIONS.map((p) => (
-                <SelectItem key={p} value={p} className="capitalize">
-                  {p === "All" ? "All Platforms" : p}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    const emptyTitle = isArchive
+        ? 'No archived projects'
+        : hasFilters
+          ? 'No projects match these filters'
+          : 'No projects yet';
 
-          {hasFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-9 px-3 text-xs text-muted-foreground hover:text-foreground"
-              onClick={() => { setSearch(""); setStatus("All"); setPlatform("All") }}
-            >
-              Clear
-            </Button>
-          )}
-        </div>
-      </div>
+    const emptyDescription = isArchive
+        ? 'Archive a project to keep it out of the active list without removing it.'
+        : hasFilters
+          ? 'Try a different search term, or clear the filters to see everything.'
+          : 'Create your first project to start generating AI-powered content.';
 
-      {/* Results count */}
-      {!isLoading && (data?.data?.length ?? 0) > 0 && (
-        <p className="text-xs text-muted-foreground">
-          Showing <span className="font-semibold text-foreground">{projects.length}</span> of{" "}
-          <span className="font-semibold text-foreground">{data?.data?.length ?? 0}</span> projects
-        </p>
-      )}
+    const emptyAction = isArchive
+        ? { label: 'Back to projects', onClick: clearFilters }
+        : hasFilters
+          ? { label: 'Clear filters', onClick: clearFilters }
+          : {
+                label: 'Create your first project',
+                onClick: () => router.push('/projects/new'),
+            };
 
-      {/* Content */}
-      <DataState
-        isLoading={isLoading}
-        error={error}
-        isEmpty={projects.length === 0}
-        emptyTitle={hasFilters ? "No matching projects" : "No projects found"}
-        emptyDescription={
-          hasFilters
-            ? "No projects match the current search and filters."
-            : "Create your first project to start generating AI-powered content."
-        }
-        emptyAction={
-          hasFilters
-            ? undefined
-            : { label: "New Project", onClick: () => router.push("/projects/new") }
-        }
-        loadingFallback={
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-[180px] rounded-xl" />
+    const grid = (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {projects.map((project) => (
+                <ProjectCard key={project._id} project={project} />
             ))}
-          </div>
-        }
-      >
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project: Project) => (
-            <ProjectCard key={project._id} project={project} />
-          ))}
         </div>
-      </DataState>
+    );
 
-    </div>
-  )
+    return (
+        <div className="space-y-6">
+            <PageHeader
+                title={isArchive ? 'Project archive' : 'Projects'}
+                description={
+                    isArchive
+                        ? 'Projects you have archived. Restore one to put it back in the active list.'
+                        : 'Your content projects, scripts and workflows in one place.'
+                }
+                actions={
+                    <Button asChild className="h-11 px-4">
+                        <Link href="/projects/new">
+                            <Plus className="mr-2 size-4" aria-hidden="true" />
+                            New Project
+                        </Link>
+                    </Button>
+                }
+            />
+
+            <ProjectsToolbar
+                filters={filters}
+                onChange={updateFilters}
+                onClear={clearFilters}
+                view={view}
+                onViewChange={setView}
+                resultCount={isLoading ? undefined : total}
+            />
+
+            {hasFilters ? (
+                <div className="flex flex-wrap items-center gap-2" aria-label="Active filters">
+                    {filters.q ? (
+                        <FilterChip
+                            label={`Search: ${filters.q}`}
+                            onRemove={() => updateFilters({ ...filters, q: '', page: 1 })}
+                        />
+                    ) : null}
+                    {filters.statuses.map((status) => (
+                        <FilterChip
+                            key={status}
+                            label={STATUS_LABEL[status]}
+                            onRemove={() => removeStatus(status)}
+                        />
+                    ))}
+                    {filters.platforms.map((platform) => (
+                        <FilterChip
+                            key={platform}
+                            label={PLATFORM_LABEL[platform]}
+                            onRemove={() => removePlatform(platform)}
+                        />
+                    ))}
+                    <Button
+                        type="button"
+                        variant="link"
+                        className="h-8 px-2 text-xs"
+                        onClick={clearFilters}
+                    >
+                        Clear all
+                    </Button>
+                </div>
+            ) : null}
+
+            <DataState
+                isLoading={isLoading}
+                error={isError ? error : undefined}
+                isEmpty={projects.length === 0}
+                emptyTitle={emptyTitle}
+                emptyDescription={emptyDescription}
+                emptyIcon={isArchive ? Archive : hasFilters ? SearchX : FolderOpen}
+                emptyAction={emptyAction}
+                onRetry={() => void refetch()}
+                loadingFallback={<ProjectsSkeleton view={view} />}
+            >
+                {view === 'table' ? (
+                    <>
+                        <div className="hidden md:block">
+                            <ProjectsTable projects={projects} />
+                        </div>
+                        <div className="md:hidden">{grid}</div>
+                    </>
+                ) : (
+                    grid
+                )}
+            </DataState>
+
+            {meta && meta.totalPages > 1 && projects.length > 0 ? (
+                <nav
+                    aria-label="Project pages"
+                    className="flex flex-col items-center justify-between gap-3 sm:flex-row"
+                >
+                    <p className="text-xs text-muted-foreground">
+                        Page {meta.page} of {meta.totalPages} · {total}{' '}
+                        {total === 1 ? 'project' : 'projects'}
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="h-11 min-w-24"
+                            disabled={!meta.hasPrevPage}
+                            onClick={() =>
+                                updateFilters({ ...filters, page: Math.max(1, filters.page - 1) })
+                            }
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="h-11 min-w-24"
+                            disabled={!meta.hasNextPage}
+                            onClick={() => updateFilters({ ...filters, page: filters.page + 1 })}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </nav>
+            ) : null}
+
+            <p className={cn('sr-only')} aria-live="polite">
+                {data ? `${total} projects found` : 'Loading projects'}
+            </p>
+        </div>
+    );
 }
