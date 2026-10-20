@@ -1,6 +1,7 @@
 import apiClient from '@/services/api-client';
 import type { Project, Platform, ProjectStatus } from '@/types';
 import type { PlannerEvent } from '@/features/planner/services/planner.service';
+import type { DashboardPreferences } from '../lib/widget-layout';
 
 export interface DashboardStats {
     overview: {
@@ -8,6 +9,7 @@ export interface DashboardStats {
         activeProjects: number;
         completedProjects: number;
         draftProjects: number;
+        archivedProjects: number;
         totalScripts: number;
         totalThumbnails: number;
         totalAudioSuggestions: number;
@@ -56,6 +58,22 @@ export const dashboardService = {
      */
     async getHealthReady(): Promise<HealthReady> {
         const { data } = await apiClient.get('/health/ready');
+        return data.data;
+    },
+
+    /**
+     * Per-user dashboard layout (T14). Also carries the onboarding context the
+     * server uses to order widgets, so the first paint is already personalised.
+     */
+    async getPreferences(): Promise<DashboardPreferences> {
+        const { data } = await apiClient.get('/users/profile/preferences');
+        return data.data;
+    },
+
+    async updatePreferences(
+        hiddenWidgets: DashboardPreferences['hiddenWidgets']
+    ): Promise<DashboardPreferences> {
+        const { data } = await apiClient.patch('/users/profile/preferences', { hiddenWidgets });
         return data.data;
     },
 };
