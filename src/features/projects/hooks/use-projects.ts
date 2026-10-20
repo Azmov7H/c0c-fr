@@ -1,13 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { projectsService, CreateProjectDTO, UpdateProjectDTO, ProjectsQuery } from '../services/projects.service';
+import { projectKeys } from '../lib/query-keys';
 import { toApiError } from '@/lib/api-error';
 
-const PROJECTS_KEY = 'projects';
+export { projectKeys };
 
 export function useProjects(query?: ProjectsQuery, options?: { enabled?: boolean }) {
     return useQuery({
-        queryKey: [PROJECTS_KEY, query],
+        queryKey: projectKeys.list(query),
         queryFn: () => projectsService.getAll(query),
         // The command palette fetches the first page lazily (only while open).
         enabled: options?.enabled ?? true,
@@ -16,7 +17,7 @@ export function useProjects(query?: ProjectsQuery, options?: { enabled?: boolean
 
 export function useProject(id: string) {
     return useQuery({
-        queryKey: [PROJECTS_KEY, id],
+        queryKey: projectKeys.detail(id),
         queryFn: () => projectsService.getById(id),
         enabled: !!id,
     });
@@ -28,7 +29,7 @@ export function useCreateProject() {
     return useMutation({
         mutationFn: (data: CreateProjectDTO) => projectsService.create(data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [PROJECTS_KEY] });
+            queryClient.invalidateQueries({ queryKey: projectKeys.all });
             toast.success('Project created successfully!');
         },
         onError: (error: unknown) => {
@@ -44,8 +45,8 @@ export function useUpdateProject() {
         mutationFn: ({ id, data }: { id: string; data: UpdateProjectDTO }) =>
             projectsService.update(id, data),
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: [PROJECTS_KEY] });
-            queryClient.setQueryData([PROJECTS_KEY, data._id], data);
+            queryClient.invalidateQueries({ queryKey: projectKeys.all });
+            queryClient.setQueryData(projectKeys.detail(data._id), data);
             toast.success('Project updated successfully!');
         },
         onError: (error: unknown) => {
@@ -60,7 +61,7 @@ export function useDeleteProject() {
     return useMutation({
         mutationFn: (id: string) => projectsService.delete(id),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [PROJECTS_KEY] });
+            queryClient.invalidateQueries({ queryKey: projectKeys.all });
             toast.success('Project deleted successfully.');
         },
         onError: (error: unknown) => {

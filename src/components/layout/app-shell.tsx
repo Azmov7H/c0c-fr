@@ -100,12 +100,27 @@ function OnboardingChrome({ children }: { children: React.ReactNode }) {
  * header flash before the redirect — and protected page fetches started
  * against no session.
  */
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+    children,
+    initialAuthenticated = false,
+}: {
+    children: React.ReactNode
+    /**
+     * The middleware verified the session cookie on this request. Used to render
+     * the shell and its server-prefetched content during SSR (T14) while the
+     * client session still resolves — the store alone starts in `isLoading`.
+     */
+    initialAuthenticated?: boolean
+}) {
     const isLoading = useAuthStore((s) => s.isLoading)
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
     const pathname = usePathname()
 
-    if (isLoading || !isAuthenticated) {
+    // While the client session resolves, trust the verified cookie for the
+    // initial paint. A failed session fetch still redirects via
+    // SessionInitializer; this only decides what the first paint looks like.
+    const showChrome = isAuthenticated || (isLoading && initialAuthenticated)
+    if (!showChrome) {
         return <ShellSkeleton />
     }
 
