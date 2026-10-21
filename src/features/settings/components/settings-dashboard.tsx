@@ -1,12 +1,15 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useProfile, useUpdateProfile } from '../hooks/use-settings';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     User,
@@ -22,6 +25,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { DataState } from '@/components/shared/data-state';
 import { useLogout, useLogoutAll } from '@/features/auth/hooks/use-auth';
 import { ChangePasswordForm } from '@/features/auth/components/change-password-form';
+
+const profileSchema = z.object({
+    firstName: z.string().trim().min(1, 'First name is required').max(80),
+    lastName: z.string().trim().min(1, 'Last name is required').max(80),
+    email: z.string().trim().email('Enter a valid email address').max(254),
+});
+
+type ProfileValues = z.infer<typeof profileSchema>;
 
 const VALID_TABS = ['profile', 'api', 'security'] as const;
 type SettingsTab = (typeof VALID_TABS)[number];
@@ -42,16 +53,19 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
         ? (defaultTab as SettingsTab)
         : 'profile';
 
-    const [formData, setFormData] = useState({
-        firstName: profile?.firstName || '',
-        lastName: profile?.lastName || '',
-        email: profile?.email || '',
+    const form = useForm<ProfileValues>({
+        resolver: zodResolver(profileSchema),
+        // `values` keeps the form in sync when the profile arrives or is
+        // refetched, without a setState-in-effect reset.
+        values: {
+            firstName: profile?.firstName ?? '',
+            lastName: profile?.lastName ?? '',
+            email: profile?.email ?? '',
+        },
+        mode: 'onBlur',
     });
 
-    const handleUpdateProfile = (e: React.FormEvent) => {
-        e.preventDefault();
-        updateProfile(formData);
-    };
+    const handleUpdateProfile = form.handleSubmit((values) => updateProfile(values));
 
     if (isLoading) {
         return (
@@ -107,37 +121,54 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
                                 <CardDescription>Update your public identity on the platform.</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <form onSubmit={handleUpdateProfile} className="space-y-6">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="firstName">First Name</Label>
-                                            <Input
-                                                id="firstName"
-                                                defaultValue={profile?.firstName}
-                                                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                                <Form {...form}>
+                                    <form onSubmit={handleUpdateProfile} className="space-y-6" noValidate>
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <FormField
+                                                control={form.control}
+                                                name="firstName"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>First Name</FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} autoComplete="given-name" className="h-11" />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="lastName"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Last Name</FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} autoComplete="family-name" className="h-11" />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
                                             />
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="lastName">Last Name</Label>
-                                            <Input
-                                                id="lastName"
-                                                defaultValue={profile?.lastName}
-                                                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email">Email Address</Label>
-                                        <Input
-                                            id="email"
-                                            defaultValue={profile?.email}
-                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        <FormField
+                                            control={form.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Email Address</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} type="email" autoComplete="email" className="h-11" />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
                                         />
-                                    </div>
-                                    <Button type="submit" disabled={isUpdatingProfile}>
-                                        {isUpdatingProfile ? <RefreshCw className="animate-spin w-4 h-4 mr-2" /> : 'Save Changes'}
-                                    </Button>
-                                </form>
+                                        <Button type="submit" className="h-11" disabled={isUpdatingProfile || !form.formState.isDirty}>
+                                            {isUpdatingProfile ? <RefreshCw className="animate-spin w-4 h-4 mr-2" /> : 'Save Changes'}
+                                        </Button>
+                                    </form>
+                                </Form>
                             </CardContent>
                         </Card>
 

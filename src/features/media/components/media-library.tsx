@@ -1,169 +1,154 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { FileAudio, Image as ImageIcon, Search, Upload, Video } from 'lucide-react';
+
 import { PageHeader } from '@/components/shared/page-header';
 import { FilterBar } from '@/components/shared/filter-bar';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-
+import { EmptyState } from '@/components/ui/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DataState } from '@/components/shared/data-state';
-import { MockDataBanner } from '@/components/shared/mock-data-banner';
-import { MOCK_ASSETS } from '@/lib/dev-mocks';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Image as ImageIcon, Video, FileAudio, Search, Copy, Trash2, Play, Plus, } from 'lucide-react';
-import Image from 'next/image';
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { useProjectMedia } from '@/features/media/hooks/use-media';
+import { useProjects } from '@/features/projects/hooks/use-projects';
+import { formatRelativeTime } from '@/lib/relative-time';
 
-const assetIcons: Record<string, React.ElementType> = {
-  image: ImageIcon,
-  video: Video,
-  audio: FileAudio,
-};
+const ICONS = {
+    image: ImageIcon,
+    video: Video,
+    audio: FileAudio,
+    document: Search,
+} as const;
 
 export function MediaLibrary() {
-  const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
-  const [selectedAsset, setSelectedAsset] = useState<typeof MOCK_ASSETS[0] | null>(null);
+    const projects = useProjects({ limit: 100 });
+    const [projectId, setProjectId] = useState('');
+    const [search, setSearch] = useState('');
+    const [tab, setTab] = useState('all');
 
-  const filtered = MOCK_ASSETS.filter((a) => {
-    const matchSearch = !search || a.name.toLowerCase().includes(search.toLowerCase()) || a.tags.some((t) => t.includes(search.toLowerCase()));
-    const matchTab = activeTab === 'all' || a.type === activeTab;
-    return matchSearch && matchTab;
-  });
+    const activeProjectId = projectId || projects.data?.data[0]?._id || '';
+    const media = useProjectMedia(activeProjectId);
 
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Media Library"
-        description="Manage all your media assets — images, videos, and audio files."
-        actions={
-          <Button className="h-9 px-4 rounded-xl shadow-premium hover:shadow-glow transition-all">
-            <Plus className="w-4 h-4 mr-2" />
-            Upload
-          </Button>
-        }
-      />
+    const filtered = useMemo(() => {
+        const term = search.trim().toLowerCase();
+        return (media.data?.data ?? []).filter((item) => {
+            const matchesSearch =
+                !term ||
+                item.title.toLowerCase().includes(term) ||
+                item.tags?.some((tag) => tag.toLowerCase().includes(term));
+            return matchesSearch && (tab === 'all' || item.category === tab);
+        });
+    }, [media.data, search, tab]);
 
-      <MockDataBanner />
+    return (
+        <div className="space-y-6">
+            <PageHeader
+                title="Media library"
+                description="Every generated or attached asset for the selected project."
+                actions={
+                    <Button className="h-11" disabled title="Uploads need a storage provider, which is not configured yet.">
+                        <Upload className="mr-2 size-4" aria-hidden="true" />
+                        Upload
+                    </Button>
+                }
+            />
 
-      <FilterBar
-        searchValue={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Search assets..."
-        filters={[]}
-        onClear={() => { setSearch(''); setActiveTab('all'); }}
-      />
-
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="image">Images</TabsTrigger>
-          <TabsTrigger value="video">Videos</TabsTrigger>
-          <TabsTrigger value="audio">Audio</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={activeTab} className="mt-6">
-          {filtered.length === 0 ? (
-            <DataState
-              isEmpty
-              emptyIcon={Search}
-              emptyTitle={search || activeTab !== 'all' ? 'No assets found' : 'No assets yet'}
-              emptyDescription={
-                search || activeTab !== 'all'
-                  ? 'Try adjusting your search or filters.'
-                  : 'Uploads are not connected to the backend yet.'
-              }
-            >
-              {null}
-            </DataState>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4">
-              {filtered.map((asset) => {
-                const Icon = assetIcons[asset.type] || ImageIcon;
-                return (
-                  <Card
-                    key={asset.id}
-                    className="border-border/50 hover:border-primary/30 hover:shadow-premium transition-all cursor-pointer group overflow-hidden"
-                    onClick={() => setSelectedAsset(asset)}
-                  >
-                    <CardContent className="p-0">
-                      <div className="aspect-square bg-muted/40 flex items-center justify-center relative">
-                        {asset.type === 'image' && asset.url ? (
-                          <Image src={asset.url} alt={asset.name} fill className="object-cover" />
-                        ) : (
-                          <Icon className="w-10 h-10 text-muted-foreground/40" />
-                        )}
-                        {/* Hover overlay */}
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                          {asset.type === 'video' && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white" aria-label={`Play ${asset.name}`}>
-                              <Play className="w-4 h-4" />
-                            </Button>
-                          )}
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-white" aria-label={`Copy link to ${asset.name}`}>
-                            <Copy className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-white" aria-label={`Delete ${asset.name}`}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="p-2">
-                        <p className="text-xs font-medium truncate">{asset.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{asset.size}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+            <div className="max-w-sm space-y-2">
+                <Select value={activeProjectId} onValueChange={setProjectId}>
+                    <SelectTrigger className="h-11" aria-label="Project">
+                        <SelectValue placeholder="Choose a project" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {(projects.data?.data ?? []).map((project) => (
+                            <SelectItem key={project._id} value={project._id}>
+                                {project.title}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                    Uploads are disabled until a storage provider is connected.
+                </p>
             </div>
-          )}
-        </TabsContent>
-      </Tabs>
 
-      {/* Asset Preview Dialog */}
-      <Dialog open={!!selectedAsset} onOpenChange={(o) => !o && setSelectedAsset(null)}>
-        <DialogContent className="max-w-3xl">
-          {selectedAsset && (
-            <>
-              <DialogHeader>
-                <DialogTitle>{selectedAsset.name}</DialogTitle>
-                <DialogDescription>
-                  {selectedAsset.type.toUpperCase()} · {selectedAsset.size} · {selectedAsset.date}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="aspect-video bg-muted/40 rounded-lg flex items-center justify-center">
-                {selectedAsset.type === 'image' && selectedAsset.url ? (
-                  <Image src={selectedAsset.url} alt={selectedAsset.name} fill className="object-cover rounded-lg" />
-                ) : (
-                  <div className="text-center">
-                    {(() => {
-                      const IconComponent = assetIcons[selectedAsset.type]
-                      return IconComponent ? (
-                        <IconComponent className="w-16 h-16 text-muted-foreground/40 mx-auto mb-4" />
-                      ) : null
-                    })()}
-                    <p className="text-muted-foreground">Preview not available</p>
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {selectedAsset.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary">{tag}</Badge>
-                ))}
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
+            <FilterBar
+                searchValue={search}
+                onSearchChange={setSearch}
+                searchPlaceholder="Search assets..."
+                filters={[]}
+                onClear={() => {
+                    setSearch('');
+                    setTab('all');
+                }}
+            />
+
+            <Tabs value={tab} onValueChange={setTab}>
+                <TabsList>
+                    <TabsTrigger value="all">All</TabsTrigger>
+                    <TabsTrigger value="image">Images</TabsTrigger>
+                    <TabsTrigger value="video">Videos</TabsTrigger>
+                    <TabsTrigger value="audio">Audio</TabsTrigger>
+                    <TabsTrigger value="document">Documents</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value={tab} className="mt-6">
+                    {media.isLoading ? (
+                        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-6" role="status" aria-label="Loading media">
+                            {Array.from({ length: 6 }).map((_, index) => (
+                                <Skeleton key={index} className="aspect-square rounded-xl" />
+                            ))}
+                        </div>
+                    ) : filtered.length === 0 ? (
+                        <EmptyState
+                            icon={search || tab !== 'all' ? Search : Upload}
+                            title={search || tab !== 'all' ? 'No assets found' : 'No media yet'}
+                            description={
+                                search || tab !== 'all'
+                                    ? 'Try adjusting your search or filters.'
+                                    : 'Generated media from your projects will appear here.'
+                            }
+                        />
+                    ) : (
+                        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-6">
+                            {filtered.map((item) => {
+                                const Icon = ICONS[item.category] ?? ImageIcon;
+                                return (
+                                    <Card key={item._id} className="overflow-hidden">
+                                        <CardContent className="p-0">
+                                            <div className="flex aspect-square items-center justify-center bg-muted/40">
+                                                {item.thumbnailUrl ? (
+                                                    // eslint-disable-next-line @next/next/no-img-element
+                                                    <img src={item.thumbnailUrl} alt="" className="size-full object-cover" />
+                                                ) : (
+                                                    <Icon className="size-10 text-muted-foreground/50" aria-hidden="true" />
+                                                )}
+                                            </div>
+                                            <div className="space-y-1 p-3">
+                                                <p className="truncate text-xs font-medium">{item.title}</p>
+                                                <div className="flex items-center justify-between">
+                                                    <Badge variant="secondary" className="text-[10px]">{item.category}</Badge>
+                                                    <span className="text-[10px] text-muted-foreground">
+                                                        {formatRelativeTime(item.createdAt).relative}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    )}
+                </TabsContent>
+            </Tabs>
+        </div>
+    );
 }

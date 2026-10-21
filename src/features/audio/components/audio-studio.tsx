@@ -1,131 +1,190 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { Loader2, Music, Play, Sparkles, Waves } from 'lucide-react';
+
 import { PageHeader } from '@/components/shared/page-header';
 import { TwoPanelLayout } from '@/components/shared/two-panel-layout';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { DataState } from '@/components/shared/data-state';
-import { MockDataBanner } from '@/components/shared/mock-data-banner';
-import { MOCK_TRACKS } from '@/lib/dev-mocks';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { cn } from '@/lib/utils';
 import {
-  Music, Zap, Flame, Waves, Mic2, Play, Sparkles, Loader2,
-} from 'lucide-react';
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { EmptyState } from '@/components/ui/empty-state';
+import { useGenerateAudio, useProjectAudio } from '@/features/audio/hooks/use-audio';
+import { useProjects } from '@/features/projects/hooks/use-projects';
+import { toApiError } from '@/lib/api-error';
+import { cn } from '@/lib/utils';
 
 const MOODS = [
-  { id: 'energetic', label: 'Energetic & Fast', icon: Zap, description: 'High tempo, impactful beats' },
-  { id: 'suspenseful', label: 'Suspenseful Epic', icon: Flame, description: 'Deep bass, cinematic tension' },
-  { id: 'chill', label: 'Lo-fi & Chill', icon: Waves, description: 'Relaxed vibes, atmospheric' },
-  { id: 'educational', label: 'Educational', icon: Mic2, description: 'Clear, unobtrusive ambient' },
-];
+    { id: 'energetic', label: 'Energetic & Fast', description: 'High tempo, impactful beats' },
+    { id: 'suspenseful', label: 'Suspenseful Epic', description: 'Deep bass, cinematic tension' },
+    { id: 'chill', label: 'Lo-fi & Chill', description: 'Relaxed vibes, atmospheric' },
+    { id: 'educational', label: 'Educational', description: 'Clear, unobtrusive ambient' },
+] as const;
 
 export function AudioStudio() {
-  const [mood, setMood] = useState('energetic');
-  const [isGenerating, setIsGenerating] = useState(false);
+    const projects = useProjects({ limit: 100 });
+    const [projectId, setProjectId] = useState('');
+    const [mood, setMood] = useState('energetic');
+    const [quotaError, setQuotaError] = useState<string | null>(null);
 
-  const handleGenerate = async () => {
-    setIsGenerating(true);
-    await new Promise((r) => setTimeout(r, 2000));
-    setIsGenerating(false);
-  };
+    const activeProjectId = projectId || projects.data?.data[0]?._id || '';
+    const audio = useProjectAudio(activeProjectId);
+    const generate = useGenerateAudio();
 
-  const leftContent = (
-    <div className="space-y-6">
-      <RadioGroup value={mood} onValueChange={setMood} className="grid grid-cols-1 gap-3">
-        {MOODS.map((m) => (
-          <div
-            key={m.id}
-            className={cn(
-              'flex items-start space-x-3 border rounded-xl p-3 cursor-pointer transition-all',
-              mood === m.id
-                ? 'border-primary bg-primary/5 shadow-glow'
-                : 'border-border/50 hover:border-primary/30 hover:bg-muted/30'
-            )}
-            onClick={() => setMood(m.id)}
-          >
-            <div className={cn(
-              'p-2 rounded-lg shrink-0 transition-colors',
-              mood === m.id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-            )}>
-              <m.icon className="w-4 h-4" />
+    const suggestions = audio.data ?? [];
+
+    const leftContent = (
+        <div className="space-y-6">
+            <div className="space-y-2">
+                <Label>Project</Label>
+                <Select value={activeProjectId} onValueChange={setProjectId}>
+                    <SelectTrigger className="h-11" aria-label="Project">
+                        <SelectValue placeholder="Choose a project" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {(projects.data?.data ?? []).map((project) => (
+                            <SelectItem key={project._id} value={project._id}>
+                                {project.title}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
-            <div className="flex-1">
-              <Label className="cursor-pointer font-semibold text-sm block">{m.label}</Label>
-              <p className="text-[10px] text-muted-foreground">{m.description}</p>
-            </div>
-            <RadioGroupItem value={m.id} className="sr-only" />
-          </div>
-        ))}
-      </RadioGroup>
 
-      <Button onClick={handleGenerate} disabled={isGenerating} className="w-full">
-        {isGenerating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
-        {isGenerating ? 'Generating...' : 'Generate Audio'}
-      </Button>
-    </div>
-  );
+            <RadioGroup value={mood} onValueChange={setMood} className="grid grid-cols-1 gap-3">
+                {MOODS.map((option) => (
+                    <div
+                        key={option.id}
+                        className={cn(
+                            'flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-all',
+                            mood === option.id
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border/50 hover:border-primary/30 hover:bg-muted/30'
+                        )}
+                        onClick={() => setMood(option.id)}
+                    >
+                        <div className={cn(
+                            'shrink-0 rounded-lg p-2',
+                            mood === option.id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                        )}>
+                            <Music className="size-4" aria-hidden="true" />
+                        </div>
+                        <div className="flex-1">
+                            <Label className="block cursor-pointer text-sm font-semibold">{option.label}</Label>
+                            <p className="text-xs text-muted-foreground">{option.description}</p>
+                        </div>
+                        <RadioGroupItem value={option.id} className="sr-only" />
+                    </div>
+                ))}
+            </RadioGroup>
 
-  const rightContent = isGenerating ? (
-    <div className="flex flex-col items-center justify-center h-full text-center p-12">
-      <Music className="w-16 h-16 text-primary animate-bounce mb-4" />
-      <h3 className="text-xl font-semibold mb-2">Synthesizing...</h3>
-      <p className="text-muted-foreground text-sm">Our engine is crafting the perfect soundscape.</p>
-    </div>
-  ) : (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between mb-4">
-        <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Suggested Tracks</h4>
-        <Badge variant="outline" className="text-[10px]">AI Matched</Badge>
-      </div>
-      {MOCK_TRACKS.length === 0 ? (
-        <DataState
-          isEmpty
-          emptyIcon={Waves}
-          emptyTitle="No tracks yet"
-          emptyDescription="Audio generation is not connected to the backend yet."
-        >
-          {null}
-        </DataState>
-      ) : MOCK_TRACKS.map((track, i) => (
-        <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:bg-muted/40 transition-colors group cursor-pointer">
-          <div className="flex items-center gap-3">
-            <Button variant="secondary" size="icon" className="rounded-lg h-10 w-10 shrink-0" aria-label={`Play ${track.title}`}>
-              <Play className="w-4 h-4 translate-x-0.5 fill-current" />
+            <Button
+                onClick={() =>
+                    generate.mutate(
+                        { projectId: activeProjectId },
+                        {
+                            onError: (error) => {
+                                const apiError = toApiError(error, 'Audio generation failed.');
+                                if (apiError.status === 429 || apiError.code === 'QUOTA_EXHAUSTED') {
+                                    setQuotaError(apiError.message);
+                                }
+                            },
+                        }
+                    )
+                }
+                disabled={!activeProjectId || generate.isPending}
+                className="h-11 w-full"
+            >
+                {generate.isPending ? (
+                    <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                ) : (
+                    <Sparkles className="mr-2 size-4" aria-hidden="true" />
+                )}
+                {generate.isPending ? 'Generating…' : 'Generate audio profile'}
             </Button>
-            <div>
-              <p className="font-semibold text-sm">{track.title}</p>
-              <p className="text-xs text-muted-foreground">{track.genre} · {track.bpm} BPM</p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-sm font-mono">{track.duration}</p>
-            <Badge variant="secondary" className="text-[10px] mt-1">{track.mood}</Badge>
-          </div>
         </div>
-      ))}
-    </div>
-  );
+    );
 
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Audio Effects"
-        description="Generate AI-powered music, sound effects, and audio landscapes."
-      />
-      <MockDataBanner />
+    const rightContent = (
+        <div className="space-y-3">
+            {quotaError && (
+                <Alert>
+                    <AlertTitle>Generation quota reached</AlertTitle>
+                    <AlertDescription className="flex flex-wrap items-center gap-3">
+                        {quotaError}
+                        <Button asChild className="h-11">
+                            <Link href="/settings/billing">Upgrade for more generations</Link>
+                        </Button>
+                    </AlertDescription>
+                </Alert>
+            )}
+            {!activeProjectId ? (
+                <p className="text-sm text-muted-foreground">Create a project first to generate audio.</p>
+            ) : audio.isLoading ? (
+                <p className="text-sm text-muted-foreground" role="status">Loading audio…</p>
+            ) : suggestions.length === 0 ? (
+                <EmptyState
+                    className="min-h-0 border-0 bg-transparent p-0"
+                    icon={Waves}
+                    title="No audio profiles yet"
+                    description="Choose a mood and generate suggestions for your selected project."
+                />
+            ) : (
+                suggestions.map((suggestion) => (
+                    <div key={suggestion.id} className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                {suggestion.mood} · {suggestion.musicType}
+                            </h4>
+                            <Badge variant="outline">{suggestion.status}</Badge>
+                        </div>
+                        {suggestion.tracks.map((track) => (
+                            <div key={`${suggestion.id}-${track.title}`} className="flex items-center justify-between rounded-xl border border-border/50 p-4">
+                                <div className="flex items-center gap-3">
+                                    <Button variant="secondary" size="icon" className="size-11 shrink-0" aria-label={`Play ${track.title}`}>
+                                        <Play className="size-4 translate-x-0.5 fill-current" aria-hidden="true" />
+                                    </Button>
+                                    <div>
+                                        <p className="text-sm font-semibold">{track.title}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {track.genre} · {track.bpm} BPM
+                                        </p>
+                                    </div>
+                                </div>
+                                <p className="font-mono text-sm">{track.duration}</p>
+                            </div>
+                        ))}
+                    </div>
+                ))
+            )}
+        </div>
+    );
 
-      <TwoPanelLayout
-        leftTitle="Sonic Architecture"
-        leftDescription="Select mood and generate"
-        leftIcon={Music}
-        leftContent={leftContent}
-        rightTitle="Curated Tracks"
-        rightDescription="AI-matched audio for your project"
-        rightContent={rightContent}
-      />
-    </div>
-  );
+    return (
+        <div className="space-y-6">
+            <PageHeader
+                title="Audio Effects"
+                description="Generate AI-powered music and sound suggestions for your projects."
+            />
+            <TwoPanelLayout
+                leftTitle="Sonic architecture"
+                leftDescription="Pick a project, mood and generate"
+                leftIcon={Music}
+                leftContent={leftContent}
+                rightTitle="Audio profiles"
+                rightDescription="Live suggestions from the API"
+                rightContent={rightContent}
+            />
+        </div>
+    );
 }

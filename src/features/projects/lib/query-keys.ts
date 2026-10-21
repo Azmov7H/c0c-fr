@@ -14,4 +14,8 @@ export const projectKeys = {
     list: (query?: ProjectsQuery) => [...projectKeys.lists(), query ?? null] as const,
     details: () => [...projectKeys.all, 'detail'] as const,
     detail: (id: string) => [...projectKeys.details(), id] as const,
+    members: (id: string) => [...projectKeys.all, 'members', id] as const,
+    invites: (id: string) => [...projectKeys.all, 'invites', id] as const,
+    activity: (id: string, filters?: Record<string, unknown>) =>
+        [...projectKeys.all, 'activity', id, filters ?? null] as const,
 };

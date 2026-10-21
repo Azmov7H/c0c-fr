@@ -1,19 +1,21 @@
 'use client';
 
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useTeams, useCreateTeam, useInviteMember, useRemoveMember } from '../hooks/use-teams';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import {
     Users,
     UserPlus,
     UserMinus,
     Shield,
-    Mail,
     Plus,
     Settings,
     User as UserIcon,
@@ -42,34 +44,60 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
+const createTeamSchema = z.object({
+    name: z.string().trim().min(2, 'Name must be at least 2 characters').max(80),
+});
+
+const inviteSchema = z.object({
+    email: z.string().trim().email('Enter a valid email address').max(254),
+    role: z.enum(['admin', 'editor', 'viewer']),
+});
+
+type CreateTeamValues = z.infer<typeof createTeamSchema>;
+type InviteValues = z.infer<typeof inviteSchema>;
+
 export const TeamManagement = () => {
     const { data: teams, isLoading, error } = useTeams();
     const { mutate: createTeam, isPending: isCreatingTeam } = useCreateTeam();
     const { mutate: inviteMember, isPending: isInviting } = useInviteMember();
     const { mutate: removeMember } = useRemoveMember();
 
-    const [newTeamName, setNewTeamName] = useState('');
-    const [inviteEmail, setInviteEmail] = useState('');
-    const [inviteRole, setInviteRole] = useState<TeamRole>(TeamRole.EDITOR);
     const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
     const [createOpen, setCreateOpen] = useState(false);
 
+    const createForm = useForm<CreateTeamValues>({
+        resolver: zodResolver(createTeamSchema),
+        defaultValues: { name: '' },
+        mode: 'onChange',
+    });
+
+    const inviteForm = useForm<InviteValues>({
+        resolver: zodResolver(inviteSchema),
+        defaultValues: { email: '', role: 'editor' },
+        mode: 'onChange',
+    });
+
     const activeTeam = teams && teams.length > 0 ? (selectedTeamId ? teams.find(t => t.id === selectedTeamId) : teams[0]) : null;
 
-    const handleCreateTeam = () => {
-        if (!newTeamName.trim()) return;
-        createTeam({ name: newTeamName });
-        setNewTeamName('');
-    };
-
-    const handleInvite = () => {
-        if (!activeTeam || !inviteEmail.trim()) return;
-        inviteMember({
-            teamId: activeTeam.id,
-            data: { email: inviteEmail, role: inviteRole }
+    const handleCreateTeam = createForm.handleSubmit((values) => {
+        createTeam(values, {
+            onSuccess: () => {
+                createForm.reset({ name: '' });
+                setCreateOpen(false);
+            },
         });
-        setInviteEmail('');
-    };
+    });
+
+    const handleInvite = inviteForm.handleSubmit((values) => {
+        if (!activeTeam) return;
+        inviteMember(
+            {
+                teamId: activeTeam.id,
+                data: { email: values.email, role: values.role as TeamRole },
+            },
+            { onSuccess: () => inviteForm.reset({ email: '', role: values.role }) }
+        );
+    });
 
     const roleColors = {
         owner: 'bg-primary/10 text-primary border-primary/20',
@@ -117,22 +145,28 @@ export const TeamManagement = () => {
                             <DialogTitle>Create New Team Workspace</DialogTitle>
                             <DialogDescription>Workspaces allow you to group projects and collaborators together.</DialogDescription>
                         </DialogHeader>
-                        <div className="py-4 space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="name">Workspace Name</Label>
-                                <Input
-                                    id="name"
-                                    value={newTeamName}
-                                    onChange={(e) => setNewTeamName(e.target.value)}
-                                    placeholder="e.g. Marketing House"
+                        <Form {...createForm}>
+                            <form onSubmit={handleCreateTeam} className="py-4" noValidate>
+                                <FormField
+                                    control={createForm.control}
+                                    name="name"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Workspace Name</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="e.g. Marketing House" className="h-11" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
                                 />
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button onClick={handleCreateTeam} disabled={isCreatingTeam}>
-                                {isCreatingTeam ? 'Creating...' : 'Create Workspace'}
-                            </Button>
-                        </DialogFooter>
+                                <DialogFooter className="mt-6">
+                                    <Button type="submit" className="h-11" disabled={isCreatingTeam}>
+                                        {isCreatingTeam ? 'Creating...' : 'Create Workspace'}
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </Form>
                     </DialogContent>
                     </Dialog>
                 }
@@ -183,36 +217,50 @@ export const TeamManagement = () => {
                                     <UserPlus className="w-4 h-4 text-primary" /> Invite Collaborator
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">User Email</Label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="colleague@agency.com"
-                                            className="pl-10"
-                                            value={inviteEmail}
-                                            onChange={(e) => setInviteEmail(e.target.value)}
+                            <CardContent>
+                                <Form {...inviteForm}>
+                                    <form onSubmit={handleInvite} className="space-y-4" noValidate>
+                                        <FormField
+                                            control={inviteForm.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>User Email</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} type="email" placeholder="colleague@agency.com" className="h-11" />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
                                         />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Assign Role</Label>
-                                    <Select value={inviteRole} onValueChange={(val) => setInviteRole(val as TeamRole)}>
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="admin">Administrator</SelectItem>
-                                            <SelectItem value="editor">Content Editor</SelectItem>
-                                            <SelectItem value="viewer">Viewer Only</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <Button className="w-full mt-2" onClick={handleInvite} disabled={isInviting || !inviteEmail.trim()}>
-                                    {isInviting ? <RefreshCw className="animate-spin w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
-                                    Send Invitation
-                                </Button>
+                                        <FormField
+                                            control={inviteForm.control}
+                                            name="role"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Assign Role</FormLabel>
+                                                    <Select value={field.value} onValueChange={field.onChange}>
+                                                        <FormControl>
+                                                            <SelectTrigger className="h-11" aria-label="Assign role">
+                                                                <SelectValue />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="admin">Administrator</SelectItem>
+                                                            <SelectItem value="editor">Content Editor</SelectItem>
+                                                            <SelectItem value="viewer">Viewer Only</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <Button type="submit" className="mt-2 h-11 w-full" disabled={isInviting}>
+                                            {isInviting ? <RefreshCw className="animate-spin w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
+                                            Send Invitation
+                                        </Button>
+                                    </form>
+                                </Form>
                             </CardContent>
                         </Card>
                     </div>

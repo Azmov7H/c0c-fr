@@ -33,13 +33,21 @@ import { UserButton } from "./user-button"
 import { NotificationBell } from "@/features/notifications/components/notification-bell"
 import { useTheme } from "next-themes"
 import { QUICK_ACTIONS, ROUTE_LABELS } from "@/lib/navigation"
+import { useBreadcrumbStore } from "@/store/breadcrumb-store"
 
 function useBreadcrumbs() {
   const pathname = usePathname()
+  const projectId = useBreadcrumbStore((state) => state.projectId)
+  const projectTitle = useBreadcrumbStore((state) => state.projectTitle)
   const segments = pathname.split("/").filter(Boolean)
 
   return segments.map((seg, i) => ({
-    label: ROUTE_LABELS[seg] ?? seg.charAt(0).toUpperCase() + seg.slice(1),
+    // A project id is not a label. The workspace registers the loaded title so
+    // the breadcrumb reads "Projects / My video" instead of the raw ObjectId.
+    label:
+      projectTitle && seg === projectId
+        ? projectTitle
+        : ROUTE_LABELS[seg] ?? seg.charAt(0).toUpperCase() + seg.slice(1),
     href: "/" + segments.slice(0, i + 1).join("/"),
     isLast: i === segments.length - 1,
   }))

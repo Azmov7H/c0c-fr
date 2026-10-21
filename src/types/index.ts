@@ -38,6 +38,9 @@ export interface Project {
     tone: ContentTone;
     status: ProjectStatus;
     userId: string;
+    topic?: string;
+    memberLimit?: number;
+    members?: Array<{ user: string; role: 'editor' | 'commenter' | 'viewer'; joinedAt: string }>;
     thumbnailUrl?: string;
     createdAt: string;
     updatedAt: string;

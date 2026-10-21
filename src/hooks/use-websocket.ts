@@ -2,6 +2,11 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { useQueryClient } from '@tanstack/react-query';
 import { notificationsKeys } from '@/features/notifications/hooks/use-notifications';
+import { projectKeys } from '@/features/projects/lib/query-keys';
+import { scriptsKeys } from '@/features/scripts/hooks/use-scripts';
+import { thumbnailsKeys } from '@/features/thumbnails/hooks/use-thumbnails';
+import { audioKeys } from '@/features/audio/hooks/use-audio';
+import { registerSocket } from '@/lib/socket-registry';
 import { toast } from 'sonner';
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import { useRealtimeStore } from '@/store/realtime-store';
@@ -11,6 +16,9 @@ import type {
     RoomErrorPayload,
     ServerToClientEvents,
     ClientToServerEvents,
+    MemberChangedPayload,
+    InviteChangedPayload,
+    ProjectUpdatedPayload,
 } from '@/types/realtime';
 
 async function fetchSocketToken(): Promise<string | null> {
@@ -77,6 +85,7 @@ export function useWebSocket() {
         });
 
         socketRef.current = socket;
+        registerSocket(socket);
 
         socket.on('connect', () => {
             attemptRef.current = 0;
@@ -106,26 +115,51 @@ export function useWebSocket() {
             queryClient.invalidateQueries({ queryKey: notificationsKeys.unread() });
         });
 
-        socket.on('script:generated', () => {
-            queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
+        // Scoped invalidation: generation events refresh only that project's
+        // asset list, then the notification badge.
+        socket.on('script:generated', (data) => {
+            void queryClient.invalidateQueries({ queryKey: scriptsKeys.list(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: projectKeys.activity(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
             toast.success('Script Generated', {
                 description: 'AI has finished generating your script.',
             });
         });
 
-        socket.on('thumbnail:generated', () => {
-            queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
+        socket.on('thumbnail:generated', (data) => {
+            void queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: projectKeys.activity(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
             toast.success('Thumbnail Ready', {
                 description: 'AI has finished generating your thumbnail.',
             });
         });
 
-        socket.on('audio:generated', () => {
-            queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
+        socket.on('audio:generated', (data) => {
+            void queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: projectKeys.activity(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
             toast.success('Audio Ready', {
                 description: 'AI has finished generating your audio suggestions.',
             });
         });
+
+        socket.on('project:updated', (data: ProjectUpdatedPayload) => {
+            void queryClient.invalidateQueries({ queryKey: projectKeys.detail(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
+        });
+
+        const refreshCollaboration = (payload: MemberChangedPayload | InviteChangedPayload) => {
+            void queryClient.invalidateQueries({ queryKey: projectKeys.members(payload.projectId) });
+            void queryClient.invalidateQueries({ queryKey: projectKeys.invites(payload.projectId) });
+            void queryClient.invalidateQueries({ queryKey: projectKeys.activity(payload.projectId) });
+        };
+        socket.on('project.member_added', refreshCollaboration);
+        socket.on('project.member_removed', refreshCollaboration);
+        socket.on('project.member_role_changed', refreshCollaboration);
+        socket.on('project.invite_created', refreshCollaboration);
+        socket.on('project.invite_accepted', refreshCollaboration);
+        socket.on('project.invite_revoked', refreshCollaboration);
 
         // Room denial (RT-02): surface instead of silent emptiness.
         socket.on('room:error', (data: RoomErrorPayload) => {
@@ -152,6 +186,7 @@ export function useWebSocket() {
             socketRef.current.disconnect();
             socketRef.current = null;
         }
+        registerSocket(null);
         markConnected(false);
     }, [markConnected]);
 
