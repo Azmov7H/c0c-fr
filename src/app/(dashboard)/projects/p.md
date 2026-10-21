@@ -1,4 +1,4 @@
-# Projects Module — UI/UX & Architecture Spec (as shipped, T15)
+# Projects Module — UI/UX & Architecture Spec (as shipped, T16)
 
 ## Goal
 The home of the user's work: a live, filterable project list and a resumable
@@ -32,6 +32,44 @@ three-step creation wizard.
 - **Loading:** shape-matched skeletons for the grid and the table; no spinner.
 - Mobile: cards stack, filters live in a Sheet, controls are at least 44 px.
 
+## Project workspace — `/projects/[id]`
+
+- **Tabs in the URL:** `?tab=assets|members|activity`; refresh, back/forward and
+  shared links land on the same tab. The shell loads with a layout-matched
+  skeleton and renders one not-found state for missing *and* non-member projects
+  ("Project not found" only — it never implies the project exists).
+- **Header:** inline title editing with an optimistic update and cache rollback;
+  idea, platform and status badges; created/updated times; archive (confirmed),
+  delete (confirms and states the server keeps an archived record) and duplicate
+  (creates a copy from the current fields). Status changes follow
+  `ALLOWED_TRANSITIONS` (draft → processing → completed) and keep archive/restore
+  reachable.
+- **Members:** owner row plus members with avatar, name, email, coloured role
+  badge and joined time. The owner's remove control is disabled with the reason
+  ("Only the project owner can remove members…"). The owner can change another
+  member's role inline; the menu only ever offers roles the backend accepts
+  (editor/commenter/viewer, never owner). Removal mirrors the backend invariants.
+- **Invites:** RHF + Zod email/role form; the accept URL is returned only to the
+  inviter, shown with a copy button, and the copy explains that email delivery is
+  not wired yet. A plan member limit disables the form and states `used of limit`
+  with an upgrade link. Pending invites list role, inviter, countdown and state,
+  refresh every minute, and surface an alert when a row expires in place.
+- **Activity:** live GET of the project activity feed with actor, action, target
+  and relative time; type filter, pagination, and different empty states for "no
+  activity yet" and "no activity matches this filter".
+- **Assets:** live scripts, thumbnails, audio, SEO and media with counts and
+  per-group empty states. Generation controls require `edit`; a `429` quota
+  response becomes an upgrade prompt with a link to billing.
+- **Permissions:** every control is derived from `can(role, capability)` in
+  `features/projects/lib/permissions.ts` (one source with the backend matrix).
+  Viewers get a read-only roster with reasons on disabled controls.
+- **Realtime:** project rooms now admit any member with `read`; collaboration and
+  asset events invalidate only the affected query keys.
+- **Invite landing `/invites/[token]`:** shows the project name, inviter, role and
+  expiry only. Expired, revoked and unknown tokens share one message; accepting
+  briefly confirms then redirects into the project, while an already-member
+  accept shows an "already have access" state with a link in.
+
 ## Create New Project — `/projects/new`
 
 Three steps: Details → Platform & tone → Review.
@@ -59,10 +97,10 @@ Three steps: Details → Platform & tone → Review.
 ## Architecture
 ```
 src/features/projects/
-  components/   # view, toolbar, card, table, actions, wizard + steps
-  hooks/        # use-projects (queries + optimistic mutations), use-project-view
-  lib/          # zod schema/limits, URL filters, sessionStorage draft, query keys
-  services/     # projectsService
+  components/   # list view/toolbar/card/table/actions, wizard, workspace/*
+  hooks/        # use-projects, use-project-view, use-collaboration
+  lib/          # zod schema/limits, URL filters, draft, query keys, permissions, status
+  services/     # projectsService, collaboration services (members/invites/activity)
 ```
 The old `components/dashboard/project/{ProjectCard,EmptyState,helpers}` files were
 removed; their responsibilities live here.
@@ -74,3 +112,11 @@ removed; their responsibilities live here.
 - `GET /projects/:id`
 - `PATCH /projects/:id` (status changes, archive, restore)
 - `DELETE /projects/:id` (soft delete)
+- `GET /projects/:id/members`, `POST/PATCH/DELETE /projects/:id/members[/:userId]`
+- `POST/GET/DELETE /projects/:id/invites[/:inviteId]`
+- `GET /projects/:id/activity?type&page&limit` (`read`)
+- `GET /invites/:token`, `POST /invites/:token/accept` (public preview/accept)
+
+All project routes require authentication. Non-members receive the same 404 as a
+missing project (existence hiding); `GET` needs `read`, `PATCH` needs `edit`, and
+member/invite mutation needs `manage`.
