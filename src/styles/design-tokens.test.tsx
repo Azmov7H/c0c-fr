@@ -11,7 +11,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
-import postcss from 'postcss';
+import postcss, { type AcceptedPlugin } from 'postcss';
 import tailwindcss from '@tailwindcss/postcss';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -28,7 +28,10 @@ const PRE_PAINT_TSX = path.join(ROOT, 'src/components/theme-pre-paint-script.tsx
 
 async function compileGlobalsCss(): Promise<string> {
     const source = readFileSync(GLOBALS_CSS, 'utf8');
-    const result = await postcss([tailwindcss()]).process(source, {
+    // The Tailwind plugin's bundled postcss types can resolve to a second copy
+    // under pnpm; cast at the boundary so the test checks CSS behaviour, not
+    // package-manager deduplication.
+    const result = await postcss([tailwindcss() as unknown as AcceptedPlugin]).process(source, {
         from: GLOBALS_CSS,
     });
     return result.css;

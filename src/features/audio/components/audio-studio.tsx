@@ -150,14 +150,24 @@ export function AudioStudio() {
                         </div>
                         {suggestion.tracks.map((track) => (
                             <div key={`${suggestion.id}-${track.title}`} className="flex items-center justify-between rounded-xl border border-border/50 p-4">
-                                <div className="flex items-center gap-3">
-                                    <Button variant="secondary" size="icon" className="size-11 shrink-0" aria-label={`Play ${track.title}`}>
-                                        <Play className="size-4 translate-x-0.5 fill-current" aria-hidden="true" />
-                                    </Button>
-                                    <div>
-                                        <p className="text-sm font-semibold">{track.title}</p>
+                                <div className="flex min-w-0 flex-1 items-center gap-3">
+                                    {track.url ? (
+                                        <audio
+                                            controls
+                                            preload="none"
+                                            src={track.url}
+                                            aria-label={`Play ${track.title}`}
+                                            className="h-9 w-48 shrink-0"
+                                        />
+                                    ) : (
+                                        <Button variant="secondary" size="icon" className="size-11 shrink-0" aria-label={`Play ${track.title}`}>
+                                            <Play className="size-4 translate-x-0.5 fill-current" aria-hidden="true" />
+                                        </Button>
+                                    )}
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-semibold">{track.title}</p>
                                         <p className="text-xs text-muted-foreground">
-                                            {track.genre} · {track.bpm} BPM
+                                            {track.genre}{track.bpm > 0 ? ` · ${track.bpm} BPM` : ''}
                                         </p>
                                     </div>
                                 </div>
