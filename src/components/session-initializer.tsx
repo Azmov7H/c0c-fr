@@ -16,6 +16,14 @@ import { useAuthStore } from '@/store/auth-store';
  */
 const AUTH_FLOW_PAGES = ['/login', '/signup', '/forgot-password', '/reset-password', '/verify-email'];
 
+/**
+ * Invite links are opened by people who may not have an account yet, and by
+ * signed-in users who have not finished onboarding. Neither should be redirected
+ * away from the accept page: the first needs to see what they were invited to,
+ * the second must be able to accept before doing onboarding.
+ */
+const isInvitePage = (pathname: string | null): boolean => Boolean(pathname?.startsWith('/invites'));
+
 /** Of those, pages where a signed-in user has no business being. */
 const REDIRECT_WHEN_AUTHENTICATED = ['/login', '/signup', '/forgot-password'];
 
@@ -39,7 +47,7 @@ export function SessionInitializer() {
                     // T13 gate: incomplete users are routed to the wizard,
                     // finished users away from it. The helper returns null on
                     // /onboarding itself, which is what prevents a loop.
-                    const gate = onboardingRedirect({
+                    const gate = isInvitePage(pathname) ? null : onboardingRedirect({
                         pathname,
                         search: window.location.search,
                         authenticated: true,
@@ -62,7 +70,9 @@ export function SessionInitializer() {
                     }
                 } else {
                     setUser(null);
-                    const isAuthFlowPage = AUTH_FLOW_PAGES.some((p) => pathname?.startsWith(p));
+                    const isAuthFlowPage =
+                        AUTH_FLOW_PAGES.some((p) => pathname?.startsWith(p)) ||
+                        isInvitePage(pathname);
                     if (!isAuthFlowPage) {
                         const cb = safeCallbackUrl(pathname);
                         router.replace(`/login${cb ? `?callbackUrl=${encodeURIComponent(cb)}` : ''}`);

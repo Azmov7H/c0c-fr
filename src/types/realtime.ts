@@ -37,6 +37,29 @@ export interface AudioGeneratedPayload {
     audioId: string;
 }
 
+export interface ProjectUpdatedPayload {
+    projectId: string;
+    userId: string;
+}
+
+export interface MemberChangedPayload {
+    projectId: string;
+    userId?: string;
+    addedBy?: string;
+    removedBy?: string;
+    changedBy?: string;
+    role?: string;
+}
+
+export interface InviteChangedPayload {
+    projectId: string;
+    inviteId: string;
+    email?: string;
+    invitedBy?: string;
+    userId?: string;
+    role?: string;
+}
+
 export interface RoomErrorPayload {
     code: string;
     message: string;
@@ -54,6 +77,13 @@ export interface ServerToClientEvents {
     'script:generated': (data: ScriptGeneratedPayload) => void;
     'thumbnail:generated': (data: ThumbnailGeneratedPayload) => void;
     'audio:generated': (data: AudioGeneratedPayload) => void;
+    'project:updated': (data: ProjectUpdatedPayload) => void;
+    'project.member_added': (data: MemberChangedPayload) => void;
+    'project.member_removed': (data: MemberChangedPayload) => void;
+    'project.member_role_changed': (data: MemberChangedPayload) => void;
+    'project.invite_created': (data: InviteChangedPayload) => void;
+    'project.invite_accepted': (data: InviteChangedPayload) => void;
+    'project.invite_revoked': (data: InviteChangedPayload) => void;
     'room:error': (data: RoomErrorPayload) => void;
     pong: () => void;
     error: (message: string) => void;
