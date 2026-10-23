@@ -64,7 +64,7 @@ describe('MembersTab', () => {
         renderTab('owner');
 
         expect(screen.getByText('Member limit reached')).toBeTruthy();
-        expect(screen.getByText(/1 of 1 collaborator/)).toBeTruthy();
+        expect(screen.getAllByText(/1 of 1 collaborator/).length).toBeGreaterThan(0);
         expect(screen.getByRole('link', { name: /upgrade your plan/i }).getAttribute('href')).toBe(
             '/settings/billing'
         );

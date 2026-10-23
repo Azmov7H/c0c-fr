@@ -1,12 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { Loader2, Music, Play, Sparkles, Waves } from 'lucide-react';
 
 import { PageHeader } from '@/components/shared/page-header';
 import { TwoPanelLayout } from '@/components/shared/two-panel-layout';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -23,6 +21,9 @@ import { useGenerateAudio, useProjectAudio } from '@/features/audio/hooks/use-au
 import { useProjects } from '@/features/projects/hooks/use-projects';
 import { toApiError } from '@/lib/api-error';
 import { cn } from '@/lib/utils';
+import { UpgradePrompt } from '@/features/billing/components/upgrade-prompt';
+import { useBillingSummary } from '@/features/billing/hooks/use-billing';
+import { quotaFor, usageFor } from '@/features/billing/lib/entitlements';
 
 const MOODS = [
     { id: 'energetic', label: 'Energetic & Fast', description: 'High tempo, impactful beats' },
@@ -36,6 +37,9 @@ export function AudioStudio() {
     const [projectId, setProjectId] = useState('');
     const [mood, setMood] = useState('energetic');
     const [quotaError, setQuotaError] = useState<string | null>(null);
+    const billing = useBillingSummary();
+    const aiUsage = usageFor(billing.data, 'ai.generation');
+    const aiLimit = aiUsage?.limit ?? quotaFor(billing.data, 'ai.generation');
 
     const activeProjectId = projectId || projects.data?.data[0]?._id || '';
     const audio = useProjectAudio(activeProjectId);
@@ -118,15 +122,15 @@ export function AudioStudio() {
     const rightContent = (
         <div className="space-y-3">
             {quotaError && (
-                <Alert>
-                    <AlertTitle>Generation quota reached</AlertTitle>
-                    <AlertDescription className="flex flex-wrap items-center gap-3">
-                        {quotaError}
-                        <Button asChild className="h-11">
-                            <Link href="/settings/billing">Upgrade for more generations</Link>
-                        </Button>
-                    </AlertDescription>
-                </Alert>
+                <UpgradePrompt
+                    title="Generation quota reached"
+                    description={quotaError}
+                    ctaLabel="Upgrade for more generations"
+                    feature="ai.generation"
+                    used={aiUsage?.used}
+                    limit={aiLimit}
+                    resetAt={aiUsage?.resetAt}
+                />
             )}
             {!activeProjectId ? (
                 <p className="text-sm text-muted-foreground">Create a project first to generate audio.</p>

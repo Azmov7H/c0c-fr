@@ -1,4 +1,4 @@
-import type { Platform, UserPlan } from '@/types';
+import type { Platform } from '@/types';
 
 /**
  * Dashboard widget registry and layout rules (T14).
@@ -90,8 +90,11 @@ export interface WidgetLock {
  * Hiding a feature from someone who cannot use it teaches them nothing and
  * removes the only reason they would ever pay for it (card §2).
  */
-export function widgetLock(id: DashboardWidgetId, plan: UserPlan | undefined): WidgetLock {
-    if (id === 'analytics' && plan === 'starter') {
+export function widgetLock(
+    id: DashboardWidgetId,
+    entitled: boolean | undefined
+): WidgetLock {
+    if (id === 'analytics' && entitled === false) {
         return {
             locked: true,
             reason: 'Creation analytics is available on Pro and Studio plans.',

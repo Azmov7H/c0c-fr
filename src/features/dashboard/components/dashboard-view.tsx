@@ -11,7 +11,6 @@ import {
   Flame,
   LayoutDashboard,
   Lightbulb,
-  Lock,
   Plus,
   RotateCcw,
   Settings2,
@@ -36,7 +35,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { DataState } from "@/components/shared/data-state"
 import { PageHeader } from "@/components/shared/page-header"
-import { useAuthStore } from "@/store/auth-store"
 import type { Platform, Project, ProjectStatus } from "@/types"
 
 import {
@@ -47,6 +45,9 @@ import {
   useUpdateDashboardPreferences,
 } from "../hooks/use-dashboard"
 import { useProjects } from "@/features/projects/hooks/use-projects"
+import { useBillingSummary } from "@/features/billing/hooks/use-billing"
+import { hasFeature } from "@/features/billing/lib/entitlements"
+import { UpgradePrompt } from "@/features/billing/components/upgrade-prompt"
 import { useForMeTrendFeed } from "@/features/trends/hooks/use-trends"
 import type { RecentActivityItem } from "../services/dashboard.service"
 import {
@@ -698,17 +699,12 @@ function AnalyticsWidget({ lockedReason, upgradeHref }: { lockedReason?: string;
   // otherwise "no activity yet" would hide the actual reason it is unavailable.
   if (lockedReason) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border/60 p-6 text-center">
-        <div className="rounded-full bg-muted p-3">
-          <Lock className="size-5 text-muted-foreground" aria-hidden="true" />
-        </div>
-        <p className="text-sm font-medium">{lockedReason}</p>
-        <Link href={upgradeHref ?? "/settings/billing"}>
-          <Button size="sm" variant="outline">
-            See plans
-          </Button>
-        </Link>
-      </div>
+      <UpgradePrompt
+        title={lockedReason}
+        description="Upgrade to unlock the creation-trend chart and keep this widget visible."
+        feature="analytics.advanced"
+        href={upgradeHref ?? "/settings/billing"}
+      />
     )
   }
 
@@ -833,11 +829,14 @@ export function DashboardView() {
   const statsQuery = useDashboardStats()
   const preferencesQuery = useDashboardPreferences()
   const updatePreferences = useUpdateDashboardPreferences()
-  const plan = useAuthStore((state) => state.user?.plan)
+  const billing = useBillingSummary()
 
   const preferences = preferencesQuery.data ?? EMPTY_PREFERENCES
   const widgets = visibleWidgets(preferences)
-  const { locked, reason, upgradeHref } = widgetLock("analytics", plan)
+  const { locked, reason, upgradeHref } = widgetLock(
+    "analytics",
+    hasFeature(billing.data, "analytics.advanced")
+  )
 
   const toggleWidget = (id: DashboardWidgetId, shouldHide: boolean) => {
     const next = shouldHide

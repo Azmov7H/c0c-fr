@@ -49,6 +49,10 @@ const mocks = vi.hoisted(() => ({
         isError: false,
         refetch: vi.fn(),
     },
+    billing: {
+        data: { features: ['analytics.advanced'] as string[] },
+        isLoading: false,
+    },
 }));
 
 vi.mock('next/dynamic', () => ({
@@ -74,6 +78,10 @@ vi.mock('@/features/projects/hooks/use-projects', () => ({
 
 vi.mock('@/features/trends/hooks/use-trends', () => ({
     useForMeTrendFeed: () => mocks.trends,
+}));
+
+vi.mock('@/features/billing/hooks/use-billing', () => ({
+    useBillingSummary: () => mocks.billing,
 }));
 
 const STATS: DashboardStats = {
@@ -124,6 +132,11 @@ function setDefaults() {
     mocks.trends.data = { topics: [] };
     mocks.trends.isLoading = false;
     mocks.trends.isError = false;
+    mocks.billing.data = { features: ['analytics.advanced'] };
+}
+
+function lockAnalytics() {
+    mocks.billing.data = { features: [] };
 }
 
 afterEach(() => {
@@ -202,6 +215,7 @@ describe('DashboardView', () => {
 
     it('shows a locked analytics widget with the reason and upgrade link', () => {
         setDefaults();
+        lockAnalytics();
         render(<DashboardView />);
 
         expect(screen.getByText(/Creation analytics is available on Pro/i)).toBeTruthy();

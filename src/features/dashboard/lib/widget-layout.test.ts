@@ -51,11 +51,12 @@ describe('dashboard widget layout', () => {
     });
 
     it('keeps locked widgets visible with a reason and upgrade path', () => {
-        expect(widgetLock('analytics', 'starter')).toMatchObject({
+        expect(widgetLock('analytics', false)).toMatchObject({
             locked: true,
             upgradeHref: '/settings/billing',
         });
-        expect(widgetLock('analytics', 'pro').locked).toBe(false);
+        expect(widgetLock('analytics', true).locked).toBe(false);
+        expect(widgetLock('analytics', undefined).locked).toBe(false);
     });
 
     it('drops unknown ids from persisted preferences', () => {

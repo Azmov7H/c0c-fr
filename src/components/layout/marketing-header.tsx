@@ -35,7 +35,7 @@ export function MarketingHeader() {
                     <Link href="/#how-it-works" className="transition-colors hover:text-foreground/80 text-foreground/60">
                         How it works
                     </Link>
-                    <Link href="/#pricing" className="transition-colors hover:text-foreground/80 text-foreground/60">
+                    <Link href="/pricing" className="transition-colors hover:text-foreground/80 text-foreground/60">
                         Pricing
                     </Link>
                 </nav>

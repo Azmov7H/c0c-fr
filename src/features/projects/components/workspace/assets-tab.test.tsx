@@ -54,6 +54,22 @@ vi.mock('@/features/thumbnails/components/thumbnail-generator', () => ({
     ThumbnailGenerator: () => <div>thumbnail generator</div>,
 }));
 
+vi.mock('@/features/billing/hooks/use-billing', () => ({
+    useBillingSummary: () => ({
+        data: {
+            usage: [
+                {
+                    feature: 'ai.generation',
+                    used: 3,
+                    limit: 3,
+                    resetAt: '2026-11-01T00:00:00.000Z',
+                },
+            ],
+            quota: { 'ai.generation': 3 },
+        },
+    }),
+}));
+
 describe('AssetsTab', () => {
     afterEach(() => {
         cleanup();
