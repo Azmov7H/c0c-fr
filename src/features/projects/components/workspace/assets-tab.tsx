@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import Link from 'next/link';
 import {
     FileText,
     Image as ImageIcon,
@@ -9,11 +8,9 @@ import {
     Music,
     Search,
     Sparkles,
-    TriangleAlert,
     Upload,
 } from 'lucide-react';
 
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,6 +26,9 @@ import { formatRelativeTime } from '@/lib/relative-time';
 import type { ProjectRole } from '../../types';
 import { can } from '../../lib/permissions';
 import { ThumbnailGenerator } from '@/features/thumbnails/components/thumbnail-generator';
+import { UpgradePrompt } from '@/features/billing/components/upgrade-prompt';
+import { useBillingSummary } from '@/features/billing/hooks/use-billing';
+import { quotaFor, usageFor } from '@/features/billing/lib/entitlements';
 
 const isQuotaError = (error: unknown): boolean => {
     const apiError = toApiError(error, '');
@@ -107,6 +107,9 @@ function GroupCard({
 export function AssetsTab({ projectId, role }: { projectId: string; role: ProjectRole }) {
     const mayEdit = can(role, 'edit');
     const [quotaError, setQuotaError] = useState<string | null>(null);
+    const billing = useBillingSummary();
+    const aiUsage = usageFor(billing.data, 'ai.generation');
+    const aiLimit = aiUsage?.limit ?? quotaFor(billing.data, 'ai.generation');
 
     const scripts = useProjectScripts(projectId);
     const thumbnails = useProjectThumbnails(projectId);
@@ -142,16 +145,16 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
     return (
         <div className="space-y-6">
             {quotaError && (
-                <Alert>
-                    <TriangleAlert />
-                    <AlertTitle>Generation quota reached</AlertTitle>
-                    <AlertDescription className="flex flex-wrap items-center gap-3">
-                        {quotaError}
-                        <Button asChild className="h-11">
-                            <Link href="/settings/billing">Upgrade for more generations</Link>
-                        </Button>
-                    </AlertDescription>
-                </Alert>
+                <UpgradePrompt
+                    title="Generation quota reached"
+                    description={quotaError}
+                    ctaLabel="Upgrade for more generations"
+                    feature="ai.generation"
+                    used={aiUsage?.used}
+                    limit={aiLimit}
+                    resetAt={aiUsage?.resetAt}
+                    className="items-start text-left"
+                />
             )}
 
             <div className="grid gap-6 md:grid-cols-2">

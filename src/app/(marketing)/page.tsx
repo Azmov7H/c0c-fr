@@ -8,6 +8,7 @@ import { Collaboration } from '@/features/landing/components/collaboration';
 import { Proof } from '@/features/landing/components/proof';
 import { PricingTeaser } from '@/features/landing/components/pricing-teaser';
 import { FinalCta } from '@/features/landing/components/final-cta';
+import { PLAN_CATALOGUE, PLAN_IDS } from '@/features/billing/lib/plans';
 
 const SITE_URL = 'https://aicontentengine.com';
 
@@ -34,12 +35,6 @@ export const metadata: Metadata = {
     },
 };
 
-/**
- * SoftwareApplication JSON-LD with `offers` deliberately omitted: public
- * prices are not final (T11 decision — tiers are shown without dollar
- * figures), and publishing wrong prices in structured data is worse than
- * publishing none. `offers` goes in when the pricing matrix is final.
- */
 const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
@@ -49,6 +44,17 @@ const jsonLd = {
     url: SITE_URL,
     description:
         'Generate thumbnails, scripts, sound effects and images for video creators — in one project workspace.',
+    offers: PLAN_IDS.map((id) => {
+        const plan = PLAN_CATALOGUE[id];
+        return {
+            '@type': 'Offer',
+            name: plan.name,
+            price: (plan.monthlyPriceCents / 100).toFixed(0),
+            priceCurrency: 'USD',
+            category: plan.monthlyPriceCents === 0 ? 'free' : 'subscription',
+            url: `${SITE_URL}/pricing`,
+        };
+    }),
 };
 
 /**

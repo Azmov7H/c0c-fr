@@ -13,14 +13,3 @@ export interface LandingAsset {
     description: string;
     icon: LucideIcon;
 }
-
-export interface PlanTier {
-    id: 'starter' | 'pro' | 'studio';
-    name: string;
-    /** Who the tier is for, in one line. */
-    audience: string;
-    features: readonly string[];
-    highlighted?: boolean;
-    /** "Free forever" / "Paid plans announced at launch" — never a number. */
-    priceNote: string;
-}

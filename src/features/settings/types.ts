@@ -14,5 +14,3 @@ export interface UpdateProfileDTO {
     lastName?: string;
     email?: string;
 }
-
-// SEC-06: UpdatePlanDTO removed — no self-service plan mutation surface.

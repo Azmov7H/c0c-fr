@@ -34,5 +34,3 @@ export const useUpdateProfile = () => {
         },
     });
 };
-
-// SEC-06: useUpdatePlan removed — plans are read-only in the UI.

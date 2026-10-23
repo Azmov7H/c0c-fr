@@ -15,8 +15,6 @@ class SettingsService {
         return response.data.data;
     }
 
-    // SEC-06: self-service plan mutation removed. Plans are read-only;
-    // changes go through billing/support (admin route).
 }
 
 export const settingsService = new SettingsService();

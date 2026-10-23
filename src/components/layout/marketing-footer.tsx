@@ -28,7 +28,7 @@ export function MarketingFooter() {
                         <ul className="space-y-3 text-sm text-muted-foreground">
                             <li><Link href="/#assets" className="hover:text-foreground">The four assets</Link></li>
                             <li><Link href="/#how-it-works" className="hover:text-foreground">How it works</Link></li>
-                            <li><Link href="/#pricing" className="hover:text-foreground">Pricing</Link></li>
+                            <li><Link href="/pricing" className="hover:text-foreground">Pricing</Link></li>
                         </ul>
                     </div>
                     <div className="space-y-4">

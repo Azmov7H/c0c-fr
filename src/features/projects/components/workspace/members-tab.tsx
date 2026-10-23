@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
-import Link from 'next/link';
 import {
     Check,
     Clock,
@@ -19,6 +18,7 @@ import {
 import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { UpgradePrompt } from '@/features/billing/components/upgrade-prompt';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -295,18 +295,14 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {atLimit && (
-                        <Alert>
-                            <ShieldAlert />
-                            <AlertTitle>Member limit reached</AlertTitle>
-                            <AlertDescription>
-                                This project can have {data.memberLimit} collaborator{data.memberLimit === 1 ? '' : 's'} on its current plan.
-                                {' '}
-                                <Link href="/settings/billing" className="font-medium underline underline-offset-4">
-                                    Upgrade your plan
-                                </Link>{' '}
-                                to invite more people.
-                            </AlertDescription>
-                        </Alert>
+                        <UpgradePrompt
+                            title="Member limit reached"
+                            description={`This project can have ${data.memberLimit} collaborator${data.memberLimit === 1 ? '' : 's'} on its current plan. ${data.usedSlots} of ${data.memberLimit} collaborator slots are in use.`}
+                            ctaLabel="Upgrade your plan"
+                            feature="project.members"
+                            used={data.usedSlots}
+                            limit={data.memberLimit}
+                        />
                     )}
                     {!mayManage && (
                         <p className="text-sm text-muted-foreground">
