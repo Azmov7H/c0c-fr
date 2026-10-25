@@ -85,6 +85,73 @@ describe('BFF /api/auth/register', () => {
         expect(installed.calls).toHaveLength(0);
     });
 
+    it('backend !ok with a body lacking an error envelope → REGISTER_FAILED fallback, status kept', async () => {
+        backend.install([
+            {
+                status: 500,
+                body: { success: false }, // no error object — gateway-style body
+            },
+        ]);
+
+        const res = await POST(makeRequest({ body: VALID_BODY }));
+
+        expect(res.status).toBe(500);
+        await expect(res.json()).resolves.toMatchObject({
+            success: false,
+            error: { code: 'REGISTER_FAILED', message: 'Failed to create account.' },
+        });
+    });
+
+    it('backend transport failure → 500 SERVER_ERROR envelope (never an unhandled throw)', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(async () => {
+                throw new Error('ECONNREFUSED');
+            })
+        );
+
+        const res = await POST(makeRequest({ body: VALID_BODY }));
+
+        expect(res.status).toBe(500);
+        await expect(res.json()).resolves.toMatchObject({
+            success: false,
+            error: { code: 'SERVER_ERROR', message: 'Failed to process registration.' },
+        });
+    });
+
+    it('a success without any refresh cookie still issues the session cookie', async () => {
+        backend.install([
+            {
+                status: 201,
+                body: { success: true, data: { user: { id: 'u1' }, accessToken: 'a1' } },
+            },
+        ]);
+
+        const res = await POST(makeRequest({ body: VALID_BODY }));
+
+        const cookies = cookiesOf(res);
+        expect(cookies.find((c) => c.name === sessionName)?.value).toBe('a1');
+        expect(cookies.find((c) => c.name === refreshName)).toBeUndefined();
+    });
+
+    it('rejects an oversized body before reading or proxying it (413, backend untouched)', async () => {
+        const installed = backend.install([]);
+
+        const res = await POST(
+            makeRequest({
+                body: { ...VALID_BODY, pad: 'x' },
+                headers: { 'content-length': String(64 * 1024 + 1) },
+            })
+        );
+
+        expect(res.status).toBe(413);
+        await expect(res.json()).resolves.toMatchObject({
+            success: false,
+            error: { code: 'PAYLOAD_TOO_LARGE' },
+        });
+        expect(installed.calls).toHaveLength(0);
+    });
+
     it('GET is a 405 naming POST', () => {
         expect(GET().status).toBe(405);
     });

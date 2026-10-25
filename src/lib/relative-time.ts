@@ -47,5 +47,9 @@ export function formatRelativeTime(
         }
     }
 
+    // The loop above always returns via the unconditional 'second' guard (its
+    // magnitude term is a strict subset), so this fallback is unreachable by
+    // construction — kept only to satisfy the function's return type.
+    // v8 ignore next -- provably dead branch, not skipped logic
     return { relative: 'just now', absolute: absoluteFormatter.format(date) };
 }

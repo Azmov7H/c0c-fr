@@ -43,6 +43,7 @@ export function makeRequest(opts: {
     method?: 'GET' | 'POST';
     cookies?: Record<string, string>;
     body?: unknown;
+    headers?: Record<string, string>;
 }): NextRequest {
     const cookieHeader = opts.cookies
         ? Object.entries(opts.cookies)
@@ -54,6 +55,7 @@ export function makeRequest(opts: {
         headers: {
             ...(cookieHeader ? { Cookie: cookieHeader } : {}),
             'Content-Type': 'application/json',
+            ...(opts.headers ?? {}),
         },
         body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
     });

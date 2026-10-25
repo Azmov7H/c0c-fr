@@ -76,6 +76,31 @@ describe('BFF /api/auth/forgot-password', () => {
         expect(body.error.reference).toMatch(/^AUTH-[0-9a-f]{8}$/);
     });
 
+    it('rejects an oversized body (413) before any backend call', async () => {
+        const installed = backend.install([]);
+
+        const res = await POST(
+            makeRequest({
+                body: { email: 'a@b.c', pad: 'x' },
+                headers: { 'content-length': String(64 * 1024 + 1) },
+            })
+        );
+
+        expect(res.status).toBe(413);
+        expect(installed.calls).toHaveLength(0);
+    });
+
+    it('a backend success response without a data payload surfaces null', async () => {
+        backend.install([{ status: 200, body: { success: true } }]);
+
+        const res = await POST(makeRequest({ body: { email: 'real@example.com' } }));
+
+        expect(res.status).toBe(200);
+        const body = await res.json();
+        expect(body.success).toBe(true);
+        expect(body.data).toBe(null);
+    });
+
     it('GET is a 405 naming POST', async () => {
         const res = GET();
         expect(res.status).toBe(405);

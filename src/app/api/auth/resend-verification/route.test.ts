@@ -52,6 +52,66 @@ describe('BFF /api/auth/resend-verification', () => {
         expect(body.error.reference).toMatch(/^AUTH-[0-9a-f]{8}$/);
     });
 
+    it('an unauthenticated POST → 401 before anything else (no proxying without a session)', async () => {
+        const installed = backend.install([]);
+
+        const res = await POST(makeRequest({ body: {} }));
+
+        expect(res.status).toBe(401);
+        await expect(res.json()).resolves.toMatchObject({
+            success: false,
+            error: { code: 'UNAUTHORIZED' },
+        });
+        expect(installed.calls).toHaveLength(0);
+    });
+
+    it('rejects an oversized body (413) even with a valid session cookie', async () => {
+        backend.install([]);
+
+        const res = await POST(
+            makeRequest({
+                cookies: { [sessionName]: 'access-abc' },
+                body: { pad: 'x' },
+                headers: { 'content-length': String(64 * 1024 + 1) },
+            })
+        );
+
+        expect(res.status).toBe(413);
+        await expect(res.json()).resolves.toMatchObject({
+            success: false,
+            error: { code: 'PAYLOAD_TOO_LARGE' },
+        });
+    });
+
+    it('a body the schema rejects → 400, backend never called', async () => {
+        const installed = backend.install([]);
+
+        const res = await POST(
+            makeRequest({ cookies: { [sessionName]: 'access-abc' }, body: { junk: 'x' } })
+        );
+
+        expect(res.status).toBe(400);
+        expect(installed.calls).toHaveLength(0);
+    });
+
+    it('an upstream transport failure → 500 SERVER_ERROR with an AUTH reference (relayUnreachable)', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(async () => {
+                throw new Error('ECONNREFUSED');
+            })
+        );
+
+        const res = await POST(
+            makeRequest({ cookies: { [sessionName]: 'access-abc' }, body: {} })
+        );
+
+        expect(res.status).toBe(500);
+        const body = await res.json();
+        expect(body.error.code).toBe('SERVER_ERROR');
+        expect(body.error.reference).toMatch(/^AUTH-[0-9a-f]{8}$/);
+    });
+
     it('GET is a 405 naming POST', () => {
         expect(GET().status).toBe(405);
     });

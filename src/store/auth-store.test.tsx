@@ -41,6 +41,33 @@ afterEach(() => {
 });
 
 describe('auth-store logout (T10 AC6)', () => {
+    it('setUser both signs a user in and clears them, driving isAuthenticated/isLoading', () => {
+        useAuthStore.setState({ user: null, isAuthenticated: false, isLoading: true });
+
+        act(() => {
+            useAuthStore.getState().setUser(mockUser);
+        });
+        expect(useAuthStore.getState()).toMatchObject({
+            user: mockUser,
+            isAuthenticated: true,
+            isLoading: false,
+        });
+
+        // Session initializer (or a BFF session probe) found no session.
+        act(() => {
+            useAuthStore.getState().setUser(null);
+        });
+        expect(useAuthStore.getState().isAuthenticated).toBe(false);
+        expect(useAuthStore.getState().user).toBeNull();
+    });
+
+    it('setLoading lets the initializer suspend without touching identity', () => {
+        useAuthStore.setState({ isLoading: false, user: mockUser, isAuthenticated: true });
+        useAuthStore.getState().setLoading(true);
+        expect(useAuthStore.getState().isLoading).toBe(true);
+        expect(useAuthStore.getState().user).toBe(mockUser);
+    });
+
     it('clears every cached query when signing out', async () => {
         const queryClient = getQueryClient();
         queryClient.setQueryData(['projects'], [{ id: 'secret-project' }]);

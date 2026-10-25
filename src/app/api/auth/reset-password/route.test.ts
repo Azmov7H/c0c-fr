@@ -90,6 +90,47 @@ describe('BFF /api/auth/reset-password', () => {
         expect(installed.calls).toHaveLength(0);
     });
 
+    it('rejects an oversized body (413) before any backend call', async () => {
+        const installed = backend.install([]);
+
+        const res = await POST(
+            makeRequest({
+                body: { token: VALID_TOKEN, newPassword: 'NewPass1', pad: 'x' },
+                headers: { 'content-length': String(64 * 1024 + 1) },
+            })
+        );
+
+        expect(res.status).toBe(413);
+        expect(installed.calls).toHaveLength(0);
+    });
+
+    it('a backend success response without a data payload surfaces null as data', async () => {
+        backend.install([{ status: 200, body: { success: true } }]);
+
+        const res = await POST(makeRequest({ body: { token: VALID_TOKEN, newPassword: 'NewPass1' } }));
+
+        expect(res.status).toBe(200);
+        const body = await res.json();
+        expect(body.success).toBe(true);
+        expect(body.data).toBe(null);
+    });
+
+    it('an upstream transport failure → 500 SERVER_ERROR with an AUTH reference (relayUnreachable)', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(async () => {
+                throw new Error('ECONNREFUSED');
+            })
+        );
+
+        const res = await POST(makeRequest({ body: { token: VALID_TOKEN, newPassword: 'NewPass1' } }));
+
+        expect(res.status).toBe(500);
+        const body = await res.json();
+        expect(body.error.code).toBe('SERVER_ERROR');
+        expect(body.error.reference).toMatch(/^AUTH-[0-9a-f]{8}$/);
+    });
+
     it('GET is a 405 naming POST', () => {
         expect(GET().status).toBe(405);
     });

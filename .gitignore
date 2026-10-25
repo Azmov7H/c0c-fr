@@ -40,3 +40,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# T18 e2e artifacts (session tokens, fixture ids, run temp dirs)
+/tests/e2e/.auth/
+/tests/e2e/.run/
+/tests/e2e/fixtures.json
+/test-results/
+/playwright-report/
