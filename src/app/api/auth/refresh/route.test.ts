@@ -65,4 +65,56 @@ describe('BFF /api/auth/refresh', () => {
         expect(cookies.find((c) => c.name === sessionName)?.value).toBe('');
         expect(cookies.find((c) => c.name === refreshName)?.value).toBe('');
     });
+
+    it('rejects an oversized body before touching the refresh leg (413)', async () => {
+        const installed = backend.install([]);
+
+        const res = await POST(
+            makeRequest({
+                cookies: { [refreshName]: 'r-1' },
+                body: { pad: 'x' },
+                headers: { 'content-length': String(64 * 1024 + 1) },
+            })
+        );
+
+        expect(res.status).toBe(413);
+        await expect(res.json()).resolves.toMatchObject({
+            success: false,
+            error: { code: 'PAYLOAD_TOO_LARGE' },
+        });
+        expect(installed.calls).toHaveLength(0);
+    });
+
+    it('a refreshed session whose backend gave NO replacement refresh token does NOT re-set the refresh cookie', async () => {
+        backend.install([
+            {
+                status: 200,
+                body: { success: true, data: { accessToken: 'a2' } }, // no refreshToken field
+            },
+        ]);
+
+        const res = await POST(makeRequest({ cookies: { [refreshName]: 'r-old' } }));
+
+        expect(res.status).toBe(200);
+        const cookies = cookiesOf(res);
+        expect(cookies.find((c) => c.name === sessionName)?.value).toBe('a2');
+        expect(cookies.find((c) => c.name === refreshName)).toBeUndefined(); // not re-issued
+    });
+
+    it('a backend transport failure during refresh → 500 SERVER_ERROR envelope', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(async () => {
+                throw new Error('ECONNREFUSED');
+            })
+        );
+
+        const res = await POST(makeRequest({ cookies: { [refreshName]: 'r-1' } }));
+
+        expect(res.status).toBe(500);
+        await expect(res.json()).resolves.toMatchObject({
+            success: false,
+            error: { code: 'SERVER_ERROR', message: 'Failed to refresh session.' },
+        });
+    });
 });

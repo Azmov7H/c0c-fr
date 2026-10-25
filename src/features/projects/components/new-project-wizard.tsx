@@ -370,16 +370,29 @@ function WizardForm({
                         </Button>
 
                         {step < 3 ? (
+                            // key: React MUST mount a fresh node here instead of patching
+                            // the button in place — one pending click's default action was
+                            // re-evaluated against the patched-in type="submit" (T18 probe:
+                            // a step-2 Continue created the project without anyone pressing
+                            // Create). Distinct keys force the node swap instead.
                             <Button
+                                key="continue"
                                 type="button"
                                 className="h-11 sm:px-8"
-                                onClick={() => void nextStep()}
+                                onClick={(event) => {
+                                    // Belt: a type="button" has no default action — but the
+                                    // element sits in a form next to a type="submit" sibling,
+                                    // so the belt costs nothing.
+                                    event.preventDefault();
+                                    void nextStep();
+                                }}
                             >
                                 {primaryLabel}
                                 <ArrowRight className="ml-2 size-4" aria-hidden="true" />
                             </Button>
                         ) : (
                             <Button
+                                key="create"
                                 type="submit"
                                 className="h-11 max-w-full sm:px-8"
                                 disabled={create.isPending}

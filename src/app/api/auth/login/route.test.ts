@@ -101,4 +101,67 @@ describe('BFF /api/auth/login', () => {
         const res = await POST(makeRequest({ body: { email: 'a@b.c' } }));
         expect(res.status).toBe(400);
     });
+
+    it('rejects an oversized body before reading or proxying it (413, backend untouched)', async () => {
+        const installed = backend.install([]);
+
+        const res = await POST(
+            makeRequest({
+                body: { email: 'a@b.c', password: 'Password123', pad: 'x' },
+                headers: { 'content-length': String(64 * 1024 + 1) },
+            })
+        );
+
+        expect(res.status).toBe(413);
+        await expect(res.json()).resolves.toMatchObject({
+            success: false,
+            error: { code: 'PAYLOAD_TOO_LARGE' },
+        });
+        expect(installed.calls).toHaveLength(0);
+    });
+
+    it('a backend failure WITHOUT an error envelope falls back to LOGIN_FAILED', async () => {
+        backend.install([{ status: 400, body: { success: false } }]);
+
+        const res = await POST(makeRequest({ body: { email: 'a@b.c', password: 'Password123' } }));
+
+        expect(res.status).toBe(400);
+        await expect(res.json()).resolves.toMatchObject({
+            success: false,
+            error: { code: 'LOGIN_FAILED', message: 'Invalid credentials.' },
+        });
+    });
+
+    it('a success without any refresh token still issues the session cookie (and nothing else)', async () => {
+        backend.install([
+            {
+                status: 200,
+                body: { success: true, data: { user: { id: 'u1' }, accessToken: 'a1' } },
+            },
+        ]);
+
+        const res = await POST(makeRequest({ body: { email: 'a@b.c', password: 'Password123' } }));
+
+        expect(res.status).toBe(200);
+        const cookies = cookiesOf(res);
+        expect(cookies.find((c) => c.name === sessionName)?.value).toBe('a1');
+        expect(cookies.find((c) => c.name === refreshName)).toBeUndefined();
+    });
+
+    it('a backend transport failure → 500 SERVER_ERROR envelope (never an unhandled throw)', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(async () => {
+                throw new Error('ECONNREFUSED');
+            })
+        );
+
+        const res = await POST(makeRequest({ body: { email: 'a@b.c', password: 'Password123' } }));
+
+        expect(res.status).toBe(500);
+        await expect(res.json()).resolves.toMatchObject({
+            success: false,
+            error: { code: 'SERVER_ERROR', message: 'Failed to process login request.' },
+        });
+    });
 });

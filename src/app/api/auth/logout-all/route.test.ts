@@ -57,6 +57,24 @@ describe('BFF /api/auth/logout-all', () => {
         expect(headers.Authorization).toBe('Bearer access-abc');
     });
 
+    it('rejects an oversized body before any backend revocation list call (413)', async () => {
+        const installed = backend.install([]);
+
+        const res = await POST(
+            makeRequest({
+                body: { pad: 'x' },
+                headers: { 'content-length': String(64 * 1024 + 1) },
+            })
+        );
+
+        expect(res.status).toBe(413);
+        await expect(res.json()).resolves.toMatchObject({
+            success: false,
+            error: { code: 'PAYLOAD_TOO_LARGE' },
+        });
+        expect(installed.calls).toHaveLength(0);
+    });
+
     it('GET is a 405 naming POST', () => {
         expect(GET().status).toBe(405);
     });

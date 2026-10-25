@@ -4,8 +4,20 @@ import {
     ONBOARDING_PATH,
     defaultPostAuthTarget,
     isOnboardingEditMode,
+    isOnboardingIncomplete,
     onboardingRedirect,
 } from './onboarding-gate';
+
+describe('isOnboardingIncomplete', () => {
+    it('true exactly when onboardingCompleted is false (in-progress state)', () => {
+        expect(isOnboardingIncomplete({ onboardingCompleted: false } as never)).toBe(true);
+    });
+
+    it('completed users, missing users and undefined are NOT incomplete', () => {
+        expect(isOnboardingIncomplete({ onboardingCompleted: true } as never)).toBe(false);
+        expect(isOnboardingIncomplete(undefined)).toBe(false);
+    });
+});
 
 describe('onboardingRedirect (T13 gate)', () => {
     it('sends an incomplete user on any other protected route to /onboarding', () => {

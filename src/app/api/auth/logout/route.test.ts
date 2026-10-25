@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { POST } from './route';
+import { GET, POST } from './route';
 import {
     buildBackendMock,
     makeRequest,
@@ -49,5 +49,24 @@ describe('BFF /api/auth/logout', () => {
         const cookies = cookiesOf(res);
         expect(cookies.find((c) => c.name === sessionName)?.value).toBe('');
         expect(cookies.find((c) => c.name === refreshName)?.value).toBe('');
+    });
+
+    it('a POST with NO session cookie skips the revocation round trip entirely and still clears both cookies', async () => {
+        const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+            throw new Error('must not be called');
+        });
+
+        const res = await POST(makeRequest({}));
+
+        expect(fetchSpy).not.toHaveBeenCalled(); // nothing to revoke server-side
+        expect(res.status).toBe(200);
+        await expect(res.json()).resolves.toEqual({ success: true });
+        const freshCookies = cookiesOf(res);
+        expect(freshCookies.find((c) => c.name === sessionName)?.value).toBe('');
+        expect(freshCookies.find((c) => c.name === refreshName)?.value).toBe('');
+    });
+
+    it('GET is a 405 naming POST', () => {
+        expect(GET().status).toBe(405);
     });
 });
