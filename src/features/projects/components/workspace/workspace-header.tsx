@@ -36,7 +36,7 @@ import { formatAbsoluteTime, formatRelativeTime } from '@/lib/relative-time';
 import { useCreateProject, useDeleteProject, useUpdateProject } from '../../hooks/use-projects';
 import { can } from '../../lib/permissions';
 import { nextStatuses } from '../../lib/status';
-import { STATUS_LABEL } from '../../lib/project-schemas';
+import { STATUS_LABEL } from '../../lib/project-constants';
 import { PlatformBadge, StatusBadge } from '../project-badges';
 import { DeleteProjectDialog } from '../delete-project-dialog';
 import type { ProjectRole } from '../../types';

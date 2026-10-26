@@ -1,12 +1,38 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { Activity, FolderKanban, Users } from 'lucide-react';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { ProjectRole } from '../../types';
 import { AssetsTab } from './assets-tab';
-import { MembersTab } from './members-tab';
-import { ActivityTab } from './activity-tab';
+
+/**
+ * T20: only the selected tab renders (Radix unmounts the rest), so the other
+ * two tabs' modules — the invite form's zod schema and the activity feed's
+ * renderers — used to sit in the workspace's first load for code that a visitor
+ * behind the default Assets tab never ran. They are split now and fetched on
+ * the first click.
+ */
+const MembersTab = dynamic(() => import('./members-tab').then((mod) => mod.MembersTab), {
+    ssr: false,
+    loading: () => <TabSkeleton />,
+});
+
+const ActivityTab = dynamic(() => import('./activity-tab').then((mod) => mod.ActivityTab), {
+    ssr: false,
+    loading: () => <TabSkeleton />,
+});
+
+function TabSkeleton() {
+    return (
+        <div className="space-y-3" role="status" aria-label="Loading tab">
+            <Skeleton className="h-10 w-64 rounded-lg" />
+            <Skeleton className="h-32 w-full rounded-xl" />
+        </div>
+    );
+}
 
 export type WorkspaceTab = 'assets' | 'members' | 'activity';
 

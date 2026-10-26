@@ -1,4 +1,4 @@
-import Link from "next/link"
+/* eslint-disable @next/next/no-html-link-for-pages -- T20: see marketing-header.tsx; the footer is static chrome and its links cross a route group. */
 import { Zap } from "lucide-react"
 
 /**
@@ -7,6 +7,10 @@ import { Zap } from "lucide-react"
  * three social buttons that pointed at platform homepages (nobody was
  * linking to a real profile). What remains resolves: three landing anchors
  * and the two legal pages, which exist as minimal marked placeholders.
+ *
+ * T20: plain anchors, not `next/link` — the same route-group-boundary argument
+ * as marketing-header.tsx. These are document navigations either way, and the
+ * link runtime is a ~3 kB gzip client chunk on the landing budget.
  */
 export function MarketingFooter() {
     return (
@@ -14,10 +18,10 @@ export function MarketingFooter() {
             <div className="container mx-auto max-w-screen-2xl px-4 md:px-6">
                 <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
                     <div className="col-span-2 space-y-4">
-                        <Link href="/" className="flex items-center space-x-2">
+                        <a href="/" className="flex items-center space-x-2">
                             <Zap className="h-6 w-6 text-primary" aria-hidden />
                             <span className="font-bold">AI Content Engine</span>
-                        </Link>
+                        </a>
                         <p className="max-w-xs text-sm text-muted-foreground">
                             Thumbnails, scripts, sound effects and images — everything
                             a video needs, in one place.
@@ -26,16 +30,16 @@ export function MarketingFooter() {
                     <div className="space-y-4">
                         <h2 className="text-sm font-semibold">Product</h2>
                         <ul className="space-y-3 text-sm text-muted-foreground">
-                            <li><Link href="/#assets" className="hover:text-foreground">The four assets</Link></li>
-                            <li><Link href="/#how-it-works" className="hover:text-foreground">How it works</Link></li>
-                            <li><Link href="/pricing" className="hover:text-foreground">Pricing</Link></li>
+                            <li><a href="/#assets" className="hover:text-foreground">The four assets</a></li>
+                            <li><a href="/#how-it-works" className="hover:text-foreground">How it works</a></li>
+                            <li><a href="/pricing" className="hover:text-foreground">Pricing</a></li>
                         </ul>
                     </div>
                     <div className="space-y-4">
                         <h2 className="text-sm font-semibold">Legal</h2>
                         <ul className="space-y-3 text-sm text-muted-foreground">
-                            <li><Link href="/privacy" className="hover:text-foreground">Privacy Policy</Link></li>
-                            <li><Link href="/terms" className="hover:text-foreground">Terms of Service</Link></li>
+                            <li><a href="/privacy" className="hover:text-foreground">Privacy Policy</a></li>
+                            <li><a href="/terms" className="hover:text-foreground">Terms of Service</a></li>
                         </ul>
                     </div>
                 </div>

@@ -1,7 +1,6 @@
-import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { MarketingCtaLink } from '@/components/layout/marketing-cta';
 
 /** Repeat the hero promise, one CTA. The last thing on the page converts. */
 export function FinalCta() {
@@ -15,12 +14,10 @@ export function FinalCta() {
                     Your first project — and your first set of thumbnails, scripts,
                     sounds and images — takes minutes.
                 </p>
-                <Button size="lg" className="mt-8 h-12 px-8 text-base" asChild>
-                    <Link href="/signup">
-                        Start creating — free
-                        <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
-                    </Link>
-                </Button>
+                <MarketingCtaLink href="/signup" size="lg" className="mt-8 h-12 px-8 text-base">
+                    Start creating — free
+                    <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+                </MarketingCtaLink>
             </div>
         </section>
     );

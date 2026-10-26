@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 import { LoaderCircle, WifiOff } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from '@/lib/toast'
 import { useAuthStore } from "@/store/auth-store"
 import { useRealtimeStatus } from "@/hooks/use-realtime-status"
 

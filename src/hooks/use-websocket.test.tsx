@@ -36,14 +36,14 @@ const st = vi.hoisted(() => {
 });
 
 vi.mock('socket.io-client', () => ({ io: st.io }));
-vi.mock('sonner', () => ({
+vi.mock('@/lib/toast', () => ({
     toast: { info: vi.fn(), success: vi.fn(), error: vi.fn() },
 }));
 vi.mock('@/features/auth/hooks/use-auth', () => ({
     useAuth: vi.fn(() => ({ user: st.userBox.user })),
 }));
 
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { useWebSocket } from './use-websocket';
 
 const mockUser: User = {

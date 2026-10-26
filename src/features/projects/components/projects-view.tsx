@@ -21,7 +21,7 @@ import {
     serializeProjectFilters,
     type ProjectFilters,
 } from '../lib/project-filters';
-import { PLATFORM_LABEL, STATUS_LABEL } from '../lib/project-schemas';
+import { PLATFORM_LABEL, STATUS_LABEL } from '../lib/project-constants';
 import { ProjectCard } from './project-card';
 import { ProjectsSkeleton } from './projects-skeletons';
 import { ProjectsTable } from './projects-table';

@@ -17,7 +17,7 @@ vi.mock('next/navigation', () => ({
     usePathname: () => '/reset-password',
 }));
 
-vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock('@/lib/toast', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 const TOKEN = 'a'.repeat(43);
 

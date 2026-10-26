@@ -7,9 +7,9 @@
  * user out on every access-token expiry. These tests force exactly that storm —
  * ten concurrent 401s — and assert the storm collapses into one refresh.
  *
- * MSW intercepts at the network layer: axios is pinned to the `fetch` adapter
- * with an absolute baseURL (jsdom has no fetch resolution of relative URLs) and
- * the refresh/logout requests the module makes itself through global fetch flow
+ * MSW intercepts at the network layer: the client is pointed at an absolute
+ * baseURL (jsdom has no fetch resolution of relative URLs) and the
+ * refresh/logout requests the module makes itself through global fetch flow
  * through the same interceptor, so every boundary a real browser sees is real
  * here.
  */
@@ -20,16 +20,15 @@ startMsw();
 
 const healthy = { success: true, data: { hello: 'world' } };
 
-/** Minimal axios-response shape; avoids importing axios types into this test module. */
-type AxiosLike = { data: unknown; status: number; config?: unknown };
+/** The response shape the feature services consume. */
+type ClientResponse = { data: unknown; status: number };
 
-/** jsdom + undici cannot resolve a relative fetch URL, so the axios instance
- *  under test gets an absolute baseURL. Only affects the test environment —
- *  production keeps the app's `config.apiUrl` value.
+/** jsdom + undici cannot resolve a relative fetch URL, so the client under
+ *  test gets an absolute baseURL. Only affects the test environment — production
+ *  keeps the app's same-origin `config.apiUrl` value.
  */
 async function useApi() {
     const { default: apiClient } = await import('../services/api-client');
-    apiClient.defaults.adapter = 'fetch';
     apiClient.defaults.baseURL = 'http://localhost:3000/api/v1';
     return apiClient;
 }
@@ -83,9 +82,9 @@ describe('api-client 401 interceptor', () => {
             Extract<(typeof results)[number], { status: 'fulfilled' }>
         >;
         expect(fulfilled).toHaveLength(10);
-        // axios's `.data` is the raw JSON body — which keeps the envelope shape
+        // `.data` is the raw JSON body — which keeps the envelope shape
         // (api-client documents this explicitly). The 10 retries really succeed.
-        const body = (fulfilled[0].value as AxiosLike).data;
+        const body = (fulfilled[0].value as ClientResponse).data;
         expect(body).toEqual(healthy);
     });
 
@@ -222,7 +221,7 @@ describe('api-client 401 interceptor', () => {
 
         const apiClient = await useApi();
 
-        const res = await apiClient.get('/meta');
+        const res = await apiClient.get<{ data: { rows: number }; meta: { total: number } }>('/meta');
         expect(res.data.data).toEqual({ rows: 3 });
         expect(res.data.meta).toEqual({ total: 7 });
         expect(res.status).toBe(200);
@@ -275,7 +274,7 @@ describe('api-client error mapping without a backend envelope', () => {
         };
         expect(err.code).toBe('UNKNOWN_ERROR');
         expect(err.status).toBeUndefined();
-        expect(err.message).toBeTruthy(); // axios's own transport message, never empty
+        expect(err.message).toBeTruthy(); // the transport message, never empty
     });
 
     it('a refresh whose fetch itself throws → the network catch fails the refresh, logout still runs', async () => {

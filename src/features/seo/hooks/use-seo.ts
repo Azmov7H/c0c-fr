@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { seoService } from '../services/seo.service';
 import { UpdateSEODTO } from '../types';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { toApiError } from '@/lib/api-error';
 
 export const seoKeys = {

@@ -32,7 +32,7 @@ vi.mock('next/navigation', () => ({
     useRouter: () => ({ replace: mocks.replace, push: mocks.push }),
 }));
 
-vi.mock('sonner', () => ({
+vi.mock('@/lib/toast', () => ({
     toast: { success: mocks.toastSuccess, error: mocks.toastError },
 }));
 

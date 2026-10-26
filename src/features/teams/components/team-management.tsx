@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -23,9 +24,18 @@ import {
     CheckCircle2
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DataTable } from '@/components/ui/data-table';
 import { DataState } from '@/components/shared/data-state';
 import { PageHeader } from '@/components/shared/page-header';
+
+/**
+ * T20: `@tanstack/react-table` is only needed once a team exists. Deferring it
+ * keeps the table runtime (and the pagination primitives it pulls in) out of
+ * the first-load bundle; the skeleton matches the roster's row height.
+ */
+const DataTable = dynamic(() => import('@/components/ui/data-table').then((mod) => mod.DataTable), {
+    ssr: false,
+    loading: () => <Skeleton className="h-40 w-full rounded-xl" />,
+}) as typeof import('@/components/ui/data-table').DataTable;
 import { TeamRole, type TeamMember } from '../types';
 import {
     Dialog,

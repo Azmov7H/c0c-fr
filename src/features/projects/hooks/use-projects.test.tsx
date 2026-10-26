@@ -24,7 +24,7 @@ vi.mock('../services/projects.service', () => ({
     },
 }));
 
-vi.mock('sonner', () => ({
+vi.mock('@/lib/toast', () => ({
     toast: { success: vi.fn(), error: vi.fn() },
 }));
 

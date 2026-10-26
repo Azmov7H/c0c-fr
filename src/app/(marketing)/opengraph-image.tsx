@@ -12,6 +12,11 @@ import { ImageResponse } from 'next/og';
  * Google's CDN while prerendering, which made builds fail outright whenever
  * that request timed out (observed: ETIMEDOUT, whole build exited 1). Build
  * determinism is worth 63 kB of committed woff.
+ *
+ * T20: the logo mark is text, not the ⚡ emoji. Satori resolves emoji through
+ * its CDN helper even when every requested face is local, so the emoji put a
+ * network call back into a supposedly offline prerender (observed as the same
+ * ETIMEDOUT build failure the vendored fonts were meant to remove).
  */
 export const alt = 'AI Content Engine — everything a video needs, in one place';
 export const size = { width: 1200, height: 630 };
@@ -49,11 +54,11 @@ export default function OpengraphImage() {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: 34,
+                            fontSize: 28,
                             fontWeight: 700,
                         }}
                     >
-                        ⚡
+                        AI
                     </div>
                     <span style={{ fontSize: 30, fontWeight: 600 }}>
                         AI Content Engine

@@ -108,7 +108,7 @@ export function buildContentSecurityPolicy(scriptNonce: string, enforce = false)
     ].join('; ');
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const mode = process.env.AUTH_MIDDLEWARE_MODE ?? 'verify';
     if (mode === 'off') return NextResponse.next();
 

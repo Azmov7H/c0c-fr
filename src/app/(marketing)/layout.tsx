@@ -10,7 +10,7 @@ export default function MarketingLayout({
     return (
         <div className="flex min-h-screen flex-col bg-background">
             {/* Applies the stored theme class before first paint; the
-                marketing routes deliberately do not mount next-themes (T11
+                marketing routes deliberately do not mount the app theme provider (T11
                 bundle budget) — see the component for the full reasoning. */}
             <ThemePrePaintScript />
             <MarketingHeader />

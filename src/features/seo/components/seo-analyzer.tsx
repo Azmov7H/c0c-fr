@@ -19,7 +19,7 @@ import {
     Check
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 

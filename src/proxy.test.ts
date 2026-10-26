@@ -1,16 +1,16 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { SignJWT } from 'jose';
 import { NextRequest } from 'next/server';
-import { middleware, sanitizeRedirectPath, config as middlewareConfig } from './middleware';
+import { proxy, sanitizeRedirectPath, config as proxyConfig } from './proxy';
 
 /**
- * T09 middleware tests — the gate must verify, not merely sniff a cookie.
+ * T09 proxy tests — the gate must verify, not merely sniff a cookie.
  * Tokens are signed for real (jose, HS256) against the same contract the
  * backend implements, so these tests fail if either side drifts.
  */
 
 const SECRET = 'test-secret-that-is-at-least-32-chars-long!!';
-const SESSION_COOKIE = 'auth_session'; // dev name; middleware must accept both
+const SESSION_COOKIE = 'auth_session'; // dev name; proxy must accept both
 
 const originalSecret = process.env.JWT_SECRET;
 const originalMode = process.env.AUTH_MIDDLEWARE_MODE;
@@ -76,9 +76,9 @@ function locationOf(res: Response): string {
     return res.headers.get('location') ?? '';
 }
 
-describe('middleware session verification (AC: verify, do not merely check)', () => {
+describe('proxy session verification (AC: verify, do not merely check)', () => {
     it('missing cookie on a protected route → redirects to /login with callbackUrl', async () => {
-        const res = await middleware(makeRequest('/dashboard/projects'));
+        const res = await proxy(makeRequest('/dashboard/projects'));
         expect(res.status).toBe(307);
         const loc = locationOf(res);
         expect(loc).toContain('/login');
@@ -86,7 +86,7 @@ describe('middleware session verification (AC: verify, do not merely check)', ()
     });
 
     it('T13: /onboarding is protected for a signed-out visitor', async () => {
-        const res = await middleware(makeRequest('/onboarding'));
+        const res = await proxy(makeRequest('/onboarding'));
         expect(res.status).toBe(307);
         const loc = locationOf(res);
         expect(loc).toContain('/login');
@@ -94,16 +94,16 @@ describe('middleware session verification (AC: verify, do not merely check)', ()
     });
 
     it('valid token → request passes through', async () => {
-        const res = await middleware(
+        const res = await proxy(
             makeRequest('/dashboard', { cookies: { [SESSION_COOKIE]: await signToken() } })
         );
         expect(res.status).toBe(200);
-        expect(res.headers.get('x-middleware-next')).toBe('1');
+        expect(res.headers.get('x-proxy-next')).toBe('1');
     });
 
     it('expired token → redirected AND the dead cookie is cleared', async () => {
         const now = Math.floor(Date.now() / 1000);
-        const res = await middleware(
+        const res = await proxy(
             makeRequest('/dashboard', {
                 cookies: { [SESSION_COOKIE]: await signToken({ exp: now - 60 }) },
             })
@@ -116,7 +116,7 @@ describe('middleware session verification (AC: verify, do not merely check)', ()
     });
 
     it('tampered payload → rejected (the presence-only check would have allowed it)', async () => {
-        const res = await middleware(
+        const res = await proxy(
             makeRequest('/dashboard', {
                 cookies: { [SESSION_COOKIE]: await signToken({ tamperPayload: true }) },
             })
@@ -126,14 +126,14 @@ describe('middleware session verification (AC: verify, do not merely check)', ()
     });
 
     it('garbage value in the cookie → rejected', async () => {
-        const res = await middleware(
+        const res = await proxy(
             makeRequest('/dashboard', { cookies: { [SESSION_COOKIE]: 'not-a-jwt' } })
         );
         expect(res.status).toBe(307);
     });
 
     it('token signed with the wrong secret → rejected', async () => {
-        const res = await middleware(
+        const res = await proxy(
             makeRequest('/dashboard', {
                 cookies: { [SESSION_COOKIE]: await signToken({ secret: 'a'.repeat(40) }) },
             })
@@ -142,7 +142,7 @@ describe('middleware session verification (AC: verify, do not merely check)', ()
     });
 
     it('a refresh-audience token is not a session token → rejected', async () => {
-        const res = await middleware(
+        const res = await proxy(
             makeRequest('/dashboard', {
                 cookies: {
                     [SESSION_COOKIE]: await signToken({ typ: 'refresh', aud: 'c0c-refresh' }),
@@ -156,7 +156,7 @@ describe('middleware session verification (AC: verify, do not merely check)', ()
         const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
         delete process.env.JWT_SECRET;
         try {
-            const res = await middleware(
+            const res = await proxy(
                 makeRequest('/dashboard', { cookies: { [SESSION_COOKIE]: await signToken() } })
             );
             expect(res.status).toBe(307);
@@ -169,7 +169,7 @@ describe('middleware session verification (AC: verify, do not merely check)', ()
     });
 
     it('valid token visiting /login → redirected to /dashboard', async () => {
-        const res = await middleware(
+        const res = await proxy(
             makeRequest('/login', { cookies: { [SESSION_COOKIE]: await signToken() } })
         );
         expect(res.status).toBe(307);
@@ -181,7 +181,7 @@ describe('open-redirect guard on callbackUrl (no test existed before T09)', () =
     const evilTargets = ['https://evil.com', 'http://evil.com', '//evil.com', '/\\evil.com', 'javascript:alert(1)'];
 
     it.each(evilTargets)('callbackUrl=%s → falls back to /dashboard', async (evil) => {
-        const res = await middleware(
+        const res = await proxy(
             makeRequest('/login', {
                 cookies: { [SESSION_COOKIE]: await signToken() },
                 search: `?callbackUrl=${encodeURIComponent(evil)}`,
@@ -194,7 +194,7 @@ describe('open-redirect guard on callbackUrl (no test existed before T09)', () =
     });
 
     it('safe relative callbackUrl is honoured', async () => {
-        const res = await middleware(
+        const res = await proxy(
             makeRequest('/login', {
                 cookies: { [SESSION_COOKIE]: await signToken() },
                 search: '?callbackUrl=%2Fprojects%2F42%3Ftab%3Daudio',
@@ -218,7 +218,7 @@ describe('rollout modes (AUTH_MIDDLEWARE_MODE)', () => {
     it('presence mode: any cookie value passes (pre-T09 rollback path)', async () => {
         process.env.AUTH_MIDDLEWARE_MODE = 'presence';
         try {
-            const res = await middleware(
+            const res = await proxy(
                 makeRequest('/dashboard', { cookies: { [SESSION_COOKIE]: 'x' } })
             );
             expect(res.status).toBe(200);
@@ -230,7 +230,7 @@ describe('rollout modes (AUTH_MIDDLEWARE_MODE)', () => {
     it('off mode: no gate at all (last resort)', async () => {
         process.env.AUTH_MIDDLEWARE_MODE = 'off';
         try {
-            const res = await middleware(makeRequest('/dashboard'));
+            const res = await proxy(makeRequest('/dashboard'));
             expect(res.status).toBe(200);
         } finally {
             delete process.env.AUTH_MIDDLEWARE_MODE;
@@ -240,7 +240,7 @@ describe('rollout modes (AUTH_MIDDLEWARE_MODE)', () => {
 
 describe('CSP header delivery', () => {
     it('ships report-only by default with a nonce and no unsafe-inline for scripts', async () => {
-        const res = await middleware(makeRequest('/'));
+        const res = await proxy(makeRequest('/'));
         const csp = res.headers.get('content-security-policy-report-only') ?? '';
         expect(csp).not.toBe('');
         expect(res.headers.get('content-security-policy')).toBeNull();
@@ -254,7 +254,7 @@ describe('CSP header delivery', () => {
     it('CSP_ENFORCE=true flips to the enforcing header (config change, not a rebuild)', async () => {
         process.env.CSP_ENFORCE = 'true';
         try {
-            const res = await middleware(makeRequest('/'));
+            const res = await proxy(makeRequest('/'));
             expect(res.headers.get('content-security-policy')).not.toBeNull();
             expect(res.headers.get('content-security-policy-report-only')).toBeNull();
         } finally {
@@ -263,10 +263,10 @@ describe('CSP header delivery', () => {
     });
 
     it('a nonce is generated per request (two requests never share one)', async () => {
-        const a = (await middleware(makeRequest('/'))).headers.get(
+        const a = (await proxy(makeRequest('/'))).headers.get(
             'content-security-policy-report-only'
         );
-        const b = (await middleware(makeRequest('/'))).headers.get(
+        const b = (await proxy(makeRequest('/'))).headers.get(
             'content-security-policy-report-only'
         );
         const nonceOf = (csp: string | null) => csp?.match(/'nonce-([^']+)'/)?.[1];
@@ -276,7 +276,7 @@ describe('CSP header delivery', () => {
 });
 
 describe('matcher is narrowed (R-14)', () => {
-    const matcher = new RegExp(`^${middlewareConfig.matcher[0]}$`);
+    const matcher = new RegExp(`^${proxyConfig.matcher[0]}$`);
 
     it.each([
         ['/dashboard', true],

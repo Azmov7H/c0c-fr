@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { PageHeader } from '@/components/shared/page-header';
 import { StatCard } from '@/components/shared/stat-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import {
   Select,
@@ -15,7 +17,25 @@ import {
 } from '@/components/ui/select';
 import {
   TrendingUp, Users, Eye, BarChart3, Calendar, ArrowUpRight, } from 'lucide-react';
-import { TrendAreaChart, EngagementBarChart, AudiencePieChart } from '@/components/shared/charts';
+
+/**
+ * T20: Recharts is the largest client leaf on this route. Splitting the three
+ * charts keeps it out of first-load JS; the surrounding cards and filters paint
+ * immediately and each chart fills in.
+ */
+const chartLoading = () => <Skeleton className="h-[280px] w-full rounded-xl" />;
+const TrendAreaChart = dynamic(
+  () => import('@/components/shared/charts').then((mod) => mod.TrendAreaChart),
+  { ssr: false, loading: chartLoading }
+);
+const EngagementBarChart = dynamic(
+  () => import('@/components/shared/charts').then((mod) => mod.EngagementBarChart),
+  { ssr: false, loading: chartLoading }
+);
+const AudiencePieChart = dynamic(
+  () => import('@/components/shared/charts').then((mod) => mod.AudiencePieChart),
+  { ssr: false, loading: chartLoading }
+);
 
 export function AnalyticsDashboard() {
   const [period, setPeriod] = useState('7d');

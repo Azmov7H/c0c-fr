@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { Check } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -88,7 +87,7 @@ export function PricingCards({ className, currentPlan }: PricingCardsProps) {
                                 variant={recommended ? 'default' : 'outline'}
                                 asChild
                             >
-                                <Link href={cta.href}>{cta.label}</Link>
+                                <a href={cta.href}>{cta.label}</a>
                             </Button>
                         )}
                     </article>

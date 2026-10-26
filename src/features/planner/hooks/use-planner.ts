@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { plannerService } from '../services/planner.service';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import type { PlannerEvent } from '../services/planner.service';
 
 export const plannerKeys = {

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 import { dashboardService } from '../services/dashboard.service';
 import type { DashboardPreferences, DashboardWidgetId } from '../lib/widget-layout';

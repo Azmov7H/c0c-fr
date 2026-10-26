@@ -15,7 +15,7 @@ import {
     Users,
     X,
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UpgradePrompt } from '@/features/billing/components/upgrade-prompt';
@@ -47,7 +47,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuthStore } from '@/store/auth-store';
 import { toApiError } from '@/lib/api-error';
 import { formatRelativeTime } from '@/lib/relative-time';
@@ -172,6 +172,15 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
     const expiredInvites = (invitesQuery.data ?? []).filter((invite) => invite.state !== 'pending');
 
     return (
+        /**
+         * T20: the app-level TooltipProvider was removed from app-providers.tsx
+         * (it pulled Popper into every authenticated route's first-load graph,
+         * and this tab is the only Tooltip consumer in the tree). This is the
+         * feature-local home its comment promised; without it Radix's Root
+         * throws "`Tooltip` must be used within `TooltipProvider`" the moment
+         * a member row renders — E2E journey-2/3 caught exactly that.
+         */
+        <TooltipProvider>
         <div className="space-y-6">
             <Card>
                 <CardHeader className="flex-row items-center justify-between gap-3">
@@ -492,5 +501,6 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                 </DialogContent>
             </Dialog>
         </div>
+        </TooltipProvider>
     );
 }

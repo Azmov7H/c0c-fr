@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import dynamic from "next/dynamic"
+import { usePathname } from "next/navigation"
 import { useCallback, useSyncExternalStore } from "react"
 
 import {
@@ -12,14 +13,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -28,12 +21,33 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
-import { CommandMenu } from "./command-menu"
-import { UserButton } from "./user-button"
-import { NotificationBell } from "@/features/notifications/components/notification-bell"
-import { useTheme } from "next-themes"
+import { UserButtonSlot } from "./user-button-slot"
+import { useTheme } from "@/components/theme-provider"
 import { QUICK_ACTIONS, ROUTE_LABELS } from "@/lib/navigation"
 import { useBreadcrumbStore } from "@/store/breadcrumb-store"
+
+/** T20: the bell dropdown is interaction-only; its menu runtime loads on demand. */
+const NotificationBell = dynamic(
+  () =>
+    import("@/features/notifications/components/notification-bell").then(
+      (mod) => mod.NotificationBell
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <span className="inline-flex size-9 shrink-0 rounded-md" aria-hidden="true" />
+    ),
+  }
+)
+
+/**
+ * T20: the palette (cmdk + project search) is opened by Cmd/Ctrl+K, not on
+ * first paint. Deferring its chunk keeps cmdk out of the first-load budget
+ * while still loading in the background after hydration.
+ */
+const CommandMenu = dynamic(() => import("./command-menu").then((mod) => mod.CommandMenu), {
+  ssr: false,
+})
 
 function useBreadcrumbs() {
   const pathname = usePathname()
@@ -96,7 +110,6 @@ function ThemeCycler() {
 }
 
 export function Header() {
-  const router = useRouter()
   const breadcrumbs = useBreadcrumbs()
 
   // The palette owns its open state; a synthetic ⌘K event is the shared
@@ -209,39 +222,38 @@ export function Header() {
             </Link>
           </Button>
 
-          {/* Create dropdown — the remaining quick actions. */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                aria-label="Create"
-                className="
-                  h-9 max-md:h-11 px-3 gap-1.5 rounded-lg
-                  text-xs font-semibold
-                "
-              >
-                Create
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel className="text-xs text-muted-foreground">Quick Create</DropdownMenuLabel>
-              <DropdownMenuSeparator />
+          {/* Create menu — the remaining quick actions.
+              T20: native <details>, not Radix DropdownMenu. Radix's menu
+              pulls Popper (~10 kB gzip) into the authenticated shell on every
+              dashboard/workspace first load; this menu is five links and opens
+              without any menu runtime. Links keep client-side navigation. */}
+          <details className="group relative">
+            <summary
+              className="inline-flex h-9 max-md:h-11 cursor-pointer list-none items-center rounded-lg border border-input bg-background px-3 text-xs font-semibold shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground [&::-webkit-details-marker]:hidden"
+            >
+              Create
+            </summary>
+            <div className="absolute right-0 top-full z-50 mt-1 w-56 rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+              <p className="px-2 py-1.5 text-xs text-muted-foreground">Quick Create</p>
+              <div className="my-1 h-px bg-border" />
               {QUICK_ACTIONS.map((action) => (
-                <DropdownMenuItem
+                <Link
                   key={action.id}
-                  className="gap-2 cursor-pointer"
-                  onClick={() => router.push(action.url)}
+                  href={action.url}
+                  className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+                  onClick={(event) => {
+                    event.currentTarget.closest('details')?.removeAttribute('open')
+                  }}
                 >
-                  <action.icon className="w-4 h-4 text-primary" />
+                  <action.icon className="h-4 w-4 text-primary" />
                   {action.title}
-                  <kbd className="ml-auto text-[10px] font-mono text-muted-foreground tracking-wider">
+                  <kbd className="ml-auto font-mono text-[10px] tracking-wider text-muted-foreground">
                     G&thinsp;{action.shortcutKey.toUpperCase()}
                   </kbd>
-                </DropdownMenuItem>
+                </Link>
               ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </div>
+          </details>
 
           {/* Notifications */}
           <NotificationBell />
@@ -253,7 +265,7 @@ export function Header() {
           <div className="h-5 w-px bg-border/60 mx-1" />
 
           {/* User */}
-          <UserButton />
+          <UserButtonSlot />
         </div>
       </header>
     </>

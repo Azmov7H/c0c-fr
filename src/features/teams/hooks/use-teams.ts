@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { teamsService } from '../services/teams.service';
 import { CreateTeamDTO, InviteMemberDTO } from '../types';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 interface RequestErrorShape {
     message?: string;

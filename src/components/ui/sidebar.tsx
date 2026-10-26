@@ -18,12 +18,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -128,8 +122,7 @@ function SidebarProvider({
 
   return (
     <SidebarContext.Provider value={contextValue}>
-      <TooltipProvider delayDuration={0}>
-        <div
+      <div
           data-slot="sidebar-wrapper"
           style={
             {
@@ -144,9 +137,8 @@ function SidebarProvider({
           )}
           {...props}
         >
-          {children}
-        </div>
-      </TooltipProvider>
+        {children}
+      </div>
     </SidebarContext.Provider>
   )
 }
@@ -495,23 +487,31 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
+/**
+ * T20: the Radix tooltip branch was removed from this primitive.
+ *
+ * `SidebarMenuButton` is used by every authenticated route, and a Radix
+ * Tooltip pulls Popper (~10 kB gzip) into the first-load graph even when the
+ * collapsed-sidebar label is not shown. The only caller that ever passed
+ * `tooltip` was the app sidebar; it now uses the native `title` attribute on
+ * the collapsed link, which needs no client runtime. Radix Tooltip remains
+ * available for feature-local uses (the workspace members tab) without
+ * dragging Popper into the dashboard shell.
+ */
 function SidebarMenuButton({
   asChild = false,
   isActive = false,
   variant = "default",
   size = "default",
-  tooltip,
   className,
   ...props
 }: React.ComponentProps<"button"> & {
   asChild?: boolean
   isActive?: boolean
-  tooltip?: string | React.ComponentProps<typeof TooltipContent>
 } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const Comp = asChild ? Slot.Root : "button"
-  const { isMobile, state } = useSidebar()
 
-  const button = (
+  return (
     <Comp
       data-slot="sidebar-menu-button"
       data-sidebar="menu-button"
@@ -520,28 +520,6 @@ function SidebarMenuButton({
       className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
       {...props}
     />
-  )
-
-  if (!tooltip) {
-    return button
-  }
-
-  if (typeof tooltip === "string") {
-    tooltip = {
-      children: tooltip,
-    }
-  }
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>{button}</TooltipTrigger>
-      <TooltipContent
-        side="right"
-        align="center"
-        hidden={state !== "collapsed" || isMobile}
-        {...tooltip}
-      />
-    </Tooltip>
   )
 }
 

@@ -1,10 +1,17 @@
 import type { NextConfig } from "next";
+import bundleAnalyzer from "@next/bundle-analyzer";
+
+const withBundleAnalyzer = bundleAnalyzer({
+  // `ANALYZE=true pnpm build` writes the interactive treemap to .next/analyze.
+  enabled: process.env.ANALYZE === "true",
+  openAnalyzer: false,
+});
 
 const API_URL = process.env.API_URL || "http://localhost:5001";
 
 /**
  * Static security headers (T09 / R-12). The CSP is deliberately NOT here: it
- * needs a per-request nonce and is set by src/middleware.ts (report-only
+ * needs a per-request nonce and is set by src/proxy.ts (report-only
  * first, enforced via CSP_ENFORCE=true).
  *
  * HSTS ships WITHOUT `preload`: preload is effectively irreversible and
@@ -28,6 +35,15 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // Don't advertise the framework; the response is otherwise identical.
   poweredByHeader: false,
+
+  experimental: {
+    /**
+     * T20: these are barrel packages — importing one icon or one formatter
+     * otherwise parses the whole export surface. Next rewrites the imports to
+     * per-module paths at build time.
+     */
+    optimizePackageImports: ["lucide-react", "date-fns", "radix-ui"],
+  },
 
   images: {
     /**
@@ -63,4 +79,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

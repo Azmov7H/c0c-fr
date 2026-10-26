@@ -7,7 +7,7 @@ import { scriptsKeys } from '@/features/scripts/hooks/use-scripts';
 import { thumbnailsKeys } from '@/features/thumbnails/hooks/use-thumbnails';
 import { audioKeys } from '@/features/audio/hooks/use-audio';
 import { registerSocket } from '@/lib/socket-registry';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import { useRealtimeStore } from '@/store/realtime-store';
 import type {

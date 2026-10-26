@@ -10,7 +10,7 @@ export const notificationsService = {
         limit?: number;
         isRead?: boolean;
     }): Promise<{ data: Notification[]; meta: NotificationsMeta }> {
-        const { data } = await apiClient.get('/notifications', { params });
+        const { data } = await apiClient.get<{ data: Notification[]; meta: NotificationsMeta }>('/notifications', { params });
         return { data: data.data, meta: data.meta };
     },
 
@@ -18,7 +18,7 @@ export const notificationsService = {
      * Get unread count
      */
     async getUnreadCount(): Promise<number> {
-        const { data } = await apiClient.get('/notifications/unread-count');
+        const { data } = await apiClient.get<{ data: { unreadCount: number } }>('/notifications/unread-count');
         return data.data.unreadCount;
     },
 
@@ -26,7 +26,7 @@ export const notificationsService = {
      * Mark single notification as read
      */
     async markAsRead(id: string): Promise<Notification> {
-        const { data } = await apiClient.patch(`/notifications/${id}/read`);
+        const { data } = await apiClient.patch<{ data: Notification }>(`/notifications/${id}/read`);
         return data.data;
     },
 

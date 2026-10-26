@@ -40,12 +40,12 @@ export interface HealthReady {
 
 export const dashboardService = {
     async getStats(): Promise<DashboardStats> {
-        const { data } = await apiClient.get('/dashboard/stats');
+        const { data } = await apiClient.get<{ data: DashboardStats }>('/dashboard/stats');
         return data.data;
     },
 
     async getRecentActivity(limit = 10): Promise<RecentActivityItem[]> {
-        const { data } = await apiClient.get('/dashboard/recent-activity', {
+        const { data } = await apiClient.get<{ data: RecentActivityItem[] }>('/dashboard/recent-activity', {
             params: { limit },
         });
         return data.data;
@@ -57,7 +57,7 @@ export const dashboardService = {
      * `connecting`, `disconnected`, …).
      */
     async getHealthReady(): Promise<HealthReady> {
-        const { data } = await apiClient.get('/health/ready');
+        const { data } = await apiClient.get<{ data: HealthReady }>('/health/ready');
         return data.data;
     },
 
@@ -66,14 +66,14 @@ export const dashboardService = {
      * server uses to order widgets, so the first paint is already personalised.
      */
     async getPreferences(): Promise<DashboardPreferences> {
-        const { data } = await apiClient.get('/users/profile/preferences');
+        const { data } = await apiClient.get<{ data: DashboardPreferences }>('/users/profile/preferences');
         return data.data;
     },
 
     async updatePreferences(
         hiddenWidgets: DashboardPreferences['hiddenWidgets']
     ): Promise<DashboardPreferences> {
-        const { data } = await apiClient.patch('/users/profile/preferences', { hiddenWidgets });
+        const { data } = await apiClient.patch<{ data: DashboardPreferences }>('/users/profile/preferences', { hiddenWidgets });
         return data.data;
     },
 };

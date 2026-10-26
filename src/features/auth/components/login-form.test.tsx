@@ -16,7 +16,7 @@ vi.mock('next/navigation', () => ({
     useSearchParams: () => nav.search,
 }));
 
-vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock('@/lib/toast', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 function renderLogin() {
     const client = new QueryClient({
