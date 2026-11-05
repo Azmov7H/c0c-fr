@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatRelativeTime } from '@/lib/relative-time';
 import type { Project } from '@/types';
 
-import { PLATFORM_LABEL } from '../lib/project-schemas';
+import { PLATFORM_LABEL } from '../lib/project-constants';
 import { ProjectActions } from './project-actions';
 import { PlatformBadge, StatusBadge } from './project-badges';
 

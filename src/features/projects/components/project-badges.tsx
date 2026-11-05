@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { Platform, ProjectStatus } from '@/types';
 
-import { PLATFORM_LABEL, STATUS_LABEL } from '../lib/project-schemas';
+import { PLATFORM_LABEL, STATUS_LABEL } from '../lib/project-constants';
 
 const PLATFORM_ICON: Record<Platform, typeof Youtube> = {
     youtube: Youtube,

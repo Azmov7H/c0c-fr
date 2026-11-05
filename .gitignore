@@ -47,3 +47,5 @@ next-env.d.ts
 /tests/e2e/fixtures.json
 /test-results/
 /playwright-report/
+# T20 lighthouse artifacts
+/.lighthouseci/

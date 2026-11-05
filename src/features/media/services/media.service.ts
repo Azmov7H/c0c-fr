@@ -30,22 +30,22 @@ export const mediaService = {
         projectId?: string;
         search?: string;
     }): Promise<{ data: MediaItem[]; meta: PaginatedMeta }> {
-        const { data } = await apiClient.get('/media', { params });
+        const { data } = await apiClient.get<{ data: MediaItem[]; meta: PaginatedMeta }>('/media', { params });
         return { data: data.data, meta: data.meta };
     },
 
     async getById(id: string): Promise<MediaItem> {
-        const { data } = await apiClient.get(`/media/${id}`);
+        const { data } = await apiClient.get<{ data: MediaItem }>(`/media/${id}`);
         return data.data;
     },
 
     async create(dto: Partial<MediaItem>): Promise<MediaItem> {
-        const { data } = await apiClient.post('/media', dto);
+        const { data } = await apiClient.post<{ data: MediaItem }>('/media', dto);
         return data.data;
     },
 
     async update(id: string, dto: Partial<MediaItem>): Promise<MediaItem> {
-        const { data } = await apiClient.patch(`/media/${id}`, dto);
+        const { data } = await apiClient.patch<{ data: MediaItem }>(`/media/${id}`, dto);
         return data.data;
     },
 
@@ -54,7 +54,7 @@ export const mediaService = {
     },
 
     async getStats(): Promise<{ total: number }> {
-        const { data } = await apiClient.get('/media/stats');
+        const { data } = await apiClient.get<{ data: { total: number } }>('/media/stats');
         return data.data;
     },
 };

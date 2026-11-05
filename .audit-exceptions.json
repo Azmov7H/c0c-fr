@@ -1,0 +1,85 @@
+{
+  "$schema-title": "T21 audit-gate exceptions. The fr gate runs `--scope prod` (level high): production dependencies must always audit clean. Dev-dependency advisories that gate cannot see are recorded here so nothing is waived silently — accepted, owned, time-boxed. Re-check on review-by: when `pnpm audit` (full) stops listing an advisory, prune the entry.",
+  "exceptions": [
+    {
+      "advisory": 1240853,
+      "module": "basic-ftp",
+      "ghsa": "GHSA-c475-qrg2-pj4r",
+      "severity": "high",
+      "reason": "devDependency-only, via @lhci/cli -> lighthouse -> puppeteer-core -> proxy-agent chain; the module never reaches a browser or the deployed app. Fix (basic-ftp 6.2.1) is incompatible with the pinned proxy-agent line.",
+      "owner": "fr platform",
+      "added": "2026-10-28",
+      "review-by": "2027-01-28"
+    },
+    {
+      "advisory": 1193685,
+      "module": "extract-zip",
+      "ghsa": "GHSA-7pqw-9j4j-h8q3",
+      "severity": "high",
+      "reason": "devDependency-only, used by the browser-install toolchain (playwright/puppeteer) to unpack downloaded browser archives. Upstream states NO patched release at any version; accepted until the toolchain swaps the library.",
+      "owner": "fr platform",
+      "added": "2026-10-28",
+      "review-by": "2027-01-28"
+    },
+    {
+      "advisory": 1139346,
+      "module": "extract-zip",
+      "ghsa": "GHSA-jmr9-qjv8-65gv",
+      "severity": "high",
+      "reason": "Same toolchain path and upstream status as GHSA-7pqw-9j4j-h8q3 — no patched release exists; dev machines/CI download browsers from pinned playwright registries only.",
+      "owner": "fr platform",
+      "added": "2026-10-28",
+      "review-by": "2027-01-28"
+    },
+    {
+      "advisory": 1120654,
+      "module": "tmp",
+      "ghsa": "GHSA-ph9p-34f9-6g65",
+      "severity": "high",
+      "reason": "devDependency-only (browser-install toolchain, also reachable via the @lhci CLI). tmp 0.2.6 would break the pinned toolchains that expect the 0.0.x API.",
+      "owner": "fr platform",
+      "added": "2026-10-28",
+      "review-by": "2027-01-28"
+    },
+    {
+      "advisory": 1243066,
+      "module": "zod",
+      "ghsa": "GHSA-mrhx-c7xc-m3w5",
+      "severity": "high",
+      "reason": "The APP's zod is pinned >= 4.6.6 (fixed). A second, transitive zod@3.25.76 remains under the shadcn CLI and the lighthouse chain — dev-only, never bundled; upgrading those to zod 4 is upstream work this repo can only wait for.",
+      "owner": "fr platform",
+      "added": "2026-10-28",
+      "review-by": "2027-01-28"
+    },
+    {
+      "advisory": 1243505,
+      "module": "deepmerge",
+      "ghsa": "GHSA-gcqx-w48m-w2h4",
+      "severity": "low",
+      "reason": "devDependency-only (@lhci chain). No compatible fix published in the 4.x line the toolchain requires.",
+      "owner": "fr platform",
+      "added": "2026-10-28",
+      "review-by": "2027-01-28"
+    },
+    {
+      "advisory": 1109537,
+      "module": "tmp",
+      "ghsa": "GHSA-52f5-9888-hmc6",
+      "severity": "low",
+      "reason": "devDependency-only (browser-install toolchain); same constraint as GHSA-ph9p-34f9-6g65 — the 0.0.x API is what the toolchains pin.",
+      "owner": "fr platform",
+      "added": "2026-10-28",
+      "review-by": "2027-01-28"
+    },
+    {
+      "advisory": 1119441,
+      "module": "uuid",
+      "ghsa": "GHSA-w5hq-g745-h8pq",
+      "severity": "moderate",
+      "reason": "devDependency-only (@lhci/cli). uuid >= 11 is a broad API break for the toolchain; accepted until lighthouse ships it.",
+      "owner": "fr platform",
+      "added": "2026-10-28",
+      "review-by": "2027-01-28"
+    }
+  ]
+}

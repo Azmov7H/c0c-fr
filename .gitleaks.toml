@@ -1,0 +1,23 @@
+# T21 — gitleaks configuration for c0c-fr.
+#
+# Extends the default ruleset unchanged; the only addition is one narrow
+# allowlist for the Playwright harness.
+#
+# Why it exists: `tests/e2e/harness.ts` carries FIXED, TEST-ONLY secrets so the
+# journey suite can boot the real backend without external credentials. They
+# are not deployment secrets — every value is prefixed `t18-e2e-`, distinct
+# from every environment, and nothing under tests/e2e is imported by the app at
+# runtime. The generic-api-key rule flags the JWT-looking constants; the
+# allowlist keeps the full-history scan honest without weakening the rule
+# anywhere else.
+
+title = "c0c-fr gitleaks config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "E2E-only fixture secrets in the Playwright harness (prefix t18-e2e-)"
+paths = ['''tests/e2e/harness\.ts''']
+regexTarget = "match"
+regexes = ['''t18-e2e-''']

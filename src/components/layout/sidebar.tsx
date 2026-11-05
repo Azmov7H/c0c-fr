@@ -17,15 +17,9 @@ import {
 } from "@/components/ui/sidebar"
 
 import { Separator } from "@/components/ui/separator"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-
 import Logo from "../logo"
 import { ThemeToggle } from "../theme-toggle"
-import { UserButton } from "./user-button"
+import { UserButtonSlot } from "./user-button-slot"
 import { useAuthStore } from "@/store/auth-store"
 import { NAV_GROUPS, getActiveNavUrl, type NavItem as NavConfigItem } from "@/lib/navigation"
 
@@ -38,7 +32,11 @@ function NavItem({
   active: boolean
   collapsed: boolean
 }) {
-  const button = (
+  // T20: collapsed labels use the native title attribute. The Radix tooltip
+  // here put Popper on every authenticated route's first-load path; the
+  // browser tooltip needs no JavaScript and is announced as the accessible
+  // name when the label is visually hidden by the icon rail.
+  return (
     <SidebarMenuButton
       asChild
       isActive={active}
@@ -54,6 +52,7 @@ function NavItem({
       <Link
         href={item.url}
         aria-current={active ? "page" : undefined}
+        title={collapsed ? item.title : undefined}
         className="flex items-center gap-3 px-3"
       >
         <item.icon size={17} className="shrink-0" />
@@ -61,19 +60,6 @@ function NavItem({
       </Link>
     </SidebarMenuButton>
   )
-
-  if (collapsed) {
-    return (
-      <Tooltip delayDuration={0}>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
-        <TooltipContent side="right" className="font-medium">
-          {item.title}
-        </TooltipContent>
-      </Tooltip>
-    )
-  }
-
-  return button
 }
 
 export function AppSidebar() {
@@ -125,7 +111,7 @@ export function AppSidebar() {
       <SidebarFooter className="p-3 border-t border-border/60">
         <div className="flex items-center justify-between gap-2 p-1.5 rounded-lg hover:bg-muted/40 transition-colors">
           <div className="flex items-center gap-2.5 min-w-0">
-            <UserButton />
+            <UserButtonSlot />
             {!collapsed && (
               <span className="text-sm font-medium truncate text-foreground/80">
                 {user?.firstName

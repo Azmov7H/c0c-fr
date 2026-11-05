@@ -12,7 +12,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { useNotifications, useUnreadCount, useMarkAsRead, useMarkAllAsRead } from '@/features/notifications/hooks/use-notifications';
-import { formatDistanceToNow } from 'date-fns';
+import { formatRelativeTime } from '@/lib/relative-time';
 import { cn } from '@/lib/utils';
 
 const notificationIcons: Record<string, string> = {
@@ -120,9 +120,7 @@ export function NotificationBell() {
                                         )}
                                     </div>
                                     <span className="text-[10px] text-muted-foreground">
-                                        {formatDistanceToNow(new Date(notification.createdAt), {
-                                            addSuffix: true,
-                                        })}
+                                        {formatRelativeTime(notification.createdAt).relative}
                                     </span>
                                 </DropdownMenuItem>
                             ))}

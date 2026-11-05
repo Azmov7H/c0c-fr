@@ -27,22 +27,22 @@ export const plannerService = {
         status?: string;
         projectId?: string;
     }): Promise<{ data: PlannerEvent[]; meta: PaginatedMeta }> {
-        const { data } = await apiClient.get('/planner/events', { params });
+        const { data } = await apiClient.get<{ data: PlannerEvent[]; meta: PaginatedMeta }>('/planner/events', { params });
         return { data: data.data, meta: data.meta };
     },
 
     async getById(id: string): Promise<PlannerEvent> {
-        const { data } = await apiClient.get(`/planner/events/${id}`);
+        const { data } = await apiClient.get<{ data: PlannerEvent }>(`/planner/events/${id}`);
         return data.data;
     },
 
     async create(dto: Partial<PlannerEvent>): Promise<PlannerEvent> {
-        const { data } = await apiClient.post('/planner/events', dto);
+        const { data } = await apiClient.post<{ data: PlannerEvent }>('/planner/events', dto);
         return data.data;
     },
 
     async update(id: string, dto: Partial<PlannerEvent>): Promise<PlannerEvent> {
-        const { data } = await apiClient.patch(`/planner/events/${id}`, dto);
+        const { data } = await apiClient.patch<{ data: PlannerEvent }>(`/planner/events/${id}`, dto);
         return data.data;
     },
 

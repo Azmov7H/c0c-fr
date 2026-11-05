@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 import { PricingCards } from '@/features/billing/components/pricing';
 
 export function PricingTeaser() {
@@ -20,9 +18,9 @@ export function PricingTeaser() {
 
                 <p className="mt-6 text-center text-xs text-muted-foreground">
                     Every new account starts on Starter, no card required.{' '}
-                    <Link className="underline underline-offset-4" href="/pricing">
+                    <a className="underline underline-offset-4" href="/pricing">
                         See the full comparison
-                    </Link>
+                    </a>
                     .
                 </p>
             </div>

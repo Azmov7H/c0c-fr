@@ -17,7 +17,7 @@ import {
 import { NAV_GROUPS, QUICK_ACTIONS } from "@/lib/navigation"
 import { useProjects } from "@/features/projects/hooks/use-projects"
 import { useLogout } from "@/features/auth/hooks/use-auth"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/components/theme-provider"
 
 const G_PREFIX_WINDOW_MS = 1200
 

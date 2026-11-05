@@ -21,7 +21,7 @@ import {
 import type { Project, ProjectStatus } from '@/types';
 
 import { useDeleteProject, useUpdateProject } from '../hooks/use-projects';
-import { STATUS_LABEL } from '../lib/project-schemas';
+import { STATUS_LABEL } from '../lib/project-constants';
 import { DeleteProjectDialog } from './delete-project-dialog';
 
 const STATUS_CHOICES: ProjectStatus[] = ['draft', 'processing', 'completed'];

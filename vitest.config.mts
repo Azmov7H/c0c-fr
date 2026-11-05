@@ -28,7 +28,7 @@ export default defineConfig({
                         'src/app/api/**/*.test.ts',
                         'src/types/**/*.test.ts',
                         'src/lib/**/*.test.ts',
-                        'src/middleware.test.ts',
+                        'src/proxy.test.ts',
                         'src/features/**/*.test.ts',
                         'tests/security/**/*.test.ts',
                     ],
@@ -65,7 +65,7 @@ export default defineConfig({
             include: [
                 'src/app/api/**',
                 'src/lib/**',
-                'src/middleware.ts',
+                'src/proxy.ts',
                 'src/services/**',
                 'src/features/**',
                 'src/hooks/**',
@@ -88,7 +88,8 @@ export default defineConfig({
             // Ratchet state (merged v8 coverage across both projects, run 7):
             //   api      card ≥90 → gates 90/90/95/90 kept (measured 100.0 on all four)
             //   lib      card ≥90 → branches/functions raised 90→98 / 90→95 (measured 99.2 / 96.0)
-            //   middleware card ≥90 → 95/85/100/95 met as-is (measured 100.0 except branches 100)
+            //   middleware card ≥90 → 95/85/100/95 kept (T20 split the auth
+            //   proxy out of middleware.ts; the threshold now keys on src/proxy.ts)
             //   services card ≥90 → 90/80/100/90 met (measured 97.5/86.66/100/100)
             //   hooks    → 70/70/70/70 met (measured 97.76/81.48/94.44/100)
             //   store    → 90/75/100/90 met as-is (measured 100.0)
@@ -97,7 +98,7 @@ export default defineConfig({
             thresholds: {
                 'src/app/api/**': { statements: 90, branches: 90, functions: 95, lines: 90 },
                 'src/lib/**': { statements: 98, branches: 98, functions: 95, lines: 95 },
-                'src/middleware.ts': { statements: 95, branches: 85, functions: 100, lines: 95 },
+                'src/proxy.ts': { statements: 95, branches: 85, functions: 100, lines: 95 },
                 'src/services/**': { statements: 90, branches: 80, functions: 100, lines: 90 },
                 'src/features/**': { statements: 47, branches: 50, functions: 36, lines: 47 },
                 'src/hooks/**': { statements: 70, branches: 70, functions: 70, lines: 70 },

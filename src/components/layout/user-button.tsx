@@ -18,7 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CreditCard, LogOut, Monitor, Moon, Settings, Sun, SunMoon, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/components/theme-provider"
 import { useAuthStore } from "@/store/auth-store"
 import { useLogout } from "@/features/auth/hooks/use-auth"
 

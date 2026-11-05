@@ -5,7 +5,7 @@ import {
     useQueryClient,
     type QueryKey,
 } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 import type { PaginatedResponse, Project } from '@/types';
 import { toApiError } from '@/lib/api-error';

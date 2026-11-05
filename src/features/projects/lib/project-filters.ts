@@ -1,7 +1,7 @@
 import type { Platform, ProjectStatus } from '@/types';
 
 import type { ProjectsQuery } from '../services/projects.service';
-import { PROJECT_PLATFORMS, PROJECT_STATUSES } from './project-schemas';
+import { PROJECT_PLATFORMS, PROJECT_STATUSES } from './project-constants';
 
 /**
  * URL is the source of truth for the list's filters (T15 §1).

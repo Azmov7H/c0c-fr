@@ -44,7 +44,7 @@ import {
     PLATFORM_LABEL,
     PROJECT_PLATFORMS,
     STATUS_LABEL,
-} from '../lib/project-schemas';
+} from '../lib/project-constants';
 
 const LIST_STATUSES: ProjectStatus[] = ['draft', 'processing', 'completed'];
 

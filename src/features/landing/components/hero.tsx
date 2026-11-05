@@ -1,8 +1,7 @@
-import Link from 'next/link';
-import Image from 'next/image';
+import { getImageProps } from 'next/image';
 import { ArrowRight } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { MarketingCtaLink } from '@/components/layout/marketing-cta';
 
 /**
  * Above the fold: headline, subhead, one primary CTA, one secondary CTA, one
@@ -35,29 +34,74 @@ export function Hero() {
                 </p>
 
                 <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                    <Button size="lg" className="h-12 px-8 text-base" asChild>
-                        <Link href="/signup">
-                            Start creating — free
-                            <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
-                        </Link>
-                    </Button>
-                    <Button size="lg" variant="outline" className="h-12 px-8 text-base" asChild>
-                        <Link href="#assets">See the four assets</Link>
-                    </Button>
+                    <MarketingCtaLink href="/signup" size="lg" className="h-12 px-8 text-base">
+                        Start creating — free
+                        <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+                    </MarketingCtaLink>
+                    <MarketingCtaLink
+                        href="#assets"
+                        size="lg"
+                        variant="outline"
+                        className="h-12 px-8 text-base"
+                    >
+                        See the four assets
+                    </MarketingCtaLink>
                 </div>
 
                 <div className="mx-auto mt-14 max-w-5xl">
-                    <Image
-                        src="/landing/dashboard.jpg"
-                        alt="The Ideas & Trends workspace ranking viral topics with score bars and growth percentages"
-                        width={1600}
-                        height={1000}
-                        priority
-                        sizes="(max-width: 768px) 100vw, 1024px"
-                        className="rounded-xl border border-border/60 shadow-2xl"
-                    />
+                    {/*
+                      T20: `next/image`'s server API, not the client component.
+                      The landing page is the one route with a 140 kB budget and
+                      this is its only image, so the Image component's ~5.6 kB
+                      client runtime was the entire route-specific cost over the
+                      framework floor. `getImageProps` still goes through Next's
+                      image optimizer (same AVIF/WebP formats and `sizes`), but
+                      renders a plain <img> at build time — no hydration code for
+                      an image that has no behaviour.
+
+                      LCP treatment is preserved explicitly: eager loading, high
+                      fetch priority and a matching srcSet preload. `priority` is
+                      passed too so the generated props keep the same eager
+                      semantics the component had.
+                    */}
+                    <HeroImage />
                 </div>
             </div>
         </section>
+    );
+}
+
+/**
+ * The hero visual is a real capture of the running product. `getImageProps`
+ * is evaluated once at build time because the marketing route is static.
+ */
+const HERO_IMAGE = {
+    src: '/landing/dashboard.jpg',
+    alt: 'The Ideas & Trends workspace ranking viral topics with score bars and growth percentages',
+    width: 1600,
+    height: 1000,
+    priority: true,
+    sizes: '(max-width: 768px) 100vw, 1024px',
+    className: 'rounded-xl border border-border/60 shadow-2xl',
+    fetchPriority: 'high' as const,
+    loading: 'eager' as const,
+};
+
+const { props: heroImageProps } = getImageProps(HERO_IMAGE);
+
+function HeroImage() {
+    return (
+        <>
+            <link
+                rel="preload"
+                as="image"
+                href={heroImageProps.src}
+                imageSrcSet={heroImageProps.srcSet}
+                imageSizes={heroImageProps.sizes}
+                fetchPriority="high"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element -- props come from next/image's getImageProps (optimizer, srcSet, sizes); the lint rule cannot see through the spread. */}
+            <img {...heroImageProps} alt={HERO_IMAGE.alt} />
+        </>
     );
 }

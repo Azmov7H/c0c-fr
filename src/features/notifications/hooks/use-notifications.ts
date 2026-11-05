@@ -3,7 +3,7 @@ import { notificationsService } from '../services/notifications.service';
 import { useRealtimeStatus } from '@/hooks/use-realtime-status';
 import { useAuthStore } from '@/store/auth-store';
 import { getPollingIntervalMs } from '@/types/realtime';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 // Query keys
 export const notificationsKeys = {

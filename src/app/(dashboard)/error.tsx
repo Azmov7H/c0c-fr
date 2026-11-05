@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import Link from "next/link"
 import { AlertTriangle, Home, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { reportClientError } from "@/lib/report-error"
 
 /**
  * Route-level boundary for every authenticated page (T10). Shows a recovery
@@ -20,6 +21,8 @@ export default function DashboardError({
 }) {
   useEffect(() => {
     console.error("Dashboard route error:", error)
+    // Lazy Sentry reporter (T21) — no client SDK on a healthy page load.
+    reportClientError(error)
   }, [error])
 
   return (

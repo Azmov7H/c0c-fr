@@ -6,7 +6,7 @@ import nextConfig from '../../next.config';
  *
  * The eight security headers come from two places by design:
  *   - seven static headers from next.config.ts `headers()` (this file),
- *   - the CSP from src/middleware.ts (per-request nonce; see middleware.test.ts).
+ *   - the CSP from src/proxy.ts (per-request nonce; see proxy.test.ts).
  * A test that asserted all eight in one place would lie about where the CSP is
  * produced; together these two files pin the full set.
  */

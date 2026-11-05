@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { thumbnailsService } from '../services/thumbnails.service';
 import { CreateThumbnailDTO, UpdateThumbnailDTO } from '../types';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { toApiError } from '@/lib/api-error';
 
 export const thumbnailsKeys = {
