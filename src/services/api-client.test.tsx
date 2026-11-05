@@ -14,6 +14,7 @@
  * here.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ApiError } from '../lib/api-error';
 import { startMsw, server, http, HttpResponse } from '../../tests/msw/server';
 
 startMsw();
@@ -344,5 +345,346 @@ describe('api-client error mapping without a backend envelope', () => {
         expect(refresh).not.toHaveBeenCalled();
         expect(err.code).toBe('TOKEN_EXPIRED'); // the switch's 401 arm, reached envelope-less
         expect(err.status).toBe(401);
+    });
+});
+
+describe('api-client method surface, params and signals', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it('every verb reaches the wire with its body (and DELETE bodies are legal)', async () => {
+        const seen: Record<string, { method: string; body: unknown; contentType: string | null }> = {};
+        const capture = async (request: Request) => ({
+            method: request.method,
+            body: request.method === 'GET' ? null : await request.json(),
+            contentType: request.headers.get('content-type'),
+        });
+        server.use(
+            http.post('/api/v1/beings', async ({ request }) => {
+                seen.POST = await capture(request);
+                return HttpResponse.json(healthy);
+            }),
+            http.put('/api/v1/beings', async ({ request }) => {
+                seen.PUT = await capture(request);
+                return HttpResponse.json(healthy);
+            }),
+            http.patch('/api/v1/beings', async ({ request }) => {
+                seen.PATCH = await capture(request);
+                return HttpResponse.json(healthy);
+            }),
+            http.delete('/api/v1/beings', async ({ request }) => {
+                seen.DELETE = await capture(request); // deletes may carry { data }
+                return HttpResponse.json(healthy);
+            })
+        );
+
+        const apiClient = await useApi();
+        await apiClient.post('/beings', { name: 'a' });
+        await apiClient.put('/beings', { name: 'b' });
+        await apiClient.patch('/beings', { name: 'c' });
+        await apiClient.delete('/beings', { data: { memberId: 'm-1' } });
+
+        expect(seen.POST.method).toBe('POST');
+        expect((seen.POST.body as { name?: string }).name).toBe('a');
+        expect(seen.POST.contentType).toContain('application/json');
+        expect(seen.PUT.method).toBe('PUT');
+        expect((seen.PUT.body as { name?: string }).name).toBe('b');
+        expect(seen.PATCH.method).toBe('PATCH');
+        expect((seen.PATCH.body as { name?: string }).name).toBe('c');
+        expect(seen.DELETE.method).toBe('DELETE');
+        expect(seen.DELETE.body).toEqual({ memberId: 'm-1' });
+    });
+
+    it('a GET without a body carries no Content-Type at all', async () => {
+        let contentType: string | null = 'unset';
+        server.use(
+            http.get('/api/v1/lean', ({ request }) => {
+                contentType = request.headers.get('content-type');
+                return HttpResponse.json(healthy);
+            })
+        );
+
+        const apiClient = await useApi();
+        await apiClient.get('/lean');
+
+        expect(contentType).toBeNull();
+    });
+
+    it('params: scalars render, arrays become key[], null/undefined/objects are skipped', async () => {
+        let url = '';
+        server.use(
+            http.get('/api/v1/query', ({ request }) => {
+                url = request.url;
+                return HttpResponse.json(healthy);
+            })
+        );
+
+        const apiClient = await useApi();
+        await apiClient.get('/query', {
+            params: {
+                page: 2,
+                tags: ['a', 'b'],
+                empty: null,
+                missing: undefined,
+                nested: { x: 1 },
+            },
+        });
+
+        const parsed = new URL(url);
+        expect(parsed.searchParams.get('page')).toBe('2');
+        expect(parsed.searchParams.getAll('tags[]')).toEqual(['a', 'b']);
+        expect(parsed.searchParams.get('empty')).toBeNull();
+        expect(parsed.searchParams.has('missing')).toBe(false);
+        expect(parsed.searchParams.has('nested')).toBe(false);
+    });
+
+    it('an aborted caller signal fails the request through the timeout-join path', async () => {
+        server.use(
+            http.get('/api/v1/slow', async () => {
+                await new Promise((resolve) => setTimeout(resolve, 400));
+                return HttpResponse.json(healthy);
+            })
+        );
+
+        const apiClient = await useApi();
+        const controller = new AbortController();
+        controller.abort();
+
+        const err = (await apiClient.get('/slow', { signal: controller.signal }).catch(
+            (e: unknown) => e
+        )) as { code?: string; status?: number };
+
+        expect(err.code).toBe('UNKNOWN_ERROR'); // transport error, not a response
+        expect(err.status).toBeUndefined();
+    });
+
+    it('an absolute URL is used verbatim (no baseURL prefix)', async () => {
+        let url = '';
+        server.use(
+            http.get('/api/v1/checkout', ({ request }) => {
+                url = request.url;
+                return HttpResponse.json(healthy);
+            })
+        );
+
+        const apiClient = await useApi();
+        await apiClient.get('http://localhost:3000/api/v1/checkout');
+
+        expect(new URL(url).pathname).toBe('/api/v1/checkout');
+        expect(url.includes('/api/v1/api/v1')).toBe(false);
+    });
+});
+
+describe('api-client defensive edges (SSR guards, transport oddities)', () => {
+    afterEach(() => {
+        vi.unstubAllGlobals();
+        vi.restoreAllMocks();
+    });
+
+    it('a 204 (or any bodyless ok) resolves with data undefined', async () => {
+        server.use(http.delete('/api/v1/members/9', () => new HttpResponse(null, { status: 204 })));
+
+        const apiClient = await useApi();
+        const result = await apiClient.delete('/members/9');
+
+        expect(result.status).toBe(204);
+        expect(result.data).toBeUndefined();
+    });
+
+    it('array params skip null/undefined members but keep the rest as key[]', async () => {
+        let url = '';
+        server.use(
+            http.get('/api/v1/pick', ({ request }) => {
+                url = request.url;
+                return HttpResponse.json(healthy);
+            })
+        );
+
+        const apiClient = await useApi();
+        await apiClient.get('/pick', { params: { tags: ['a', null, 'b', undefined] } });
+
+        expect(new URL(url).searchParams.getAll('tags[]')).toEqual(['a', 'b']);
+    });
+
+    it('an empty statusText with a non-envelope body falls all the way to "Request failed"', async () => {
+        const previous = global.fetch;
+        // undici only fills statusText when a REASON PHRASE is present; locally
+        // constructed responses (what an HTTP/2 origin produces in practice) carry
+        // an empty one, which is the fallback arm under test.
+        global.fetch = vi.fn(async () => new Response('nope', { status: 418 })) as unknown as typeof fetch;
+        try {
+            const apiClient = await useApi();
+            const err = (await apiClient.get('/things').catch((e: unknown) => e)) as {
+                code?: string;
+                message?: string;
+            };
+
+            expect(err.code).toBe('UNKNOWN_ERROR'); // 418 hits mapHttpStatus's default arm
+            expect(err.message).toBe('Request failed'); // no envelope, no statusText fallback
+        } finally {
+            global.fetch = previous;
+        }
+    });
+
+    it('an ApiError escaping the transport is re-thrown, never double-wrapped', async () => {
+        const previous = global.fetch;
+        global.fetch = vi.fn(async () => {
+            throw new ApiError({ code: 'NASTY', message: 'market crash' });
+        }) as unknown as typeof fetch;
+        try {
+            const apiClient = await useApi();
+            const err = (await apiClient.get('/things').catch((e: unknown) => e)) as { code?: string };
+
+            expect(err).toBeInstanceOf(ApiError);
+            expect(err.code).toBe('NASTY');
+        } finally {
+            global.fetch = previous;
+        }
+    });
+
+    it('a transport rejection that is not an Error degrades to the UNKNOWN_ERROR fallback', async () => {
+        const previous = global.fetch;
+        global.fetch = vi.fn(async () => {
+            throw 'socket glitch'; // pathological runtime, not an Error instance
+        }) as unknown as typeof fetch;
+        try {
+            const apiClient = await useApi();
+            const err = (await apiClient.get('/things').catch((e: unknown) => e)) as {
+                code?: string;
+                message?: string;
+            };
+
+            expect(err.code).toBe('UNKNOWN_ERROR');
+            expect(err.message).toBe('Request failed');
+        } finally {
+            global.fetch = previous;
+        }
+    });
+
+    it('a body-less/garbage-decode pathology resolves with data undefined', async () => {
+        // A response whose stream was already consumed (gateway cache replay
+        // pathology): text() rejects, parseBody degrades to undefined and the
+        // caller still receives a well-formed (if empty) 200. The transport is
+        // mocked directly rather than through MSW, because the exploit lives
+        // in the undici Response itself.
+        const previous = global.fetch;
+        global.fetch = vi.fn(async () => {
+            const ghost = new Response('{"cached": true}', { status: 200, headers: { 'content-type': 'application/json' } });
+            await ghost.text(); // consume the stream before it ever reaches the client
+            return ghost;
+        }) as unknown as typeof fetch;
+        try {
+            const apiClient = await useApi();
+            const result = await apiClient.get('/ghost');
+
+            expect(result.status).toBe(200);
+            expect(result.data).toBeUndefined();
+        } finally {
+            global.fetch = previous;
+        }
+    });
+
+    it('without AbortSignal.any the caller signal is used directly (legacy runtimes)', async () => {
+        const hadAny = (AbortSignal as { any?: unknown }).any;
+        delete (AbortSignal as { any?: unknown }).any;
+
+        try {
+            server.use(
+                http.get('/api/v1/slow-legacy', async () => {
+                    await new Promise((resolve) => setTimeout(resolve, 400));
+                    return HttpResponse.json(healthy);
+                })
+            );
+
+            const apiClient = await useApi();
+            const controller = new AbortController();
+            controller.abort();
+
+            const err = (await apiClient
+                .get('/slow-legacy', { signal: controller.signal })
+                .catch((e: unknown) => e)) as { code?: string };
+
+            expect(err.code).toBe('UNKNOWN_ERROR'); // the raw caller abort still fails the request
+        } finally {
+            (AbortSignal as { any?: unknown }).any = hadAny;
+        }
+    });
+});
+
+describe('api-client SSR behaviour (window undefined)', () => {
+    afterEach(() => {
+        vi.unstubAllGlobals();
+        vi.restoreAllMocks();
+    });
+
+    it('on a failed refresh in SSR context it skips logout/redirect and still throws TOKEN_EXPIRED', async () => {
+        const refresh = vi.fn(async () => HttpResponse.json({}, { status: 401 }));
+        const logout = vi.fn(async () => HttpResponse.json({ success: true, data: {} }));
+        server.use(
+            http.get('/api/v1/edge', () => new HttpResponse('no token', { status: 401 })),
+            http.post('/api/auth/refresh', refresh),
+            http.post('/api/auth/logout', logout)
+        );
+        vi.stubGlobal('window', undefined);
+
+        const apiClient = await useApi();
+        const err = (await apiClient.get('/edge').catch((e: unknown) => e)) as { code?: string };
+
+        // No browser to call the BFF or navigate on; the error still surfaces typed.
+        expect(logout).not.toHaveBeenCalled();
+        expect(err.code).toBe('TOKEN_EXPIRED');
+    });
+
+    it('a logout transport failure is swallowed—the sign-out redirect still proceeds', async () => {
+        const refresh = vi.fn(async () => HttpResponse.json({}, { status: 401 }));
+        server.use(
+            http.get('/api/v1/edge', () => new HttpResponse('no token', { status: 401 })),
+            http.post('/api/auth/refresh', refresh)
+        );
+
+        // Only the logout call dies at the transport level (downed BFF);
+        // everything else keeps flowing through MSW's patched fetch.
+        const mswFetch = global.fetch;
+        const previous = global.fetch;
+        global.fetch = vi.fn(async (input: Parameters<typeof fetch>[0], init?: RequestInit) => {
+            const url = typeof input === 'string' ? input : String(input);
+            if (url.includes('/api/auth/logout')) throw new TypeError('Failed to fetch');
+            return mswFetch?.(input, init);
+        }) as unknown as typeof fetch;
+
+        try {
+            const apiClient = await useApi();
+            const err = (await apiClient.get('/edge').catch((e: unknown) => e)) as {
+                code?: string;
+                message?: string;
+            };
+
+            expect(err.code).toBe('TOKEN_EXPIRED');
+        } finally {
+            global.fetch = previous;
+        }
+    });
+
+    it('if the window vanishes mid-refresh (logout resolves after unmount) the redirect short-circuits', async () => {
+        const refresh = vi.fn(async () => HttpResponse.json({}, { status: 401 }));
+        const logout = vi.fn(async () => {
+            // The BFF logout resolves while the page is being torn down —
+            // if window is gone by the time redirectToLogin runs, the guard
+            // inside must return without touching location.
+            vi.stubGlobal('window', undefined);
+            return HttpResponse.json({ success: true, data: {} });
+        });
+        server.use(
+            http.get('/api/v1/edge', () => new HttpResponse('no token', { status: 401 })),
+            http.post('/api/auth/refresh', refresh),
+            http.post('/api/auth/logout', logout)
+        );
+
+        const apiClient = await useApi();
+        const err = (await apiClient.get('/edge').catch((e: unknown) => e)) as { code?: string };
+
+        expect(logout).toHaveBeenCalledTimes(1);
+        expect(err.code).toBe('TOKEN_EXPIRED');
     });
 });

@@ -1,0 +1,140 @@
+# T21 — CI for the frontend. Every stage below is blocking: branch protection
+# requires all live jobs, so a red job cannot be merged. Cards enforced here:
+#   §lint         zero new warnings against the committed baseline ratchet
+#   §typecheck    the Next.js graph (tsc --noEmit, same one the editor uses)
+#   §test         full two-project suite (node + jsdom) under coverage, with
+#                 per-group floors from T18/T21 — silent drops go red
+#   §coverage     bundle budgets still on every route (T20 hard gate)
+#   §e2e          playwright journeys — gated on the backend sibling repo PAT
+#                 (T21_SIBLING_PAT must be added by the repo owner; the job
+#                 no-ops green with a marker until it exists)
+#   §audit        pnpm audit --prod at level ≥ high; dev-tree advisories are
+#                 an explicitly ledgered time-boxed debt (.audit-exceptions.json)
+#   §secrets      gitleaks over the FULL history, including merge commits
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: lint · typecheck · bundle budgets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4   # version from packageManager in package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint                            # errors fail by exit code
+      - run: node scripts/check-lint-baseline.mjs # warnings ≤ committed baseline
+      - run: pnpm exec tsc --noEmit
+      # `pnpm build` = next build && bundle-budget: budgets are blocking here.
+      - run: pnpm build
+
+  test:
+    name: vitest · coverage floors · client-secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec vitest run --coverage
+      - run: pnpm check:client-secrets   # component bundles must not carry secrets
+
+  e2e:
+    name: playwright journeys (gated on backend sibling)
+    runs-on: ubuntu-latest
+    env:
+      # The frontend journeys drive the REAL backend. In CI they need a PAT with
+      # read access to the sibling repo so the workflow can checkout + boot the
+      # backend + mongod. Until the owner adds T21_SIBLING_PAT the job skips green
+      # and the PR carries the marker, so it cannot silently hide forever.
+      NEXTAUTH_URL: http://localhost:19531
+      API_URL: http://localhost:19530
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - name: sibling repo availability gate
+        id: gate
+        run: |
+          if [ -z "${{ secrets.T21_SIBLING_PAT }}" ]; then
+            echo "T21_SIBLING_PAT is not configured on this repo yet — e2e skipped with an explicit marker."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.gate.outputs.ready == 'true'
+        run: |
+          echo "Backend sibling checkout + mongod wiring lands when the PAT exists."
+          echo "Reference: tasks/tasks/T21-ci-observability.md §e2e (owner-side setup)."
+          exit 1   # PAT present but wiring incomplete: fail loud, not silent
+      - if: steps.gate.outputs.ready == 'false'
+        run: echo "e2e job marked pending-secret; revisit once T21_SIBLING_PAT is added."
+
+  links:
+    name: route-table link checker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # No install needed: the checker reads src/app/** and README.md directly.
+      # It resolves every href against the real Next route table (groups
+      # flattened, dynamic segments wildcarded) — a dead internal link fails
+      # the build naming file:line.
+      - run: node scripts/check-links.mjs
+
+  audit:
+    name: pnpm audit --prod · gate ≥ high
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Production scope: the app tree must ALWAYS be clean at ≥ high. Dev-tree
+      # toolchain advisories are ledgered in .audit-exceptions.json with reason,
+      # owner and review date — they are accepted debt, never silent, and
+      # re-checked by review.
+      - run: node scripts/audit-gate.mjs --scope prod
+
+  secrets:
+    name: gitleaks · full history
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0           # full history — leaks hide in old commits
+      - name: install pinned gitleaks (checksum-verified)
+        run: |
+          curl -fsSL -o gitleaks.tgz \
+            https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz
+          echo "a65b5253807a68ac0cafa4414031fd740aeb55f54fb7e55f386acb52e6a840eb  gitleaks.tgz" | sha256sum -c -
+          tar xzf gitleaks.tgz gitleaks
+      - run: ./gitleaks detect --source . --redact

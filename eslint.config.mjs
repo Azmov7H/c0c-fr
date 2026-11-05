@@ -83,6 +83,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated tooling output — the lint ratchet measures source, not
+    // artifacts that appear whichever dev ran the last coverage run.
+    "coverage/**",
+    "test-results/**",
   ]),
 ]);
 

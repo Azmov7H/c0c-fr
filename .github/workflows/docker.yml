@@ -1,0 +1,75 @@
+# T21 — image workflow for the frontend: build it, boot it, curl the liveness
+# route, assert the process runs as non-root, then scan with Trivy. Kept
+# separate from CI because it fails for image reasons (missing static assets,
+# wrong standalone layout, bad HEALTHCHECK) and should not be confused with
+# test failures. No backend needed: the image is verified as a standalone
+# target — the /robots.txt route leaves this process, never the API server.
+
+name: Docker
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: docker-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: build · boot · /robots.txt · non-root
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: build image
+        run: docker build -t c0c-fr:ci .
+      - name: run container
+        run: |
+          docker run -d --name c0c-fr --network host \
+            -e PORT=5110 \
+            c0c-fr:ci
+      - name: wait until the server answers
+        run: |
+          for n in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:5110/robots.txt > /dev/null; then
+              echo "container up after ${n} attempt(s)"; exit 0
+            fi
+            sleep 2
+          done
+          docker logs c0c-fr
+          exit 1
+      - name: served routes are the real Next app (not an error page)
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5110/)
+          if [ "$code" != "200" ]; then
+            echo "GET / returned $code — expected 200"; docker logs c0c-fr; exit 1
+          fi
+          echo "GET / → 200 from the standalone server"
+      - name: process is non-root (uid 1000)
+        run: |
+          uid=$(docker exec c0c-fr node -e "console.log(process.getuid())")
+          if [ "$uid" != "1000" ]; then
+            echo "container process runs as uid $uid — expected 1000 (node)"; exit 1
+          fi
+          echo "uid=1000 (node) ✓"
+      - run: docker rm -f c0c-fr
+
+  scan:
+    name: trivy · HIGH,CRITICAL fail
+    needs: smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t c0c-fr:ci .
+      - uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: c0c-fr:ci
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          format: table

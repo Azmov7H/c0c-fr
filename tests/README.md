@@ -96,12 +96,12 @@ thresholds failing while every test passed.
 | Package | Gate (stmts/branches/funcs/lines) | Measured | Card |
 |---|---|---|---|
 | `src/app/api/**` | 90 / 90 / 95 / 90 | **100.0 / 100.0 / 100.0 / 100.0** | ≥90 ✓ |
-| `src/lib/**` | 98 / 98 / 95 / 95 | 99.01 / 99.2 / 96 / 100 | ≥90 ✓ |
-| `src/middleware.ts` | 95 / 85 / 100 / 95 | 100.0 / 100.0 / 100.0 / 100.0 | ≥90 ✓ |
-| `src/services/**` | 90 / 80 / 100 / 90 | 97.5 / 86.66 / 100 / 100 | ✓ |
+| `src/lib/**` | 98 / 98 / 95 / 95 | 99.55 / 99.24 / 98.30 / 100 | ≥90 ✓ |
+| `src/proxy.ts` | 95 / 85 / 100 / 95 | 100.0 / 100.0 / 100.0 / 100.0 | ≥90 ✓ |
+| `src/services/**` | 90 / 80 / 100 / 90 | **100.0 / 100.0 / 100.0 / 100.0** | ✓ |
 | `src/hooks/**` | 70 / 70 / 70 / 70 | 97.76 / 81.48 / 94.44 / 100 | ✓ |
 | `src/store/**` | 90 / 75 / 100 / 90 | 100.0 / 100.0 / 100.0 / 100.0 | ✓ |
-| `src/features/**` | 47 / 50 / 36 / 47 — **floors** | 47.25 / 50.2 / 36.29 / 47.13 | ≥80 — ratchet |
+| `src/features/**` | 47 / 50 / 36 / 47 — **floors** | 47.26 / 51.42 / 36.12 / 47.32 | ≥80 — ratchet |
 | `src/components/shared/**` | 44 / 33 / 25 / 43 — **floors** | 44.11 / 33.33 / 25 / 43.75 | ≥80 — ratchet |
 
 Ratchet policy: gates start at what the code actually measures today and move up
@@ -110,6 +110,19 @@ card's ≥90 packages (`api/**`, `lib/**`, `middleware.ts`) sit at or above the
 card today; `features/**` and `components/shared/**` sit at their measured floors
 with an explicit ratchet path toward the card's 80. New source files under the
 first six rows must arrive with tests at the existing gate levels.
+
+T21 additions to the measured state (read this before touching thresholds):
+- The `src/lib/**` and `src/services/**` rows above are the T21 lift — the auth BFF
+  relay (`auth-relay`), the toast bus and the `api-client` method/transport surface
+  gained tests; `services` is a clean 100 across the board. The `src/features/**`
+  floors did NOT move: T20's split-out dashboard files (`dashboard-widgets`,
+  `widget-settings`) had ZERO tests and dragged the group below the T18 floor —
+  T21 restored it with real widget-state tests (every widget's loading/error/
+  empty/populated branch now renders). This is the honest fix: with the tests,
+  the features floor is paid; without them the suite goes red again.
+- features is measured to a 0.26 pt statement margin over its floor: adding
+  untested feature components DRAGS THE SUITE RED immediately. That friction is
+  wanted.
 
 Exemptions (all stated, none silent):
 - vendored `src/components/ui/**` — out of the coverage program entirely (testing

@@ -173,6 +173,10 @@ export async function proxy(request: NextRequest) {
     const enforce = process.env.CSP_ENFORCE === 'true';
     const headerName = enforce ? 'Content-Security-Policy' : 'Content-Security-Policy-Report-Only';
     response.headers.set(headerName, buildContentSecurityPolicy(scriptNonce, enforce));
+    // Observability marker (T21): distinguishes "proved by the auth gate" from
+    // "reached the edge without the gate active" (mode: off bypasses above and
+    // never carries this header).
+    response.headers.set('x-proxy-next', '1');
 
     return response;
 }

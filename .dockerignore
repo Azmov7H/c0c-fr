@@ -1,0 +1,38 @@
+# T21 — build context for `docker build`. Everything that only exists for
+# local development, CI or secret-keeping is kept OUT of the build context:
+# smaller layers, faster pushes, and no chance of a .env leaking into an
+# image layer even if a Dockerfile bug tried to COPY . wildly.
+.git
+.github
+node_modules
+**/node_modules
+.next
+coverage
+test-results
+playwright-report
+logs
+*.log
+
+# secrets and environment — never in an image layer
+.env
+.env.*
+!.env.example
+*.pem
+
+# playwright/ coverage artifacts and local-only docs stay out; the tests/ TREE
+# STAYS IN the context: client tests under src/ import tests/setup|helpers|msw,
+# and `next build` type-checks src/** so it needs those files present.
+# No secrets live in tests/; e2e runs against real browsers, not this image.
+e2e
+docs
+scripts
+audit-exceptions
+vercel.json
+.vercel
+.vscode
+.idea
+.DS_Store
+
+# the build machinery itself (copied explicitly by the Dockerfile, not via .)
+Dockerfile
+.dockerignore

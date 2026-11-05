@@ -12,10 +12,16 @@
     "check:client-secrets": "node scripts/check-client-bundle-secrets.mjs",
     "test:unit": "vitest run",
     "test:e2e": "API_URL=http://localhost:19531 next build && node scripts/bundle-budget.mjs && playwright test",
-    "lhci": "lhci autorun"
+    "lhci": "lhci autorun",
+    "lint:baseline": "node scripts/check-lint-baseline.mjs",
+    "audit:gate": "node scripts/audit-gate.mjs --scope prod",
+    "preinstall": "npx only-allow pnpm",
+    "check:links": "node scripts/check-links.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@sentry/nextjs": "^11.10.0",
+    "@sentry/server-runtime-injection": "11.10.0",
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",
@@ -33,7 +39,7 @@
     "server-only": "^0.0.1",
     "socket.io-client": "^4.8.3",
     "tailwind-merge": "^3.5.0",
-    "zod": "^4.3.6",
+    "zod": "^4.6.6",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
