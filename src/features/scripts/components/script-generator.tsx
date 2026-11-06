@@ -73,6 +73,11 @@ export function ScriptGenerator() {
               variant={tone === t ? 'default' : 'outline'}
               className="cursor-pointer transition-all"
               onClick={() => setTone(t)}
+              role="button"
+              tabIndex={0}
+              aria-pressed={tone === t}
+              aria-label={`Tone: ${t}`}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setTone(t) } }}
             >
               {t}
             </Badge>

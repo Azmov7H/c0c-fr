@@ -68,6 +68,7 @@ module.exports = {
                 {
                     matchingUrlPattern: '.*',
                     assertions: {
+                        'accessibility': ['error', { minNumericValue: 0.95 }],
                         'cumulative-layout-shift': ['error', { maxNumericValue: 0.05 }],
                         // The card's INP (≤ 200 ms) row, enforced through its lab
                         // proxy: Lighthouse 12.6.1 reports INP as a notApplicable

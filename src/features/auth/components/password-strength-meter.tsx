@@ -18,7 +18,7 @@ export function PasswordStrengthMeter({ value }: { value: string }) {
         score >= 4 ? 'bg-success' : score === 3 ? 'bg-info' : score === 2 ? 'bg-warning' : 'bg-destructive';
 
     return (
-        <div className="space-y-2" data-testid="password-strength-meter">
+        <div className="space-y-2" data-testid="password-strength-meter" aria-live="polite">
             <div
                 className="flex gap-1"
                 role="img"

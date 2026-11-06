@@ -70,9 +70,10 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
                 <CardContent className="flex-1 p-8 space-y-8 overflow-y-auto">
                     {/* Prompt */}
                     <div className="space-y-4">
-                        <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">The Directive</Label>
+                        <Label htmlFor="thumb-gen-prompt" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">The Directive</Label>
                         <div className="relative group">
                             <Textarea
+                                id="thumb-gen-prompt"
                                 value={prompt}
                                 onChange={(e) => setPrompt(e.target.value)}
                                 placeholder="A cybernetic detective in a neon-lit alleyway, hyper-detailed, synthwave color palette..."
@@ -93,15 +94,15 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
                             className="grid grid-cols-1 gap-4"
                         >
                             {STYLES.map((style) => (
-                                <div
+                                <label
                                     key={style.id}
+                                    htmlFor={`style-${style.id}`}
                                     className={cn(
                                         "flex items-center space-x-4 border rounded-[20px] p-4 cursor-pointer transition-all duration-300 group",
                                         stylePreset === style.id
                                             ? "border-primary bg-primary/5 shadow-glow scale-[1.02]"
                                             : "border-border/50 hover:border-primary/30 hover:bg-muted/30"
                                     )}
-                                    onClick={() => setStylePreset(style.id as ThumbnailStyle)}
                                 >
                                     <div className={cn(
                                         "p-2.5 rounded-xl shrink-0 transition-colors",
@@ -109,16 +110,16 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
                                     )}>
                                         <style.icon className="w-5 h-5" />
                                     </div>
-                                    <div className="flex-1">
-                                        <Label htmlFor={`style-${style.id}`} className="cursor-pointer font-bold text-sm block">
+                                    <span className="flex-1">
+                                        <span className="cursor-pointer font-bold text-sm block">
                                             {style.label}
-                                        </Label>
-                                        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                                        </span>
+                                        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider block">
                                             {style.description}
-                                        </p>
-                                    </div>
+                                        </span>
+                                    </span>
                                     <RadioGroupItem value={style.id} id={`style-${style.id}`} className="sr-only" />
-                                </div>
+                                </label>
                             ))}
                         </RadioGroup>
                     </div>

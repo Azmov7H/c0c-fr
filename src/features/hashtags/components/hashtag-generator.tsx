@@ -71,8 +71,9 @@ export function HashtagGenerator() {
           </CardHeader>
           <CardContent className="p-4 space-y-4">
             <div className="space-y-3">
-              <Label>Topic</Label>
+              <Label htmlFor="hashtag-topic">Topic</Label>
               <Textarea
+                id="hashtag-topic"
                 placeholder="What's your content about?"
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
@@ -124,6 +125,10 @@ export function HashtagGenerator() {
                     key={tag}
                     className="px-3 py-1.5 rounded-full bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground font-semibold cursor-pointer transition-all text-sm"
                     onClick={() => copyOne(tag)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Copy hashtag ${tag}`}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); copyOne(tag) } }}
                   >
                     {tag}
                   </Badge>
