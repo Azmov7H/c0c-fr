@@ -4,23 +4,27 @@
  * T20 made this a server component. As a client component it cost its own
  * first-load chunk (~0.7 kB gzip) plus the client boundary runtime on the one
  * route with the tightest budget. The button renders identically on the
- * server; one delegated inline script (part of the prerendered HTML) attaches
- * the click behaviour. That is the same trade the pre-paint theme script
- * already makes, and it keeps the marketing route's JavaScript to framework
- * + `next/image` only.
+ * server; one delegated inline script (part of the prerendered HTML — see
+ * theme-pre-paint-script.tsx) attaches the click behaviour. That is the same
+ * trade the pre-paint theme script already makes, and it keeps the marketing
+ * route's JavaScript to framework + `next/image` only.
  *
  * It writes the same `theme` localStorage key and `dark` class that the app
- * theme provider uses (see theme-pre-paint-script.tsx for the pre-paint half),
- * so the choice carries over both ways.
+ * theme provider uses (see theme-pre-paint-script.tsx for the pre-paint half
+ * and the delegated toggle listener), so the choice carries over both ways.
  *
  * Both icons occupy the same grid cell and CSS decides which one shows, so the
  * toggle is correct before the script runs and without JavaScript.
+ *
+ * T21 review fix: the click behaviour used to live in a <script> rendered
+ * next to this button. Scripts inserted by React on client-side navigation
+ * do not execute, so the toggle was dead after an SPA navigation. The
+ * listener now lives on `document` in theme-pre-paint-script.tsx, which
+ * runs once on document load and survives every subsequent navigation.
+ * This component therefore renders ONLY the button.
  */
-const SCRIPT = `(function(){var b=document.getElementById('theme-quick-toggle');if(!b)return;b.addEventListener('click',function(){try{var e=document.documentElement;var d=!e.classList.contains('dark');e.classList.toggle('dark',d);e.style.colorScheme=d?'dark':'light';localStorage.setItem('theme',d?'dark':'light');}catch(e){}});})();`;
-
 export function ThemeQuickToggle() {
     return (
-        <>
             <button
                 id="theme-quick-toggle"
                 type="button"
@@ -53,7 +57,5 @@ export function ThemeQuickToggle() {
                     </svg>
                 </span>
             </button>
-            <script dangerouslySetInnerHTML={{ __html: SCRIPT }} />
-        </>
     );
 }
