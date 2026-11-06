@@ -13,8 +13,17 @@
  * every load. Under the report-only CSP it is a reportable inline script
  * (nonce-less static pages); the enforce-phase decision for static routes
  * (documented in T09-STATUS) covers it.
+ *
+ * T21 review fix: the same script also installs ONE delegated document
+ * click listener for #theme-quick-toggle. The old per-button inline script
+ * inside ThemeQuickToggle never executed on client-side navigation (React
+ * inserts <script> nodes dynamically and browsers do not run them), so the
+ * toggle was dead after an SPA navigation. Delegating on `document`
+ * survives navigation because the listener lives on the document, not on
+ * the button node React re-creates on each route change. This keeps the
+ * toggle a zero-JS server component for the tight landing budget.
  */
-const SCRIPT = `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);var e=document.documentElement;e.classList.toggle('dark',d);e.style.colorScheme=d?'dark':'light';}catch(e){}})();`;
+const SCRIPT = `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);var e=document.documentElement;e.classList.toggle('dark',d);e.style.colorScheme=d?'dark':'light';}catch(e){}document.addEventListener('click',function(ev){try{var b=ev.target&&ev.target.closest&&ev.target.closest('#theme-quick-toggle');if(!b)return;var e=document.documentElement;var d=!e.classList.contains('dark');e.classList.toggle('dark',d);e.style.colorScheme=d?'dark':'light';localStorage.setItem('theme',d?'dark':'light');}catch(x){}});})();`;
 
 export function ThemePrePaintScript() {
     return <script dangerouslySetInnerHTML={{ __html: SCRIPT }} />;

@@ -66,7 +66,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t c0c-fr:ci .
-      - uses: aquasecurity/trivy-action@0.28.0
+      - uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: c0c-fr:ci
           severity: HIGH,CRITICAL
