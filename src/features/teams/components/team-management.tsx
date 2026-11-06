@@ -203,20 +203,23 @@ export const TeamManagement = () => {
                             </CardHeader>
                             <CardContent className="space-y-2">
                                 {teams?.map(t => (
-                                    <div
+                                    <button
                                         key={t.id}
+                                        type="button"
                                         onClick={() => setSelectedTeamId(t.id)}
-                                        className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border ${activeTeam.id === t.id ? 'bg-primary/10 border-primary/30 text-primary' : 'hover:bg-muted text-muted-foreground'
+                                        aria-pressed={activeTeam.id === t.id}
+                                        aria-current={activeTeam.id === t.id ? 'true' : undefined}
+                                        className={`flex w-full items-center justify-between p-3 rounded-lg cursor-pointer transition-all border text-left ${activeTeam.id === t.id ? 'bg-primary/10 border-primary/30 text-primary' : 'hover:bg-muted text-muted-foreground'
                                             }`}
                                     >
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-8 h-8 rounded-md flex items-center justify-center font-bold text-xs ${activeTeam.id === t.id ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                                        <span className="flex items-center gap-3">
+                                            <span className={`w-8 h-8 rounded-md flex items-center justify-center font-bold text-xs ${activeTeam.id === t.id ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                                                 {t.name.slice(0, 2).toUpperCase()}
-                                            </div>
+                                            </span>
                                             <span className="text-sm font-medium">{t.name}</span>
-                                        </div>
+                                        </span>
                                         {activeTeam.id === t.id && <CheckCircle2 className="w-4 h-4" />}
-                                    </div>
+                                    </button>
                                 ))}
                             </CardContent>
                         </Card>

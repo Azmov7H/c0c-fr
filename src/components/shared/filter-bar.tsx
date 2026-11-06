@@ -43,6 +43,7 @@ export function FilterBar({
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder={searchPlaceholder}
+          aria-label={searchPlaceholder}
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-9 h-9 rounded-xl bg-muted/30 border-border/60 focus-visible:ring-1"
@@ -51,10 +52,10 @@ export function FilterBar({
 
       {filters.length > 0 && (
         <div className="flex items-center gap-2">
-          <SlidersHorizontal className="w-4 h-4 text-muted-foreground shrink-0" />
+          <SlidersHorizontal className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden="true" />
           {filters.map((filter) => (
             <Select key={filter.id} value={filter.value} onValueChange={filter.onChange}>
-              <SelectTrigger className="h-9 w-36 rounded-xl border-border/60 text-xs">
+              <SelectTrigger className="h-9 w-36 rounded-xl border-border/60 text-xs" aria-label={filter.label}>
                 <SelectValue placeholder={filter.label} />
               </SelectTrigger>
               <SelectContent>

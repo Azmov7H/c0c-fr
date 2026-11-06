@@ -67,7 +67,7 @@ export function AudioStudio() {
 
             <RadioGroup value={mood} onValueChange={setMood} className="grid grid-cols-1 gap-3">
                 {MOODS.map((option) => (
-                    <div
+                    <label
                         key={option.id}
                         className={cn(
                             'flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-all',
@@ -75,7 +75,6 @@ export function AudioStudio() {
                                 ? 'border-primary bg-primary/5'
                                 : 'border-border/50 hover:border-primary/30 hover:bg-muted/30'
                         )}
-                        onClick={() => setMood(option.id)}
                     >
                         <div className={cn(
                             'shrink-0 rounded-lg p-2',
@@ -83,12 +82,12 @@ export function AudioStudio() {
                         )}>
                             <Music className="size-4" aria-hidden="true" />
                         </div>
-                        <div className="flex-1">
-                            <Label className="block cursor-pointer text-sm font-semibold">{option.label}</Label>
-                            <p className="text-xs text-muted-foreground">{option.description}</p>
-                        </div>
+                        <span className="flex-1">
+                            <span className="block cursor-pointer text-sm font-semibold">{option.label}</span>
+                            <span className="text-xs text-muted-foreground block">{option.description}</span>
+                        </span>
                         <RadioGroupItem value={option.id} className="sr-only" />
-                    </div>
+                    </label>
                 ))}
             </RadioGroup>
 

@@ -101,21 +101,23 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                     </CardHeader>
                     <CardContent className="p-8 space-y-4">
                         {analysis.suggestedTitles.map((title, i) => (
-                            <div
+                            <button
                                 key={i}
-                                className="group relative p-5 rounded-2xl border border-border/50 bg-muted/20 hover:border-primary/40 hover:bg-muted/40 transition-all cursor-pointer shadow-sm hover:shadow-premium"
+                                type="button"
+                                className="group relative w-full text-left p-5 rounded-2xl border border-border/50 bg-muted/20 hover:border-primary/40 hover:bg-muted/40 transition-all cursor-pointer shadow-sm hover:shadow-premium"
                                 onClick={() => copyToClipboard(title, `title-${i}`)}
+                                aria-label={`Copy title suggestion: ${title}`}
                             >
-                                <p className="text-base font-bold text-foreground pr-12 leading-relaxed tracking-tight">{title}</p>
-                                <div className="absolute top-1/2 -translate-y-1/2 right-4">
-                                    <div className={cn(
+                                <span className="text-base font-bold text-foreground pr-12 leading-relaxed tracking-tight block">{title}</span>
+                                <span className="absolute top-1/2 -translate-y-1/2 right-4">
+                                    <span className={cn(
                                         "h-10 w-10 rounded-xl flex items-center justify-center transition-all",
                                         copiedId === `title-${i}` ? "bg-success/20 text-success" : "bg-muted/50 text-muted-foreground group-hover:text-primary group-hover:bg-primary/10"
                                     )}>
                                         {copiedId === `title-${i}` ? <Check className="w-5 h-5" /> : <Copy className="w-4 h-4" />}
-                                    </div>
-                                </div>
-                            </div>
+                                    </span>
+                                </span>
+                            </button>
                         ))}
                     </CardContent>
                 </Card>
@@ -132,6 +134,7 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                     <CardContent className="p-8 flex-1 relative">
                         <Textarea
                             value={analysis.description}
+                            aria-label="Generated description"
                             className="min-h-[220px] glass bg-muted/10 border-border/50 rounded-2xl p-6 text-sm font-medium leading-relaxed resize-none focus-visible:ring-primary/20 pointer-events-none opacity-80"
                             readOnly
                         />
@@ -169,6 +172,10 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                                     key={i}
                                     className="px-4 py-2 rounded-xl bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground font-extrabold text-xs uppercase tracking-widest transition-all cursor-pointer shadow-sm hover:shadow-glow-sm"
                                     onClick={() => copyToClipboard(tag, `tag-${i}`)}
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-label={`Copy keyword: ${tag}`}
+                                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); copyToClipboard(tag, `tag-${i}`) } }}
                                 >
                                     {tag}
                                 </Badge>

@@ -76,6 +76,15 @@ function TrendCard({ trend, onClick }: { trend: Trend; onClick: () => void }) {
     <Card
       className="border-border/50 bg-card hover:border-primary/30 hover:shadow-premium transition-all duration-200 cursor-pointer group"
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      aria-label={`Open details for ${trend.topic}`}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          onClick()
+        }
+      }}
     >
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
@@ -110,6 +119,15 @@ function TrendRow({ trend, onClick }: { trend: Trend; onClick: () => void }) {
     <div
       className="flex items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-colors cursor-pointer group border-b border-border/40 last:border-0"
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      aria-label={`Open details for ${trend.topic}`}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          onClick()
+        }
+      }}
     >
       <div className="flex-1 min-w-0 flex items-center gap-3">
         {trend.isRising && <Flame className="w-4 h-4 text-negative shrink-0" />}
@@ -241,13 +259,13 @@ export function TrendsContent() {
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs text-muted-foreground">Filters:</span>
           {category !== "All" && (
-            <Badge variant="secondary" className="gap-1 text-xs cursor-pointer hover:bg-destructive/10 hover:text-destructive transition-colors" onClick={() => setCategory("All")}>
-              {category} <X className="w-3 h-3" />
+            <Badge variant="secondary" className="gap-1 text-xs cursor-pointer hover:bg-destructive/10 hover:text-destructive transition-colors" onClick={() => setCategory("All")} role="button" tabIndex={0} aria-label={`Remove category filter: ${category}`} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setCategory("All") } }}>
+              {category} <X className="w-3 h-3" aria-hidden="true" />
             </Badge>
           )}
           {platform !== "All" && (
-            <Badge variant="secondary" className="gap-1 text-xs cursor-pointer hover:bg-destructive/10 hover:text-destructive transition-colors" onClick={() => setPlatform("All")}>
-              {platform} <X className="w-3 h-3" />
+            <Badge variant="secondary" className="gap-1 text-xs cursor-pointer hover:bg-destructive/10 hover:text-destructive transition-colors" onClick={() => setPlatform("All")} role="button" tabIndex={0} aria-label={`Remove platform filter: ${platform}`} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setPlatform("All") } }}>
+              {platform} <X className="w-3 h-3" aria-hidden="true" />
             </Badge>
           )}
         </div>

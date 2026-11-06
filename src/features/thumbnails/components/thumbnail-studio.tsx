@@ -51,7 +51,7 @@ export function ThumbnailStudio() {
         <Label>Style Preset</Label>
         <RadioGroup value={stylePreset} onValueChange={setStylePreset} className="grid grid-cols-1 gap-3">
           {STYLES.map((style) => (
-            <div
+            <label
               key={style.id}
               className={cn(
                 'flex items-center space-x-3 border rounded-xl p-3 cursor-pointer transition-all',
@@ -59,7 +59,6 @@ export function ThumbnailStudio() {
                   ? 'border-primary bg-primary/5 shadow-glow'
                   : 'border-border/50 hover:border-primary/30 hover:bg-muted/30'
               )}
-              onClick={() => setStylePreset(style.id)}
             >
               <div className={cn(
                 'p-2 rounded-lg shrink-0 transition-colors',
@@ -67,12 +66,12 @@ export function ThumbnailStudio() {
               )}>
                 <style.icon className="w-4 h-4" />
               </div>
-              <div className="flex-1">
-                <Label className="cursor-pointer font-semibold text-sm block">{style.label}</Label>
-                <p className="text-[10px] text-muted-foreground">{style.description}</p>
-              </div>
+              <span className="flex-1">
+                <span className="cursor-pointer font-semibold text-sm block">{style.label}</span>
+                <span className="text-[10px] text-muted-foreground block">{style.description}</span>
+              </span>
               <RadioGroupItem value={style.id} className="sr-only" />
-            </div>
+            </label>
           ))}
         </RadioGroup>
       </div>

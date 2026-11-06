@@ -238,7 +238,17 @@
     ::before,
     ::after {
       transition-duration: 0.01ms;
+      animation-duration: 0.01ms;
+      animation-iteration-count: 1;
     }
+  }
+  /* T22: focus-visible fallback for any control that does not carry the
+     per-component ring classes. Components with `outline-none` + ring
+     utilities keep winning (utilities layer beats base layer), so this only
+     covers custom controls that would otherwise show nothing. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20;

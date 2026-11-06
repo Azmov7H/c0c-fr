@@ -124,6 +124,7 @@ export const ScriptEditor = ({ scriptId }: ScriptEditorProps) => {
                 <CardContent className="p-0 flex-1 min-h-[600px] relative">
                     <Textarea
                         value={content}
+                        aria-label="Script content"
                         onChange={(e) => {
                             setContent(e.target.value);
                             setIsDirty(true);
