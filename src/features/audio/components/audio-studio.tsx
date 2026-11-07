@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { Loader2, Music, Play, Sparkles, Waves } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Download, Loader2, Music, Play, RefreshCw, Sparkles, Upload, Waves } from 'lucide-react';
 
 import { PageHeader } from '@/components/shared/page-header';
 import { TwoPanelLayout } from '@/components/shared/two-panel-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
@@ -17,7 +18,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { EmptyState } from '@/components/ui/empty-state';
-import { useGenerateAudio, useProjectAudio } from '@/features/audio/hooks/use-audio';
+import { useGenerateAudio, useProjectAudio, useUploadAudio, useReplaceAudio } from '@/features/audio/hooks/use-audio';
 import { useProjects } from '@/features/projects/hooks/use-projects';
 import { toApiError } from '@/lib/api-error';
 import { cn } from '@/lib/utils';
@@ -37,6 +38,9 @@ export function AudioStudio() {
     const [projectId, setProjectId] = useState('');
     const [mood, setMood] = useState('energetic');
     const [quotaError, setQuotaError] = useState<string | null>(null);
+    const [externalUrl, setExternalUrl] = useState('');
+    const [externalError, setExternalError] = useState<string | null>(null);
+    const replaceInputRef = useRef<HTMLInputElement | null>(null);
     const billing = useBillingSummary();
     const aiUsage = usageFor(billing.data, 'ai.generation');
     const aiLimit = aiUsage?.limit ?? quotaFor(billing.data, 'ai.generation');
@@ -44,8 +48,58 @@ export function AudioStudio() {
     const activeProjectId = projectId || projects.data?.data[0]?._id || '';
     const audio = useProjectAudio(activeProjectId);
     const generate = useGenerateAudio();
+    const upload = useUploadAudio();
+    const replace = useReplaceAudio();
 
     const suggestions = audio.data ?? [];
+    // T24: current = explicit flag, newest-first fallback for legacy rows.
+    const current = suggestions.find((s) => s.isCurrent) ?? suggestions[0];
+    const history = suggestions.filter((s) => s.id !== current?.id);
+
+    const ALLOWED_MIME = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4'];
+    const MAX_BYTES = 25 * 1024 * 1024;
+    const validateFile = (file: File | undefined): string | null => {
+        if (!file) return 'No file selected.';
+        if (!ALLOWED_MIME.includes(file.type)) return `Unsupported audio type (${file.type || 'unknown'}). Use MP3, WAV, OGG or M4A.`;
+        if (file.size > MAX_BYTES) return 'Audio file exceeds 25 MB.';
+        return null;
+    };
+    const fileToPayload = (file: File) => ({
+        fileUrl: URL.createObjectURL(file),
+        format: (file.type.includes('wav') ? 'wav' : file.type.includes('ogg') ? 'ogg' : file.type.includes('mp4') ? 'm4a' : 'mp3') as 'mp3' | 'wav' | 'ogg' | 'm4a',
+        fileSize: file.size,
+        durationSeconds: undefined,
+    });
+
+    const onReplaceFile = (file: File | undefined) => {
+        const err = validateFile(file);
+        if (err) {
+            setExternalError(err);
+            return;
+        }
+        if (!current || !file) return;
+        setExternalError(null);
+        replace.mutate({ id: current.id, data: fileToPayload(file) });
+    };
+
+    const onUploadExternal = () => {
+        setExternalError(null);
+        let parsed: URL | null = null;
+        try {
+            parsed = new URL(externalUrl);
+        } catch {
+            setExternalError('Enter a valid https audio URL.');
+            return;
+        }
+        if (parsed.protocol !== 'https:') {
+            setExternalError('Audio URL must be https.');
+            return;
+        }
+        if (!activeProjectId) return;
+        upload.mutate({ projectId: activeProjectId, fileUrl: externalUrl, source: 'external' }, {
+            onSuccess: () => setExternalUrl(''),
+        });
+    };
 
     const leftContent = (
         <div className="space-y-6">
@@ -130,6 +184,46 @@ export function AudioStudio() {
                     limit={aiLimit}
                     resetAt={aiUsage?.resetAt}
                 />
+            )}
+            {current && (
+                <div className="space-y-3 rounded-xl border border-border/50 p-4" aria-label="Current audio">
+                    <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Current audio</h4>
+                        <Badge variant="secondary">{current.source ?? 'generated'}</Badge>
+                    </div>
+                    {current.fileUrl ? (
+                        <audio controls preload="none" src={current.fileUrl} className="w-full" onError={() => setExternalError('This audio link expired — regenerate or re-upload.')} />
+                    ) : (
+                        <p className="text-sm text-muted-foreground">Legacy suggestion (no file). Generate or upload to get a playable asset.</p>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                        <input ref={replaceInputRef} type="file" accept="audio/*" className="sr-only" aria-label="Replace current audio" onChange={(e) => onReplaceFile(e.target.files?.[0])} />
+                        <Button variant="outline" size="sm" className="h-11" disabled={replace.isPending || !activeProjectId} onClick={() => replaceInputRef.current?.click()}>
+                            {replace.isPending ? <Loader2 className="mr-1 size-4 animate-spin" aria-hidden="true" /> : <RefreshCw className="mr-1 size-4" aria-hidden="true" />}
+                            {replace.isPending ? 'Replacing…' : 'Replace'}
+                        </Button>
+                        {current.fileUrl && (
+                            <Button asChild variant="ghost" size="sm" className="h-11">
+                                <a href={current.fileUrl} download aria-label="Download current audio">
+                                    <Download className="mr-1 size-4" aria-hidden="true" /> Download
+                                </a>
+                            </Button>
+                        )}
+                    </div>
+                    {externalError && <p role="alert" className="text-sm text-destructive">{externalError}</p>}
+                    <div className="flex gap-2">
+                        <Label htmlFor="audio-external-url" className="sr-only">External audio URL</Label>
+                        <Input id="audio-external-url" placeholder="https://…/audio.mp3" value={externalUrl} onChange={(e) => setExternalUrl(e.target.value)} />
+                        <Button variant="outline" size="sm" className="h-11 shrink-0" disabled={upload.isPending || !externalUrl} onClick={onUploadExternal}>
+                            <Upload className="mr-1 size-4" aria-hidden="true" /> Upload
+                        </Button>
+                    </div>
+                    {history.length > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                            {history.length} previous version{history.length === 1 ? '' : 's'} kept as history.
+                        </p>
+                    )}
+                </div>
             )}
             {!activeProjectId ? (
                 <p className="text-sm text-muted-foreground">Create a project first to generate audio.</p>

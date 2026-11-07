@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { audioService } from '../services/audio.service';
-import { CreateAudioSuggestionDTO, UpdateAudioSuggestionDTO } from '../types';
+import { CreateAudioSuggestionDTO, UpdateAudioSuggestionDTO, UploadAudioDTO, ReplaceAudioDTO } from '../types';
 import { toast } from '@/lib/toast';
 import { toApiError } from '@/lib/api-error';
 
@@ -16,6 +16,15 @@ export const useProjectAudio = (projectId: string) => {
     return useQuery({
         queryKey: audioKeys.list(projectId),
         queryFn: () => audioService.getProjectSuggestions(projectId),
+        enabled: !!projectId,
+    });
+};
+
+/** T24: the project's current asset. Null = no asset yet (empty state). */
+export const useCurrentAudio = (projectId: string) => {
+    return useQuery({
+        queryKey: [...audioKeys.list(projectId), 'current'] as const,
+        queryFn: () => audioService.getCurrent(projectId),
         enabled: !!projectId,
     });
 };
@@ -73,6 +82,40 @@ export const useUpdateAudioSuggestion = () => {
         },
         onError: (error: unknown) => {
             toast.error(toApiError(error, 'Failed to update audio profile').message);
+        },
+    });
+};
+
+/** T24: upload external audio. No optimistic UI — invalidation only. */
+export const useUploadAudio = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: UploadAudioDTO) => audioService.uploadAudio(data),
+        onSuccess: (data) => {
+            toast.success('Audio uploaded');
+            queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
+        },
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to upload audio').message);
+        },
+    });
+};
+
+/** T24: safe replacement. Pending → success/refetch only; on failure the
+ * previous asset stays current (no optimistic swap — rollback would hide
+ * the real file state). */
+export const useReplaceAudio = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: ReplaceAudioDTO }) =>
+            audioService.replaceAudio(id, data),
+        onSuccess: (data) => {
+            toast.success('Audio replaced');
+            queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
+            queryClient.setQueryData(audioKeys.detail(data.id), data);
+        },
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Replacement failed — previous audio kept').message);
         },
     });
 };
