@@ -9,7 +9,7 @@
  * `src/features/landing/marketing-links.test.ts` asserts every path here has a
  * real page, that no private route leaks in, and that robots/sitemap agree.
  */
-export const SITE_URL = 'https://aicontentengine.com';
+export const SITE_URL = 'https://c0c-fr.vercel.app';
 
 export interface PublicRoute {
     path: string;
