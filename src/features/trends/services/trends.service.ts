@@ -9,12 +9,6 @@ import {
 import { ApiResponse } from '@/types';
 
 class TrendsService {
-    /**
-     * T07 renamed the per-user reports from `/trends` to `/trends/reports` so the
-     * measured feed owns the namespace root. This must track the backend exactly —
-     * the two landed in the same change, because deploying the backend half alone
-     * 404s every trends page.
-     */
     private readonly baseUrl = '/trends/reports';
     private readonly feedUrl = '/trends';
 
@@ -22,9 +16,13 @@ class TrendsService {
      * Public and CDN-cacheable, so this is a plain GET with no auth attached. The
      * server sends `s-maxage=300, stale-while-revalidate=3600`.
      */
-    async getGlobalFeed(scope: TrendScope = 'global', window: TrendWindow = 7): Promise<TrendFeed> {
+    async getGlobalFeed(
+        scope: TrendScope = 'global',
+        window: TrendWindow = 7,
+        category?: string
+    ): Promise<TrendFeed> {
         const response = await apiClient.get<ApiResponse<TrendFeed>>(`${this.feedUrl}/global`, {
-            params: { scope, window },
+            params: { scope, window, category: category ?? undefined },
         });
         return response.data.data;
     }
@@ -35,11 +33,12 @@ class TrendsService {
      */
     async getForMeFeed(
         window: TrendWindow = 7,
-        summary = false
+        summary = false,
+        category?: string
     ): Promise<ForMeTrendFeed> {
         const response = await apiClient.get<ApiResponse<ForMeTrendFeed>>(
             `${this.feedUrl}/for-me`,
-            { params: { window, summary: summary ? '1' : undefined } }
+            { params: { window, summary: summary ? '1' : undefined, category: category ?? undefined } }
         );
         return response.data.data;
     }
