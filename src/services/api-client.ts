@@ -34,6 +34,8 @@ export interface RequestOptions {
     /** DELETE bodies are legal and the members endpoint uses one. */
     data?: unknown;
     signal?: AbortSignal;
+    /** M2-T25: binary payloads (ZIP export) bypass JSON parsing. */
+    responseType?: 'json' | 'blob';
 }
 
 const AUTH_ROUTE_PATTERN =
@@ -114,6 +116,11 @@ function timeoutSignal(caller?: AbortSignal): AbortSignal {
 }
 
 async function parseBody(response: Response): Promise<unknown> {
+    // M2-T25: binary payloads (ZIP export) — return the blob untouched.
+    const contentType = response.headers.get('content-type') ?? '';
+    if (contentType.includes('application/zip') || contentType.includes('application/octet-stream')) {
+        return await response.blob();
+    }
     const text = await response.text().catch(() => '');
     if (!text) return undefined;
     try {

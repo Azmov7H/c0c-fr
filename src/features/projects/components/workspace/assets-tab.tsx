@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useProjectAudio, useGenerateAudio } from '@/features/audio/hooks/use-audio';
 import { useProjectMedia } from '@/features/media/hooks/use-media';
 import { useProjectScripts, useGenerateScript } from '@/features/scripts/hooks/use-scripts';
+import { ProjectExport } from './project-export';
 import { useProjectSEO, useGenerateSEO } from '@/features/seo/hooks/use-seo';
 import { useProjectThumbnails } from '@/features/thumbnails/hooks/use-thumbnails';
 import { toApiError } from '@/lib/api-error';
@@ -144,6 +145,7 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
 
     return (
         <div className="space-y-6">
+            <ProjectExport projectId={projectId} title="Project" />
             {quotaError && (
                 <UpgradePrompt
                     title="Generation quota reached"
