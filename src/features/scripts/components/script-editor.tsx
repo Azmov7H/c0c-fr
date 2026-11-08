@@ -1,226 +1,285 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect } from 'react';
+import { useFieldArray, useForm, type UseFormReturn } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Clock, FileText, Link2, Save, Sparkles } from 'lucide-react';
 import { useScript, useUpdateScript, useGenerateScript } from '../hooks/use-scripts';
+import type { Script, ScriptSection } from '../types';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import {
-    Save,
-    FileText,
-    Activity,
-    Clock,
-    BarChart3,
-    Sparkles,
-    Zap,
-    Type,
-    BrainCircuit,
-    Hash
-} from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
-interface ScriptEditorProps {
-    scriptId: string;
-}
+const TRANSITIONS = ['cut', 'fade', 'dissolve', 'slide', 'zoom', 'none'] as const;
 
-export const ScriptEditor = ({ scriptId }: ScriptEditorProps) => {
+const sectionSchema = z.object({
+    label: z.string().min(1).max(100),
+    content: z.string().max(5000),
+    narration: z.string().max(5000).optional(),
+    visualDirection: z.string().max(2000).optional(),
+    transition: z.enum(TRANSITIONS).optional(),
+    durationSeconds: z.number().int().min(0).max(3600).optional(),
+    assetIds: z.array(z.string()).max(20).optional(),
+});
+
+const formSchema = z.object({ sections: z.array(sectionSchema).min(1) });
+type FormValues = z.infer<typeof formSchema>;
+
+const toFormSection = (section: ScriptSection): FormValues['sections'][number] => ({
+    label: section.label,
+    content: section.content,
+    narration: section.narration ?? '',
+    visualDirection: section.visualDirection ?? '',
+    transition: section.transition ?? 'cut',
+    durationSeconds: section.durationSeconds ?? 0,
+    assetIds: section.assetIds ?? [],
+});
+
+/**
+ * P05.7 — per-scene editing. Every scene is editable (content, narration,
+ * visual direction, transition, duration, asset links read-only until
+ * P06/P07 wire them); saving replaces the list verbatim so untouched
+ * scenes are preserved byte-for-byte (P05.6). RHF + Zod, no raw state
+ * per field.
+ */
+export const ScriptEditor = ({ scriptId }: { scriptId: string }) => {
     const { data: script, isLoading } = useScript(scriptId);
     const { mutate: updateScript, isPending: isUpdating } = useUpdateScript();
     const { mutate: generateScript, isPending: isGenerating } = useGenerateScript();
 
-    const [content, setContent] = useState('');
-    const [isDirty, setIsDirty] = useState(false);
-    const [loadedScriptId, setLoadedScriptId] = useState<string | null>(null);
+    const form = useForm<FormValues>({
+        resolver: zodResolver(formSchema),
+        defaultValues: { sections: [] },
+    });
+    const { fields, replace } = useFieldArray({ control: form.control, name: 'sections' });
 
-    // Adjust state during render when the server sends a different script, rather
-    // than syncing from an effect. An effect would paint one frame with the previous
-    // script's content and would clobber unsaved edits on any refetch.
-    if (script && script.id !== loadedScriptId) {
-        setLoadedScriptId(script.id);
-        setContent(script.sections?.[0]?.content ?? '');
-        setIsDirty(false);
-    }
+    useEffect(() => {
+        if (script) {
+            replace((script.sections ?? []).map(toFormSection));
+        }
+    }, [script, replace]);
 
-    const handleSave = () => {
+    const totalDuration = form
+        .watch('sections')
+        .reduce((sum, s) => sum + (s.durationSeconds ?? 0), 0);
+    const wordCount = form
+        .watch('sections')
+        .reduce((sum, s) => sum + s.content.split(/\s+/).filter(Boolean).length, 0);
+
+    const handleSave = (values: FormValues) => {
         if (!script) return;
-
         updateScript({
             id: scriptId,
             data: {
-                projectId: script.projectId,
-                sections: [
-                    {
-                        order: 0,
-                        label: 'Main Content',
-                        content: content
-                    }
-                ],
-                wordCount: content.split(/\s+/).filter(w => w.length > 0).length,
-                status: 'draft'
-            }
+                sections: values.sections.map((s, index) => ({
+                    order: index + 1,
+                    label: s.label,
+                    content: s.content,
+                    narration: s.narration ?? '',
+                    visualDirection: s.visualDirection ?? '',
+                    transition: s.transition ?? 'cut',
+                    durationSeconds: s.durationSeconds ?? 0,
+                    assetIds: s.assetIds ?? [],
+                })),
+                wordCount,
+                status: 'draft',
+            },
         });
-        setIsDirty(false);
     };
 
     if (isLoading || !script) {
         return (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full min-h-[600px] animate-in fade-in duration-500">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                 <div className="lg:col-span-2">
-                    <Skeleton className="w-full h-full rounded-[32px]" />
+                    <Skeleton className="h-96 w-full rounded-[32px]" />
                 </div>
-                <div className="space-y-6">
-                    <Skeleton className="w-full h-64 rounded-[32px]" />
-                    <Skeleton className="w-full h-48 rounded-[32px]" />
-                </div>
+                <Skeleton className="h-64 w-full rounded-[32px]" />
             </div>
         );
     }
 
-    const wordCount = content.split(/\s+/).filter(w => w.length > 0).length;
-    const readTimeMins = Math.max(1, Math.ceil(wordCount / 150));
-
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Editor Main Area */}
-            <Card className="lg:col-span-2 relative overflow-hidden glass border-border/50 rounded-[32px] shadow-premium h-full flex flex-col group/editor">
-                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-focus-within/editor:opacity-100 transition-opacity duration-700" />
-
-                <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 px-8 py-6">
-                    <div className="space-y-1">
-                        <CardTitle className="text-xl font-bold flex items-center gap-2">
-                            <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                                <FileText className="w-5 h-5" />
-                            </div>
-                            Script Canvas
-                        </CardTitle>
-                        <CardDescription className="font-medium opacity-70">Architect your video narrative with precision</CardDescription>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <Button
-                            variant="outline"
-                            size="lg"
-                            className="hidden sm:flex h-11 rounded-xl border-primary/20 bg-primary/5 text-primary font-bold hover:bg-primary/10 hover:shadow-glow transition-all"
-                            disabled={isGenerating}
-                            onClick={() => generateScript(script.projectId)}
-                        >
-                            <Sparkles className={cn("w-4 h-4 mr-2", isGenerating && "animate-spin")} />
-                            {isGenerating ? 'AI Thinking...' : 'Refine with AI'}
-                        </Button>
-                        <Button
-                            onClick={handleSave}
-                            disabled={!isDirty || isUpdating}
-                            size="lg"
-                            className="h-11 rounded-xl bg-primary text-primary-foreground font-bold hover:shadow-glow active:scale-[0.98] transition-all"
-                        >
-                            {isUpdating ? <Zap className="w-4 h-4 mr-2 animate-pulse" /> : <Save className="w-4 h-4 mr-2" />}
-                            {isUpdating ? 'Saving...' : 'Sync Draft'}
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent className="p-0 flex-1 min-h-[600px] relative">
-                    <Textarea
-                        value={content}
-                        aria-label="Script content"
-                        onChange={(e) => {
-                            setContent(e.target.value);
-                            setIsDirty(true);
-                        }}
-                        placeholder="Once upon a time in the digital age..."
-                        className="w-full h-full min-h-[600px] border-0 focus-visible:ring-0 rounded-none resize-none p-10 text-lg font-medium leading-[1.8] bg-transparent selection:bg-primary/20 placeholder:text-muted-foreground/30"
-                    />
-
-                    {/* Character/Focus indicator */}
-                    <div className="absolute bottom-6 right-8 opacity-40 group-focus-within/editor:opacity-100 transition-opacity">
-                        <Badge variant="outline" className="bg-background/50 border-border/50 font-mono text-[10px] uppercase tracking-widest px-3 h-6">
-                            Editing Node: Main Content
-                        </Badge>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Insights Sidebar */}
-            <div className="space-y-6">
-                <Card className="glass border-border/50 rounded-[32px] shadow-premium overflow-hidden">
-                    <CardHeader className="bg-muted/30 pb-4 border-b border-border/50">
-                        <CardTitle className="text-xs font-bold uppercase tracking-[0.2em] flex items-center gap-2 text-muted-foreground">
-                            <BrainCircuit className="w-3.5 h-3.5 text-primary" />
-                            Intelligence
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-8 space-y-8">
-                        <div className="grid grid-cols-2 gap-6">
-                            <div className="space-y-2 p-4 glass border-border/50 rounded-2xl relative overflow-hidden group/metric">
-                                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover/metric:opacity-30 transition-opacity">
-                                    <Type className="w-8 h-8" />
-                                </div>
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Words</p>
-                                <p className="text-3xl font-black font-mono text-foreground leading-none">{wordCount}</p>
-                            </div>
-                            <div className="space-y-2 p-4 glass border-border/50 rounded-2xl relative overflow-hidden group/metric">
-                                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover/metric:opacity-30 transition-opacity">
-                                    <Clock className="w-8 h-8" />
-                                </div>
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Min</p>
-                                <p className="text-3xl font-black font-mono text-foreground leading-none">
-                                    {readTimeMins}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4 pt-4 border-t border-border/50">
-                            {[
-                                { label: 'Reading level', value: script.readingLevel || 'Grade 8', icon: BarChart3 },
-                                { label: 'Tone analysis', value: script.sentiment || 'Professional', icon: Activity },
-                                { label: 'Project Status', value: script.status, icon: Zap, highlight: true }
-                            ].map((stat, i) => (
-                                <div key={i} className="flex justify-between items-center group/item p-1">
-                                    <div className="flex items-center gap-3">
-                                        <stat.icon className="w-3.5 h-3.5 text-muted-foreground" />
-                                        <span className="text-xs font-bold uppercase tracking-tight text-muted-foreground/80">{stat.label}</span>
-                                    </div>
-                                    <Badge
-                                        variant={stat.highlight ? "default" : "outline"}
-                                        className={cn(
-                                            "h-7 px-3 rounded-lg uppercase text-[10px] font-bold tracking-widest transition-all",
-                                            stat.highlight ? "bg-primary shadow-glow hover:bg-primary/90" : "bg-muted/30 border-border/30 group-hover/item:border-primary/30"
-                                        )}
-                                    >
-                                        {stat.value}
-                                    </Badge>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="glass border-border/50 rounded-[32px] shadow-premium overflow-hidden">
-                    <CardHeader className="bg-muted/30 pb-4 border-b border-border/50">
-                        <CardTitle className="text-xs font-bold uppercase tracking-[0.2em] flex items-center gap-2 text-muted-foreground">
-                            <Hash className="w-3.5 h-3.5 text-primary" />
-                            Viral Connect
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-8">
-                        <div className="flex flex-wrap gap-2">
-                            {['#impact', '#viral_ops', '#content_engine', '#ai_driven'].map(tag => (
-                                <Badge
-                                    key={tag}
-                                    className="px-3 py-1.5 rounded-xl bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground font-bold text-[10px] transition-all cursor-pointer"
-                                >
-                                    {tag}
-                                </Badge>
-                            ))}
-                        </div>
-                        <p className="mt-6 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-loose">
-                            AI-generated tags based on script semantic analysis
-                        </p>
-                    </CardContent>
-                </Card>
+        <div className="space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <CardTitle className="flex items-center gap-2 text-xl font-bold">
+                        <FileText className="h-5 w-5 text-primary" aria-hidden="true" />
+                        Script scenes (v{script.version})
+                    </CardTitle>
+                    <CardDescription className="mt-1">
+                        {fields.length} scene(s) · {wordCount} words · {totalDuration}s estimated
+                    </CardDescription>
+                </div>
+                <div className="flex items-center gap-3">
+                    <Button
+                        variant="outline"
+                        className="h-11 rounded-xl"
+                        disabled={isGenerating}
+                        onClick={() => generateScript(script.projectId)}
+                    >
+                        <Sparkles className={cn('mr-2 h-4 w-4', isGenerating && 'animate-spin')} aria-hidden="true" />
+                        {isGenerating ? 'AI thinking…' : 'Refine with AI'}
+                    </Button>
+                    <Button
+                        className="h-11 rounded-xl"
+                        disabled={isUpdating || !form.formState.isDirty}
+                        onClick={form.handleSubmit(handleSave)}
+                    >
+                        <Save className="mr-2 h-4 w-4" aria-hidden="true" />
+                        {isUpdating ? 'Saving…' : 'Save script'}
+                    </Button>
+                </div>
             </div>
+
+            {form.formState.errors.sections?.root?.message && (
+                <p role="alert" className="text-sm text-destructive">
+                    {form.formState.errors.sections.root.message as string}
+                </p>
+            )}
+
+            {fields.map((field, index) => {
+                const errors = form.formState.errors.sections?.[index];
+                return (
+                    <Card key={field.id} className="rounded-2xl border-border/60">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="flex items-center gap-2 text-base">
+                                Scene {index + 1} · {field.label || 'Untitled'}
+                                <Badge variant="outline">{field.transition ?? 'cut'}</Badge>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <Labeled
+                                    id={`scene-${index}-label`}
+                                    label="Section title"
+                                    error={errors?.label?.message}
+                                >
+                                    <Input
+                                        id={`scene-${index}-label`}
+                                        value={field.label}
+                                        onChange={(e) => form.setValue(`sections.${index}.label`, e.target.value, { shouldDirty: true })}
+                                        className="h-11 text-base"
+                                    />
+                                </Labeled>
+                                <div>
+                                    <Label htmlFor={`scene-${index}-duration`}>
+                                        Duration (seconds)
+                                    </Label>
+                                    <div className="mt-2 flex items-center gap-2">
+                                        <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                                        <Input
+                                            id={`scene-${index}-duration`}
+                                            type="number"
+                                            inputMode="numeric"
+                                            min={0}
+                                            max={3600}
+                                            value={field.durationSeconds ?? 0}
+                                            onChange={(e) => form.setValue(`sections.${index}.durationSeconds`, Number(e.target.value), { shouldDirty: true })}
+                                            className="h-11 text-base"
+                                        />
+                                    </div>
+                                    <FormHint error={errors?.durationSeconds?.message} />
+                                </div>
+                            </div>
+                            <Labeled id={`scene-${index}-content`} label="Section text" error={errors?.content?.message}>
+                                <Textarea
+                                    id={`scene-${index}-content`}
+                                    value={field.content}
+                                    onChange={(e) => form.setValue(`sections.${index}.content`, e.target.value, { shouldDirty: true })}
+                                    rows={4}
+                                    className="text-base"
+                                />
+                            </Labeled>
+                            <Labeled id={`scene-${index}-narration`} label="Narration (voiceover)" error={errors?.narration?.message}>
+                                <Textarea
+                                    id={`scene-${index}-narration`}
+                                    value={field.narration ?? ''}
+                                    onChange={(e) => form.setValue(`sections.${index}.narration`, e.target.value, { shouldDirty: true })}
+                                    rows={3}
+                                    className="text-base"
+                                />
+                            </Labeled>
+                            <Labeled id={`scene-${index}-visual`} label="Visual direction" error={errors?.visualDirection?.message}>
+                                <Textarea
+                                    id={`scene-${index}-visual`}
+                                    value={field.visualDirection ?? ''}
+                                    onChange={(e) => form.setValue(`sections.${index}.visualDirection`, e.target.value, { shouldDirty: true })}
+                                    rows={2}
+                                    className="text-base"
+                                />
+                            </Labeled>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <Label htmlFor={`scene-${index}-transition`}>Transition</Label>
+                                    <Select
+                                        value={field.transition ?? 'cut'}
+                                        onValueChange={(v) =>
+                                            form.setValue(`sections.${index}.transition`, v as (typeof TRANSITIONS)[number], { shouldDirty: true })
+                                        }
+                                    >
+                                        <SelectTrigger id={`scene-${index}-transition`} className="mt-2 h-11">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {TRANSITIONS.map((t) => (
+                                                <SelectItem key={t} value={t}>{t}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormHint error={errors?.transition?.message} />
+                                </div>
+                                <div>
+                                    <Label>Linked assets</Label>
+                                    <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Link2 className="h-4 w-4" aria-hidden="true" />
+                                        {(field.assetIds ?? []).length === 0
+                                            ? 'None yet — scene links open with P06/P07.'
+                                            : (field.assetIds ?? []).join(', ')}
+                                    </p>
+                                    <FormHint error={errors?.assetIds?.message} />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                );
+            })}
         </div>
     );
 };
+
+function Labeled({
+    id,
+    label,
+    error,
+    children,
+}: {
+    id: string;
+    label: string;
+    error?: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <div>
+            <Label htmlFor={id}>{label}</Label>
+            <div className="mt-2">{children}</div>
+            <FormHint error={error} />
+        </div>
+    );
+}
+
+function FormHint({ error }: { error?: string }) {
+    if (!error) return null;
+    return (
+        <p role="alert" className="mt-1 text-sm text-destructive">
+            {error}
+        </p>
+    );
+}
