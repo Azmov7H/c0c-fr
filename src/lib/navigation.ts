@@ -5,14 +5,11 @@ import {
     FileText,
     Flame,
     FolderKanban,
-    Hash,
     Image,
     LayoutDashboard,
     Library,
-    Music,
     Search,
     Settings,
-    Type,
     Users,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -26,10 +23,15 @@ import type { LucideIcon } from 'lucide-react';
  *
  * Routes are NOT renamed by labels: `/settings` stays `/settings` (bookmarks,
  * sitemap), only its label is "Account" per the brief. The sidebar keeps the
- * five-group layout from DESIGN_SPEC.md §2; the only deliberate deviation is
- * retaining Titles/Hashtags (live pages, listed in DESIGN_SPEC) after the
- * card's target list omitted them — removing them from the only navigation
- * surface would strand two working pages.
+ * five-group layout from DESIGN_SPEC.md §2.
+ *
+ * M2-T22 (project-centric): standalone generation pages (Scripts/Titles/
+ * Hashtags/Audio Studio) are removed from primary navigation — their real
+ * generation already lives in the project workspace Assets tab (project-
+ * scoped forms, `can(role, 'edit')` gates, 429 → UpgradePrompt). The legacy
+ * URLs redirect to `/projects`; the generation components stay for their
+ * workspace mounting. "Services" has no page (Settings AI-keys tab stays) and
+ * "Video" has none at all (see docs/nav-audit.md Q0).
  */
 
 export interface NavItem {
@@ -54,9 +56,6 @@ export const NAV_GROUPS: NavGroup[] = [
         label: 'Content Engine',
         items: [
             { title: 'Projects', url: '/projects', icon: FolderKanban },
-            { title: 'Scripts', url: '/scripts', icon: FileText },
-            { title: 'Titles', url: '/titles', icon: Type },
-            { title: 'Hashtags', url: '/hashtags', icon: Hash },
         ],
     },
     {
@@ -64,7 +63,6 @@ export const NAV_GROUPS: NavGroup[] = [
         items: [
             { title: 'Thumbnails', url: '/thumbnails', icon: Image },
             { title: 'Media Library', url: '/media', icon: Library },
-            { title: 'Audio Studio', url: '/audio', icon: Music },
         ],
     },
     {
@@ -99,6 +97,12 @@ export const NAV_URLS: string[] = NAV_ITEMS.map((item) => item.url);
 export const ROUTE_LABELS: Record<string, string> = {
     ...Object.fromEntries(NAV_ITEMS.map((item) => [item.url.split('/').pop()!, item.title])),
     new: 'New',
+    // M2-T22: redirect stubs keep their labels so breadcrumb coverage
+    // (navigation.test.ts enforces every dashboard segment) still holds.
+    scripts: 'Scripts',
+    titles: 'Titles',
+    hashtags: 'Hashtags',
+    audio: 'Audio Studio',
     // T13: focused flow, no header/breadcrumb in the shell, but every route
     // segment still carries a label (navigation.test.ts enforces it).
     onboarding: 'Get started',
@@ -129,7 +133,7 @@ export interface QuickAction {
  */
 export const QUICK_ACTIONS: QuickAction[] = [
     { id: 'new-project', title: 'New Project', url: '/projects/new', icon: FolderKanban, shortcutKey: 'p' },
-    { id: 'new-script', title: 'New Script', url: '/scripts', icon: FileText, shortcutKey: 's' },
+    { id: 'new-script', title: 'New Script', url: '/projects', icon: FileText, shortcutKey: 's' },
     { id: 'new-thumbnail', title: 'New Thumbnail', url: '/thumbnails', icon: Image, shortcutKey: 't' },
     { id: 'new-planner-event', title: 'New Planner Event', url: '/planner', icon: CalendarDays, shortcutKey: 'e' },
     { id: 'invite-member', title: 'Invite a Member', url: '/team', icon: Users, shortcutKey: 'i' },

@@ -1,11 +1,8 @@
-import type { Metadata } from "next"
-import { AudioStudio } from "@/features/audio/components/audio-studio"
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = {
-  title: "Audio Effects",
-  description: "Generate and browse AI-powered audio effects, background music, and soundscapes.",
-}
-
-export default function AudioPage() {
-  return <AudioStudio />
+// M2-T22 (project-centric): standalone generation pages consolidate into
+// the project workspace Assets tab. Legacy URLs redirect to /projects
+// (no project context is known at redirect time). Components preserved.
+export default function LegacyPage() {
+  redirect('/projects');
 }

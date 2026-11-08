@@ -18,6 +18,8 @@ export interface MediaItem {
     duration?: number;
     tags?: string[];
     isPublic: boolean;
+    /** M2-T23 Q1=A: `{ slot?: 0 | 1 | 2 }` marks the gallery slot. */
+    metadata?: Record<string, unknown>;
     createdAt: string;
     updatedAt: string;
 }

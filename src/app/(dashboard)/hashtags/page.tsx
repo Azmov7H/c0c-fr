@@ -1,11 +1,8 @@
-import type { Metadata } from "next"
-import { HashtagGenerator } from "@/features/hashtags/components/hashtag-generator"
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = {
-  title: "Hashtag Generator",
-  description: "Generate trending hashtags optimized for maximum reach and engagement.",
-}
-
-export default function HashtagsPage() {
-  return <HashtagGenerator />
+// M2-T22 (project-centric): standalone generation pages consolidate into
+// the project workspace Assets tab. Legacy URLs redirect to /projects
+// (no project context is known at redirect time). Components preserved.
+export default function LegacyPage() {
+  redirect('/projects');
 }

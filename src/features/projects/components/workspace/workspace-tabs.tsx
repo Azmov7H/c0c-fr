@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Activity, FolderKanban, Users } from 'lucide-react';
+import { Activity, FileImage as ImageIcon, FolderKanban, Users } from 'lucide-react';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,6 +25,12 @@ const ActivityTab = dynamic(() => import('./activity-tab').then((mod) => mod.Act
     loading: () => <TabSkeleton />,
 });
 
+// M2-T23: media workspace (lazy — large per-slot components and <audio>).
+const MediaTab = dynamic(
+    () => import('./media-tab').then((mod) => mod.MediaTab),
+    { ssr: false, loading: () => <TabSkeleton /> },
+);
+
 function TabSkeleton() {
     return (
         <div className="space-y-3" role="status" aria-label="Loading tab">
@@ -34,12 +40,12 @@ function TabSkeleton() {
     );
 }
 
-export type WorkspaceTab = 'assets' | 'members' | 'activity';
+export type WorkspaceTab = 'assets' | 'media' | 'members' | 'activity';
 
-export const WORKSPACE_TABS: readonly WorkspaceTab[] = ['assets', 'members', 'activity'];
+export const WORKSPACE_TABS: readonly WorkspaceTab[] = ['assets', 'media', 'members', 'activity'];
 
 export function isWorkspaceTab(value: string | null): value is WorkspaceTab {
-    return value === 'assets' || value === 'members' || value === 'activity';
+    return value === 'assets' || value === 'media' || value === 'members' || value === 'activity';
 }
 
 export function WorkspaceTabs({
@@ -60,6 +66,10 @@ export function WorkspaceTabs({
                     <FolderKanban className="size-4" aria-hidden="true" />
                     Assets
                 </TabsTrigger>
+                <TabsTrigger value="media" className="h-11 gap-2 px-4">
+                    <ImageIcon className="size-4" aria-hidden="true" />
+                    Media
+                </TabsTrigger>
                 <TabsTrigger value="members" className="h-11 gap-2 px-4">
                     <Users className="size-4" aria-hidden="true" />
                     Members
@@ -72,6 +82,9 @@ export function WorkspaceTabs({
 
             <TabsContent value="assets" className="mt-6">
                 <AssetsTab projectId={projectId} role={role} />
+            </TabsContent>
+            <TabsContent value="media" className="mt-6">
+                <MediaTab projectId={projectId} role={role} />
             </TabsContent>
             <TabsContent value="members" className="mt-6">
                 <MembersTab projectId={projectId} role={role} />

@@ -1,11 +1,7 @@
-import type { Metadata } from "next"
-import { MediaLibrary } from "@/features/media/components/media-library"
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = {
-  title: "Media Library",
-  description: "Browse and manage your uploaded media assets, images, and video clips.",
-}
-
-export default function MediaPage() {
-  return <MediaLibrary />
+// M2-T23: global media library becomes the per-project Media workspace.
+// Legacy URL redirects to /projects (no project context at redirect time).
+export default function LegacyPage() {
+  redirect('/projects');
 }

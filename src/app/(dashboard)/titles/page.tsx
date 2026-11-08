@@ -1,11 +1,8 @@
-import type { Metadata } from "next"
-import { TitleGenerator } from "@/features/titles/components/title-generator"
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = {
-  title: "Title Generator",
-  description: "Generate high-CTR titles optimized for YouTube, TikTok, and Instagram.",
-}
-
-export default function TitlesPage() {
-  return <TitleGenerator />
+// M2-T22 (project-centric): standalone generation pages consolidate into
+// the project workspace Assets tab. Legacy URLs redirect to /projects
+// (no project context is known at redirect time). Components preserved.
+export default function LegacyPage() {
+  redirect('/projects');
 }
