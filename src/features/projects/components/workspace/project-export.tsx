@@ -5,7 +5,6 @@ import { Loader2, PackageOpen } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { useQuery } from '@tanstack/react-query';
 import { toast } from '@/lib/toast';
 import { toApiError } from '@/lib/api-error';
 import apiClient from '@/services/api-client';
@@ -29,24 +28,14 @@ export function ProjectExport({ projectId, title }: { projectId: string; title: 
     const [scope, setScope] = useState<Scope>('full');
     const [pending, setPending] = useState(false);
 
-    const exportQuery = useQuery({
-        queryKey: ['export', projectId, scope],
-        queryFn: async () => {
+    const onExport = async () => {
+        setPending(true);
+        try {
             const res = await apiClient.get(`/projects/${projectId}/export`, {
                 params: { scope },
                 responseType: 'blob',
             });
-            return res;
-        },
-        enabled: false,
-    });
-
-    const onExport = async () => {
-        setPending(true);
-        try {
-            const res = await exportQuery.refetch();
-            if (res.error) throw res.error;
-            const blob = res.data?.data as unknown as Blob;
+            const blob = res.data as unknown as Blob;
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
