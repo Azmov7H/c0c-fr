@@ -114,6 +114,7 @@ export function AnalyticsDashboard() {
                     ['YouTube', data.projectsByPlatform.youtube],
                     ['TikTok', data.projectsByPlatform.tiktok],
                     ['Instagram', data.projectsByPlatform.instagram],
+                    ['Facebook', data.projectsByPlatform.facebook],
                   ].map(([label, value]) => (
                     <div key={label as string} className="flex items-center justify-between text-sm">
                       <span>{label}</span>

@@ -14,7 +14,7 @@ export const PROJECT_DRAFT_KEY = 'c0c:projects:new-draft:v1';
 
 export interface ProjectDraft {
     values: Partial<ProjectFormValues>;
-    step: 1 | 2 | 3;
+    step: 1 | 2 | 3 | 4;
     savedAt: string;
 }
 
@@ -40,7 +40,7 @@ export function readProjectDraft(storage: Storage): ProjectDraft | null {
 
         const platform = parsed.values?.platform;
         const tone = parsed.values?.tone;
-        if (platform === 'youtube' || platform === 'tiktok' || platform === 'instagram') {
+        if (platform === 'youtube' || platform === 'tiktok' || platform === 'instagram' || platform === 'facebook') {
             values.platform = platform;
         }
         if (
@@ -53,8 +53,15 @@ export function readProjectDraft(storage: Storage): ProjectDraft | null {
         ) {
             values.tone = tone;
         }
+        const format = parsed.values?.contentFormat;
+        if (format === 'long' || format === 'short') values.contentFormat = format;
+        const duration = parsed.values?.durationSeconds;
+        if (typeof duration === 'number' && Number.isInteger(duration) && duration >= 15 && duration <= 3600) {
+            values.durationSeconds = duration;
+        }
 
-        const step = parsed.step === 2 || parsed.step === 3 ? parsed.step : 1;
+        const step =
+            parsed.step === 2 || parsed.step === 3 || parsed.step === 4 ? parsed.step : 1;
         const savedAt =
             typeof parsed.savedAt === 'string' && !Number.isNaN(Date.parse(parsed.savedAt))
                 ? parsed.savedAt
@@ -69,7 +76,7 @@ export function readProjectDraft(storage: Storage): ProjectDraft | null {
 export function writeProjectDraft(
     storage: Storage,
     values: Partial<ProjectFormValues>,
-    step: 1 | 2 | 3
+    step: 1 | 2 | 3 | 4
 ): void {
     try {
         const draft: ProjectDraft = {

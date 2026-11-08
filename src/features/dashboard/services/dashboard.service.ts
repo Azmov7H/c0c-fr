@@ -15,7 +15,7 @@ export interface DashboardStats {
         totalAudioSuggestions: number;
         totalMediaItems: number;
     };
-    projectsByPlatform: { youtube: number; tiktok: number; instagram: number };
+    projectsByPlatform: { youtube: number; tiktok: number; instagram: number; facebook: number };
     recentProjects: Project[];
     upcomingEvents: PlannerEvent[];
     trendVelocity: { date: string; count: number }[];

@@ -73,7 +73,7 @@ export function visibleWidgets(preferences: DashboardPreferences): DashboardWidg
 
 /** Platforms ordered by the creator's stated preference, then the rest. */
 export function orderPlatforms(preferred: Platform[]): Platform[] {
-    const all: Platform[] = ['youtube', 'tiktok', 'instagram'];
+    const all: Platform[] = ['youtube', 'tiktok', 'instagram', 'facebook'];
     const set = new Set(preferred);
     return [...all.filter((p) => set.has(p)), ...all.filter((p) => !set.has(p))];
 }

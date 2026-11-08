@@ -33,15 +33,16 @@ import {
     type ProjectDraft,
 } from '../lib/project-draft';
 import { projectFormSchema, type ProjectFormValues } from '../lib/project-schemas';
-import { StepDetails, StepPlatformTone, StepReview } from './new-project-steps';
+import { StepDetails, StepPlatformTone, StepConfiguration, StepReview } from './new-project-steps';
 
-const STEP_LABELS = ['Details', 'Platform & tone', 'Review'] as const;
+const STEP_LABELS = ['Details', 'Platform & tone', 'Configuration', 'Review'] as const;
 const BLANK_VALUES: ProjectFormValues = {
     title: '',
     description: '',
     idea: '',
     platform: 'youtube',
     tone: 'educational',
+    contentFormat: 'short',
 };
 
 function subscribeToDraft(listener: () => void): () => void {
@@ -79,11 +80,11 @@ function useRestoredDraft(): ProjectDraft | null {
     }, [raw]);
 }
 
-function StepIndicator({ current }: { current: 1 | 2 | 3 }) {
+function StepIndicator({ current }: { current: 1 | 2 | 3 | 4 }) {
     return (
         <ol className="flex items-center justify-center gap-2 sm:gap-3" aria-label="Progress">
             {STEP_LABELS.map((label, index) => {
-                const step = (index + 1) as 1 | 2 | 3;
+                const step = (index + 1) as 1 | 2 | 3 | 4;
                 const complete = step < current;
                 const active = step === current;
                 return (
@@ -134,7 +135,7 @@ function WizardForm({
     const create = useCreateProject();
     const onboarding = useOnboardingState();
 
-    const [step, setStep] = useState<1 | 2 | 3>(initialDraft?.step ?? 1);
+    const [step, setStep] = useState<1 | 2 | 3 | 4>(initialDraft?.step ?? 1);
     const [restored, setRestored] = useState<ProjectDraft | null>(initialDraft);
     const [cancelOpen, setCancelOpen] = useState(false);
     const [completed, setCompleted] = useState(false);
@@ -187,13 +188,17 @@ function WizardForm({
 
     const nextStep = async () => {
         const fields: Array<keyof ProjectFormValues> =
-            step === 1 ? ['title', 'description', 'idea'] : ['platform', 'tone'];
+            step === 1
+                ? ['title', 'description', 'idea']
+                : step === 2
+                  ? ['platform', 'tone']
+                  : ['contentFormat', 'durationSeconds'];
         const valid = await form.trigger(fields);
-        if (valid && step < 3) setStep((current) => (current + 1) as 1 | 2 | 3);
+        if (valid && step < 4) setStep((current) => (current + 1) as 1 | 2 | 3 | 4);
     };
 
     const previousStep = () => {
-        setStep((current) => (current - 1) as 1 | 2 | 3);
+        setStep((current) => (current - 1) as 1 | 2 | 3 | 4);
     };
 
     const clearDraft = () => {
@@ -268,7 +273,7 @@ function WizardForm({
         if (target.tagName === 'TEXTAREA' && event.shiftKey) return;
 
         event.preventDefault();
-        if (step === 3) {
+        if (step === 4) {
             onSubmitClick();
         } else {
             void nextStep();
@@ -277,7 +282,7 @@ function WizardForm({
 
     const title = (useWatch({ control: form.control, name: 'title' }) ?? '').trim();
     const primaryLabel =
-        step === 3
+        step === 4
             ? `Create “${title && title.length > 40 ? `${title.slice(0, 40)}…` : title || 'project'}”`
             : 'Continue';
 
@@ -337,7 +342,9 @@ function WizardForm({
                         ? 'Define the idea. This becomes the seed for your scripts.'
                         : step === 2
                           ? 'Choose where it will live and how it should sound.'
-                          : 'Check everything before we create the workspace.'}
+                          : step === 3
+                            ? 'Choose the format and target duration.'
+                            : 'Check everything before we create the workspace.'}
                 </p>
             </div>
 
@@ -354,7 +361,8 @@ function WizardForm({
                     <div className="rounded-2xl border border-border/60 bg-card p-4 sm:p-6">
                         {step === 1 ? <StepDetails form={form} /> : null}
                         {step === 2 ? <StepPlatformTone form={form} /> : null}
-                        {step === 3 ? <StepReview form={form} onEdit={setStep} /> : null}
+                        {step === 3 ? <StepConfiguration form={form} /> : null}
+                        {step === 4 ? <StepReview form={form} onEdit={setStep} /> : null}
                     </div>
 
                     <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -369,7 +377,7 @@ function WizardForm({
                             Back
                         </Button>
 
-                        {step < 3 ? (
+                        {step < 4 ? (
                             // key: React MUST mount a fresh node here instead of patching
                             // the button in place — one pending click's default action was
                             // re-evaluated against the patched-in type="submit" (T18 probe:

@@ -19,7 +19,7 @@ const mocks = vi.hoisted(() => ({
                       totalAudioSuggestions: number;
                       totalMediaItems: number;
                   };
-                  projectsByPlatform: { youtube: number; tiktok: number; instagram: number };
+                  projectsByPlatform: { youtube: number; tiktok: number; instagram: number; facebook: number };
                   recentProjects: Array<Record<string, unknown>>;
                   upcomingEvents: [];
                   trendVelocity: [];
@@ -52,7 +52,7 @@ const stats = (overrides: object = {}) => ({
         totalAudioSuggestions: 1,
         totalMediaItems: 4,
     },
-    projectsByPlatform: { youtube: 2, tiktok: 1, instagram: 0 },
+    projectsByPlatform: { youtube: 2, tiktok: 1, instagram: 0, facebook: 0 },
     recentProjects: [{ _id: 'p1', title: 'Alpha', updatedAt: new Date().toISOString(), createdAt: new Date().toISOString() }],
     upcomingEvents: [],
     trendVelocity: [],

@@ -96,7 +96,7 @@ const STATS: DashboardStats = {
         totalAudioSuggestions: 0,
         totalMediaItems: 4,
     },
-    projectsByPlatform: { youtube: 1, tiktok: 2, instagram: 0 },
+    projectsByPlatform: { youtube: 1, tiktok: 2, instagram: 0, facebook: 0 },
     recentProjects: [],
     upcomingEvents: [],
     trendVelocity: [],

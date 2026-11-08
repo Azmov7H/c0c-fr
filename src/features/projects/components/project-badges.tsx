@@ -1,4 +1,4 @@
-import { Instagram, PlaySquare, Youtube } from 'lucide-react';
+import { Facebook, Instagram, PlaySquare, Youtube } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -10,6 +10,7 @@ const PLATFORM_ICON: Record<Platform, typeof Youtube> = {
     youtube: Youtube,
     tiktok: PlaySquare,
     instagram: Instagram,
+    facebook: Facebook,
 };
 
 const STATUS_STYLE: Record<ProjectStatus, string> = {
@@ -23,6 +24,7 @@ const PLATFORM_STYLE: Record<Platform, string> = {
     youtube: 'bg-brand-red/10 text-brand-red border-brand-red/20',
     tiktok: 'bg-brand-cyan/10 text-brand-cyan border-brand-cyan/20',
     instagram: 'bg-brand-pink/10 text-brand-pink border-brand-pink/20',
+    facebook: 'bg-info/10 text-info border-info/20',
 };
 
 export function PlatformBadge({ platform }: { platform: Platform }) {

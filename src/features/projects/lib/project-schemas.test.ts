@@ -22,7 +22,7 @@ describe('project schema mirrors the backend contract', () => {
     });
 
     it('pins the enum vocabularies', () => {
-        expect(PROJECT_PLATFORMS).toEqual(['youtube', 'tiktok', 'instagram']);
+        expect(PROJECT_PLATFORMS).toEqual(['youtube', 'tiktok', 'instagram', 'facebook']);
         expect(PROJECT_TONES).toEqual([
             'educational',
             'dramatic',
@@ -53,5 +53,13 @@ describe('project schema mirrors the backend contract', () => {
     it('rejects platforms and tones the backend would reject', () => {
         expect(projectFormSchema.safeParse({ ...valid, platform: 'shorts' }).success).toBe(false);
         expect(projectFormSchema.safeParse({ ...valid, tone: 'funny' }).success).toBe(false);
+    });
+
+    it('accepts facebook + format/duration (P04) and rejects out-of-range durations', () => {
+        expect(
+            projectFormSchema.safeParse({ ...valid, platform: 'facebook', contentFormat: 'short', durationSeconds: 60 }).success
+        ).toBe(true);
+        expect(projectFormSchema.safeParse({ ...valid, durationSeconds: 5 }).success).toBe(false);
+        expect(projectFormSchema.safeParse({ ...valid, durationSeconds: 9999 }).success).toBe(false);
     });
 });

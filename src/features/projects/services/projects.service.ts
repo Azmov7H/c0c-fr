@@ -1,16 +1,33 @@
 import apiClient from '@/services/api-client';
-import { Project, PaginatedResponse, ApiResponse } from '@/types';
+import { Project, PaginatedResponse, ApiResponse, ContentFormat, Platform } from '@/types';
 
 export interface CreateProjectDTO {
     title: string;
     description?: string;
     idea: string;
-    platform: 'youtube' | 'tiktok' | 'instagram';
+    platform: Platform;
     tone: 'educational' | 'dramatic' | 'viral' | 'storytelling' | 'casual' | 'professional';
+    contentFormat?: ContentFormat;
+    durationSeconds?: number;
+    language?: string;
+    voiceGender?: string;
+    dialect?: string;
+    topic?: string;
 }
 
 export interface UpdateProjectDTO extends Partial<CreateProjectDTO> {
     status?: 'draft' | 'processing' | 'completed' | 'archived';
+}
+
+export interface ConfigurationOptions {
+    platforms: readonly string[];
+    contentFormats: readonly string[];
+    /** Empty until D8 verifies TTS capabilities (see backend configuration-options). */
+    languages: readonly string[];
+    voiceGenders: readonly string[];
+    dialects: readonly string[];
+    durationSeconds: { min: number; max: number };
+    voiceNote: string;
 }
 
 export interface ProjectsQuery {
@@ -46,5 +63,10 @@ export const projectsService = {
 
     delete: async (id: string): Promise<void> => {
         await apiClient.delete(`/projects/${id}`);
+    },
+
+    getConfigurationOptions: async (): Promise<ConfigurationOptions> => {
+        const response = await apiClient.get<ApiResponse<ConfigurationOptions>>('/projects/configuration-options');
+        return response.data.data;
     },
 };

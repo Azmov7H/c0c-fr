@@ -18,7 +18,7 @@ export const PROJECT_LIMITS = {
     idea: 5000,
 } as const;
 
-export const PROJECT_PLATFORMS = ['youtube', 'tiktok', 'instagram'] as const satisfies readonly Platform[];
+export const PROJECT_PLATFORMS = ['youtube', 'tiktok', 'instagram', 'facebook'] as const satisfies readonly Platform[];
 
 export const PROJECT_TONES = [
     'educational',
@@ -61,6 +61,12 @@ export const PLATFORM_CHOICES: PlatformChoice[] = [
         label: 'Instagram',
         summary: 'Reels and carousels',
         affects: '4:5 / 9:16 visuals, 30–90 second scripts, up to 30 niche hashtags.',
+    },
+    {
+        value: 'facebook',
+        label: 'Facebook',
+        summary: 'Reels',
+        affects: '9:16 visuals, short-form scripts, share-driven hooks.',
     },
 ];
 
