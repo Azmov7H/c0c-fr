@@ -75,7 +75,13 @@ const nextConfig: NextConfig = {
      * '**', never a wildcard subdomain of a user-controlled domain, never
      * http:. Force downloads instead of rendering active content.
      */
-    remotePatterns: [],
+    // M2-T26 (R-13): exactly one explicit Cloudinary host. Never '**'.
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+    ],
     contentDispositionType: 'attachment',
   },
 
