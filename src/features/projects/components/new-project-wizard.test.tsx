@@ -54,6 +54,8 @@ const goToReview = async () => {
     fireEvent.click(screen.getByRole('button', { name: /continue/i }));
     await screen.findByText('Platform');
     fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+    await screen.findByText('Content format');
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }));
     await screen.findByText('Platform and tone');
 };
 
@@ -148,6 +150,7 @@ describe('NewProjectWizard', () => {
         expect(tiktok.getAttribute('aria-checked')).toBe('true');
 
         fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+        fireEvent.click(await screen.findByRole('button', { name: /continue/i }));
         fireEvent.click(await screen.findByRole('button', { name: /^Create/ }));
 
         await waitFor(() =>

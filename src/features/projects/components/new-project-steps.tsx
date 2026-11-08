@@ -235,6 +235,86 @@ export function StepPlatformTone({ form }: StepProps) {
     );
 }
 
+export function StepConfiguration({ form }: StepProps) {
+    return (
+        <div className="space-y-8">
+            <FormField
+                control={form.control}
+                name="contentFormat"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Content format</FormLabel>
+                        <FormControl>
+                            <div role="radiogroup" aria-label="Content format" className="grid gap-3 sm:grid-cols-2">
+                                {(
+                                    [
+                                        { value: 'long', label: 'Long-form', description: 'YouTube long-form video.' },
+                                        { value: 'short', label: 'Short-form', description: 'Reels, Shorts and other vertical video.' },
+                                    ] as const
+                                ).map((choice) => {
+                                    const selected = field.value === choice.value;
+                                    return (
+                                        <button
+                                            key={choice.value}
+                                            type="button"
+                                            role="radio"
+                                            aria-checked={selected}
+                                            onClick={() => field.onChange(choice.value)}
+                                            className={cn(
+                                                'flex min-h-[72px] flex-col items-start rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                                                selected
+                                                    ? 'border-primary bg-primary/5'
+                                                    : 'border-border/60 hover:border-primary/40'
+                                            )}
+                                        >
+                                            <span className="text-sm font-semibold">{choice.label}</span>
+                                            <span className="text-xs text-muted-foreground">{choice.description}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
+                name="durationSeconds"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Target duration (seconds, optional)</FormLabel>
+                        <FormControl>
+                            <Input
+                                type="number"
+                                inputMode="numeric"
+                                min={15}
+                                max={3600}
+                                value={field.value ?? ''}
+                                onChange={(event) => {
+                                    const raw = event.target.value;
+                                    field.onChange(raw === '' ? undefined : Number(raw));
+                                }}
+                                onBlur={field.onBlur}
+                                name={field.name}
+                                placeholder="e.g. 60"
+                                className="h-12 text-base"
+                            />
+                        </FormControl>
+                        <FormDescription>15 to 3600 seconds. Scripts target this budget.</FormDescription>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <p role="note" className="text-sm text-muted-foreground">
+                Language, voice, and dialect options are not available until the text-to-speech provider is verified. They will appear here when available.
+            </p>
+        </div>
+    );
+}
+
 function ReviewRow({
     label,
     children,
@@ -261,7 +341,7 @@ function ReviewRow({
 export function StepReview({
     form,
     onEdit,
-}: StepProps & { onEdit: (step: 1 | 2) => void }) {
+}: StepProps & { onEdit: (step: 1 | 2 | 3 | 4) => void }) {
     const values = form.getValues();
     return (
         <div className="rounded-2xl border border-border/60 bg-muted/20 px-4">
@@ -280,6 +360,12 @@ export function StepReview({
                 <div className="flex flex-wrap gap-2">
                     <Badge variant="outline">{PLATFORM_LABEL[values.platform]}</Badge>
                     <Badge variant="outline">{TONE_LABEL[values.tone]}</Badge>
+                </div>
+            </ReviewRow>
+            <ReviewRow label="Format and duration" onEdit={() => onEdit(3)}>
+                <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline">{values.contentFormat === 'long' ? 'Long-form' : 'Short-form'}</Badge>
+                    <Badge variant="outline">{values.durationSeconds ? `${values.durationSeconds}s` : 'No target duration'}</Badge>
                 </div>
             </ReviewRow>
         </div>

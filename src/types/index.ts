@@ -26,8 +26,9 @@ export interface User {
 
 // ─── Project Types ─────────────────────────────────────
 export type ProjectStatus = 'draft' | 'processing' | 'completed' | 'archived';
-export type Platform = 'youtube' | 'tiktok' | 'instagram';
+export type Platform = 'youtube' | 'tiktok' | 'instagram' | 'facebook';
 export type ContentTone = 'educational' | 'dramatic' | 'viral' | 'storytelling' | 'casual' | 'professional';
+export type ContentFormat = 'long' | 'short';
 
 export interface Project {
     _id: string;
@@ -39,6 +40,11 @@ export interface Project {
     status: ProjectStatus;
     userId: string;
     topic?: string;
+    contentFormat?: ContentFormat;
+    durationSeconds?: number;
+    language?: string;
+    voiceGender?: string;
+    dialect?: string;
     memberLimit?: number;
     members?: Array<{ user: string; role: 'editor' | 'commenter' | 'viewer'; joinedAt: string }>;
     thumbnailUrl?: string;

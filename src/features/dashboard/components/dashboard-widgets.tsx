@@ -39,12 +39,14 @@ const PLATFORM_LABEL: Record<Platform, string> = {
     youtube: 'YouTube',
     tiktok: 'TikTok',
     instagram: 'Instagram',
+    facebook: 'Facebook',
 };
 
 const PLATFORM_TONE: Record<Platform, string> = {
     youtube: 'bg-negative/10 text-negative',
     tiktok: 'bg-info/10 text-info',
     instagram: 'bg-brand-violet/10 text-brand-violet',
+    facebook: 'bg-info/10 text-info',
 };
 
 export type LazyWidgetId =
@@ -103,7 +105,7 @@ function PlatformsWidget() {
     const { data, isLoading, isError, refetch } = useDashboardStats();
     const preferences = useDashboardPreferences().data ?? EMPTY_PREFERENCES;
     const platforms = orderPlatforms(preferences.preferredPlatforms);
-    const counts = data?.projectsByPlatform ?? { youtube: 0, tiktok: 0, instagram: 0 };
+    const counts = data?.projectsByPlatform ?? { youtube: 0, tiktok: 0, instagram: 0, facebook: 0 };
     const total = platforms.reduce((sum, platform) => sum + counts[platform], 0);
 
     return (

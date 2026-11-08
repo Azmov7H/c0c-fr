@@ -76,6 +76,7 @@ const PLATFORM_LABEL: Record<Platform, string> = {
   youtube: "YouTube",
   tiktok: "TikTok",
   instagram: "Instagram",
+  facebook: "Facebook",
 }
 
 const STATUS_LABEL: Record<ProjectStatus, string> = {
@@ -96,6 +97,7 @@ const PLATFORM_TONE: Record<Platform, string> = {
   youtube: "bg-negative/10 text-negative",
   tiktok: "bg-info/10 text-info",
   instagram: "bg-brand-violet/10 text-brand-violet",
+  facebook: "bg-info/10 text-info",
 }
 
 type StatusFilter = "all" | ProjectStatus
