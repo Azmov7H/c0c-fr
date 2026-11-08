@@ -1,11 +1,8 @@
-import type { Metadata } from "next"
-import { ScriptGenerator } from "@/features/scripts/components/script-generator"
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = {
-  title: "Script Generator",
-  description: "Generate AI-powered video scripts with platform-specific formatting and tone control.",
-}
-
-export default function ScriptsPage() {
-  return <ScriptGenerator />
+// M2-T22 (project-centric): standalone generation pages consolidate into
+// the project workspace Assets tab. Legacy URLs redirect to /projects
+// (no project context is known at redirect time). Components preserved.
+export default function LegacyPage() {
+  redirect('/projects');
 }
