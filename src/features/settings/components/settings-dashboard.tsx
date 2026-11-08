@@ -8,12 +8,10 @@ import { useProfile, useUpdateProfile } from '../hooks/use-settings';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     User,
-    Key,
     Shield,
     RefreshCw,
     LogOut,
@@ -34,11 +32,11 @@ const profileSchema = z.object({
 
 type ProfileValues = z.infer<typeof profileSchema>;
 
-const VALID_TABS = ['profile', 'api', 'security'] as const;
+const VALID_TABS = ['profile', 'security'] as const;
 type SettingsTab = (typeof VALID_TABS)[number];
 
 interface SettingsDashboardProps {
-    /** Deep link support (`/settings?tab=api`) for the user menu, T10. */
+    /** Deep link support (`/settings?tab=security`) for the user menu, T10. */
     defaultTab?: string;
 }
 
@@ -52,6 +50,12 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
     const initialTab: SettingsTab = (VALID_TABS as readonly string[]).includes(defaultTab ?? '')
         ? (defaultTab as SettingsTab)
         : 'profile';
+    // M2-T27: `?tab=api` (and any unknown tab) resolves to profile with a
+    // notice — never a blank panel or a crash.
+    const unknownTabNotice =
+        defaultTab && !(VALID_TABS as readonly string[]).includes(defaultTab)
+            ? 'Unknown settings tab — showing your profile.'
+            : null;
 
     const form = useForm<ProfileValues>({
         resolver: zodResolver(profileSchema),
@@ -91,17 +95,23 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
 
             <div>
                 <h1 className="text-3xl font-bold">System Settings</h1>
-                <p className="text-muted-foreground mt-2">Manage your account preferences, billing, and API access.</p>
+                <p className="text-muted-foreground mt-2">Manage your account preferences and billing.</p>
             </div>
+            {unknownTabNotice && (
+                <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Tab not found</AlertTitle>
+                    <AlertDescription>
+                        API settings were removed — C0C does not offer a public API. Showing your profile.
+                    </AlertDescription>
+                </Alert>
+            )}
 
             <Tabs defaultValue={initialTab} className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
 
                 <TabsList className="flex flex-col h-auto bg-transparent gap-2 items-start lg:col-span-1 p-0">
                     <TabsTrigger value="profile" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-muted transition-all">
                         <User className="w-4 h-4" /> My Profile
-                    </TabsTrigger>
-                    <TabsTrigger value="api" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-muted transition-all">
-                        <Key className="w-4 h-4" /> AI API Keys
                     </TabsTrigger>
                     <TabsTrigger value="security" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-muted transition-all">
                         <Shield className="w-4 h-4" /> Security
@@ -225,41 +235,6 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
                                 >
                                     <LogOut className="w-4 h-4" /> Sign out everywhere
                                 </Button>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                    <TabsContent value="api" className="mt-0 space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>AI Provider Tokens</CardTitle>
-                                <CardDescription>How model access is configured for this workspace.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <Alert>
-                                    <Info className="h-4 w-4" />
-                                    <AlertTitle>Managed server-side</AlertTitle>
-                                    <AlertDescription>
-                                        Provider keys are configured by the deployment and are never
-                                        entered in the browser. Per-user key storage is not part of the
-                                        current release.
-                                    </AlertDescription>
-                                </Alert>
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label className="flex justify-between">
-                                            <span>OpenAI API Key</span>
-                                            <span className="text-[10px] text-muted-foreground font-mono">NOT CONFIGURED PER USER</span>
-                                        </Label>
-                                        <Input value="Managed by the server" readOnly disabled />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="flex justify-between">
-                                            <span>Anthropic Key</span>
-                                            <span className="text-[10px] text-muted-foreground font-mono">NOT CONFIGURED PER USER</span>
-                                        </Label>
-                                        <Input value="Managed by the server" readOnly disabled />
-                                    </div>
-                                </div>
                             </CardContent>
                         </Card>
                     </TabsContent>

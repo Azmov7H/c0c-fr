@@ -31,7 +31,6 @@ const summary = (overrides: Partial<BillingSummary> = {}): BillingSummary => ({
         'teams.create',
         'teams.invite',
         'media.publish',
-        'api.access',
         'project.members',
         'analytics.advanced',
         'export.csv',

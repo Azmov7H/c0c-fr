@@ -7,7 +7,6 @@ export type BillingFeature =
     | 'teams.create'
     | 'teams.invite'
     | 'media.publish'
-    | 'api.access'
     | 'project.members'
     | 'priority_queue'
     | 'analytics.advanced'
