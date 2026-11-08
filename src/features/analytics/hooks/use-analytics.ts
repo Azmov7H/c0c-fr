@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { analyticsService } from '../services/analytics.service';
-import { CreateAnalyticsDTO, UpdateAnalyticsDTO } from '../types';
+import { CreateAnalyticsDTO, GenerateAnalyticsDTO, UpdateAnalyticsDTO } from '../types';
 import { toast } from '@/lib/toast';
 import { toApiError } from '@/lib/api-error';
 
@@ -32,9 +32,11 @@ export const useGenerateAnalytics = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (projectId: string) => analyticsService.generateInitial(projectId),
+        mutationFn: (data: GenerateAnalyticsDTO) => analyticsService.generateInitial(data),
         onSuccess: (data) => {
-            toast.success('AI analysis generated successfully');
+            // P01.1: only projected reports are AI analysis; measured reports
+            // are computed from real activity.
+            toast.success(data.source === 'projected' ? 'AI analysis generated (projection)' : 'Measured report generated');
             queryClient.invalidateQueries({ queryKey: analyticsKeys.list(data.projectId) });
         },
         onError: (error: unknown) => {
