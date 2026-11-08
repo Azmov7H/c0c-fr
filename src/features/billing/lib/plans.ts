@@ -62,7 +62,6 @@ export const PLAN_CATALOGUE: Record<PlanId, PlanDefinition> = {
             'teams.create',
             'teams.invite',
             'media.publish',
-            'api.access',
             'project.members',
             'analytics.advanced',
             'export.csv',
@@ -86,7 +85,6 @@ export const PLAN_CATALOGUE: Record<PlanId, PlanDefinition> = {
             'teams.create',
             'teams.invite',
             'media.publish',
-            'api.access',
             'project.members',
             'priority_queue',
             'analytics.advanced',
@@ -100,7 +98,6 @@ export const FEATURE_LABELS: Record<BillingFeature, string> = {
     'teams.create': 'Team workspaces',
     'teams.invite': 'Invite collaborators',
     'media.publish': 'Publish media',
-    'api.access': 'API access',
     'project.members': 'Project members',
     priority_queue: 'Priority generation queue',
     'analytics.advanced': 'Advanced analytics',
@@ -162,7 +159,6 @@ export function planHighlights(plan: PlanDefinition): readonly string[] {
         } at a time`,
     ];
 
-    if (plan.features.includes('api.access')) highlights.push('API access');
     if (plan.features.includes('analytics.advanced')) highlights.push('Advanced analytics');
     if (plan.features.includes('export.csv')) highlights.push('CSV export');
     if (plan.features.includes('priority_queue')) {
@@ -224,7 +220,6 @@ export const PLAN_COMPARISON: readonly ComparisonRow[] = [
         [
             ['teams.invite', 'teams.invite'],
             ['media.publish', 'media.publish'],
-            ['api.access', 'api.access'],
             ['analytics.advanced', 'analytics.advanced'],
             ['export.csv', 'export.csv'],
             ['priority_queue', 'priority_queue'],
