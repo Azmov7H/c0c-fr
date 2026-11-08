@@ -18,10 +18,10 @@ export const trendKeys = {
      * get pinned to whatever a report fetch last wrote.
      */
     feeds: () => [...trendKeys.all, 'feed'] as const,
-    feed: (scope: TrendScope, window: TrendWindow) =>
-        [...trendKeys.feeds(), 'global', scope, window] as const,
-    forMe: (window: TrendWindow, summary: boolean) =>
-        [...trendKeys.feeds(), 'for-me', window, summary] as const,
+    feed: (scope: TrendScope, window: TrendWindow, category?: string) =>
+        [...trendKeys.feeds(), 'global', scope, window, category ?? 'all'] as const,
+    forMe: (window: TrendWindow, summary: boolean, category?: string) =>
+        [...trendKeys.feeds(), 'for-me', window, summary, category ?? 'all'] as const,
 };
 
 /**
@@ -30,10 +30,10 @@ export const trendKeys = {
  * response — the two windows disagreeing produces a request storm that the cache
  * headers were specifically meant to prevent.
  */
-export const useGlobalTrendFeed = (scope: TrendScope = 'global', window: TrendWindow = 7) => {
+export const useGlobalTrendFeed = (scope: TrendScope = 'global', window: TrendWindow = 7, category?: string) => {
     return useQuery({
-        queryKey: trendKeys.feed(scope, window),
-        queryFn: () => trendsService.getGlobalFeed(scope, window),
+        queryKey: trendKeys.feed(scope, window, category),
+        queryFn: () => trendsService.getGlobalFeed(scope, window, category),
         staleTime: 300_000,
     });
 };
@@ -43,10 +43,10 @@ export const useGlobalTrendFeed = (scope: TrendScope = 'global', window: TrendWi
  * ranking is per-session and refetching is expected. `summary` is opt-in because
  * it is a billable model call.
  */
-export const useForMeTrendFeed = (window: TrendWindow = 7, summary = false) => {
+export const useForMeTrendFeed = (window: TrendWindow = 7, summary = false, category?: string) => {
     return useQuery({
-        queryKey: trendKeys.forMe(window, summary),
-        queryFn: () => trendsService.getForMeFeed(window, summary),
+        queryKey: trendKeys.forMe(window, summary, category),
+        queryFn: () => trendsService.getForMeFeed(window, summary, category),
     });
 };
 

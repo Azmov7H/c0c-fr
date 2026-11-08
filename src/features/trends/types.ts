@@ -18,18 +18,15 @@ export interface DemographicLocation {
 }
 
 /**
- * A user's own AI-generated report. Note that its `viralScore` is a *model
- * projection*, not a measurement — the backend labels these `status`-derived and
- * they live under `/trends/reports`.
- *
- * Distinct from `TrendTopic.viralScore` below, which is a reproducible function
- * of measured counts. The two numbers share a name and nothing else, which is
- * exactly why they are typed apart here rather than sharing an alias.
+ * P03.1/D9: AI-generated reports are *projections*, not measurements.
+ * Live-trend claims ("what is hot right now") are only ever served by the
+ * measured snapshot feed below.
  */
 export interface TrendReport {
     id: string;
     userId: string;
     platform: Platform;
+    source: 'projected';
     viralScore: number;
     risingKeywords: RisingKeyword[];
     avgEngagement: number;
@@ -48,7 +45,7 @@ export interface CreateTrendDTO {
     platform: Platform;
 }
 
-// ─── Measured feed (T07) ────────────────────────────────────────────────────
+// ─── Measured feed (T07 + P03) ─────────────────────────────────────────────────
 
 export type TrendScope = 'global' | Platform;
 export type TrendWindow = 7 | 30;
@@ -78,26 +75,26 @@ export interface TrendTopic {
     relatedTopics: string[];
     creatorCount: number;
     source: 'measured';
+    /** Niche slug from the onboarding taxonomy; see the backend read-time mapping. */
+    category?: string;
 }
 
-/**
- * A topic as returned by `/trends/for-me`.
- *
- * `affinity` is stated preference, never measurement. It is kept separate from
- * `viralScore` on purpose: merging them would make a personalised ranking
- * impossible to distinguish from a measured one.
- */
 export interface RankedTrendTopic extends TrendTopic {
     affinity: number;
     matchedInterests: string[];
     matchedPlatforms: string[];
 }
 
+export type ProviderStatus = 'ok' | 'stale' | 'unavailable';
+
 export interface TrendFeed {
     scope: TrendScope;
     windowDays: TrendWindow;
     computedAt: string | null;
+    fetchedAt: string | null;
     freshness: 'fresh' | 'stale' | 'cold';
+    provider: string;
+    providerStatus: ProviderStatus;
     source: 'measured';
     topics: TrendTopic[];
 }
@@ -106,7 +103,11 @@ export interface ForMeTrendFeed {
     scope: TrendScope;
     windowDays: TrendWindow;
     computedAt: string | null;
+    fetchedAt: string | null;
     freshness: 'fresh' | 'stale' | 'cold';
+    provider: string;
+    providerStatus: ProviderStatus;
+    source: 'measured';
     topics: RankedTrendTopic[];
     /** Absent whenever the model failed. Never a placeholder string. */
     summary?: TrendSummary;
