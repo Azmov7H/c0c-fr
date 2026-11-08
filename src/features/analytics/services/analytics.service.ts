@@ -1,5 +1,5 @@
 import apiClient from '@/services/api-client';
-import { AnalyticsReport, CreateAnalyticsDTO, UpdateAnalyticsDTO } from '../types';
+import { AnalyticsReport, CreateAnalyticsDTO, GenerateAnalyticsDTO, UpdateAnalyticsDTO } from '../types';
 import { ApiResponse } from '@/types';
 
 class AnalyticsService {
@@ -10,8 +10,8 @@ class AnalyticsService {
         return response.data.data;
     }
 
-    async generateInitial(projectId: string): Promise<AnalyticsReport> {
-        const response = await apiClient.post<ApiResponse<AnalyticsReport>>(`${this.baseUrl}/generate`, { projectId });
+    async generateInitial(data: GenerateAnalyticsDTO): Promise<AnalyticsReport> {
+        const response = await apiClient.post<ApiResponse<AnalyticsReport>>(`${this.baseUrl}/generate`, data);
         return response.data.data;
     }
 
