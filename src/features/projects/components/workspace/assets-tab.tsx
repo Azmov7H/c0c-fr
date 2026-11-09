@@ -17,9 +17,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProjectAudio, useGenerateAudio } from '@/features/audio/hooks/use-audio';
+import dynamic from 'next/dynamic';
 import { useProjectMedia } from '@/features/media/hooks/use-media';
 import { useProjectScripts, useGenerateScript } from '@/features/scripts/hooks/use-scripts';
 import { ProjectExport } from './project-export';
+
 import { useProjectSEO, useGenerateSEO } from '@/features/seo/hooks/use-seo';
 import { useProjectThumbnails } from '@/features/thumbnails/hooks/use-thumbnails';
 import { toApiError } from '@/lib/api-error';
@@ -35,6 +37,16 @@ const isQuotaError = (error: unknown): boolean => {
     const apiError = toApiError(error, '');
     return apiError.status === 429 || apiError.code === 'QUOTA_EXHAUSTED' || apiError.code === 'RATE_LIMITED';
 };
+
+// P05.7: the per-scene editor (RHF + Zod) is split out of the Assets first
+// load — visitors without a script never download the form machinery.
+const ScriptEditor = dynamic(
+    () => import('@/features/scripts/components/script-editor').then((m) => m.ScriptEditor),
+    {
+        ssr: false,
+        loading: () => <Skeleton className="h-64 w-full rounded-2xl" />,
+    }
+);
 
 function AssetRow({
     title,
@@ -164,7 +176,7 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                     title="Scripts"
                     icon={FileText}
                     count={scripts.data?.length ?? 0}
-                    description="Generated scripts for this project."
+                    description="Structured per-scene scripts for this project."
                     action={
                         <Button
                             className="h-11"
@@ -187,15 +199,22 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                             No scripts yet. {mayEdit ? 'Generate the first one.' : 'An editor can generate one.'}
                         </p>
                     ) : (
-                        <ul>{(scripts.data ?? []).slice(0, 5).map((script) => (
-                            <AssetRow
-                                key={script.id}
-                                title={`Version ${script.version}`}
-                                subtitle={`${script.wordCount} words`}
-                                status={script.status}
-                                createdAt={script.createdAt}
-                            />
-                        ))}</ul>
+                        <>
+                            <ul>{(scripts.data ?? []).slice(0, 5).map((script) => (
+                                <AssetRow
+                                    key={script.id}
+                                    title={`Version ${script.version} · ${script.sections.length} scene(s)`}
+                                    subtitle={`${script.wordCount} words`}
+                                    status={script.status}
+                                    createdAt={script.createdAt}
+                                />
+                            ))}</ul>
+                            {mayEdit && (scripts.data ?? []).length > 0 && (
+                                <div className="border-t border-border/50 pt-4">
+                                    <ScriptEditor scriptId={String((scripts.data ?? [])[0]!.id)} />
+                                </div>
+                            )}
+                        </>
                     )}
                 </GroupCard>
 

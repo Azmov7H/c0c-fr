@@ -1,5 +1,6 @@
 export type AudioMood = 'energetic' | 'suspenseful' | 'educational' | 'chill';
 export type AudioStatus = 'pending' | 'analyzing' | 'completed' | 'error';
+export type AudioAssetType = 'narration' | 'sfx' | 'music';
 
 export interface AudioTrack {
     title: string;
@@ -42,11 +43,23 @@ export interface AudioSuggestion {
     format?: AudioAssetFormat;
     fileSize?: number;
     source?: AudioAssetSource;
+    /**
+     * P06.1: absent on pre-split rows (combined). The narration layer is
+     * where playable bytes live; music/sfx carry suggestions + controls.
+     */
+    assetType?: AudioAssetType;
+    volume?: number;
+    enabled?: boolean;
+    muted?: boolean;
     isCurrent: boolean;
     isDeleted: boolean;
     createdAt: string;
     updatedAt: string;
 }
+
+/** P06.1: layer of a row, where legacy rows count as narration. */
+export const audioLayerOf = (row: AudioSuggestion): AudioAssetType =>
+    row.assetType ?? 'narration';
 
 export interface CreateAudioSuggestionDTO {
     projectId: string;
@@ -54,6 +67,10 @@ export interface CreateAudioSuggestionDTO {
     musicType?: string;
     status?: AudioStatus;
     scriptId?: string;
+    assetType?: AudioAssetType;
+    volume?: number;
+    enabled?: boolean;
+    muted?: boolean;
     fileUrl?: string;
     durationSeconds?: number;
     format?: AudioAssetFormat;
@@ -64,6 +81,7 @@ export interface CreateAudioSuggestionDTO {
 export interface UploadAudioDTO {
     projectId: string;
     scriptId?: string;
+    assetType?: AudioAssetType;
     fileUrl: string;
     durationSeconds?: number;
     format?: AudioAssetFormat;
