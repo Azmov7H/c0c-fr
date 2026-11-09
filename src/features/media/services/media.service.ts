@@ -24,6 +24,12 @@ export interface MediaItem {
     updatedAt: string;
 }
 
+/** P07.6: the allowance counters, straight from the backend (never computed here). */
+export interface MediaAllowance {
+    thumbnail: { used: number; limit: number | null };
+    images: { used: number; limit: number | null };
+}
+
 export const mediaService = {
     async getMedia(params?: {
         page?: number;
@@ -46,6 +52,12 @@ export const mediaService = {
         return data.data;
     },
 
+    /** P07.4: replace one gallery row's bytes in place (siblings untouched). */
+    async regenerate(id: string, fileUrl: string): Promise<MediaItem> {
+        const { data } = await apiClient.post<{ data: MediaItem }>(`/media/${id}/regenerate`, { fileUrl });
+        return data.data;
+    },
+
     async update(id: string, dto: Partial<MediaItem>): Promise<MediaItem> {
         const { data } = await apiClient.patch<{ data: MediaItem }>(`/media/${id}`, dto);
         return data.data;
@@ -57,6 +69,13 @@ export const mediaService = {
 
     async getStats(): Promise<{ total: number }> {
         const { data } = await apiClient.get<{ data: { total: number } }>('/media/stats');
+        return data.data;
+    },
+
+    async getAllowance(projectId: string): Promise<MediaAllowance> {
+        const { data } = await apiClient.get<{ data: MediaAllowance }>(
+            `/media/project/${projectId}/allowance`
+        );
         return data.data;
     },
 };

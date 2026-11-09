@@ -10,9 +10,10 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProjectAudio, useGenerateAudio, useUpdateAudioSuggestion } from '@/features/audio/hooks/use-audio';
 import { audioLayerOf, type AudioSuggestion } from '@/features/audio/types';
-import { useProjectMedia } from '@/features/media/hooks/use-media';
+import { useMediaAllowance, useProjectMedia, useRegenerateMedia } from '@/features/media/hooks/use-media';
 import { useProjectThumbnails } from '@/features/thumbnails/hooks/use-thumbnails';
 import { useProjects } from '@/features/projects/hooks/use-projects';
+import { useRegenerateThumbnail } from '@/features/thumbnails/hooks/use-thumbnails';
 
 function formatDuration(seconds: number): string {
     const m = Math.floor(seconds / 60);
@@ -133,7 +134,12 @@ export function MediaWorkspace({ projectId }: { projectId: string }) {
     const thumbnails = useProjectThumbnails(projectId);
     const media = useProjectMedia(projectId);
     const audio = useProjectAudio(projectId);
+    const allowance = useMediaAllowance(projectId);
+    const regenMedia = useRegenerateMedia(projectId);
+    const regenThumb = useRegenerateThumbnail();
     const [imgError, setImgError] = useState<Record<string, boolean>>({});
+    const [replacing, setReplacing] = useState<number | null>(null);
+    const [regenUrl, setRegenUrl] = useState('');
 
     const loading = thumbnails.isLoading || media.isLoading || audio.isLoading;
     if (loading) {
@@ -188,13 +194,32 @@ export function MediaWorkspace({ projectId }: { projectId: string }) {
                                     />
                                 )}
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex flex-wrap gap-2">
                                 <Button asChild variant="outline" size="sm" className="h-11">
                                     <a href={thumbUrl} download={`thumbnail.png`} rel="noreferrer">
                                         <Download className="mr-1 size-4" aria-hidden="true" /> Download
                                     </a>
                                 </Button>
+                                {latestThumb && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-11"
+                                        disabled={regenThumb.isPending}
+                                        onClick={() => regenThumb.mutate({ id: latestThumb.id })}
+                                    >
+                                        <RefreshCw className="mr-1 size-4" aria-hidden={regenThumb.isPending} /> Regenerate
+                                    </Button>
+                                )}
                             </div>
+                            {allowance.data?.thumbnail && (
+                                <p className="text-xs text-muted-foreground">
+                                    {allowance.data.thumbnail.used} of {allowance.data.thumbnail.limit ?? '∞'} thumbnail(s) used.
+                                    {allowance.data.thumbnail.limit !== null && allowance.data.thumbnail.used >= allowance.data.thumbnail.limit
+                                        ? ' At limit — regenerate or remove to add more.'
+                                        : ''}
+                                </p>
+                            )}
                         </div>
                     ) : (
                         <p className="text-sm text-muted-foreground">No thumbnail yet. Generate one from the Thumbnails section.</p>
@@ -213,6 +238,15 @@ export function MediaWorkspace({ projectId }: { projectId: string }) {
                         {[0, 1, 2].map((slot) => {
                             const item = bySlot(slot);
                             const key = `slot-${slot}`;
+                            const imagesAtCap =
+                                allowance.data?.images.limit !== null &&
+                                allowance.data?.images.limit !== undefined &&
+                                allowance.data.images.used >= allowance.data.images.limit;
+                            const sceneRef =
+                                item?.metadata &&
+                                typeof (item.metadata as { sceneRef?: unknown }).sceneRef === 'string'
+                                    ? String((item.metadata as { sceneRef: string }).sceneRef)
+                                    : undefined;
                             return (
                                 <div key={key} className="space-y-2">
                                     <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Slot {slot + 1}</p>
@@ -233,20 +267,63 @@ export function MediaWorkspace({ projectId }: { projectId: string }) {
                                             <p className="flex aspect-square items-center justify-center text-sm text-muted-foreground">Empty</p>
                                         )}
                                     </div>
+                                    {sceneRef && (
+                                        <p className="text-xs text-muted-foreground">
+                                            Scene {sceneRef}
+                                        </p>
+                                    )}
                                     <div className="flex gap-2">
-                                        <Button variant="outline" size="sm" className="h-11" disabled>
-                                            <Upload className="mr-1 size-4" aria-hidden="true" /> Replace
-                                        </Button>
-                                        {item?.fileUrl && (
-                                            <Button asChild variant="ghost" size="sm" className="h-11">
-                                                <a href={item.fileUrl} download={`image-${slot + 1}.png`} rel="noreferrer">
-                                                    <Download className="mr-1 size-4" aria-hidden="true" /> Download
-                                                </a>
-                                            </Button>
+                                        {replacing === slot && item ? (
+                                            <div className="flex flex-1 items-center gap-2">
+                                                <Input
+                                                    value={regenUrl}
+                                                    onChange={(e) => setRegenUrl(e.target.value)}
+                                                    placeholder="https://…allowlisted host…"
+                                                    aria-label={`New URL for slot ${slot + 1}`}
+                                                    className="h-11 text-base"
+                                                />
+                                                <Button
+                                                    size="sm"
+                                                    className="h-11"
+                                                    disabled={!regenUrl.trim() || regenMedia.isPending}
+                                                    onClick={() => {
+                                                        regenMedia.mutate(
+                                                            { id: item._id, fileUrl: regenUrl.trim() },
+                                                            { onSuccess: () => { setReplacing(null); setRegenUrl(''); } }
+                                                        );
+                                                    }}
+                                                >
+                                                    Save
+                                                </Button>
+                                                <Button size="sm" variant="ghost" className="h-11" onClick={() => { setReplacing(null); setRegenUrl(''); }}>
+                                                    Cancel
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-11"
+                                                    disabled={!item}
+                                                    onClick={() => setReplacing(slot)}
+                                                >
+                                                    <Upload className="mr-1 size-4" aria-hidden="true" /> Replace
+                                                </Button>
+                                                {item?.fileUrl && (
+                                                    <Button asChild variant="ghost" size="sm" className="h-11">
+                                                        <a href={item.fileUrl} download={`image-${slot + 1}.png`} rel="noreferrer">
+                                                            <Download className="mr-1 size-4" aria-hidden="true" /> Download
+                                                        </a>
+                                                    </Button>
+                                                )}
+                                            </>
                                         )}
                                     </div>
-                                    <p className="text-xs text-muted-foreground" title="Storage pending (M2-T26)">
-                                        Replace pending — storage not configured.
+                                    <p className="text-xs text-muted-foreground">
+                                        {imagesAtCap
+                                            ? `Gallery at limit (${allowance.data?.images.used}/${allowance.data?.images.limit} images) — regenerate or remove to add more.`
+                                            : `${allowance.data?.images.used ?? 0} of ${allowance.data?.images.limit ?? '∞'} images used.`}
                                     </p>
                                 </div>
                             );
