@@ -28,6 +28,12 @@ class ThumbnailsService {
     async deleteThumbnail(id: string): Promise<void> {
         await apiClient.delete(`${this.baseUrl}/${id}`);
     }
+
+    /** P07.4: regenerate one thumbnail in place (no new asset). */
+    async regenerateThumbnail(id: string, data?: { prompt?: string; stylePreset?: string }): Promise<Thumbnail> {
+        const response = await apiClient.post<ApiResponse<Thumbnail>>(`${this.baseUrl}/${id}/regenerate`, data ?? {});
+        return response.data.data;
+    }
 }
 
 export const thumbnailsService = new ThumbnailsService();

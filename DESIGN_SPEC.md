@@ -162,7 +162,28 @@ A robust asset management system.
 - `grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4`.
 - **Card Design:** Aspect ratio locked (16:9 for thumbnails/video, 1:1 for music icons). Uses `next/image` heavily optimized. 
 - Hover state reveals a dark gradient overlay with "Play/View", "Copy URL", and "Delete" ghost buttons.
-- **Preview Modal:** Clicking an asset opens a massive `Dialog` displaying the high-res image or custom video/audio player alongside a metadata sidebar (Size, Date, Auto-generated Tags).
+- **Preview Modal:** Clicking an asset opens a massive `Dialog` displaying
+the high-res image or custom video/audio player alongside a metadata
+sidebar (Size, Date, Auto-generated Tags).
+
+**Thumbnail dimension table (P07.1)** — new generations use the
+platform-correct size; older rows keep their stored size (flagged
+`legacy` by the storage dual-read):
+
+| Platform + contentFormat | Size |
+|---|---|
+| YouTube long (default) | 1280×720 |
+| YouTube Shorts | 1080×1920 |
+| TikTok | 1080×1920 |
+| Instagram Reels | 1080×1920 |
+| Facebook Reels | 1080×1920 |
+| `short_form` (multi-platform) | 1080×1920 |
+
+Canonical source: `c0c-bake/src/modules/thumbnails/thumbnail-dimensions.ts`
+(`PLATFORM_DIMENSIONS`), proven by `tests/media/visual-assets.http.test.ts`.
+Free projects are quota-limited per project to **1 thumbnail** and
+**3 gallery images** (`GET /media/project/:projectId/allowance` reports the
+counters); the thumbnail never counts toward the gallery limit.
 
 ---
 

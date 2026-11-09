@@ -14,11 +14,14 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/features/projects/hooks/use-projects', () => ({
     useProjects: () => ({ data: { data: [] } }),
 }));
-vi.mock('@/features/thumbnails/hooks/use-thumbnails', () => ({
-    useProjectThumbnails: () => ({ data: [], isLoading: false }),
-}));
 vi.mock('@/features/media/hooks/use-media', () => ({
     useProjectMedia: () => ({ data: { data: [] }, isLoading: false }),
+    useMediaAllowance: () => ({ data: { thumbnail: { used: 0, limit: null }, images: { used: 0, limit: null } } }),
+    useRegenerateMedia: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+vi.mock('@/features/thumbnails/hooks/use-thumbnails', () => ({
+    useProjectThumbnails: () => ({ data: [], isLoading: false }),
+    useRegenerateThumbnail: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 vi.mock('@/features/audio/hooks/use-audio', () => ({
     useProjectAudio: () => ({ data: mocks.audio, isLoading: false }),

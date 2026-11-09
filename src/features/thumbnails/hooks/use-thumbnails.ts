@@ -60,6 +60,24 @@ export const useUpdateThumbnail = () => {
     });
 };
 
+/** P07.4: in-place regeneration — no new asset, no quota consume. */
+export const useRegenerateThumbnail = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, prompt, stylePreset }: { id: string; prompt?: string; stylePreset?: string }) =>
+            thumbnailsService.regenerateThumbnail(id, { prompt, stylePreset }),
+        onSuccess: (data) => {
+            toast.success('Thumbnail regenerated');
+            queryClient.invalidateQueries({ queryKey: thumbnailsKeys.detail(data.id) });
+            queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(data.projectId) });
+        },
+        onError: (error: unknown) => {
+            toast.error(toApiError(error, 'Failed to regenerate thumbnail').message);
+        },
+    });
+};
+
 export const useDeleteThumbnail = () => {
     const queryClient = useQueryClient();
 
