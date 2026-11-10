@@ -46,7 +46,6 @@ test('owner invites → invitee accepts in a second context → editor contribut
     await page.locator('#main-content').getByRole('button', { name: /Create “Landing page teardown”/ }).click();
     await expect(page).toHaveURL(/\/projects\/[a-f\d]{24}$/);
     const projectUrl = page.url();
-    const projectId = projectUrl.split('/').pop() as string;
 
     // ── Owner: invite the collaborator and copy the accept link ─────────────
     await page.goto(`${projectUrl}?tab=members`);
