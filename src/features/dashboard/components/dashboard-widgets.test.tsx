@@ -146,10 +146,11 @@ describe('PlatformsWidget', () => {
 
         render(<DashboardWidget id="platforms" />);
 
-        // youtube 1/3 · tiktok 2/3 · instagram 0/3
+        // youtube 1/3 · tiktok 2/3 · instagram 0/3 (+ facebook 0/3 since P04's
+        // platform enum widened — two legitimate zero rows, so assert the pair).
         expect(screen.getByText('1 · 33%')).toBeTruthy();
         expect(screen.getByText('2 · 67%')).toBeTruthy();
-        expect(screen.getByText('0 · 0%')).toBeTruthy();
+        expect(screen.getAllByText('0 · 0%')).toHaveLength(2);
         expect(screen.getByText('YouTube')).toBeTruthy();
         expect(screen.getByText('TikTok')).toBeTruthy();
     });

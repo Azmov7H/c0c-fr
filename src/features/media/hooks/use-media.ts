@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { mediaService, type MediaItem, type MediaAllowance } from '../services/media.service';
+import { mediaService, type MediaItem } from '../services/media.service';
 
 export const mediaKeys = {
     all: ['media'] as const,

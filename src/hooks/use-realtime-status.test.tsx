@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { useAuthStore } from '@/store/auth-store';
 import { useRealtimeStore } from '@/store/realtime-store';

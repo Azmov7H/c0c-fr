@@ -9,10 +9,16 @@ export interface PlannerEvent {
     description?: string;
     type: 'publish' | 'schedule' | 'review' | 'draft' | 'meeting';
     status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+    /** UTC instant. */
     scheduledDate: string;
+    /** P02.1: IANA zone the client scheduled in (write-validated). */
+    timezone?: string;
+    /** P02.3: YYYY-MM-DD day key IN THE STORED ZONE, computed server-side — the one value both views read. */
+    scheduledDay?: string;
     platform?: 'youtube' | 'tiktok' | 'instagram';
     contentUrl?: string;
     notes?: string;
+    /** P02.2: stored metadata only — no dispatch path exists yet; the UI must say so, never pretend reminders fire. */
     reminders?: string[];
     createdAt: string;
     updatedAt: string;
@@ -37,7 +43,13 @@ export const plannerService = {
     },
 
     async create(dto: Partial<PlannerEvent>): Promise<PlannerEvent> {
-        const { data } = await apiClient.post<{ data: PlannerEvent }>('/planner/events', dto);
+        // P02.1: the zone travels from the client unless the caller picked
+        // one explicitly — an event is only honest if its zone is real.
+        const withZone = {
+            ...dto,
+            timezone: dto.timezone ?? new Intl.DateTimeFormat().resolvedOptions().timeZone,
+        };
+        const { data } = await apiClient.post<{ data: PlannerEvent }>('/planner/events', withZone);
         return data.data;
     },
 

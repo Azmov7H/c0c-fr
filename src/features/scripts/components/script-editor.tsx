@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useFieldArray, useForm, type UseFormReturn } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Clock, FileText, Link2, Save, Sparkles } from 'lucide-react';
 import { useScript, useUpdateScript, useGenerateScript } from '../hooks/use-scripts';
-import type { Script, ScriptSection } from '../types';
+import type { ScriptSection } from '../types';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
