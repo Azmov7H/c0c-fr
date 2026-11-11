@@ -134,6 +134,9 @@ describe('project export', () => {
         expect(
             await screen.findByText(/paid exports open once the export price is published/i)
         ).toBeTruthy();
+        // The cost column renders `pending` until the price is published —
+        // never a zero that reads like "free".
+        expect(screen.getByText(/cost pending/i)).toBeTruthy();
         expect(screen.getByRole('button', { name: /export/i })).toBeDisabled();
     });
 

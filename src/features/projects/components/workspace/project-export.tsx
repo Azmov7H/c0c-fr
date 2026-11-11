@@ -175,7 +175,11 @@ export function ProjectExport({ projectId, title }: { projectId: string; title: 
             ) : estimate ? (
                 <p className="text-xs text-muted-foreground">
                     {formatBytes(estimate.estimateBytes)}
-                    {estimate.creditCost > 0 ? ` · ${estimate.creditCost} credits` : ''}
+                    {estimate.pricePending
+                        ? ' · cost pending'
+                        : estimate.creditCost > 0
+                          ? ` · ${estimate.creditCost} credits`
+                          : ''}
                     {estimate.allowance.remaining !== null
                         ? ` · ${estimate.allowance.remaining} of ${estimate.allowance.limit} free export${
                               (estimate.allowance.limit ?? 1) === 1 ? '' : 's'
