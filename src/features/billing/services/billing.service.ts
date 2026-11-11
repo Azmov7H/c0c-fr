@@ -1,6 +1,13 @@
 import apiClient from '@/services/api-client';
-import type { ApiResponse } from '@/types';
-import type { BillingSummary, CheckoutSession, PlanId, PortalSession } from '../types';
+import type { ApiResponse, PaginatedMeta } from '@/types';
+import type {
+    BillingSummary,
+    CheckoutSession,
+    CreditBalance,
+    CreditHistoryPage,
+    PlanId,
+    PortalSession,
+} from '../types';
 
 class BillingService {
     private readonly baseUrl = '/billing';
@@ -10,6 +17,24 @@ class BillingService {
             `${this.baseUrl}/subscription`
         );
         return response.data.data;
+    }
+
+    async getCredits(): Promise<CreditBalance> {
+        const response = await apiClient.get<ApiResponse<CreditBalance>>(
+            `${this.baseUrl}/credits`
+        );
+        return response.data.data;
+    }
+
+    async getCreditHistory(page = 1, limit = 20): Promise<CreditHistoryPage> {
+        const response = await apiClient.get<
+            ApiResponse<{ events: CreditHistoryPage['events']; meta: PaginatedMeta }>
+        >(`${this.baseUrl}/credits/history`, { params: { page, limit } });
+        return {
+            events: response.data.data.events,
+            total: response.data.data.meta.total,
+            limit,
+        };
     }
 
     async createCheckoutSession(plan: PlanId): Promise<CheckoutSession> {

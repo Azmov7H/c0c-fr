@@ -17,12 +17,32 @@ import {
 export const billingKeys = {
     all: ['billing'] as const,
     subscription: () => [...billingKeys.all, 'subscription'] as const,
+    credits: () => [...billingKeys.all, 'credits'] as const,
+    creditHistory: (page: number) => [...billingKeys.all, 'credits', 'history', page] as const,
 };
 
 export function useBillingSummary() {
     return useQuery({
         queryKey: billingKeys.subscription(),
         queryFn: () => billingService.getSubscription(),
+        staleTime: 30_000,
+    });
+}
+
+/** Server-side credit balance (P08.4) — revalidated on focus, never cached long. */
+export function useCredits() {
+    return useQuery({
+        queryKey: billingKeys.credits(),
+        queryFn: () => billingService.getCredits(),
+        staleTime: 15_000,
+    });
+}
+
+/** One page of the immutable ledger, newest first. */
+export function useCreditHistory(page: number, limit: number) {
+    return useQuery({
+        queryKey: billingKeys.creditHistory(page),
+        queryFn: () => billingService.getCreditHistory(page, limit),
         staleTime: 30_000,
     });
 }
