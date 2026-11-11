@@ -19,6 +19,12 @@ vi.mock('@/features/billing/hooks/use-billing', () => ({
         error: null,
         refetch: vi.fn(),
     }),
+    useCredits: () => ({
+        data: null,
+        isLoading: true,
+        error: null,
+        refetch: vi.fn(),
+    }),
     useCheckout: () => mocks.checkout,
     usePortal: () => mocks.portal,
     useCheckoutReturn: () => mocks.checkoutReturn,

@@ -29,6 +29,7 @@ import {
 } from '@/features/billing/components/billing-status';
 import { PlanChooser } from '@/features/billing/components/plan-chooser';
 import { UsageSummary } from '@/features/billing/components/usage-summary';
+import { CreditsPanel } from '@/features/billing/components/credits-panel';
 import { deriveBillingNotice } from '@/features/billing/lib/billing-state';
 import { formatDate } from '@/features/billing/lib/format';
 import { PLAN_CATALOGUE, formatMonthlyPrice } from '@/features/billing/lib/plans';
@@ -215,6 +216,7 @@ export function BillingSettings() {
                             portalPending={portal.isPending}
                         />
                         <UsageSummary summary={data} />
+                        <CreditsPanel />
                         <PlanChooser
                             summary={data}
                             checkoutPending={checkout.isPending}

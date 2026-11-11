@@ -40,6 +40,42 @@ export interface BillingSummary {
     managedByStripe: boolean;
 }
 
+/** The server's credit numbers (GET /billing/credits) — never a client estimate. */
+export interface CreditBalance {
+    balance: number;
+    /** Reserved-but-unsettled credits for in-flight operations. */
+    held: number;
+    /** `YYYY-MM` cycle key this balance belongs to. */
+    period: string;
+    resetAt: string | null;
+    plan: PlanId;
+}
+
+export type CreditKind =
+    | 'grant'
+    | 'topup'
+    | 'reserve'
+    | 'settle'
+    | 'release'
+    | 'refund'
+    | 'expiry';
+
+/** One immutable ledger row (D7); `amount` is a positive magnitude, `kind` carries direction. */
+export interface CreditEvent {
+    kind: CreditKind;
+    amount: number;
+    balanceAfter: number;
+    heldAfter: number;
+    note?: string;
+    createdAt: string;
+}
+
+export interface CreditHistoryPage {
+    events: CreditEvent[];
+    total: number;
+    limit: number;
+}
+
 export interface CheckoutSession {
     sessionId: string;
     url: string;
