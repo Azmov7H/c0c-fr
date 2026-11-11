@@ -27,12 +27,16 @@ class BillingService {
     }
 
     async getCreditHistory(page = 1, limit = 20): Promise<CreditHistoryPage> {
+        // P09 fix-up: the ledger endpoint answers with the codebase's
+        // standard paginated envelope `{success, data: T[], meta}` (P08
+        // shipped a nested `{data: {data, meta}}` that no client read
+        // correctly).
         const response = await apiClient.get<
-            ApiResponse<{ events: CreditHistoryPage['events']; meta: PaginatedMeta }>
+            ApiResponse<CreditHistoryPage['events']> & { meta: PaginatedMeta }
         >(`${this.baseUrl}/credits/history`, { params: { page, limit } });
         return {
-            events: response.data.data.events,
-            total: response.data.data.meta.total,
+            events: response.data.data,
+            total: response.data.meta.total,
             limit,
         };
     }

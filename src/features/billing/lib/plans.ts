@@ -41,6 +41,9 @@ export const PLAN_CATALOGUE: Record<PlanId, PlanDefinition> = {
             'teams.invite',
             'media.publish',
             'project.members',
+            // P09.2: the Free tier CAN export — once per project. The
+            // quantity is the plan's business, not a missing capability.
+            'export.csv',
         ],
     },
     pro: {
@@ -160,7 +163,13 @@ export function planHighlights(plan: PlanDefinition): readonly string[] {
     ];
 
     if (plan.features.includes('analytics.advanced')) highlights.push('Advanced analytics');
-    if (plan.features.includes('export.csv')) highlights.push('CSV export');
+    if (plan.features.includes('export.csv')) {
+        // P09.2: Free exports ONCE per project; paid plans export per export
+        // (priced). Saying "CSV export" for both would be a lie.
+        highlights.push(
+            plan.monthlyPriceCents === 0 ? '1 project export' : 'Project export per download'
+        );
+    }
     if (plan.features.includes('priority_queue')) {
         highlights.push('Priority generation queue', 'Everything in Pro');
     }
@@ -216,12 +225,21 @@ export const PLAN_COMPARISON: readonly ComparisonRow[] = [
             studio: String(PLAN_CATALOGUE.studio.limits.concurrentGenerations),
         },
     },
+    {
+        // P09.2/P09.3: the export row is not a boolean — Free gets one
+        // export per project, paid plans are priced per export.
+        label: FEATURE_LABELS['export.csv'],
+        values: {
+            starter: '1 per project',
+            pro: 'Per export',
+            studio: 'Per export',
+        },
+    },
     ...(
         [
             ['teams.invite', 'teams.invite'],
             ['media.publish', 'media.publish'],
             ['analytics.advanced', 'analytics.advanced'],
-            ['export.csv', 'export.csv'],
             ['priority_queue', 'priority_queue'],
         ] as const
     ).map(([feature, key]) => ({
