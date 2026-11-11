@@ -43,7 +43,11 @@ describe('pricing surface', () => {
         });
         const rows = within(table).getAllByRole('row');
         expect(rows.length).toBeGreaterThan(9);
-        expect(within(table).getByRole('rowheader', { name: 'API access' })).toBeTruthy();
+        // M2-T27 Q5: the deleted `API access` copy must NOT come back — the
+        // export row is the capability that replaced it (P09.2: on every
+        // plan, with the Free tier bounded by its allowance).
+        expect(within(table).queryByRole('rowheader', { name: 'API access' })).toBeNull();
+        expect(within(table).getByRole('rowheader', { name: 'CSV export' })).toBeTruthy();
         expect(
             within(table).getByRole('rowheader', { name: 'Priority generation queue' })
         ).toBeTruthy();

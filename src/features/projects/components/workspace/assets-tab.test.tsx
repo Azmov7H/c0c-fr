@@ -53,6 +53,11 @@ vi.mock('@/features/media/hooks/use-media', () => ({
 vi.mock('@/features/thumbnails/components/thumbnail-generator', () => ({
     ThumbnailGenerator: () => <div>thumbnail generator</div>,
 }));
+// P09.8: the export panel is a query-driven component of its own (covered
+// by `project-export.test.tsx`); this suite is about the asset tabs.
+vi.mock('./project-export', () => ({
+    ProjectExport: () => <div>project export</div>,
+}));
 
 vi.mock('@/features/billing/hooks/use-billing', () => ({
     useBillingSummary: () => ({
