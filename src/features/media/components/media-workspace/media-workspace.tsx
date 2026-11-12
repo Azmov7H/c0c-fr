@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useProjectAudio, useGenerateAudio, useUpdateAudioSuggestion } from '@/features/audio/hooks/use-audio';
 import { audioLayerOf, type AudioSuggestion } from '@/features/audio/types';
+import { GenerationIndicator } from '@/features/billing/components/generation-indicator';
 import { useMediaAllowance, useProjectMedia, useRegenerateMedia } from '@/features/media/hooks/use-media';
 import { useProjectThumbnails } from '@/features/thumbnails/hooks/use-thumbnails';
 import { useProjects } from '@/features/projects/hooks/use-projects';
@@ -26,24 +27,29 @@ function LayerCard({
     rows,
     projectId,
     description,
+    anchor,
 }: {
     title: string;
     rows: AudioSuggestion[];
     projectId: string;
     description: string;
+    /** P11.2: the deep-link anchor for this stage panel. */
+    anchor?: string;
 }) {
     const generate = useGenerateAudio();
     const update = useUpdateAudioSuggestion();
     const current = rows.find((a) => a.isCurrent) ?? rows[0];
 
     return (
-        <Card>
+        <Card id={anchor}>
             <CardHeader className="flex-row items-center justify-between gap-3">
                 <div>
                     <CardTitle className="flex items-center gap-2">
                         <Music className="size-4" aria-hidden="true" /> {title}
                     </CardTitle>
                     <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+                    {/* P11.4: the server's remaining allowance on the control. */}
+                    <GenerationIndicator className="mt-1" />
                 </div>
                 <Button
                     variant="outline"
@@ -172,11 +178,13 @@ export function MediaWorkspace({ projectId }: { projectId: string }) {
 
     return (
         <div className="grid gap-6">
-            <Card>
+            <Card id="thumbnail">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <FileImage className="size-4" aria-hidden="true" /> Project Thumbnail
                     </CardTitle>
+                    {/* P11.4: the server's remaining allowance on the control. */}
+                    <GenerationIndicator className="mt-1" />
                 </CardHeader>
                 <CardContent>
                     {thumbUrl ? (
@@ -227,7 +235,7 @@ export function MediaWorkspace({ projectId }: { projectId: string }) {
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card id="gallery">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <FileImage className="size-4" aria-hidden="true" /> AI Generated Images
@@ -337,6 +345,7 @@ export function MediaWorkspace({ projectId }: { projectId: string }) {
                 rows={narrationRows}
                 projectId={projectId}
                 description="Voiceover from the verified TTS voice. Playback uses the current narration only."
+                anchor="narration"
             />
             {hasLegacy && narrationRows.length > 0 && (
                 <p role="note" className="text-sm text-muted-foreground">
@@ -354,6 +363,7 @@ export function MediaWorkspace({ projectId }: { projectId: string }) {
                 rows={sfxRows}
                 projectId={projectId}
                 description="SFX suggestions. Independent of narration."
+                anchor="effects"
             />
         </div>
     );

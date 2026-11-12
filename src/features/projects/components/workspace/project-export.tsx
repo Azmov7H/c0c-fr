@@ -17,6 +17,7 @@ import {
     type ExportRecordView,
     type ExportScope,
 } from '../../services/export.service';
+import { exportKeys } from '../../hooks/use-export-history';
 
 type Scope = ExportScope;
 const SCOPES: Array<{ value: Scope; label: string }> = [
@@ -83,14 +84,14 @@ export function ProjectExport({ projectId, title }: { projectId: string; title: 
     const queryClient = useQueryClient();
 
     const estimateQuery = useQuery({
-        queryKey: ['export', 'estimate', projectId, scope],
+        queryKey: exportKeys.estimate(projectId, scope),
         queryFn: () => exportService.estimate(projectId, scope),
         enabled: Boolean(projectId),
         staleTime: 15_000,
     });
 
     const historyQuery = useQuery({
-        queryKey: ['export', 'history', projectId],
+        queryKey: exportKeys.history(projectId),
         queryFn: () => exportService.history(projectId),
         enabled: Boolean(projectId),
         staleTime: 15_000,

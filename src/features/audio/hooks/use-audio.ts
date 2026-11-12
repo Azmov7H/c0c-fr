@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { audioService } from '../services/audio.service';
 import { CreateAudioSuggestionDTO, UpdateAudioSuggestionDTO, UploadAudioDTO, ReplaceAudioDTO } from '../types';
 import { toast } from '@/lib/toast';
-import { toApiError } from '@/lib/api-error';
+import { generationErrorMessage } from '@/features/billing/lib/generation-error';
 
 export const audioKeys = {
     all: ['audio'] as const,
@@ -47,7 +47,7 @@ export const useCreateAudioSuggestion = () => {
             queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(toApiError(error, 'Failed to start audio analysis').message);
+            toast.error(generationErrorMessage(error, 'Failed to start audio analysis'));
         },
     });
 };
@@ -64,7 +64,7 @@ export const useGenerateAudio = () => {
             queryClient.setQueryData(audioKeys.detail(data.id), data);
         },
         onError: (error: unknown) => {
-            toast.error(toApiError(error, 'AI Audio generation failed').message);
+            toast.error(generationErrorMessage(error, 'AI Audio generation failed'));
         },
     });
 };
@@ -81,7 +81,7 @@ export const useUpdateAudioSuggestion = () => {
             queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(toApiError(error, 'Failed to update audio profile').message);
+            toast.error(generationErrorMessage(error, 'Failed to update audio profile'));
         },
     });
 };
@@ -96,7 +96,7 @@ export const useUploadAudio = () => {
             queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(toApiError(error, 'Failed to upload audio').message);
+            toast.error(generationErrorMessage(error, 'Failed to upload audio'));
         },
     });
 };
@@ -115,7 +115,7 @@ export const useReplaceAudio = () => {
             queryClient.setQueryData(audioKeys.detail(data.id), data);
         },
         onError: (error: unknown) => {
-            toast.error(toApiError(error, 'Replacement failed — previous audio kept').message);
+            toast.error(generationErrorMessage(error, 'Replacement failed — previous audio kept'));
         },
     });
 };
@@ -131,7 +131,7 @@ export const useDeleteAudioSuggestion = () => {
             queryClient.invalidateQueries({ queryKey: audioKeys.list(variables.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(toApiError(error, 'Failed to delete audio profile').message);
+            toast.error(generationErrorMessage(error, 'Failed to delete audio profile'));
         },
     });
 };

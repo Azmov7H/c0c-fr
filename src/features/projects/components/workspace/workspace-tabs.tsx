@@ -1,12 +1,13 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Activity, FileImage as ImageIcon, FolderKanban, Users } from 'lucide-react';
+import { Activity, Eye, FileImage as ImageIcon, FolderKanban, Users } from 'lucide-react';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { ProjectRole } from '../../types';
 import { AssetsTab } from './assets-tab';
+import { PreviewPanel } from './preview-panel';
 
 /**
  * T20: only the selected tab renders (Radix unmounts the rest), so the other
@@ -40,12 +41,24 @@ function TabSkeleton() {
     );
 }
 
-export type WorkspaceTab = 'assets' | 'media' | 'members' | 'activity';
+export type WorkspaceTab = 'assets' | 'media' | 'preview' | 'members' | 'activity';
 
-export const WORKSPACE_TABS: readonly WorkspaceTab[] = ['assets', 'media', 'members', 'activity'];
+export const WORKSPACE_TABS: readonly WorkspaceTab[] = [
+    'assets',
+    'media',
+    'preview',
+    'members',
+    'activity',
+];
 
 export function isWorkspaceTab(value: string | null): value is WorkspaceTab {
-    return value === 'assets' || value === 'media' || value === 'members' || value === 'activity';
+    return (
+        value === 'assets' ||
+        value === 'media' ||
+        value === 'preview' ||
+        value === 'members' ||
+        value === 'activity'
+    );
 }
 
 export function WorkspaceTabs({
@@ -70,6 +83,12 @@ export function WorkspaceTabs({
                     <ImageIcon className="size-4" aria-hidden="true" />
                     Media
                 </TabsTrigger>
+                {/* P11.3: the Preview stage — a read-only assembly of what the
+                    project has. The other tabs stay exactly as they were. */}
+                <TabsTrigger value="preview" className="h-11 gap-2 px-4">
+                    <Eye className="size-4" aria-hidden="true" />
+                    Preview
+                </TabsTrigger>
                 <TabsTrigger value="members" className="h-11 gap-2 px-4">
                     <Users className="size-4" aria-hidden="true" />
                     Members
@@ -85,6 +104,9 @@ export function WorkspaceTabs({
             </TabsContent>
             <TabsContent value="media" className="mt-6">
                 <MediaTab projectId={projectId} role={role} />
+            </TabsContent>
+            <TabsContent value="preview" className="mt-6">
+                <PreviewPanel projectId={projectId} />
             </TabsContent>
             <TabsContent value="members" className="mt-6">
                 <MembersTab projectId={projectId} role={role} />

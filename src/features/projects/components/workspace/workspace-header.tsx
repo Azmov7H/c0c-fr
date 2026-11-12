@@ -39,6 +39,7 @@ import { nextStatuses } from '../../lib/status';
 import { STATUS_LABEL } from '../../lib/project-constants';
 import { PlatformBadge, StatusBadge } from '../project-badges';
 import { DeleteProjectDialog } from '../delete-project-dialog';
+import { WorkflowStepper } from './workflow-stepper';
 import type { ProjectRole } from '../../types';
 
 interface WorkspaceHeaderProps {
@@ -207,6 +208,12 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
+            </div>
+
+            {/* P11.2: the guided production path. It links into the existing
+                tabs — the workspace groupings stay exactly as they were. */}
+            <div className="mt-4">
+                <WorkflowStepper projectId={project._id} />
             </div>
 
             <button
