@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { thumbnailsService } from '../services/thumbnails.service';
 import { CreateThumbnailDTO, UpdateThumbnailDTO } from '../types';
 import { toast } from '@/lib/toast';
-import { toApiError } from '@/lib/api-error';
+import { generationErrorMessage } from '@/features/billing/lib/generation-error';
 
 export const thumbnailsKeys = {
     all: ['thumbnails'] as const,
@@ -38,7 +38,7 @@ export const useCreateThumbnail = () => {
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(data.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(toApiError(error, 'Failed to submit thumbnail prompt').message);
+            toast.error(generationErrorMessage(error, 'Failed to submit thumbnail prompt'));
         },
     });
 };
@@ -55,7 +55,7 @@ export const useUpdateThumbnail = () => {
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(data.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(toApiError(error, 'Failed to update thumbnail').message);
+            toast.error(generationErrorMessage(error, 'Failed to update thumbnail'));
         },
     });
 };
@@ -73,7 +73,7 @@ export const useRegenerateThumbnail = () => {
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(data.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(toApiError(error, 'Failed to regenerate thumbnail').message);
+            toast.error(generationErrorMessage(error, 'Failed to regenerate thumbnail'));
         },
     });
 };
@@ -89,7 +89,7 @@ export const useDeleteThumbnail = () => {
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(variables.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(toApiError(error, 'Failed to delete thumbnail').message);
+            toast.error(generationErrorMessage(error, 'Failed to delete thumbnail'));
         },
     });
 };

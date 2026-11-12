@@ -73,6 +73,13 @@ vi.mock('@/features/billing/hooks/use-billing', () => ({
             quota: { 'ai.generation': 3 },
         },
     }),
+    // P11.4: the generation indicator reads the credit balance (P08).
+    useCredits: () => ({
+        data: { balance: 240, held: 0, period: '2026-11', resetAt: null, plan: 'pro' },
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+    }),
 }));
 
 describe('AssetsTab', () => {

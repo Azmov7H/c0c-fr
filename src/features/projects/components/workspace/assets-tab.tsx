@@ -25,19 +25,17 @@ import { ProjectExport } from './project-export';
 import { useProjectSEO, useGenerateSEO } from '@/features/seo/hooks/use-seo';
 import { useProjectThumbnails } from '@/features/thumbnails/hooks/use-thumbnails';
 import { toApiError } from '@/lib/api-error';
+import { isCreditError, isQuotaError } from '@/features/billing/lib/generation-error';
 import { formatRelativeTime } from '@/lib/relative-time';
 import type { ProjectRole } from '../../types';
 import { can } from '../../lib/permissions';
 import { ThumbnailGenerator } from '@/features/thumbnails/components/thumbnail-generator';
 import { UpgradePrompt } from '@/features/billing/components/upgrade-prompt';
+import { GenerationIndicator } from '@/features/billing/components/generation-indicator';
 import { useBillingSummary } from '@/features/billing/hooks/use-billing';
 import { quotaFor, usageFor } from '@/features/billing/lib/entitlements';
 
-const isQuotaError = (error: unknown): boolean => {
-    const apiError = toApiError(error, '');
-    return apiError.status === 429 || apiError.code === 'QUOTA_EXHAUSTED' || apiError.code === 'RATE_LIMITED';
-};
-
+// P11.6: the shared error classifier (402 = credits, 429 = quota).
 // P05.7: the per-scene editor (RHF + Zod) is split out of the Assets first
 // load — visitors without a script never download the form machinery.
 const ScriptEditor = dynamic(
@@ -90,6 +88,7 @@ function GroupCard({
     count,
     description,
     action,
+    anchor,
     children,
 }: {
     title: string;
@@ -97,10 +96,12 @@ function GroupCard({
     count: number;
     description: string;
     action?: ReactNode;
+    /** P11.2: the deep-link anchor for the stage that lives here. */
+    anchor?: string;
     children: ReactNode;
 }) {
     return (
-        <Card>
+        <Card id={anchor}>
             <CardHeader className="flex-row items-start justify-between gap-3">
                 <div>
                     <CardTitle className="flex items-center gap-2 text-base">
@@ -120,6 +121,9 @@ function GroupCard({
 export function AssetsTab({ projectId, role }: { projectId: string; role: ProjectRole }) {
     const mayEdit = can(role, 'edit');
     const [quotaError, setQuotaError] = useState<string | null>(null);
+    // P11.6: a 402 is money (credits), a 429 is time (quota) — they get
+    // different prompts, and both are upgrade-aware.
+    const [creditError, setCreditError] = useState<string | null>(null);
     const billing = useBillingSummary();
     const aiUsage = usageFor(billing.data, 'ai.generation');
     const aiLimit = aiUsage?.limit ?? quotaFor(billing.data, 'ai.generation');
@@ -135,11 +139,19 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
     const generateSEO = useGenerateSEO();
 
     const onGenerationError = (error: unknown) => {
+        const apiError = toApiError(error, '');
+        if (isCreditError(error)) {
+            setQuotaError(null);
+            setCreditError(apiError.message);
+            return;
+        }
         if (isQuotaError(error)) {
             setQuotaError(toApiError(error, 'Generation quota exhausted.').message);
+            setCreditError(null);
             return;
         }
         setQuotaError(null);
+        setCreditError(null);
     };
 
     const loading =
@@ -157,7 +169,10 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
 
     return (
         <div className="space-y-6">
-            <ProjectExport projectId={projectId} title="Project" />
+            {/* P11.2: the export stage's panel anchor. */}
+            <div id="export">
+                <ProjectExport projectId={projectId} title="Project" />
+            </div>
             {quotaError && (
                 <UpgradePrompt
                     title="Generation quota reached"
@@ -170,6 +185,16 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                     className="items-start text-left"
                 />
             )}
+            {/* P11.6: 402 — the operation needs credits, not time. */}
+            {creditError && (
+                <UpgradePrompt
+                    title="Not enough credits"
+                    description={creditError}
+                    ctaLabel="Top up or upgrade to continue"
+                    feature="ai.generation"
+                    className="items-start text-left"
+                />
+            )}
 
             <div className="grid gap-6 md:grid-cols-2">
                 <GroupCard
@@ -177,21 +202,26 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                     icon={FileText}
                     count={scripts.data?.length ?? 0}
                     description="Structured per-scene scripts for this project."
+                    anchor="scripts"
                     action={
-                        <Button
-                            className="h-11"
-                            disabled={!mayEdit || generateScript.isPending}
-                            onClick={() =>
-                                generateScript.mutate(projectId, { onError: onGenerationError })
-                            }
-                        >
-                            {generateScript.isPending ? (
-                                <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
-                            ) : (
-                                <Sparkles className="mr-2 size-4" aria-hidden="true" />
-                            )}
-                            Generate
-                        </Button>
+                        <div className="flex flex-col items-end gap-1">
+                            <Button
+                                className="h-11"
+                                disabled={!mayEdit || generateScript.isPending}
+                                onClick={() =>
+                                    generateScript.mutate(projectId, { onError: onGenerationError })
+                                }
+                            >
+                                {generateScript.isPending ? (
+                                    <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                                ) : (
+                                    <Sparkles className="mr-2 size-4" aria-hidden="true" />
+                                )}
+                                Generate
+                            </Button>
+                            {/* P11.4: the server's remaining allowance on the control. */}
+                            <GenerationIndicator />
+                        </div>
                     }
                 >
                     {(scripts.data ?? []).length === 0 ? (
@@ -250,23 +280,26 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                     count={audio.data?.length ?? 0}
                     description="Music and sound-effect suggestions."
                     action={
-                        <Button
-                            className="h-11"
-                            disabled={!mayEdit || generateAudio.isPending}
-                            onClick={() =>
-                                generateAudio.mutate(
-                                    { projectId },
-                                    { onError: onGenerationError }
-                                )
-                            }
-                        >
-                            {generateAudio.isPending ? (
-                                <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
-                            ) : (
-                                <Sparkles className="mr-2 size-4" aria-hidden="true" />
-                            )}
-                            Generate
-                        </Button>
+                        <div className="flex flex-col items-end gap-1">
+                            <Button
+                                className="h-11"
+                                disabled={!mayEdit || generateAudio.isPending}
+                                onClick={() =>
+                                    generateAudio.mutate(
+                                        { projectId },
+                                        { onError: onGenerationError }
+                                    )
+                                }
+                            >
+                                {generateAudio.isPending ? (
+                                    <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                                ) : (
+                                    <Sparkles className="mr-2 size-4" aria-hidden="true" />
+                                )}
+                                Generate
+                            </Button>
+                            <GenerationIndicator />
+                        </div>
                     }
                 >
                     {(audio.data ?? []).length === 0 ? (
@@ -290,20 +323,23 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                     count={seo.data ? 1 : 0}
                     description="Titles, hashtags and keywords."
                     action={
-                        <Button
-                            className="h-11"
-                            disabled={!mayEdit || generateSEO.isPending}
-                            onClick={() =>
-                                generateSEO.mutate(projectId, { onError: onGenerationError })
-                            }
-                        >
-                            {generateSEO.isPending ? (
-                                <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
-                            ) : (
-                                <Sparkles className="mr-2 size-4" aria-hidden="true" />
-                            )}
-                            Generate
-                        </Button>
+                        <div className="flex flex-col items-end gap-1">
+                            <Button
+                                className="h-11"
+                                disabled={!mayEdit || generateSEO.isPending}
+                                onClick={() =>
+                                    generateSEO.mutate(projectId, { onError: onGenerationError })
+                                }
+                            >
+                                {generateSEO.isPending ? (
+                                    <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                                ) : (
+                                    <Sparkles className="mr-2 size-4" aria-hidden="true" />
+                                )}
+                                Generate
+                            </Button>
+                            <GenerationIndicator />
+                        </div>
                     }
                 >
                     {seo.data ? (

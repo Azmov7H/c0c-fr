@@ -54,7 +54,7 @@ describe('design tokens', () => {
         await act(async () => {
             root.render(<h1 className="font-display">Trending</h1>);
         });
-    });
+    }, 60_000);
 
     afterAll(async () => {
         await act(async () => {

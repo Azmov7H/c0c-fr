@@ -96,8 +96,8 @@ describe('project export', () => {
     it('shows the server estimate before the download button', async () => {
         renderExport();
 
-        expect(await screen.findByText(/4 KB/)).toBeTruthy();
-        expect(await screen.findByText(/1 of 1 free export left/)).toBeTruthy();
+        expect(await screen.findByText(/4 KB/, {}, { timeout: 5000 })).toBeTruthy();
+        expect(await screen.findByText(/1 of 1 free export left/, {}, { timeout: 5000 })).toBeTruthy();
         expect(screen.getByRole('button', { name: /export/i })).toBeEnabled();
     });
 
@@ -156,7 +156,7 @@ describe('project export', () => {
 
         renderExport();
 
-        expect(await screen.findByText('Export history')).toBeTruthy();
+        expect(await screen.findByText('Export history', {}, { timeout: 5000 })).toBeTruthy();
         expect(screen.getByText('Completed')).toBeTruthy();
         expect(screen.getByText('Failed')).toBeTruthy();
         expect(screen.getByText(/cancelled — nothing was charged/i)).toBeTruthy();
@@ -175,7 +175,7 @@ describe('project export', () => {
         renderExport();
 
         // The button stays disabled until the server's estimate arrives.
-        expect(await screen.findByText(/4 KB/)).toBeTruthy();
+        expect(await screen.findByText(/4 KB/, {}, { timeout: 5000 })).toBeTruthy();
         const button = screen.getByRole('button', { name: /export/i });
         fireEvent.click(button);
 

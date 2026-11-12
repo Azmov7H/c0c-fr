@@ -47,7 +47,14 @@ describe('dashboard widget layout', () => {
     });
 
     it('orders platforms by stated preference', () => {
-        expect(orderPlatforms(['instagram'])).toEqual(['instagram', 'youtube', 'tiktok']);
+        // P04 added `facebook` to the platform vocabulary; the order is the
+        // preferred platform first, then the rest in the canonical order.
+        expect(orderPlatforms(['instagram'])).toEqual([
+            'instagram',
+            'youtube',
+            'tiktok',
+            'facebook',
+        ]);
     });
 
     it('keeps locked widgets visible with a reason and upgrade path', () => {

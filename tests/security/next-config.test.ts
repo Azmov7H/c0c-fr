@@ -49,8 +49,21 @@ describe('security headers (AC1 / R-12)', () => {
 });
 
 describe('image host allowlist (AC: no wildcard, no http, unlisted hosts never fetched)', () => {
-    it('allows no remote hosts at all — every rendered asset is same-origin today', () => {
-        expect(nextConfig.images?.remotePatterns).toEqual([]);
+    it('allowlists exactly the storage host — every other asset stays same-origin', () => {
+        // The Cloudinary storage integration (P07/P16) added the one host
+        // the app actually serves remote assets from. The AC is still the
+        // same: an explicit, bounded list — no wildcard, no http, and
+        // nothing else is ever fetched by the optimiser.
+        const patterns = nextConfig.images?.remotePatterns ?? [];
+        const hosts = patterns.map((pattern) =>
+            typeof pattern === 'string' ? pattern : pattern.hostname
+        );
+        expect(hosts).toEqual(['res.cloudinary.com']);
+        for (const pattern of patterns) {
+            if (typeof pattern !== 'string') {
+                expect(pattern.protocol).toBe('https');
+            }
+        }
     });
 
     it('the serialised config contains no wildcard host and no http:', () => {

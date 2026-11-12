@@ -28,6 +28,22 @@ vi.mock('@/features/audio/hooks/use-audio', () => ({
     useGenerateAudio: () => ({ mutate: mocks.setGenerate, isPending: false }),
     useUpdateAudioSuggestion: () => ({ mutate: mocks.update, isPending: false }),
 }));
+// P11.4: the generation indicator on the layer/thumbnail controls reads the
+// server's quota + credit position.
+vi.mock('@/features/billing/hooks/use-billing', () => ({
+    useBillingSummary: () => ({
+        data: {
+            usage: [{ feature: 'ai.generation', used: 2, limit: 50, remaining: 48 }],
+            quota: { 'ai.generation': 50 },
+        },
+    }),
+    useCredits: () => ({
+        data: { balance: 120, held: 0, period: '2026-11', resetAt: null, plan: 'pro' },
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+    }),
+}));
 
 const row = (overrides: object = {}) =>
     ({
