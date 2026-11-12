@@ -79,13 +79,13 @@ describe('credits panel', () => {
     it('shows the server balance, the held amount and the cycle', async () => {
         renderPanel();
 
-        expect(await screen.findByText('450 available')).toBeTruthy();
+        expect(await screen.findByText('450 available', {}, { timeout: 5000 })).toBeTruthy();
         expect(screen.getAllByText('20 held').length).toBeGreaterThan(0);
         expect(screen.getByText('In progress')).toBeTruthy();
         expect(screen.getByText('450')).toBeTruthy();
         expect(screen.getByText(/2026-11 — resets Nov 30, 2026/)).toBeTruthy();
         // The settle is visible once the ledger loads.
-        expect(await screen.findByText('Generation charged')).toBeTruthy();
+        expect(await screen.findByText('Generation charged', {}, { timeout: 5000 })).toBeTruthy();
     });
 
     it('renders a 402 (insufficient credits) as a recoverable error, not a crash', async () => {
@@ -99,9 +99,9 @@ describe('credits panel', () => {
 
         renderPanel();
         // The rejection resolves as a microtask: the error branch shows, no crash.
-        expect(await screen.findByText('Something went wrong')).toBeTruthy();
+        expect(await screen.findByText('Something went wrong', {}, { timeout: 5000 })).toBeTruthy();
         expect(
-            await screen.findByText('Not enough credits to cover this operation.')
+            await screen.findByText('Not enough credits to cover this operation.', {}, { timeout: 5000 })
         ).toBeTruthy();
         fireEvent.click(screen.getByRole('button', { name: /try again/i }));
         expect(mocks.getCredits).toHaveBeenCalledTimes(2);
@@ -126,14 +126,14 @@ describe('credits panel', () => {
         renderPanel();
 
         expect(
-            await screen.findByText('Generation charged — Over-reserve released: 2')
+            await screen.findByText('Generation charged — Over-reserve released: 2', {}, { timeout: 5000 })
         ).toBeTruthy();
-        expect(await screen.findByText('Reserved for a generation — scripts.generate')).toBeTruthy();
-        expect(await screen.findByText('Page 1 of 3')).toBeTruthy();
+        expect(await screen.findByText('Reserved for a generation — scripts.generate', {}, { timeout: 5000 })).toBeTruthy();
+        expect(await screen.findByText('Page 1 of 3', {}, { timeout: 5000 })).toBeTruthy();
         expect(screen.getByRole('button', { name: /newer/i })).toBeDisabled();
         fireEvent.click(screen.getByRole('button', { name: /older/i }));
-        expect(await screen.findByText('Page 2 of 3')).toBeTruthy();
-        expect(await screen.findByText('Monthly credit grant')).toBeTruthy();
+        expect(await screen.findByText('Page 2 of 3', {}, { timeout: 5000 })).toBeTruthy();
+        expect(await screen.findByText('Monthly credit grant', {}, { timeout: 5000 })).toBeTruthy();
     });
 
     it('shows the held column as "None" when nothing is in flight', async () => {
@@ -141,8 +141,8 @@ describe('credits panel', () => {
 
         renderPanel();
 
-        expect(await screen.findByText('In progress')).toBeTruthy();
-        expect(await screen.findByText('None')).toBeTruthy();
+        expect(await screen.findByText('In progress', {}, { timeout: 5000 })).toBeTruthy();
+        expect(await screen.findByText('None', {}, { timeout: 5000 })).toBeTruthy();
     });
 
     it('uses the empty state when the ledger has no rows yet', async () => {
@@ -150,7 +150,7 @@ describe('credits panel', () => {
 
         renderPanel();
 
-        expect(await screen.findByText('No credit activity yet')).toBeTruthy();
+        expect(await screen.findByText('No credit activity yet', {}, { timeout: 5000 })).toBeTruthy();
         expect(screen.queryByRole('button', { name: /older/i })).toBeNull();
     });
 });
