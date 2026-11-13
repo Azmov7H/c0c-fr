@@ -29,6 +29,7 @@
 
 import http, { type RequestListener, type Server } from 'node:http';
 import crypto from 'node:crypto';
+import type { Locator, Page } from '@playwright/test';
 
 // ─── Runtime constants ───────────────────────────────────────────────────────
 
@@ -214,6 +215,72 @@ function extractCookieValue(header: string, name: string): string {
 
 export function storageStateFor(persona: IndexedPersona): StorageStateFile {
     return { cookies: cookiesFromSetCookie(persona.setCookieHeaders, true), origins: [] };
+}
+
+// ─── The project wizard (P04 added a step; P12 drives the whole thing) ───────
+
+/**
+ * A card title, matched by its text.
+ *
+ * shadcn's `CardTitle` is a **div** with `data-slot="card-title"`, not a
+ * heading — and it usually carries a badge next to the title, so the
+ * element's text is "Scripts0", not "Scripts". Asserting a heading role
+ * here would be asserting a DOM that never existed.
+ *
+ * The scope can be the page or a locator (a tab panel), so a title that also
+ * appears in the workflow stepper is not matched twice.
+ */
+export function cardTitle(scope: Page | Locator, name: string | RegExp) {
+    return scope.locator('[data-slot="card-title"]').filter({ hasText: name });
+}
+
+/**
+ * Drives the REAL creation wizard from step 1 to the Create button.
+ *
+ * P04 added a third step (content format + target duration), so every spec
+ * that creates a project has to pass through it. Keeping the sequence in
+ * ONE helper means the next wizard change is a one-line fix here instead
+ * of three silent timeouts in three specs.
+ */
+export async function completeProjectWizard(
+    page: Page,
+    options: {
+        title: string;
+        idea: string;
+        platform?: RegExp;
+        tone?: RegExp;
+        format?: RegExp;
+        durationSeconds?: string;
+    }
+): Promise<void> {
+    await page.getByLabel('Project title').fill(options.title);
+    await page.getByLabel('The idea').fill(options.idea);
+    await page.getByRole('button', { name: 'Continue' }).click();
+
+    await page
+        .getByRole('radiogroup', { name: 'Platform' })
+        .getByRole('radio', { name: options.platform ?? /YouTube/ })
+        .click();
+    await page
+        .getByRole('radiogroup', { name: 'Tone' })
+        .getByRole('radio', { name: options.tone ?? /Professional/ })
+        .click();
+    await page.getByRole('button', { name: 'Continue' }).click();
+
+    // P04.3 — the configuration step.
+    await page
+        .getByRole('radiogroup', { name: 'Content format' })
+        .getByRole('radio', { name: options.format ?? /Short-form/ })
+        .click();
+    if (options.durationSeconds) {
+        await page.getByLabel('Target duration (seconds, optional)').fill(options.durationSeconds);
+    }
+    await page.getByRole('button', { name: 'Continue' }).click();
+
+    await page
+        .locator('#main-content')
+        .getByRole('button', { name: new RegExp(`Create “${options.title}”`) })
+        .click();
 }
 
 // ─── Backend API helpers (bearer = the access token from register) ───────────
@@ -432,6 +499,17 @@ const AI_TEXT_PAYLOAD = JSON.stringify({
     ],
 });
 
+/**
+ * P12 — the audio analysis asks for a DIFFERENT JSON shape than the script
+ * generator (music/sfx/placements instead of sections). The fake provider
+ * answers per requested model, so the real parsing path runs unchanged.
+ */
+const AI_AUDIO_PAYLOAD = JSON.stringify({
+    music: { genre: 'ambient', mood: 'neutral', description: 'Deterministic e2e music.', bpm: 90 },
+    sfx: [{ name: 'Whoosh', category: 'Transition', description: 'Deterministic e2e effect.' }],
+    placements: [{ label: 'Intro', start: '0:00', end: '0:05' }],
+});
+
 const AI_TEXT_RESPONSE = {
     id: 'chatcmpl-t18-e2e',
     object: 'chat.completion',
@@ -446,19 +524,65 @@ const AI_TEXT_RESPONSE = {
     ],
 } as const;
 
+/** The same envelope, carrying the audio-analysis payload. */
+const AI_AUDIO_RESPONSE = {
+    ...AI_TEXT_RESPONSE,
+    id: 'chatcmpl-t18-e2e-audio',
+    choices: [
+        {
+            index: 0,
+            message: { role: 'assistant', content: AI_AUDIO_PAYLOAD },
+            finish_reason: 'stop',
+        },
+    ],
+} as const;
+
 /**
  * OpenAI-compatible completion server on 127.0.0.1, wired up by
  * `ALIBABA_BASE_URL`. The real Alibaba provider client (doing its own JSON
  * extraction) calls it; nothing leaves the machine.
+ *
+ * P12: it also answers the **speech-synthesis** leg (the TTS endpoint sits
+ * on the same origin — `ALIBABA_BASE_URL` minus `/compatible-mode/v1`), so
+ * the narration layer really gets a file URL and the export manifest can
+ * carry it. The URL points back at this server; the browser never needs to
+ * play it for the journey to prove the layer exists.
  */
 export function startFakeAiServer(): Promise<Server> {
     const handler: RequestListener = (request, response) => {
-        if (request.method === 'POST' && request.url?.endsWith('/chat/completions')) {
+        if (request.method === 'POST' && request.url?.endsWith('/audio/tts/SpeechSynthesizer')) {
             const chunks: Buffer[] = [];
             request.on('data', (chunk: Buffer) => chunks.push(chunk));
             request.on('end', () => {
                 response.writeHead(200, { 'content-type': 'application/json' });
-                response.end(JSON.stringify(AI_TEXT_RESPONSE));
+                response.end(
+                    JSON.stringify({
+                        output: {
+                            audio: {
+                                url: `http://127.0.0.1:${AI_PORT}/tts/narration.mp3`,
+                                expires_at: Math.floor(Date.now() / 1000) + 86_400,
+                            },
+                        },
+                    })
+                );
+            });
+            return;
+        }
+        if (request.method === 'POST' && request.url?.endsWith('/chat/completions')) {
+            const chunks: Buffer[] = [];
+            request.on('data', (chunk: Buffer) => chunks.push(chunk));
+            request.on('end', () => {
+                // The requested model decides the payload shape — the audio
+                // analysis and the script generator ask for different JSON.
+                let model = '';
+                try {
+                    model = String((JSON.parse(Buffer.concat(chunks).toString('utf8')) as { model?: string }).model ?? '');
+                } catch {
+                    model = '';
+                }
+                const body = model.includes('audio') ? AI_AUDIO_RESPONSE : AI_TEXT_RESPONSE;
+                response.writeHead(200, { 'content-type': 'application/json' });
+                response.end(JSON.stringify(body));
             });
             return;
         }

@@ -3,6 +3,7 @@ import { audioService } from '../services/audio.service';
 import { CreateAudioSuggestionDTO, UpdateAudioSuggestionDTO, UploadAudioDTO, ReplaceAudioDTO } from '../types';
 import { toast } from '@/lib/toast';
 import { generationErrorMessage } from '@/features/billing/lib/generation-error';
+import { exportKeys } from '../../projects/hooks/use-export-history';
 
 export const audioKeys = {
     all: ['audio'] as const,
@@ -61,6 +62,8 @@ export const useGenerateAudio = () => {
         onSuccess: (data) => {
             toast.success('AI Audio profile generated! 🎵');
             queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
+            // P12: the export manifest reads the audio layers too.
+            queryClient.invalidateQueries({ queryKey: exportKeys.estimatesFor(data.projectId) });
             queryClient.setQueryData(audioKeys.detail(data.id), data);
         },
         onError: (error: unknown) => {

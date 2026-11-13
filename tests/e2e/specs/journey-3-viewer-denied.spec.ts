@@ -13,6 +13,8 @@
 
 import { expect, test } from '@playwright/test';
 
+import { completeProjectWizard } from '../harness';
+
 test.use({ storageState: 'tests/e2e/.auth/journey3.owner.json' });
 
 test('viewer cannot edit: control hidden AND direct patch returns 404', async ({
@@ -22,19 +24,12 @@ test('viewer cannot edit: control hidden AND direct patch returns 404', async ({
     // ── Owner: create the project in the real wizard ────────────────────────
     await page.goto('/projects');
     await page.locator('#main-content').getByRole('link', { name: 'New Project' }).click();
-    await page.getByLabel('Project title').fill('Viewer-only review');
-    await page.getByLabel('The idea').fill('A project the viewer may read, never mutate.');
-    await page.getByRole('button', { name: 'Continue' }).click();
-    await page
-        .getByRole('radiogroup', { name: 'Platform' })
-        .getByRole('radio', { name: /YouTube/ })
-        .click();
-    await page
-        .getByRole('radiogroup', { name: 'Tone' })
-        .getByRole('radio', { name: /Professional/ })
-        .click();
-    await page.getByRole('button', { name: 'Continue' }).click();
-    await page.locator('#main-content').getByRole('button', { name: /Create “Viewer-only review”/ }).click();
+    // The wizard's P04 configuration step lives in the shared helper.
+    await completeProjectWizard(page, {
+        title: 'Viewer-only review',
+        idea: 'A project the viewer may read, never mutate.',
+        tone: /Professional/,
+    });
     await expect(page).toHaveURL(/\/projects\/[a-f\d]{24}$/);
     const projectUrl = page.url();
 

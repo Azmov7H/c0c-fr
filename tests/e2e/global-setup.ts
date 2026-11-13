@@ -95,6 +95,19 @@ const BACKEND_ENV: Record<string, string> = {
     CORS_ORIGIN: FE_URL,
     TRUST_PROXY_HOPS: '1', // fixtures register in their own XFF bucket
     ALIBABA_BASE_URL: AI_FAKE_URL,
+    // P12: the fake provider answers per MODEL (the script generator and the
+    // audio analysis ask for different JSON), and the TTS leg needs its own
+    // model to be configured — without it the narration layer never gets a
+    // file and the export manifest has nothing to carry.
+    ALIBABA_API_KEY: 'e2e-local-key',
+    ALIBABA_MODEL_TEXT: 'e2e-text',
+    ALIBABA_MODEL_SCRIPTS: 'e2e-scripts',
+    ALIBABA_MODEL_AUDIO_SUGGESTIONS: 'e2e-audio-suggestions',
+    ALIBABA_MODEL_AUDIO: 'e2e-tts',
+    ALIBABA_MODEL_SEO: 'e2e-seo',
+    ALIBABA_MODEL_ANALYTICS: 'e2e-analytics',
+    ALIBABA_MODEL_TRENDS: 'e2e-trends',
+    ALIBABA_MODEL_THUMBNAILS: 'e2e-thumbnails',
     STRIPE_WEBHOOK_SECRET,
 };
 
@@ -224,6 +237,12 @@ const FIXTURE_SPECS = [
     { key: 'journey3.owner', firstName: 'Joa', lastName: 'Owner', xForwardedFor: '203.0.113.12' },
     { key: 'journey4.owner', firstName: 'Junip', lastName: 'Quota', xForwardedFor: '203.0.113.13' },
     { key: 'journey5.owner', firstName: 'Jora', lastName: 'Ttl', xForwardedFor: '203.0.113.14' },
+    // P12: the full create → export journey gets its OWN persona, because
+    // journey 4's persona has its starter quota exhausted on purpose and
+    // journey 2's project has an invitee attached. The M2 workspace spec
+    // gets one too, so the two journeys never share a project.
+    { key: 'm3.workflow', firstName: 'Milo', lastName: 'Workflow', xForwardedFor: '203.0.113.15' },
+    { key: 'm2.workspace', firstName: 'Moe', lastName: 'Workspace', xForwardedFor: '203.0.113.16' },
 ] as const;
 
 async function buildFixtures(): Promise<Record<string, StagedFixture>> {

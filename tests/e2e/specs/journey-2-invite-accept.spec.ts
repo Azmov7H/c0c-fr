@@ -19,6 +19,8 @@
 
 import { expect, test } from '@playwright/test';
 
+import { completeProjectWizard } from '../harness';
+
 test.use({ storageState: 'tests/e2e/.auth/journey2.owner.json' });
 
 test('owner invites → invitee accepts in a second context → editor contribution', async ({
@@ -30,20 +32,13 @@ test('owner invites → invitee accepts in a second context → editor contribut
     // Two "New Project" links exist (page header + inline CTA); scope to the
     // main content so the locator is unique.
     await page.locator('#main-content').getByRole('link', { name: 'New Project' }).click();
-    // T15 app shell /projects/new
-    await page.getByLabel('Project title').fill('Landing page teardown');
-    await page
-        .getByLabel('The idea')
-        .fill('Review the marketing page copy and tear it apart structurally.');
-    await page.getByRole('button', { name: 'Continue' }).click();
-
-    const platformGroup = page.getByRole('radiogroup', { name: 'Platform' });
-    await platformGroup.getByRole('radio', { name: /YouTube/ }).click();
-    const toneGroup = page.getByRole('radiogroup', { name: 'Tone' });
-    await toneGroup.getByRole('radio', { name: /Casual/ }).click();
-    await page.getByRole('button', { name: 'Continue' }).click();
-
-    await page.locator('#main-content').getByRole('button', { name: /Create “Landing page teardown”/ }).click();
+    // T15 app shell /projects/new — the wizard now has the P04 configuration
+    // step, so the whole sequence lives in one harness helper.
+    await completeProjectWizard(page, {
+        title: 'Landing page teardown',
+        idea: 'Review the marketing page copy and tear it apart structurally.',
+        tone: /Casual/,
+    });
     await expect(page).toHaveURL(/\/projects\/[a-f\d]{24}$/);
     const projectUrl = page.url();
 

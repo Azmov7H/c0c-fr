@@ -12,26 +12,34 @@
 
 import { expect, test } from '@playwright/test';
 
-test.use({ storageState: 'tests/e2e/.auth/journey1.a.json' });
+import { cardTitle, completeProjectWizard } from '../harness';
+
+// P12: the storage state is a persona the global setup actually mints.
+// The old `journey1.a.json` was never written by the fixture builder, so
+// this spec could not run at all — it was wired, not claimed.
+test.use({ storageState: 'tests/e2e/.auth/m2.workspace.json' });
 
 test('project → assets → media → audio → export → settings → legacy', async ({ page }) => {
     await page.goto('/projects');
     await page.locator('#main-content').getByRole('link', { name: 'New Project' }).first().click();
-    await page.getByLabel('Project title').fill('M2 workspace journey');
-    await page.getByLabel('The idea').fill('Integration journey project.');
-    await page.getByRole('button', { name: 'Continue' }).click();
-    await page.getByRole('radiogroup', { name: 'Platform' }).getByRole('radio', { name: /YouTube/ }).click();
-    await page.getByRole('radiogroup', { name: 'Tone' }).getByRole('radio', { name: /Professional/ }).click();
+    // The wizard has the P04 configuration step now (shared helper).
+    await completeProjectWizard(page, {
+        title: 'M2 workspace journey',
+        idea: 'Integration journey project.',
+        tone: /Professional/,
+    });
     await expect(page).toHaveURL(/\/projects\/[^/]+$/);
 
     // Generation happens from the workspace (no standalone navigation).
     await page.getByRole('tab', { name: /Assets/ }).click();
-    await expect(page.getByRole('heading', { name: 'Scripts' })).toBeVisible();
+    // A card title is a div with a badge next to it (shadcn's CardTitle) —
+    // assert the card title, not a heading role the DOM never had.
+    await expect(cardTitle(page, /^Scripts/)).toBeVisible();
 
     // Media workspace tab renders thumbnail + 3 slots + audio states.
     await page.getByRole('tab', { name: /Media/ }).click();
-    await expect(page.getByRole('heading', { name: /Project Thumbnail/ })).toBeVisible();
-    await expect(page.getByRole('heading', { name: /AI Generated Images/ })).toBeVisible();
+    await expect(cardTitle(page, 'Project Thumbnail')).toBeVisible();
+    await expect(cardTitle(page, 'AI Generated Images')).toBeVisible();
 
     // Settings: API tab is gone; legacy deep link lands on profile.
     await page.goto('/settings?tab=api');

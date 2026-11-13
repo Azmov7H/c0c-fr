@@ -6,6 +6,12 @@ export const exportKeys = {
     all: ['export'] as const,
     estimate: (projectId: string, scope: string) =>
         [...exportKeys.all, 'estimate', projectId, scope] as const,
+    /**
+     * Every scope's estimate for one project — the prefix an asset change
+     * invalidates. The export's manifest reads the project's assets, so a
+     * new script (or image, or narration) must re-estimate the export.
+     */
+    estimatesFor: (projectId: string) => [...exportKeys.all, 'estimate', projectId] as const,
     history: (projectId: string) => [...exportKeys.all, 'history', projectId] as const,
 };
 

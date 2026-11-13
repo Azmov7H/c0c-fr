@@ -3,6 +3,7 @@ import { thumbnailsService } from '../services/thumbnails.service';
 import { CreateThumbnailDTO, UpdateThumbnailDTO } from '../types';
 import { toast } from '@/lib/toast';
 import { generationErrorMessage } from '@/features/billing/lib/generation-error';
+import { exportKeys } from '../../projects/hooks/use-export-history';
 
 export const thumbnailsKeys = {
     all: ['thumbnails'] as const,
@@ -36,6 +37,8 @@ export const useCreateThumbnail = () => {
         onSuccess: (data) => {
             toast.success('Thumbnail prompt submitted');
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(data.projectId) });
+            // P12: the export manifest reads the thumbnails too.
+            queryClient.invalidateQueries({ queryKey: exportKeys.estimatesFor(data.projectId) });
         },
         onError: (error: unknown) => {
             toast.error(generationErrorMessage(error, 'Failed to submit thumbnail prompt'));
@@ -71,6 +74,8 @@ export const useRegenerateThumbnail = () => {
             toast.success('Thumbnail regenerated');
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.detail(data.id) });
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(data.projectId) });
+            // P12: the export manifest reads the thumbnails too.
+            queryClient.invalidateQueries({ queryKey: exportKeys.estimatesFor(data.projectId) });
         },
         onError: (error: unknown) => {
             toast.error(generationErrorMessage(error, 'Failed to regenerate thumbnail'));
@@ -87,6 +92,7 @@ export const useDeleteThumbnail = () => {
         onSuccess: (_, variables) => {
             toast.success('Thumbnail deleted');
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(variables.projectId) });
+            queryClient.invalidateQueries({ queryKey: exportKeys.estimatesFor(variables.projectId) });
         },
         onError: (error: unknown) => {
             toast.error(generationErrorMessage(error, 'Failed to delete thumbnail'));

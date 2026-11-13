@@ -57,6 +57,9 @@ function LayerCard({
                     className="h-11"
                     disabled={generate.isPending}
                     onClick={() => generate.mutate({ projectId })}
+                    // Three identical "Regenerate" buttons sit in one view; the
+                    // accessible name says WHICH layer it acts on.
+                    aria-label={`Regenerate ${title.toLowerCase()}`}
                 >
                     <RefreshCw className="mr-1 size-4" aria-hidden={generate.isPending} />
                     Regenerate
@@ -220,17 +223,21 @@ export function MediaWorkspace({ projectId }: { projectId: string }) {
                                     </Button>
                                 )}
                             </div>
-                            {allowance.data?.thumbnail && (
-                                <p className="text-xs text-muted-foreground">
-                                    {allowance.data.thumbnail.used} of {allowance.data.thumbnail.limit ?? '∞'} thumbnail(s) used.
-                                    {allowance.data.thumbnail.limit !== null && allowance.data.thumbnail.used >= allowance.data.thumbnail.limit
-                                        ? ' At limit — regenerate or remove to add more.'
-                                        : ''}
-                                </p>
-                            )}
                         </div>
                     ) : (
                         <p className="text-sm text-muted-foreground">No thumbnail yet. Generate one from the Thumbnails section.</p>
+                    )}
+                    {/* P12: the allowance is the PROJECT's budget, so it shows
+                        before the first asset too — not only once a thumbnail
+                        exists. */}
+                    {allowance.data?.thumbnail && (
+                        <p className="mt-3 text-xs text-muted-foreground">
+                            {allowance.data.thumbnail.used} of{' '}
+                            {allowance.data.thumbnail.limit ?? '∞'} thumbnail(s) used.
+                            {allowance.data.thumbnail.limit !== null && allowance.data.thumbnail.used >= allowance.data.thumbnail.limit
+                                ? ' At limit — regenerate or remove to add more.'
+                                : ''}
+                        </p>
                     )}
                 </CardContent>
             </Card>

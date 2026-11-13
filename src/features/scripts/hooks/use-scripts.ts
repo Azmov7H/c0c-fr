@@ -3,6 +3,7 @@ import { scriptsService } from '../services/scripts.service';
 import { CreateScriptDTO, UpdateScriptDTO, Script } from '../types';
 import { toast } from '@/lib/toast';
 import { toApiError } from '@/lib/api-error';
+import { exportKeys } from '../../projects/hooks/use-export-history';
 
 export const scriptsKeys = {
     all: ['scripts'] as const,
@@ -45,6 +46,10 @@ export const useCreateScript = () => {
         onSuccess: (data) => {
             toast.success('Script created successfully');
             queryClient.invalidateQueries({ queryKey: scriptsKeys.list(data.projectId) });
+            // P12: the export's manifest reads the scripts — a new script
+            // changes what an export would contain, so its estimate must be
+            // re-read (the export button would otherwise stay disabled).
+            queryClient.invalidateQueries({ queryKey: exportKeys.estimatesFor(data.projectId) });
         },
         onError: (error: unknown) => {
             toast.error(toApiError(error, 'Failed to create script').message);
@@ -60,6 +65,7 @@ export const useGenerateScript = () => {
         onSuccess: (data) => {
             toast.success('AI Script generated successfully! ✨');
             queryClient.invalidateQueries({ queryKey: scriptsKeys.list(data.projectId) });
+            queryClient.invalidateQueries({ queryKey: exportKeys.estimatesFor(data.projectId) });
             queryClient.setQueryData(scriptsKeys.detail(data.id), data);
         },
         onError: (error: unknown) => {
@@ -91,6 +97,7 @@ export const useUpdateScript = () => {
         onSuccess: (data) => {
             toast.success('Script saved');
             queryClient.invalidateQueries({ queryKey: scriptsKeys.list(data.projectId) });
+            queryClient.invalidateQueries({ queryKey: exportKeys.estimatesFor(data.projectId) });
         },
         onSettled: (_data, _error, { id }) => {
             queryClient.invalidateQueries({ queryKey: scriptsKeys.detail(id) });
