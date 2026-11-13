@@ -104,4 +104,26 @@ test('landing CTA → signup → onboarding wizard → seeded project', async ({
         page.locator('#main-content').getByRole('list', { name: 'Projects' })
     ).toContainText(seededTitle);
     await expect(page.getByRole('link', { name: 'Resume' })).toBeVisible();
+
+    // ── P12.5: no demo data on the measured surfaces ────────────────────────
+    // A brand-new account has planned nothing and has no provider data. The
+    // surfaces must say so — never show a sample event, a sample trend or a
+    // sample number. (Analytics has the seeded project, so it shows the
+    // MEASURED zeros; the true empty-user state is covered by the component
+    // test — "zero activity reads as unavailable with a reason".)
+    await page.goto('/analytics');
+    await expect(page.getByText('Creation activity (last 7 days)')).toBeVisible();
+    await expect(page.getByText('Scripts', { exact: true }).first()).toBeVisible();
+
+    await page.goto('/planner');
+    await expect(page.getByText('Nothing scheduled this month')).toBeVisible();
+
+    await page.goto('/trends');
+    // The feed is measured (the e2e database really does hold other
+    // personas' projects) or empty — never a projection presented as a live
+    // trend, and never a sample row.
+    await expect(page.getByRole('heading', { name: 'Ideas & Trends' })).toBeVisible();
+    await expect(
+        page.getByText(/are projections and are never shown as live trends/)
+    ).toBeVisible();
 });

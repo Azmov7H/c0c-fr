@@ -68,7 +68,11 @@ module.exports = {
                 {
                     matchingUrlPattern: '.*',
                     assertions: {
-                        'accessibility': ['error', { minNumericValue: 0.95 }],
+                        // LHCI 0.15 asserts a category score as
+                        // `categories:accessibility`; the bare `accessibility`
+                        // key is not a known audit any more and the gate
+                        // failed on "not a known audit" instead of measuring.
+                        'categories:accessibility': ['error', { minNumericValue: 0.95 }],
                         'cumulative-layout-shift': ['error', { maxNumericValue: 0.05 }],
                         // The card's INP (≤ 200 ms) row, enforced through its lab
                         // proxy: Lighthouse 12.6.1 reports INP as a notApplicable
