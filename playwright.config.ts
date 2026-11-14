@@ -21,7 +21,12 @@ export default defineConfig({
     // Keep the throwaway backend from being pummelled by accidental retry
     // loops: a failing journey reruns under human control, not automatically.
     retries: 0,
-    timeout: 120_000,
+    // P12: the longest journey (create → invite → accept in a second
+    // context → contribute) needs ~80 s on an idle box; under the parallel
+    // run it crossed the old 120 s ceiling and failed as a TIMEOUT, not as a
+    // behaviour change. The `expect` budget below stays 20 s — no assertion
+    // waits longer, the test just gets room to run.
+    timeout: 240_000,
     expect: { timeout: 20_000 },
     reporter: [['list']],
     globalSetup: `${harnessBase}/global-setup.ts`,
