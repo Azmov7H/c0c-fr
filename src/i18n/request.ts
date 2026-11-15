@@ -1,31 +1,45 @@
 import { hasLocale } from 'next-intl';
 import { getRequestConfig } from 'next-intl/server';
+import * as rootParams from 'next/root-params';
 
+import { loadMessages } from './messages';
 import { routing } from './routing';
 
 /**
- * AR02 — the server request configuration.
+ * AR03 — the server request configuration.
  *
- * `next-intl` calls this once per request to learn which locale to render and
- * which messages to load. AR-002 ships the wiring with an empty catalog (the
- * catalogs arrive with AR-009/AR-010), so the spike proves the plugin,
- * the request config and the middleware agree on one locale — without
- * changing a single rendered string.
+ * This is the one place that answers "which locale is this request in?".
  *
- * Locale resolution (I18N-ARCHITECTURE §4):
- *   1. the URL prefix wins (the middleware sets it on the request);
- *   2. an unknown/garbage value falls back to the default locale rather
- *      than throwing — the page must render, not 500.
+ * Resolution order (I18N-ARCHITECTURE §4):
+ *
+ *   1. an explicit locale passed to an awaitable helper (`getTranslations({
+ *      locale })`) — the caller knows better;
+ *   2. the `[locale]` route segment, read through `next/root-params`. This
+ *      is the URL, and the URL is the source of truth (AR-D-01);
+ *   3. the default locale.
+ *
+ * A value that is not a locale this app serves never renders: it falls back
+ * to the default instead of throwing, because a page that 500s on a stray
+ * URL is worse than a page that renders in the default locale.
  */
-export default getRequestConfig(async ({ requestLocale }) => {
-    const requested = await requestLocale;
-    const locale = hasLocale(routing.locales, requested)
-        ? requested
-        : routing.defaultLocale;
+export default getRequestConfig(async ({ locale }) => {
+    let resolved = locale;
+
+    if (!resolved) {
+        try {
+            resolved = await rootParams.locale();
+        } catch {
+            // `next/root-params` is only available inside a route. A request
+            // that never reaches a page (a route handler, a prefetch of a
+            // non-localized URL) must not break the request.
+            resolved = undefined;
+        }
+    }
+
+    const active = hasLocale(routing.locales, resolved) ? resolved : routing.defaultLocale;
 
     return {
-        locale,
-        // AR-002: no catalog yet. AR-009 seeds `common`, AR-010 the rest.
-        messages: {},
+        locale: active,
+        messages: await loadMessages(active),
     };
 });
