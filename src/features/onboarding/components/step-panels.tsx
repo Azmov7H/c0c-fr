@@ -49,14 +49,14 @@ function SearchField({
 }) {
     return (
         <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <Input
                 type="search"
                 value={value}
                 onChange={(event) => onChange(event.target.value)}
                 placeholder={placeholder}
                 aria-label={placeholder}
-                className="h-11 pl-9"
+                className="h-11 ps-9"
             />
         </div>
     );

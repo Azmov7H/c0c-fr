@@ -44,7 +44,7 @@ export function ThumbnailStudio() {
           onChange={(e) => setPrompt(e.target.value)}
           className="min-h-[120px] resize-none"
         />
-        <p className="text-[10px] text-muted-foreground text-right">{prompt.length} chars</p>
+        <p className="text-[10px] text-muted-foreground text-end">{prompt.length} chars</p>
       </div>
 
       <div className="space-y-3">
@@ -77,7 +77,7 @@ export function ThumbnailStudio() {
       </div>
 
       <Button onClick={handleGenerate} disabled={isGenerating || !prompt.trim()} className="w-full">
-        {isGenerating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+        {isGenerating ? <Loader2 className="w-4 h-4 me-2 animate-spin" /> : <Sparkles className="w-4 h-4 me-2" />}
         {isGenerating ? 'Rendering...' : 'Generate Thumbnail'}
       </Button>
     </div>
@@ -88,7 +88,7 @@ export function ThumbnailStudio() {
       <div className="flex items-center justify-between">
         <Badge variant="outline">{stylePreset}</Badge>
         <Button variant="outline" size="sm">
-          <Download className="w-3.5 h-3.5 mr-1" /> Download
+          <Download className="w-3.5 h-3.5 me-1" /> Download
         </Button>
       </div>
       <div className="aspect-video rounded-xl bg-muted/40 flex items-center justify-center overflow-hidden">

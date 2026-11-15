@@ -77,7 +77,7 @@ function EventRow({
         <div className="flex flex-1 flex-col">
             <p className="text-sm font-medium">{event.title}</p>
             <p className="text-xs text-muted-foreground">
-                <Clock className="mr-1 inline size-3" aria-hidden="true" />
+                <Clock className="me-1 inline size-3" aria-hidden="true" />
                 {showDay && event.scheduledDay ? `${event.scheduledDay} · ` : ''}
                 {formatRelativeTime(event.scheduledDate, locale).absolute}
                 {event.timezone ? ` (${event.timezone})` : ''}

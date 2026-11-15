@@ -148,7 +148,7 @@ export function InviteLanding({ token }: { token: string }) {
                         disabled={accept.isPending}
                         onClick={() => accept.mutate()}
                     >
-                        {accept.isPending && <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />}
+                        {accept.isPending && <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />}
                         Accept invite
                     </Button>
                 ) : (

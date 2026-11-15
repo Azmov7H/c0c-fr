@@ -16,7 +16,7 @@ export function FinalCta() {
                 </p>
                 <MarketingCtaLink href="/signup" size="lg" className="mt-8 h-12 px-8 text-base">
                     Start creating — free
-                    <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+                    <ArrowRight className="ms-2 h-4 w-4" aria-hidden />
                 </MarketingCtaLink>
             </div>
         </section>

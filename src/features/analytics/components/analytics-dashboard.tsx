@@ -132,7 +132,7 @@ export function AnalyticsDashboard() {
                 <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
                   <CardTitle className="text-base font-bold">Recent projects</CardTitle>
                   <Button asChild variant="ghost" size="sm" className="h-8">
-                    <Link href="/projects">All projects <ArrowRight className="ml-1 h-3.5 w-3.5" aria-hidden="true" /></Link>
+                    <Link href="/projects">All projects <ArrowRight className="ms-1 h-3.5 w-3.5" aria-hidden="true" /></Link>
                   </Button>
                 </CardHeader>
                 <CardContent className="space-y-2 pt-4">

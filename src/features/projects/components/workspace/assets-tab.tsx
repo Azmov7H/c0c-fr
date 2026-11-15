@@ -184,7 +184,7 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                     used={aiUsage?.used}
                     limit={aiLimit}
                     resetAt={aiUsage?.resetAt}
-                    className="items-start text-left"
+                    className="items-start text-start"
                 />
             )}
             {/* P11.6: 402 — the operation needs credits, not time. */}
@@ -194,7 +194,7 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                     description={creditError}
                     ctaLabel="Top up or upgrade to continue"
                     feature="ai.generation"
-                    className="items-start text-left"
+                    className="items-start text-start"
                 />
             )}
 
@@ -215,9 +215,9 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                                 }
                             >
                                 {generateScript.isPending ? (
-                                    <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                                    <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />
                                 ) : (
-                                    <Sparkles className="mr-2 size-4" aria-hidden="true" />
+                                    <Sparkles className="me-2 size-4" aria-hidden="true" />
                                 )}
                                 Generate
                             </Button>
@@ -294,9 +294,9 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                                 }
                             >
                                 {generateAudio.isPending ? (
-                                    <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                                    <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />
                                 ) : (
-                                    <Sparkles className="mr-2 size-4" aria-hidden="true" />
+                                    <Sparkles className="me-2 size-4" aria-hidden="true" />
                                 )}
                                 Generate
                             </Button>
@@ -334,9 +334,9 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                                 }
                             >
                                 {generateSEO.isPending ? (
-                                    <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                                    <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />
                                 ) : (
-                                    <Sparkles className="mr-2 size-4" aria-hidden="true" />
+                                    <Sparkles className="me-2 size-4" aria-hidden="true" />
                                 )}
                                 Generate
                             </Button>

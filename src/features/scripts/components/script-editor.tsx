@@ -125,7 +125,7 @@ export const ScriptEditor = ({ scriptId }: { scriptId: string }) => {
                         disabled={isGenerating}
                         onClick={() => generateScript(script.projectId)}
                     >
-                        <Sparkles className={cn('mr-2 h-4 w-4', isGenerating && 'animate-spin')} aria-hidden="true" />
+                        <Sparkles className={cn('me-2 h-4 w-4', isGenerating && 'animate-spin')} aria-hidden="true" />
                         {isGenerating ? 'AI thinking…' : 'Refine with AI'}
                     </Button>
                     <Button
@@ -133,7 +133,7 @@ export const ScriptEditor = ({ scriptId }: { scriptId: string }) => {
                         disabled={isUpdating || !form.formState.isDirty}
                         onClick={form.handleSubmit(handleSave)}
                     >
-                        <Save className="mr-2 h-4 w-4" aria-hidden="true" />
+                        <Save className="me-2 h-4 w-4" aria-hidden="true" />
                         {isUpdating ? 'Saving…' : 'Save script'}
                     </Button>
                 </div>

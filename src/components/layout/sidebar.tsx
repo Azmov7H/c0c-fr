@@ -47,8 +47,8 @@ function NavItem({
         text-muted-foreground
         hover:bg-muted/60 hover:text-foreground
         data-[active=true]:bg-primary/10 data-[active=true]:text-primary
-        data-[active=true]:font-semibold data-[active=true]:border-l-2
-        data-[active=true]:border-primary data-[active=true]:pl-[calc(0.75rem-2px)]
+        data-[active=true]:font-semibold data-[active=true]:border-s-2
+        data-[active=true]:border-primary data-[active=true]:ps-[calc(0.75rem-2px)]
       "
     >
       <Link

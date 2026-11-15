@@ -196,7 +196,7 @@ export function ProjectsToolbar({
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <div className="relative flex-1 sm:max-w-sm">
                     <Search
-                        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                        className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
                         aria-hidden="true"
                     />
                     <Input
@@ -206,13 +206,13 @@ export function ProjectsToolbar({
                         placeholder="Search projects..."
                         value={search}
                         onChange={(event) => onSearchChange(event.target.value)}
-                        className="h-11 pl-9 pr-9"
+                        className="h-11 ps-9 pe-9"
                     />
                     {search ? (
                         <button
                             type="button"
                             aria-label="Clear search"
-                            className="absolute right-1 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            className="absolute end-1 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             onClick={() => {
                                 if (debounceRef.current) clearTimeout(debounceRef.current);
                                 setSearch('');

@@ -377,7 +377,7 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                                 disabled={!mayManage || atLimit || !email || createInvite.isPending}
                             >
                                 {createInvite.isPending ? (
-                                    <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                                    <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />
                                 ) : null}
                                 Create invite
                             </Button>
@@ -436,7 +436,7 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                                         disabled={!mayManage || revokeInvite.isPending || invite.state === 'accepted' || invite.state === 'revoked'}
                                         onClick={() => revokeInvite.mutate(invite.id)}
                                     >
-                                        <X className="mr-2 size-4" aria-hidden="true" />
+                                        <X className="me-2 size-4" aria-hidden="true" />
                                         Revoke
                                     </Button>
                                 </li>
@@ -469,7 +469,7 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                                 });
                             }}
                         >
-                            {removeMember.isPending && <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />}
+                            {removeMember.isPending && <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />}
                             Remove member
                         </Button>
                     </DialogFooter>
@@ -487,7 +487,7 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                     <div className="flex items-center gap-2">
                         <Input readOnly value={createdInvite?.acceptUrl ?? ''} aria-label="Invite link" className="h-11 font-mono text-xs" />
                         <Button type="button" className="h-11" onClick={copyUrl}>
-                            <Copy className="mr-2 size-4" aria-hidden="true" />
+                            <Copy className="me-2 size-4" aria-hidden="true" />
                             Copy
                         </Button>
                     </div>
@@ -496,7 +496,7 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                     </p>
                     <DialogFooter>
                         <Button variant="outline" className="h-11" onClick={() => setCreatedInvite(null)}>
-                            <Check className="mr-2 size-4" aria-hidden="true" />
+                            <Check className="me-2 size-4" aria-hidden="true" />
                             Done
                         </Button>
                     </DialogFooter>

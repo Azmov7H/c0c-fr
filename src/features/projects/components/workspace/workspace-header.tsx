@@ -136,7 +136,7 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
                         <button
                             type="button"
                             onClick={() => setEditing(true)}
-                            className="max-w-full truncate rounded text-left text-2xl font-bold hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            className="max-w-full truncate rounded text-start text-2xl font-bold hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             aria-label={`Edit project title: ${project.title}`}
                         >
                             {project.title}
@@ -165,9 +165,9 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
                             onClick={() => changeStatus(project.status === 'archived' ? 'draft' : 'archived')}
                         >
                             {project.status === 'archived' ? (
-                                <><RotateCcw className="mr-2 size-4" aria-hidden="true" />Restore</>
+                                <><RotateCcw className="me-2 size-4" aria-hidden="true" />Restore</>
                             ) : (
-                                <><Archive className="mr-2 size-4" aria-hidden="true" />Archive</>
+                                <><Archive className="me-2 size-4" aria-hidden="true" />Archive</>
                             )}
                         </Button>
                     )}
@@ -253,7 +253,7 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
                                 changeStatus('archived');
                             }}
                         >
-                            {update.isPending && <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />}
+                            {update.isPending && <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />}
                             Archive project
                         </Button>
                     </DialogFooter>

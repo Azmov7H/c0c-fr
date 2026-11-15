@@ -146,7 +146,7 @@ export const TeamManagement = () => {
                     <Dialog open={createOpen} onOpenChange={setCreateOpen}>
                     <DialogTrigger asChild>
                         <Button>
-                            <Plus className="w-4 h-4 mr-2" />
+                            <Plus className="w-4 h-4 me-2" />
                             New Workspace
                         </Button>
                     </DialogTrigger>
@@ -209,7 +209,7 @@ export const TeamManagement = () => {
                                         onClick={() => setSelectedTeamId(t.id)}
                                         aria-pressed={activeTeam.id === t.id}
                                         aria-current={activeTeam.id === t.id ? 'true' : undefined}
-                                        className={`flex w-full items-center justify-between p-3 rounded-lg cursor-pointer transition-all border text-left ${activeTeam.id === t.id ? 'bg-primary/10 border-primary/30 text-primary' : 'hover:bg-muted text-muted-foreground'
+                                        className={`flex w-full items-center justify-between p-3 rounded-lg cursor-pointer transition-all border text-start ${activeTeam.id === t.id ? 'bg-primary/10 border-primary/30 text-primary' : 'hover:bg-muted text-muted-foreground'
                                             }`}
                                     >
                                         <span className="flex items-center gap-3">
@@ -269,7 +269,7 @@ export const TeamManagement = () => {
                                             )}
                                         />
                                         <Button type="submit" className="mt-2 h-11 w-full" disabled={isInviting}>
-                                            {isInviting ? <RefreshCw className="animate-spin w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
+                                            {isInviting ? <RefreshCw className="animate-spin w-4 h-4 me-2" /> : <UserPlus className="w-4 h-4 me-2" />}
                                             Send Invitation
                                         </Button>
                                     </form>
@@ -286,7 +286,7 @@ export const TeamManagement = () => {
                                 <CardDescription>{activeTeam.members.length} active users in this workspace</CardDescription>
                             </div>
                             <Button variant="outline" size="sm">
-                                <Settings className="w-4 h-4 mr-2" />
+                                <Settings className="w-4 h-4 me-2" />
                                 Team Settings
                             </Button>
                         </CardHeader>

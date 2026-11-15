@@ -87,9 +87,9 @@ export function ScriptGenerator() {
 
       <Button onClick={handleGenerate} disabled={isGenerating || !idea.trim()} className="w-full">
         {isGenerating ? (
-          <Sparkles className="w-4 h-4 mr-2 animate-spin" />
+          <Sparkles className="w-4 h-4 me-2 animate-spin" />
         ) : (
-          <Sparkles className="w-4 h-4 mr-2" />
+          <Sparkles className="w-4 h-4 me-2" />
         )}
         {isGenerating ? 'Generating...' : 'Generate Script'}
       </Button>
@@ -105,17 +105,17 @@ export function ScriptGenerator() {
         </div>
         <div className="flex gap-2">
           <Button variant="ghost" size="sm" onClick={() => setGeneratedScript(null)}>
-            <RotateCcw className="w-3.5 h-3.5 mr-1" /> Regenerate
+            <RotateCcw className="w-3.5 h-3.5 me-1" /> Regenerate
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigator.clipboard.writeText(generatedScript)}
           >
-            <Copy className="w-3.5 h-3.5 mr-1" /> Copy
+            <Copy className="w-3.5 h-3.5 me-1" /> Copy
           </Button>
           <Button variant="ghost" size="sm">
-            <Download className="w-3.5 h-3.5 mr-1" /> Export
+            <Download className="w-3.5 h-3.5 me-1" /> Export
           </Button>
         </div>
       </div>

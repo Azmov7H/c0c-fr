@@ -294,7 +294,7 @@ function WizardForm({
                 <Button
                     type="button"
                     variant="ghost"
-                    className="-ml-2 h-11 gap-2 text-muted-foreground hover:text-foreground"
+                    className="-ms-2 h-11 gap-2 text-muted-foreground hover:text-foreground"
                     onClick={requestCancel}
                 >
                     <ArrowLeft className="size-4" aria-hidden="true" />
@@ -309,7 +309,7 @@ function WizardForm({
                     className="flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                     <p className="text-sm">
-                        <Sparkles className="mr-2 inline size-4 text-primary" aria-hidden="true" />
+                        <Sparkles className="me-2 inline size-4 text-primary" aria-hidden="true" />
                         Draft restored from {formatRelativeTime(restored.savedAt, locale).relative}.
                     </p>
                     <div className="flex gap-2">
@@ -375,7 +375,7 @@ function WizardForm({
                             onClick={previousStep}
                             disabled={step === 1 || create.isPending}
                         >
-                            <ArrowLeft className="mr-2 size-4" aria-hidden="true" />
+                            <ArrowLeft className="me-2 size-4" aria-hidden="true" />
                             Back
                         </Button>
 
@@ -398,7 +398,7 @@ function WizardForm({
                                 }}
                             >
                                 {primaryLabel}
-                                <ArrowRight className="ml-2 size-4" aria-hidden="true" />
+                                <ArrowRight className="ms-2 size-4" aria-hidden="true" />
                             </Button>
                         ) : (
                             <Button
@@ -410,7 +410,7 @@ function WizardForm({
                                 {create.isPending ? (
                                     <>
                                         <Loader2
-                                            className="mr-2 size-4 animate-spin"
+                                            className="me-2 size-4 animate-spin"
                                             aria-hidden="true"
                                         />
                                         Creating…

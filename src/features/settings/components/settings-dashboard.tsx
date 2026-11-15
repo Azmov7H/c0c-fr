@@ -175,7 +175,7 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
                                             )}
                                         />
                                         <Button type="submit" className="h-11" disabled={isUpdatingProfile || !form.formState.isDirty}>
-                                            {isUpdatingProfile ? <RefreshCw className="animate-spin w-4 h-4 mr-2" /> : 'Save Changes'}
+                                            {isUpdatingProfile ? <RefreshCw className="animate-spin w-4 h-4 me-2" /> : 'Save Changes'}
                                         </Button>
                                     </form>
                                 </Form>

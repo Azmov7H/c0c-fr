@@ -42,7 +42,7 @@ export function WidgetSettings({
         <Dialog>
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="h-9 rounded-xl px-4">
-                    <Settings2 className="mr-1.5 size-3.5" aria-hidden="true" />
+                    <Settings2 className="me-1.5 size-3.5" aria-hidden="true" />
                     Customise
                 </Button>
             </DialogTrigger>

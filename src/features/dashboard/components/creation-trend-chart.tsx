@@ -105,7 +105,7 @@ export default function CreationTrendChart({ data }: { data: CreationTrendPoint[
                 <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
                     View as table
                 </summary>
-                <table className="mt-2 w-full border-collapse text-left">
+                <table className="mt-2 w-full border-collapse text-start">
                     <caption className="sr-only">Projects created per day, last seven days</caption>
                     <thead>
                         <tr className="border-b border-border/60">

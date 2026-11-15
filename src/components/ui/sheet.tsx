@@ -1,3 +1,7 @@
+// RTL (AR-017): upstream uses the physical side; converted to the logical edge
+// so the mirror is the browser's job (RTL-DESIGN-SYSTEM §3). The classes keyed
+// to Radix's `data-side` stay physical — they follow the placement Radix
+// decides. Re-apply on re-vendoring.
 "use client"
 
 import * as React from "react"
@@ -75,7 +79,7 @@ function SheetContent({
       >
         {children}
         {showCloseButton && (
-          <SheetPrimitive.Close className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-secondary">
+          <SheetPrimitive.Close className="absolute top-4 end-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-secondary">
             <XIcon className="size-4" />
             <span className="sr-only">Close</span>
           </SheetPrimitive.Close>

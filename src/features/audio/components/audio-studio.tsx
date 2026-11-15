@@ -163,9 +163,9 @@ export function AudioStudio() {
                 className="h-11 w-full"
             >
                 {generate.isPending ? (
-                    <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                    <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />
                 ) : (
-                    <Sparkles className="mr-2 size-4" aria-hidden="true" />
+                    <Sparkles className="me-2 size-4" aria-hidden="true" />
                 )}
                 {generate.isPending ? 'Generating…' : 'Generate audio profile'}
             </Button>
@@ -199,13 +199,13 @@ export function AudioStudio() {
                     <div className="flex flex-wrap gap-2">
                         <input ref={replaceInputRef} type="file" accept="audio/*" className="sr-only" aria-label="Replace current audio" onChange={(e) => onReplaceFile(e.target.files?.[0])} />
                         <Button variant="outline" size="sm" className="h-11" disabled={replace.isPending || !activeProjectId} onClick={() => replaceInputRef.current?.click()}>
-                            {replace.isPending ? <Loader2 className="mr-1 size-4 animate-spin" aria-hidden="true" /> : <RefreshCw className="mr-1 size-4" aria-hidden="true" />}
+                            {replace.isPending ? <Loader2 className="me-1 size-4 animate-spin" aria-hidden="true" /> : <RefreshCw className="me-1 size-4" aria-hidden="true" />}
                             {replace.isPending ? 'Replacing…' : 'Replace'}
                         </Button>
                         {current.fileUrl && (
                             <Button asChild variant="ghost" size="sm" className="h-11">
                                 <a href={current.fileUrl} download aria-label="Download current audio">
-                                    <Download className="mr-1 size-4" aria-hidden="true" /> Download
+                                    <Download className="me-1 size-4" aria-hidden="true" /> Download
                                 </a>
                             </Button>
                         )}
@@ -215,7 +215,7 @@ export function AudioStudio() {
                         <Label htmlFor="audio-external-url" className="sr-only">External audio URL</Label>
                         <Input id="audio-external-url" placeholder="https://…/audio.mp3" value={externalUrl} onChange={(e) => setExternalUrl(e.target.value)} />
                         <Button variant="outline" size="sm" className="h-11 shrink-0" disabled={upload.isPending || !externalUrl} onClick={onUploadExternal}>
-                            <Upload className="mr-1 size-4" aria-hidden="true" /> Upload
+                            <Upload className="me-1 size-4" aria-hidden="true" /> Upload
                         </Button>
                     </div>
                     {history.length > 0 && (
