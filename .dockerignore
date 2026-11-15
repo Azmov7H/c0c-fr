@@ -25,7 +25,16 @@ logs
 # No secrets live in tests/; e2e runs against real browsers, not this image.
 e2e
 docs
-scripts
+# AR-021: the CI scripts stay out — EXCEPT the one the typecheck needs.
+# `scripts/rtl-utilities.mjs` is imported by tests/i18n/rtl-directions.test.tsx
+# (the rendered-output check shares the CI gate's matcher), and `next build`
+# type-checks the WHOLE project — so the file has to be in the context or the
+# image build fails on a missing module.
+#
+# The exclusion is `scripts/*` and not `scripts`: a file inside an excluded
+# DIRECTORY cannot be re-included (docker's own rule).
+scripts/*
+!scripts/rtl-utilities.mjs
 audit-exceptions
 vercel.json
 .vercel
