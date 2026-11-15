@@ -5,7 +5,7 @@ import path from 'node:path';
 import {
     FEATURE_LABELS,
     PLAN_CATALOGUE,
-    PLAN_COMPARISON,
+    planComparison,
     PLAN_IDS,
     formatMonthlyPrice,
     planHighlights,
@@ -18,9 +18,9 @@ describe('plan catalogue', () => {
         expect(PLAN_CATALOGUE.starter.monthlyPriceCents).toBe(0);
         expect(PLAN_CATALOGUE.pro.monthlyPriceCents).toBe(4900);
         expect(PLAN_CATALOGUE.studio.monthlyPriceCents).toBe(19900);
-        expect(formatMonthlyPrice(PLAN_CATALOGUE.starter)).toBe('Free');
-        expect(formatMonthlyPrice(PLAN_CATALOGUE.pro)).toBe('$49/month');
-        expect(formatMonthlyPrice(PLAN_CATALOGUE.studio)).toBe('$199/month');
+        expect(formatMonthlyPrice(PLAN_CATALOGUE.starter, 'en')).toBe('Free');
+        expect(formatMonthlyPrice(PLAN_CATALOGUE.pro, 'en')).toBe('$49/month');
+        expect(formatMonthlyPrice(PLAN_CATALOGUE.studio, 'en')).toBe('$199/month');
     });
 
     it('mirrors the backend quota matrix', () => {
@@ -48,7 +48,7 @@ describe('plan catalogue', () => {
     });
 
     it('lists every enforced backend capability in the comparison table', () => {
-        const labels = PLAN_COMPARISON.map((row) => row.label);
+        const labels = planComparison('en').map((row) => row.label);
         for (const label of Object.values(FEATURE_LABELS)) {
             expect(labels).toContain(label);
         }
@@ -62,7 +62,7 @@ describe('plan catalogue', () => {
         expect(studio.filter((feature) => !pro.includes(feature))).toEqual([
             'priority_queue',
         ]);
-        expect(planHighlights(PLAN_CATALOGUE.studio)).toContain(
+        expect(planHighlights(PLAN_CATALOGUE.studio, 'en')).toContain(
             'Priority generation queue'
         );
     });

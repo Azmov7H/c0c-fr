@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlLocale } from '@/i18n/locale';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
@@ -49,6 +50,7 @@ interface WorkspaceHeaderProps {
 }
 
 export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
+    const locale = useUrlLocale();
     const [editing, setEditing] = useState(false);
     const [confirmArchive, setConfirmArchive] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -146,11 +148,11 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                         <PlatformBadge platform={project.platform} />
                         <StatusBadge status={project.status} />
-                        <span className="text-xs text-muted-foreground" title={formatAbsoluteTime(project.updatedAt)}>
-                            Updated {formatRelativeTime(project.updatedAt).relative}
+                        <span className="text-xs text-muted-foreground" title={formatAbsoluteTime(project.updatedAt, locale)}>
+                            Updated {formatRelativeTime(project.updatedAt, locale).relative}
                         </span>
-                        <span className="text-xs text-muted-foreground" title={formatAbsoluteTime(project.createdAt)}>
-                            Created {formatRelativeTime(project.createdAt).relative}
+                        <span className="text-xs text-muted-foreground" title={formatAbsoluteTime(project.createdAt, locale)}>
+                            Created {formatRelativeTime(project.createdAt, locale).relative}
                         </span>
                     </div>
                 </div>

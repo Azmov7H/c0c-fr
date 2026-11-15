@@ -4,11 +4,16 @@ import { cleanup, render, screen, within } from '@testing-library/react';
 
 import { PlanComparisonTable, PricingCards, PricingFaq } from './pricing';
 
+// AR-014: the pricing surface is a SERVER component (the marketing pages
+// have no client runtime), so the server reads the locale and hands it down.
+// The English locale is the baseline the assertions below expect.
+const LOCALE = 'en' as const;
+
 afterEach(cleanup);
 
 describe('pricing surface', () => {
     it('renders all three tiers with the single-source prices and quotas', () => {
-        render(<PricingCards />);
+        render(<PricingCards locale={LOCALE} />);
 
         expect(screen.getByRole('heading', { name: 'Starter' })).toBeTruthy();
         expect(screen.getByRole('heading', { name: 'Pro' })).toBeTruthy();
@@ -22,7 +27,7 @@ describe('pricing surface', () => {
     });
 
     it('routes paid CTAs to billing and free CTAs to signup', () => {
-        render(<PricingCards />);
+        render(<PricingCards locale={LOCALE} />);
 
         expect(screen.getByRole('link', { name: /start free/i }).getAttribute('href')).toBe(
             '/signup'
@@ -36,7 +41,7 @@ describe('pricing surface', () => {
     });
 
     it('renders every enforced capability in a semantically labelled table', () => {
-        render(<PlanComparisonTable />);
+        render(<PlanComparisonTable locale={LOCALE} />);
 
         const table = screen.getByRole('table', {
             name: /Feature and quota comparison/i,

@@ -1,28 +1,37 @@
-const day = new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-});
+import type { AppLocale } from '@/i18n/routing';
+import {
+    formatDate as formatDateValue,
+    formatNumber as formatNumberValue,
+    formatShortDate as formatShortDateValue,
+} from '@/lib/format';
 
-const dayShort = new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-});
-
-export function formatDate(value: string | null | undefined, fallback = 'Not scheduled'): string {
-    if (!value) return fallback;
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return fallback;
-    return day.format(date);
+/**
+ * The billing dates and counts (T06).
+ *
+ * AR-014: the locale is an argument — the layer under `src/lib/format/`
+ * owns the formatting.
+ */
+export function formatDate(
+    value: string | null | undefined,
+    locale: AppLocale,
+    fallback = 'Not scheduled'
+): string {
+    return formatDateValue(
+        value,
+        locale,
+        { month: 'short', day: 'numeric', year: 'numeric' },
+        fallback
+    );
 }
 
-export function formatShortDate(value: string | null | undefined, fallback = '—'): string {
-    if (!value) return fallback;
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return fallback;
-    return dayShort.format(date);
+export function formatShortDate(
+    value: string | null | undefined,
+    locale: AppLocale,
+    fallback = '—'
+): string {
+    return formatShortDateValue(value, locale, fallback);
 }
 
-export function formatCount(value: number): string {
-    return new Intl.NumberFormat('en-US').format(value);
+export function formatCount(value: number, locale: AppLocale): string {
+    return formatNumberValue(value, locale);
 }

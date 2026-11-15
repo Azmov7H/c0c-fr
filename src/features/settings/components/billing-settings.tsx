@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlLocale } from '@/i18n/locale';
 import * as React from 'react';
 import Link from 'next/link';
 import { CreditCard, ExternalLink } from 'lucide-react';
@@ -68,6 +69,7 @@ function CurrentPlan({ summary, onPortal, portalPending }: {
     onPortal: () => void;
     portalPending: boolean;
 }) {
+    const locale = useUrlLocale();
     const plan = PLAN_CATALOGUE[summary.plan];
     const renewalLabel = summary.cancelAtPeriodEnd ? 'Access ends' : 'Renews';
 
@@ -89,14 +91,14 @@ function CurrentPlan({ summary, onPortal, portalPending }: {
                 <dl className="grid gap-4 text-sm sm:grid-cols-3">
                     <div>
                         <dt className="text-muted-foreground">Price</dt>
-                        <dd className="mt-1 font-medium">{formatMonthlyPrice(plan)}</dd>
+                        <dd className="mt-1 font-medium">{formatMonthlyPrice(plan, locale)}</dd>
                     </div>
                     <div>
                         <dt className="text-muted-foreground">{renewalLabel}</dt>
                         <dd className="mt-1 font-medium">
                             {summary.plan === 'starter' && !summary.renewalDate
                                 ? 'No billing period'
-                                : formatDate(summary.renewalDate, 'Not scheduled')}
+                                : formatDate(summary.renewalDate, locale, 'Not scheduled')}
                         </dd>
                     </div>
                     <div>
@@ -136,7 +138,7 @@ function CurrentPlan({ summary, onPortal, portalPending }: {
                 {summary.cancelAtPeriodEnd ? (
                     <p className="text-sm text-muted-foreground">
                         Cancellation is scheduled. You keep {plan.name} until{' '}
-                        {formatDate(summary.renewalDate, 'the end of the period')}.{' '}
+                        {formatDate(summary.renewalDate, locale, 'the end of the period')}.{' '}
                         <Link className="underline underline-offset-4" href="#choose-plan">
                             Choose a plan to continue
                         </Link>
@@ -149,6 +151,7 @@ function CurrentPlan({ summary, onPortal, portalPending }: {
 }
 
 export function BillingSettings() {
+    const locale = useUrlLocale();
     const summaryQuery = useBillingSummary();
     const checkout = useCheckout();
     const portal = usePortal();
@@ -156,7 +159,7 @@ export function BillingSettings() {
     const checkoutReturn = useCheckoutReturn({ summary: data, refetch });
     const [mutationError, setMutationError] = React.useState<string | null>(null);
 
-    const notice = deriveBillingNotice(data);
+    const notice = deriveBillingNotice(data, locale);
     const pending = checkout.isPending || portal.isPending;
 
     const onPortal = () => {

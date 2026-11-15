@@ -1,3 +1,6 @@
+import type { AppLocale } from '@/i18n/routing';
+import { formatCurrency, formatNumber } from '@/lib/format';
+
 import type { BillingFeature, PlanId } from '../types';
 
 export interface PlanLimits {
@@ -114,26 +117,28 @@ export const QUOTA_LABELS: Record<string, string> = {
     storageGB: 'Storage',
 };
 
-const integer = new Intl.NumberFormat('en-US');
-
-export function formatPrice(cents: number, currency: PlanDefinition['currency'] = 'usd'): string {
+/**
+ * AR-014: the locale is an ARGUMENT — the layer under `src/lib/format/`
+ * owns the formatting, and the plan catalogue keeps the ids and the prices.
+ */
+export function formatPrice(
+    cents: number,
+    locale: AppLocale,
+    currency: PlanDefinition['currency'] = 'usd'
+): string {
     if (cents === 0) return 'Free';
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: currency.toUpperCase(),
-        maximumFractionDigits: 0,
-    }).format(cents / 100);
+    return formatCurrency(cents, currency, locale);
 }
 
-export function formatMonthlyPrice(plan: PlanDefinition): string {
+export function formatMonthlyPrice(plan: PlanDefinition, locale: AppLocale): string {
     return plan.monthlyPriceCents === 0
         ? 'Free'
-        : `${formatPrice(plan.monthlyPriceCents, plan.currency)}/month`;
+        : `${formatPrice(plan.monthlyPriceCents, locale, plan.currency)}/month`;
 }
 
-export function formatLimit(value: number | null, suffix = ''): string {
+export function formatLimit(value: number | null, locale: AppLocale, suffix = ''): string {
     if (value === null) return 'Unlimited';
-    return `${integer.format(value)}${suffix}`;
+    return `${formatNumber(value, locale)}${suffix}`;
 }
 
 export function planRank(plan: PlanId): number {
@@ -150,11 +155,11 @@ export function nextPlan(plan: PlanId, direction: 'upgrade' | 'downgrade'): Plan
     return PLAN_IDS[target] ?? null;
 }
 
-export function planHighlights(plan: PlanDefinition): readonly string[] {
+export function planHighlights(plan: PlanDefinition, locale: AppLocale): readonly string[] {
     const highlights = [
-        `${integer.format(plan.limits.generations)} AI generations per month`,
+        `${formatNumber(plan.limits.generations, locale)} AI generations per month`,
         `${plan.limits.storageGB} GB storage`,
-        `${formatLimit(plan.limits.membersPerProject)} ${
+        `${formatLimit(plan.limits.membersPerProject, locale)} ${
             plan.limits.membersPerProject === 1 ? 'member' : 'members'
         } per project`,
         `${plan.limits.concurrentGenerations} ${
@@ -184,13 +189,18 @@ export interface ComparisonRow {
 
 const included = (value: boolean): string => (value ? 'Included' : 'Not included');
 
-export const PLAN_COMPARISON: readonly ComparisonRow[] = [
+/**
+ * AR-014: the comparison table is a FUNCTION of the locale — the values are
+ * display strings, and a module-level constant cannot know the locale.
+ */
+export function planComparison(locale: AppLocale): ComparisonRow[] {
+    return [
     {
         label: FEATURE_LABELS['ai.generation'],
         values: {
-            starter: `${integer.format(PLAN_CATALOGUE.starter.limits.generations)} / month`,
-            pro: `${integer.format(PLAN_CATALOGUE.pro.limits.generations)} / month`,
-            studio: `${integer.format(PLAN_CATALOGUE.studio.limits.generations)} / month`,
+            starter: `${formatNumber(PLAN_CATALOGUE.starter.limits.generations, locale)} / month`,
+            pro: `${formatNumber(PLAN_CATALOGUE.pro.limits.generations, locale)} / month`,
+            studio: `${formatNumber(PLAN_CATALOGUE.studio.limits.generations, locale)} / month`,
         },
     },
     {
@@ -204,17 +214,17 @@ export const PLAN_COMPARISON: readonly ComparisonRow[] = [
     {
         label: FEATURE_LABELS['teams.create'],
         values: {
-            starter: formatLimit(PLAN_CATALOGUE.starter.limits.teamWorkspaces),
-            pro: formatLimit(PLAN_CATALOGUE.pro.limits.teamWorkspaces),
-            studio: formatLimit(PLAN_CATALOGUE.studio.limits.teamWorkspaces),
+            starter: formatLimit(PLAN_CATALOGUE.starter.limits.teamWorkspaces, locale),
+            pro: formatLimit(PLAN_CATALOGUE.pro.limits.teamWorkspaces, locale),
+            studio: formatLimit(PLAN_CATALOGUE.studio.limits.teamWorkspaces, locale),
         },
     },
     {
         label: FEATURE_LABELS['project.members'],
         values: {
-            starter: formatLimit(PLAN_CATALOGUE.starter.limits.membersPerProject),
-            pro: formatLimit(PLAN_CATALOGUE.pro.limits.membersPerProject),
-            studio: formatLimit(PLAN_CATALOGUE.studio.limits.membersPerProject),
+            starter: formatLimit(PLAN_CATALOGUE.starter.limits.membersPerProject, locale),
+            pro: formatLimit(PLAN_CATALOGUE.pro.limits.membersPerProject, locale),
+            studio: formatLimit(PLAN_CATALOGUE.studio.limits.membersPerProject, locale),
         },
     },
     {
@@ -250,7 +260,8 @@ export const PLAN_COMPARISON: readonly ComparisonRow[] = [
             studio: included(PLAN_CATALOGUE.studio.features.includes(feature)),
         },
     })),
-];
+    ];
+}
 
 export interface PricingFaqItem {
     question: string;

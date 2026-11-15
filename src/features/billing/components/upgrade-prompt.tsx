@@ -1,3 +1,4 @@
+import { useUrlLocale } from '@/i18n/locale';
 import Link from 'next/link';
 import { LockKeyhole } from 'lucide-react';
 
@@ -28,6 +29,7 @@ export function UpgradePrompt({
     resetAt,
     className,
 }: UpgradePromptProps) {
+    const locale = useUrlLocale();
     const hasUsage = typeof used === 'number' && limit !== undefined;
 
     return (
@@ -45,9 +47,9 @@ export function UpgradePrompt({
             <p className="max-w-md text-sm text-muted-foreground">{description}</p>
             {hasUsage ? (
                 <p className="text-xs text-muted-foreground">
-                    {formatCount(used)} of{' '}
-                    {limit === null ? 'unlimited' : formatCount(limit)} used
-                    {resetAt ? ` · resets ${formatDate(resetAt)}` : ''}
+                    {formatCount(used, locale)} of{' '}
+                    {limit === null ? 'unlimited' : formatCount(limit, locale)} used
+                    {resetAt ? ` · resets ${formatDate(resetAt, locale)}` : ''}
                 </p>
             ) : null}
             <Button size="sm" variant="outline" asChild>

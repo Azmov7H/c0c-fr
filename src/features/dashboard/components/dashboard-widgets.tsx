@@ -1,5 +1,7 @@
 'use client';
 
+import { formatMonth } from '@/lib/format';
+import { useUrlLocale } from '@/i18n/locale';
 import Link from 'next/link';
 import {
     ArrowRight,
@@ -59,6 +61,7 @@ export type LazyWidgetId =
     | 'health';
 
 function StatusWidget() {
+    const locale = useUrlLocale();
     const { data, isLoading, isError, refetch } = useDashboardStats();
     const rows: Array<{ key: ProjectStatus; label: string; count: number }> = [
         { key: 'draft', label: 'Draft', count: data?.overview.draftProjects ?? 0 },
@@ -83,7 +86,7 @@ function StatusWidget() {
                             <div className="flex items-center justify-between text-xs">
                                 <span className="font-medium">{row.label}</span>
                                 <span className="tabular-nums text-muted-foreground">
-                                    {formatNumber(row.count)}
+                                    {formatNumber(row.count, locale)}
                                 </span>
                             </div>
                             <div className="h-1.5 overflow-hidden rounded-full bg-muted">
@@ -102,6 +105,7 @@ function StatusWidget() {
 }
 
 function PlatformsWidget() {
+    const locale = useUrlLocale();
     const { data, isLoading, isError, refetch } = useDashboardStats();
     const preferences = useDashboardPreferences().data ?? EMPTY_PREFERENCES;
     const platforms = orderPlatforms(preferences.preferredPlatforms);
@@ -128,7 +132,7 @@ function PlatformsWidget() {
                             <div className="flex items-center justify-between text-xs">
                                 <span className="font-medium">{PLATFORM_LABEL[platform]}</span>
                                 <span className="tabular-nums text-muted-foreground">
-                                    {formatNumber(count)} · {formatPercent(share)}
+                                    {formatNumber(count, locale)} · {formatPercent(share, locale)}
                                 </span>
                             </div>
                             <div className="h-1.5 overflow-hidden rounded-full bg-muted">
@@ -147,6 +151,7 @@ function PlatformsWidget() {
 }
 
 function TrendingWidget() {
+    const locale = useUrlLocale();
     const { data, isLoading, isError, refetch } = useForMeTrendFeed(DASHBOARD_TRENDS_WINDOW, false);
     const topics = data?.topics?.slice(0, 4) ?? [];
 
@@ -188,7 +193,7 @@ function TrendingWidget() {
                             variant="outline"
                             className="border-warning/30 bg-warning/10 text-[10px] font-semibold text-warning"
                         >
-                            {formatNumber(topic.viralScore)} score
+                            {formatNumber(topic.viralScore, locale)} score
                         </Badge>
                     </li>
                 ))}
@@ -203,6 +208,7 @@ function TrendingWidget() {
 }
 
 function ActivityWidget() {
+    const locale = useUrlLocale();
     const { data, isLoading, isError, refetch } = useRecentActivity(DASHBOARD_ACTIVITY_LIMIT);
 
     return (
@@ -224,7 +230,7 @@ function ActivityWidget() {
         >
             <ul className="divide-y divide-border/40">
                 {(data ?? []).map((item: RecentActivityItem) => {
-                    const when = formatRelativeTime(item.createdAt);
+                    const when = formatRelativeTime(item.createdAt, locale);
                     return (
                         <li key={item.id} className="flex items-center justify-between gap-3 py-2.5">
                             <div className="flex min-w-0 items-center gap-3">
@@ -260,6 +266,7 @@ function ActivityWidget() {
 }
 
 function UpcomingWidget() {
+    const locale = useUrlLocale();
     const { data, isLoading, isError, refetch } = useDashboardStats();
     const events = data?.upcomingEvents ?? [];
 
@@ -281,7 +288,7 @@ function UpcomingWidget() {
                         <li key={event._id} className="flex items-center gap-3 rounded-xl p-2 hover:bg-muted/40">
                             <div className="w-10 shrink-0 text-center">
                                 <p className="text-[9px] font-bold uppercase text-muted-foreground">
-                                    {when.toLocaleString('en-US', { month: 'short' })}
+                                    {formatMonth(when, locale)}
                                 </p>
                                 <p className="text-base font-black leading-none">{when.getDate()}</p>
                             </div>

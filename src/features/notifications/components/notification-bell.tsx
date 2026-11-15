@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlLocale } from '@/i18n/locale';
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,6 +31,7 @@ const notificationIcons: Record<string, string> = {
 };
 
 export function NotificationBell() {
+    const locale = useUrlLocale();
     const { data: unreadCount } = useUnreadCount();
     const { data, isLoading } = useNotifications({ page: 1, limit: 10 });
     const markAsRead = useMarkAsRead();
@@ -120,7 +122,7 @@ export function NotificationBell() {
                                         )}
                                     </div>
                                     <span className="text-[10px] text-muted-foreground">
-                                        {formatRelativeTime(notification.createdAt).relative}
+                                        {formatRelativeTime(notification.createdAt, locale).relative}
                                     </span>
                                 </DropdownMenuItem>
                             ))}

@@ -1,3 +1,4 @@
+import { useUrlLocale } from '@/i18n/locale';
 import Link from 'next/link';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,7 +37,8 @@ function ProjectThumbnail({ project }: { project: Project }) {
 }
 
 export function ProjectCard({ project }: { project: Project }) {
-    const updated = formatRelativeTime(project.updatedAt);
+    const locale = useUrlLocale();
+    const updated = formatRelativeTime(project.updatedAt, locale);
     const excerpt = project.description?.trim() || project.idea;
 
     return (

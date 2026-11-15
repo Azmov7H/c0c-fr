@@ -1,5 +1,8 @@
 'use client';
 
+import { formatIsoDate, formatMonthYear } from '@/lib/format';
+import type { AppLocale } from '@/i18n/routing';
+import { useUrlLocale } from '@/i18n/locale';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Bell, Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
@@ -29,16 +32,15 @@ const STATUS_STYLE: Record<PlannerEvent['status'], string> = {
     cancelled: 'bg-negative/10 text-negative',
 };
 
-const monthLabel = (date: Date) =>
-    new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(date);
+/**
+ * AR-014: the month label is display (the locale's month name) and the day
+ * key is MACHINE (the ISO key of the browser's wall calendar — it never
+ * changes shape with the locale).
+ */
+const monthLabelWith = (date: Date, locale: AppLocale) => formatMonthYear(date, locale);
 
-/** `YYYY-MM-DD` of a grid cell in the browser's wall-calendar (no zone override needed). */
 const cellKey = (year: number, monthIndex: number, day: number) =>
-    new Intl.DateTimeFormat('en-CA', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-    }).format(new Date(year, monthIndex, day));
+    formatIsoDate(new Date(year, monthIndex, day));
 
 // Stable render anchors so the memoised grid doesn't rebuild on every render.
 const useMonthWindow = (monthOffset: number) =>
@@ -70,13 +72,14 @@ function EventRow({
     event: PlannerEvent;
     showDay?: boolean;
 }) {
+    const locale = useUrlLocale();
     return (
         <div className="flex flex-1 flex-col">
             <p className="text-sm font-medium">{event.title}</p>
             <p className="text-xs text-muted-foreground">
                 <Clock className="mr-1 inline size-3" aria-hidden="true" />
                 {showDay && event.scheduledDay ? `${event.scheduledDay} · ` : ''}
-                {formatRelativeTime(event.scheduledDate).absolute}
+                {formatRelativeTime(event.scheduledDate, locale).absolute}
                 {event.timezone ? ` (${event.timezone})` : ''}
                 {' · '}
                 {event.type}
@@ -94,6 +97,7 @@ function EventRow({
  * mobile list chip is generated from the same array).
  */
 export function ContentPlanner() {
+    const locale = useUrlLocale();
     const projects = useProjects({ limit: 100 });
     const [projectId, setProjectId] = useState('all');
     const [monthOffset, setMonthOffset] = useState(0);
@@ -185,7 +189,7 @@ export function ContentPlanner() {
                     <Button variant="outline" size="icon" className="size-11" aria-label="Previous month" onClick={() => setMonthOffset((value) => value - 1)}>
                         <ChevronLeft className="size-4" aria-hidden="true" />
                     </Button>
-                    <span className="min-w-40 text-center text-sm font-medium">{monthLabel(month)}</span>
+                    <span className="min-w-40 text-center text-sm font-medium">{monthLabelWith(month, locale)}</span>
                     <Button variant="outline" size="icon" className="size-11" aria-label="Next month" onClick={() => setMonthOffset((value) => value + 1)}>
                         <ChevronRight className="size-4" aria-hidden="true" />
                     </Button>
@@ -196,7 +200,7 @@ export function ContentPlanner() {
                 title={
                     <span className="flex items-center gap-2">
                         <Calendar className="size-4 text-primary" aria-hidden="true" />
-                        {monthLabel(month)}
+                        {monthLabelWith(month, locale)}
                     </span>
                 }
             >

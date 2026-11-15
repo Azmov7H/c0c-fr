@@ -1,55 +1,26 @@
-const absoluteFormatter = new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-});
-
-const relativeFormatter = new Intl.RelativeTimeFormat('en-US', { numeric: 'auto' });
-
-const RELATIVE_UNITS: Array<[Intl.RelativeTimeFormatUnit, number]> = [
-    ['year', 365 * 24 * 60 * 60 * 1000],
-    ['month', 30 * 24 * 60 * 60 * 1000],
-    ['week', 7 * 24 * 60 * 60 * 1000],
-    ['day', 24 * 60 * 60 * 1000],
-    ['hour', 60 * 60 * 1000],
-    ['minute', 60 * 1000],
-    ['second', 1000],
-];
-
-export function formatAbsoluteTime(iso: string | Date): string {
-    const date = typeof iso === 'string' ? new Date(iso) : iso;
-    if (Number.isNaN(date.getTime())) return 'Unknown date';
-    return absoluteFormatter.format(date);
-}
+import type { AppLocale } from '@/i18n/routing';
+import { formatDateTime, formatRelativeTime as formatRelative } from '@/lib/format';
 
 /**
- * Relative label plus the absolute value a screen reader (or a hovering user)
- * can resolve without arithmetic. Returns an empty `absolute` for invalid input
- * rather than inventing a date.
+ * The relative-time labels (T15).
+ *
+ * AR-014: the locale is an ARGUMENT, not an ambient default — the layer
+ * under `src/lib/format/` owns the formatting, and these two functions keep
+ * the app's shape (a relative label plus the absolute value a screen reader
+ * can resolve without arithmetic).
+ *
+ * The English fallbacks are copy and move to the catalog with the surface
+ * that owns them (AR-028); until then they are the English the product has
+ * always shown.
  */
+export function formatAbsoluteTime(value: string | Date, locale: AppLocale): string {
+    return formatDateTime(value, locale, 'Unknown date');
+}
+
 export function formatRelativeTime(
-    iso: string | Date,
+    value: string | Date,
+    locale: AppLocale,
     now: Date = new Date()
 ): { relative: string; absolute: string } {
-    const date = typeof iso === 'string' ? new Date(iso) : iso;
-    if (Number.isNaN(date.getTime())) {
-        return { relative: 'Unknown time', absolute: '' };
-    }
-
-    const delta = date.getTime() - now.getTime();
-    const magnitude = Math.abs(delta);
-
-    for (const [unit, ms] of RELATIVE_UNITS) {
-        if (magnitude >= ms || unit === 'second') {
-            return {
-                relative: relativeFormatter.format(Math.round(delta / ms), unit),
-                absolute: absoluteFormatter.format(date),
-            };
-        }
-    }
-
-    // The loop above always returns via the unconditional 'second' guard (its
-    // magnitude term is a strict subset), so this fallback is unreachable by
-    // construction — kept only to satisfy the function's return type.
-    // v8 ignore next -- provably dead branch, not skipped logic
-    return { relative: 'just now', absolute: absoluteFormatter.format(date) };
+    return formatRelative(value, locale, now, { relative: 'Unknown time', absolute: '' });
 }

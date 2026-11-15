@@ -30,6 +30,9 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({
     useRouter: () => ({ replace: mocks.replace, push: mocks.push }),
+    // AR-014: the wizard formats its dates, and the locale comes from the
+    // URL — the path the mock reports is the English one.
+    usePathname: () => '/en/projects/new',
 }));
 
 vi.mock('@/lib/toast', () => ({

@@ -1,5 +1,6 @@
 "use client"
 
+import { useUrlLocale } from '@/i18n/locale';
 import * as React from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
@@ -140,6 +141,7 @@ function MetricCard({
   color: string
   isLoading?: boolean
 }) {
+    const locale = useUrlLocale();
   return (
     <Card className="border-border/50 bg-card transition-all duration-200 hover:border-primary/20 hover:shadow-premium">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 px-5 pb-2 pt-5">
@@ -156,7 +158,7 @@ function MetricCard({
           <Skeleton className="mt-1 h-9 w-16" />
         ) : (
           <span className="text-3xl font-black tracking-tight tabular-nums">
-            {formatNumber(value ?? 0)}
+            {formatNumber(value ?? 0, locale)}
           </span>
         )}
         <p className="mt-2 text-xs font-medium text-muted-foreground">{sub}</p>
@@ -222,7 +224,8 @@ function ProjectThumb({ project }: { project: Project }) {
 }
 
 function ProjectRow({ project }: { project: Project }) {
-  const updated = formatRelativeTime(project.updatedAt)
+    const locale = useUrlLocale();
+  const updated = formatRelativeTime(project.updatedAt, locale)
   return (
     <Link
       href={`/projects/${project._id}`}
@@ -248,6 +251,7 @@ function ProjectRow({ project }: { project: Project }) {
 // ─── Widgets ────────────────────────────────────────────────────────────────
 
 function MetricsWidget({ loading }: { loading: boolean }) {
+    const locale = useUrlLocale();
   const { data, isLoading, isError, refetch } = useDashboardStats()
   return (
     <DataState
@@ -266,7 +270,7 @@ function MetricsWidget({ loading }: { loading: boolean }) {
         <MetricCard
           label="Projects"
           value={data?.overview.totalProjects}
-          sub={`${formatNumber(data?.overview.activeProjects ?? 0)} in progress`}
+          sub={`${formatNumber(data?.overview.activeProjects ?? 0, locale)} in progress`}
           icon={FileText}
           color="text-info"
         />
@@ -303,6 +307,7 @@ function ProjectsWidget({
   status: StatusFilter
   onStatusChange: (value: StatusFilter) => void
 }) {
+    const locale = useUrlLocale();
   const { data: stats } = useDashboardStats()
   const { data, isLoading, isError, refetch } = useProjects(DASHBOARD_PROJECTS_QUERY)
 
@@ -335,7 +340,7 @@ function ProjectsWidget({
             >
               {filter.label}
               <span className="ml-1.5 tabular-nums text-muted-foreground">
-                {isLoading ? "–" : formatNumber(counts[filter.value])}
+                {isLoading ? "–" : formatNumber(counts[filter.value], locale)}
               </span>
             </Button>
           ))}

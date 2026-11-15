@@ -12,23 +12,12 @@
  *
  * ─── The debt this list carries ────────────────────────────────────────────
  *
- * The formatter sites below still format with a hardcoded locale. They are
- * the ones FORMATTING-STRATEGY §2 maps, and they are migrated in AR-014,
- * when `src/lib/format/` exists and every call goes through it. Until then
- * they are the KNOWN exceptions — one line each, one owner (the format
- * layer), one deadline (AR-014).
+ * AR-014 migrated every formatter site onto `src/lib/format/`, so the list
+ * is down to the two places where a hardcoded locale is honest by design:
+ * the planner's time-zone detection (an INPUT to the formatter) and the
+ * direction helpers (a direction decision, not a word).
  */
 export const HARDCODED_LOCALE_EXCEPTIONS: string[] = [
-    // AR-014 — the centralized format layer.
-    'src/lib/relative-time.ts',
-    'src/features/dashboard/lib/format.ts',
-    'src/features/dashboard/components/dashboard-widgets.tsx',
-    'src/features/billing/lib/format.ts',
-    'src/features/billing/lib/plans.ts',
-    'src/features/planner/components/content-planner.tsx',
-    'src/components/ui/calendar.tsx',
-    'src/components/ui/chart.tsx',
-    'src/features/projects/components/workspace/project-export.tsx',
     // Not a display formatter: the planner reads the environment's time zone
     // (FORMATTING-STRATEGY §2). The time zone is an input to the formatter,
     // never inferred from the locale.
