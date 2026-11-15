@@ -16,7 +16,8 @@
     "lint:baseline": "node scripts/check-lint-baseline.mjs",
     "audit:gate": "node scripts/audit-gate.mjs --scope prod",
     "preinstall": "npx only-allow pnpm",
-    "check:links": "node scripts/check-links.mjs"
+    "check:links": "node scripts/check-links.mjs",
+    "check:i18n": "node scripts/i18n/check-parity.mjs && node scripts/i18n/extract-usage.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
