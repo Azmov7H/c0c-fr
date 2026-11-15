@@ -12,10 +12,12 @@
 
 import { expect, test } from '@playwright/test';
 
+import { localePath } from '../harness';
+
 test.use({ storageState: 'tests/e2e/.auth/journey1.a.json' });
 
 test('project → assets → media → audio → export → settings → legacy', async ({ page }) => {
-    await page.goto('/projects');
+    await page.goto(localePath('/projects'));
     await page.locator('#main-content').getByRole('link', { name: 'New Project' }).first().click();
     await page.getByLabel('Project title').fill('M2 workspace journey');
     await page.getByLabel('The idea').fill('Integration journey project.');
@@ -34,10 +36,10 @@ test('project → assets → media → audio → export → settings → legacy'
     await expect(page.getByRole('heading', { name: /AI Generated Images/ })).toBeVisible();
 
     // Settings: API tab is gone; legacy deep link lands on profile.
-    await page.goto('/settings?tab=api');
+    await page.goto(localePath('/settings?tab=api'));
     await expect(page.getByText(/API settings were removed/)).toBeVisible();
 
     // Legacy routes redirect (no standalone nav left to break).
-    await page.goto('/audio');
+    await page.goto(localePath('/audio'));
     await expect(page).toHaveURL(/\/projects/);
 });

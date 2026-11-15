@@ -220,6 +220,10 @@ function registerFixture(spec: {
 }
 
 const FIXTURE_SPECS = [
+    // AR-008: the M2 workspace journey asks for its own persona
+    // (journey1.a). Without it the spec had no cookie jar at all and every
+    // run failed on "Error reading storage state".
+    { key: 'journey1.a', firstName: 'Jana', lastName: 'Owner', xForwardedFor: '203.0.113.10' },
     { key: 'journey2.owner', firstName: 'June', lastName: 'Owner', xForwardedFor: '203.0.113.11' },
     { key: 'journey3.owner', firstName: 'Joa', lastName: 'Owner', xForwardedFor: '203.0.113.12' },
     { key: 'journey4.owner', firstName: 'Junip', lastName: 'Quota', xForwardedFor: '203.0.113.13' },

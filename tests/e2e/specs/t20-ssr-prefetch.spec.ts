@@ -26,6 +26,8 @@
 
 import { expect, test } from '@playwright/test';
 
+import { localePath } from '../harness';
+
 const SEED_PROJECT = 'journey2.owner fixture project';
 
 test.use({ storageState: 'tests/e2e/.auth/journey2.owner.json' });
@@ -50,7 +52,7 @@ test('/dashboard serves prefetched data in the initial HTML', async ({ page }) =
 });
 
 test('and the hydrated DOM agrees (no silent skeleton fallback)', async ({ page }) => {
-    await page.goto('/dashboard');
+    await page.goto(localePath('/dashboard'));
     // Same content visible after hydration — the server HTML was real data,
     // not a placeholder the client swapped out.
     expect(

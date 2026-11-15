@@ -13,6 +13,8 @@
 
 import { expect, test } from '@playwright/test';
 
+import { localePath } from '../harness';
+
 test.use({ storageState: 'tests/e2e/.auth/journey3.owner.json' });
 
 test('viewer cannot edit: control hidden AND direct patch returns 404', async ({
@@ -20,7 +22,7 @@ test('viewer cannot edit: control hidden AND direct patch returns 404', async ({
     browser,
 }) => {
     // ── Owner: create the project in the real wizard ────────────────────────
-    await page.goto('/projects');
+    await page.goto(localePath('/projects'));
     await page.locator('#main-content').getByRole('link', { name: 'New Project' }).click();
     await page.getByLabel('Project title').fill('Viewer-only review');
     await page.getByLabel('The idea').fill('A project the viewer may read, never mutate.');
