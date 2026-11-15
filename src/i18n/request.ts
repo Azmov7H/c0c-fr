@@ -23,7 +23,7 @@ import { routing } from './routing';
  * URL is worse than a page that renders in the default locale.
  */
 export default getRequestConfig(async ({ locale }) => {
-    let resolved = locale;
+    let resolved: string | undefined = locale;
 
     if (!resolved) {
         try {

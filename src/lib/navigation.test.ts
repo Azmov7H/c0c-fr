@@ -32,7 +32,7 @@ function walk(dir: string): string[] {
 
 /** First path segment of every dashboard route that has a page. */
 function dashboardRouteSegments(): Set<string> {
-    const dashboardDir = path.join(APP_DIR, '(dashboard)');
+    const dashboardDir = path.join(APP_DIR, '[locale]', '(dashboard)');
     const segments = new Set<string>();
     for (const file of walk(dashboardDir)) {
         if (!file.endsWith(`page.tsx`)) continue;
@@ -44,12 +44,14 @@ function dashboardRouteSegments(): Set<string> {
 
 /** Root-level routes (top-level directory with a page.tsx). */
 function hasPageForUrl(url: string): boolean {
-    // /dashboard → src/app/(dashboard)/dashboard/page.tsx
+    // /dashboard → src/app/[locale]/(dashboard)/dashboard/page.tsx
+    // (AR-004: every page lives under the locale segment.)
     const parts = url.split('/').filter(Boolean);
     const candidates = [
-        path.join(APP_DIR, '(dashboard)', ...parts, 'page.tsx'),
-        path.join(APP_DIR, '(marketing)', ...parts, 'page.tsx'),
-        path.join(APP_DIR, '(auth)', ...parts, 'page.tsx'),
+        path.join(APP_DIR, '[locale]', '(dashboard)', ...parts, 'page.tsx'),
+        path.join(APP_DIR, '[locale]', '(marketing)', ...parts, 'page.tsx'),
+        path.join(APP_DIR, '[locale]', '(auth)', ...parts, 'page.tsx'),
+        path.join(APP_DIR, '[locale]', ...parts, 'page.tsx'),
         path.join(APP_DIR, ...parts, 'page.tsx'),
     ];
     return candidates.some((candidate) => fs.existsSync(candidate));

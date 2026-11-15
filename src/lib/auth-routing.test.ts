@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
 
-import { GET, HEAD } from '@/app/(auth)/register/route';
+import { GET, HEAD } from '@/app/register/route';
 import robots from '@/app/robots';
-import { metadata } from '@/app/(auth)/layout';
+import { metadata } from '@/app/[locale]/(auth)/layout';
 
 /**
  * T12: `/register` becomes a permanent redirect to the canonical `/signup`,

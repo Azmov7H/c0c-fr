@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- AR-004: with the `[locale]` segment the lint rule resolves `/pricing` against the dynamic route and asks for a `next/link`; but this is the landing page, where the link runtime is a ~3 kB gzip client chunk the budget does not have room for (T20). A plain anchor is the deliberate choice here — see marketing-header.tsx. */
 import { PricingCards } from '@/features/billing/components/pricing';
 
 export function PricingTeaser() {
