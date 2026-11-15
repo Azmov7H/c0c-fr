@@ -21,6 +21,8 @@
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
+import { findPhysicalUtilities, PHYSICAL_UTILITIES } from './rtl-utilities.mjs';
+
 const ROOT = process.cwd();
 const SRC_DIR = join(ROOT, 'src');
 const EXCEPTIONS_FILE = join(ROOT, 'rtl-exceptions.json');
@@ -31,19 +33,12 @@ const write = process.argv.includes('--write');
  *
  * `text-right` is included: a text alignment is a direction decision, and
  * the exception list is where the numeric columns are justified.
+ *
+ * The MATCHER lives in `scripts/rtl-utilities.mjs` — the same one the
+ * rendered-output check uses (AR-021), so the gate and the test can never
+ * disagree about what "a physical utility" is.
  */
-const PHYSICAL = [
-    'mr-',
-    'ml-',
-    'pr-',
-    'pl-',
-    'text-left',
-    'text-right',
-    'border-l',
-    'border-r',
-    'left-',
-    'right-',
-];
+const PHYSICAL = PHYSICAL_UTILITIES;
 
 function sourceFiles(dir) {
     const out = [];
@@ -57,24 +52,7 @@ function sourceFiles(dir) {
 
 /** The physical utilities of one file, with their line numbers. */
 function findings(file) {
-    const lines = readFileSync(file, 'utf8').split('\n');
-    const found = [];
-    lines.forEach((line, index) => {
-        for (const utility of PHYSICAL) {
-            // A utility inside a class list: `mr-2`, `md:ml-0`, `-right-2`.
-            const escaped = utility.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
-            // The token must not be followed by a letter: `border-r` is a
-            // physical edge, `border-ring` is a focus ring.
-            const pattern = new RegExp(
-                `(?:^|[\\s"'\`])((?:[a-z-]+:)*-?${escaped}(?![a-z])[a-z0-9.\\[\\]-]*)`,
-                'g'
-            );
-            for (const match of line.matchAll(pattern)) {
-                found.push({ utility: match[1], line: index + 1 });
-            }
-        }
-    });
-    return found;
+    return findPhysicalUtilities(readFileSync(file, 'utf8'));
 }
 
 const exceptions = JSON.parse(readFileSync(EXCEPTIONS_FILE, 'utf8'));
@@ -114,7 +92,11 @@ if (write) {
     const next = { ...exceptions, files: {} };
     for (const [file, list] of allowed) {
         const hits = found.get(file);
-        const kept = list.filter((utility) => hits && hits.some((hit) => hit.utility === utility));
+        // `list` is a Set — the `--write` path used to call `.filter` on it
+        // and threw, so the allowlist could never actually be rewritten.
+        const kept = [...list].filter(
+            (utility) => hits && hits.some((hit) => hit.utility === utility)
+        );
         if (kept.length) next.files[file] = kept;
     }
     next.generatedAt = new Date().toISOString();
