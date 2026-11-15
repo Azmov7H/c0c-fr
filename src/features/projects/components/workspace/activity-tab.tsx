@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlLocale } from '@/i18n/locale';
 import { useState } from 'react';
 import {
     Activity,
@@ -61,6 +62,7 @@ const FILTERS: Array<{ value: 'all' | ProjectActivityType; label: string }> = [
 ];
 
 export function ActivityTab({ projectId }: { projectId: string }) {
+    const locale = useUrlLocale();
     const [filter, setFilter] = useState<'all' | ProjectActivityType>('all');
     const [page, setPage] = useState(1);
     const query = useProjectActivity(projectId, {
@@ -144,7 +146,7 @@ export function ActivityTab({ projectId }: { projectId: string }) {
                                 const actorName = item.actor
                                     ? [item.actor.firstName, item.actor.lastName].filter(Boolean).join(' ') || item.actor.email
                                     : 'Someone';
-                                const relative = formatRelativeTime(item.createdAt);
+                                const relative = formatRelativeTime(item.createdAt, locale);
                                 const label = meta?.label ?? item.type.replace(/_/g, ' ');
                                 return (
                                     <li key={item.id} className="flex items-start gap-3 py-4">
@@ -160,7 +162,7 @@ export function ActivityTab({ projectId }: { projectId: string }) {
                                                 <span className="font-medium">{item.target}</span>
                                                 {item.role ? ` as ${item.role}` : ''}.
                                             </p>
-                                            <p className="mt-0.5 text-xs text-muted-foreground" title={formatAbsoluteTime(item.createdAt)}>
+                                            <p className="mt-0.5 text-xs text-muted-foreground" title={formatAbsoluteTime(item.createdAt, locale)}>
                                                 {relative.relative} · {relative.absolute}
                                             </p>
                                         </div>

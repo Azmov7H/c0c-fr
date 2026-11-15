@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlLocale } from '@/i18n/locale';
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
@@ -96,6 +97,7 @@ const expiresIn = (iso: string): string => {
 };
 
 export function MembersTab({ projectId, role }: { projectId: string; role: ProjectRole }) {
+    const locale = useUrlLocale();
     const currentUserId = useAuthStore((state) => state.user?.id ?? '');
     const { data, isLoading, error, refetch } = useProjectMembers(projectId);
     const invitesQuery = useProjectInvites(projectId);
@@ -204,7 +206,7 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                                 ? [member.user.firstName, member.user.lastName].filter(Boolean).join(' ') || member.user.email
                                 : 'Deleted account';
                             const joined = 'joinedAt' in member && member.joinedAt
-                                ? `Joined ${formatRelativeTime(member.joinedAt).relative}`
+                                ? `Joined ${formatRelativeTime(member.joinedAt, locale).relative}`
                                 : 'Project owner';
                             return (
                                 <li key={member.userId} className="flex flex-wrap items-center gap-3 py-4">

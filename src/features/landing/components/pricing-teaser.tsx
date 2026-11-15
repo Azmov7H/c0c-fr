@@ -1,7 +1,9 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- AR-004: with the `[locale]` segment the lint rule resolves `/pricing` against the dynamic route and asks for a `next/link`; but this is the landing page, where the link runtime is a ~3 kB gzip client chunk the budget does not have room for (T20). A plain anchor is the deliberate choice here — see marketing-header.tsx. */
 import { PricingCards } from '@/features/billing/components/pricing';
+import { getLocale } from '@/i18n/server';
 
-export function PricingTeaser() {
+export async function PricingTeaser() {
+    const locale = await getLocale();
     return (
         <section id="pricing" className="scroll-mt-20 py-16 md:py-24">
             <div className="container mx-auto max-w-6xl px-4">
@@ -15,7 +17,7 @@ export function PricingTeaser() {
                     </p>
                 </div>
 
-                <PricingCards className="mt-12" />
+                <PricingCards className="mt-12" locale={locale} />
 
                 <p className="mt-6 text-center text-xs text-muted-foreground">
                     Every new account starts on Starter, no card required.{' '}

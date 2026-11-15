@@ -1,3 +1,4 @@
+import { useUrlLocale } from '@/i18n/locale';
 import { AlertTriangle } from 'lucide-react';
 
 import { Progress } from '@/components/ui/progress';
@@ -31,6 +32,7 @@ function usageRows(summary: BillingSummary): UsageRow[] {
 }
 
 export function UsageSummary({ summary }: UsageSummaryProps) {
+    const locale = useUrlLocale();
     const rows = usageRows(summary);
     const limitRows = Object.entries(summary.quota).filter(
         ([key]) => !rows.some((row) => row.feature === key)
@@ -62,7 +64,7 @@ export function UsageSummary({ summary }: UsageSummaryProps) {
                                 <p className="text-sm tabular-nums text-muted-foreground">
                                     {limit === null
                                         ? 'Unlimited'
-                                        : `${formatCount(row.used)} / ${formatCount(limit)}`}
+                                        : `${formatCount(row.used, locale)} / ${formatCount(limit, locale)}`}
                                 </p>
                             </div>
                             {limit === null ? (
@@ -80,10 +82,7 @@ export function UsageSummary({ summary }: UsageSummaryProps) {
                                         <span>{percent}% used</span>
                                         <span>
                                             Resets{' '}
-                                            {formatDate(
-                                                row.resetAt || summary.renewalDate,
-                                                'at the end of the period'
-                                            )}
+                                            {formatDate(row.resetAt || summary.renewalDate, locale, 'at the end of the period')}
                                         </span>
                                     </div>
                                     {exhausted ? (
@@ -110,7 +109,7 @@ export function UsageSummary({ summary }: UsageSummaryProps) {
                                     {QUOTA_LABELS[key] ?? key}
                                 </dt>
                                 <dd className="mt-0.5 text-sm font-medium">
-                                    {formatLimit(value)}
+                                    {formatLimit(value, locale)}
                                 </dd>
                             </div>
                         ))}

@@ -7,6 +7,7 @@ import {
 } from '@/features/billing/components/pricing';
 import { PLAN_CATALOGUE, PLAN_IDS } from '@/features/billing/lib/plans';
 import { PUBLIC_ROUTES } from '@/lib/public-routes';
+import { getLocale } from '@/i18n/server';
 
 const SITE_URL = 'https://aicontentengine.com';
 const canonical = PUBLIC_ROUTES.find((route) => route.path === '/pricing')?.path ?? '/pricing';
@@ -49,7 +50,8 @@ const jsonLd = {
     }),
 };
 
-export default function PricingPage() {
+export default async function PricingPage() {
+    const locale = await getLocale();
     return (
         <div id="pricing" className="scroll-mt-20">
             <script
@@ -67,7 +69,7 @@ export default function PricingPage() {
                             Start free, then move up when your publishing schedule needs it.
                         </p>
                     </div>
-                    <PricingCards className="mt-12" />
+                    <PricingCards className="mt-12" locale={locale} />
                     <p className="mt-6 text-center text-xs text-muted-foreground">
                         All paid plans are billed monthly in USD. Prices exclude any
                         taxes that may apply.
@@ -85,7 +87,7 @@ export default function PricingPage() {
                         month for Starter.
                     </p>
                     <div className="mt-8">
-                        <PlanComparisonTable />
+                        <PlanComparisonTable locale={locale} />
                     </div>
                 </div>
             </section>

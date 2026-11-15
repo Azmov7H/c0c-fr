@@ -84,6 +84,25 @@ describe('design tokens', () => {
         expect(css).toMatch(/--font-sans:\s*var\(--font-body\)/);
     });
 
+    it('AR-016: the Arabic face sits after the Latin one in both stacks', () => {
+        // One Latin voice: a Latin word inside an Arabic sentence falls
+        // through to Inter, because the Arabic face covers Arabic only.
+        expect(css).toMatch(/--font-sans:\s*var\(--font-body\),\s*var\(--font-arabic\)/);
+        expect(css).toMatch(/--font-display:\s*var\(--font-space-grotesk\),\s*var\(--font-arabic\)/);
+    });
+
+    it('AR-016: Arabic gets its own vertical rhythm', () => {
+        expect(css).toMatch(/\[lang="ar"\]\s*body\s*\{[^}]*line-height:\s*1\.75/);
+    });
+
+    it('AR-016: the tracking ban is stated, and it spares the LTR islands', () => {
+        // Letter-spacing breaks the cursive joins of the script — the ban is
+        // a hard rule, so it is asserted rather than reviewed.
+        expect(css).toMatch(
+            /\[lang="ar"\]\s*:not\(code,\s*pre,\s*kbd,\s*samp,\s*\[dir="ltr"\]\)\s*\{[^}]*letter-spacing:\s*normal/
+        );
+    });
+
     it('contains no reference to the never-defined font variables', () => {
         expect(css).not.toContain('--font-inter');
         expect(css).not.toContain('--font-geist-mono');
@@ -117,6 +136,14 @@ describe('font wiring in layout.tsx', () => {
     it('loads Space Grotesk onto --font-space-grotesk', () => {
         expect(layout).toMatch(/Space_Grotesk\(/);
         expect(layout).toContain("variable: '--font-space-grotesk'");
+    });
+
+    it('AR-016: loads Noto Sans Arabic onto --font-arabic', () => {
+        expect(layout).toMatch(/Noto_Sans_Arabic\(/);
+        expect(layout).toContain("variable: '--font-arabic'");
+        // The Arabic subset only — a Latin face here would be a second Latin
+        // voice in the product.
+        expect(layout).toContain("subsets: ['arabic']");
     });
 
     it('defaults the theme to system and does not suppress the colour transition', () => {

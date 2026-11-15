@@ -95,13 +95,18 @@
 :root {
   --radius: 0.75rem;
 
-  /* Font stacks — the real definitions. `--font-body` (Inter) and
-     `--font-space-grotesk` (Space Grotesk) are injected by next/font on <body>;
-     the generic fallbacks after them are what renders during font swap, and
-     next/font's size-adjusted fallback faces keep that swap from shifting
-     layout. */
-  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  /* Font stacks — the real definitions. `--font-body` (Inter),
+     `--font-space-grotesk` (Space Grotesk) and `--font-arabic` (Noto Sans
+     Arabic) are injected by next/font on <body>; the generic fallbacks after
+     them are what renders during font swap, and next/font's size-adjusted
+     fallback faces keep that swap from shifting layout.
+
+     AR-016 (TYPOGRAPHY §3): the Arabic face sits AFTER the Latin one, so
+     Latin characters inside an Arabic sentence render in Inter — one Latin
+     voice in the whole product, not two. The Arabic face is present on the
+     English pages too (harmlessly: it is only used for Arabic glyphs). */
+  --font-sans: var(--font-body), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-arabic), var(--font-body), ui-sans-serif, system-ui, sans-serif;
 
   /* Light Theme - Content Creator Cloud */
   --background: hsl(0, 0%, 98%); /* #FAFAFA */
@@ -279,4 +284,22 @@
     -webkit-backdrop-filter: none !important;
     background: hsl(var(--sidebar-background)) !important;
   }
+}
+/* ─── Arabic metrics (AR-016, TYPOGRAPHY §4) ─────────────────────────────────
+ *
+ * Arabic script needs a different vertical rhythm than Inter, and it must
+ * never be letter-spaced: tracking breaks the cursive joins of the script
+ * and shreds the connected letters into islands.
+ *
+ * The tracking ban is a HARD rule, so it is stated as a rule and not left to
+ * a reviewer's eye. It excludes the LTR islands (code, mono, and anything
+ * that declares `dir="ltr"`) — those keep their own tracking, because they
+ * are not Arabic.
+ */
+[lang="ar"] body {
+  line-height: 1.75;
+}
+
+[lang="ar"] :not(code, pre, kbd, samp, [dir="ltr"]) {
+  letter-spacing: normal;
 }

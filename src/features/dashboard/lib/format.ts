@@ -1,23 +1,24 @@
-/**
- * One number formatter for the whole dashboard (T14). Dates moved to
- * `src/lib/relative-time.ts` in T15 so the projects list shares them instead of
- * keeping a second copy.
- */
+import type { AppLocale } from '@/i18n/routing';
+import { formatNumber as formatNumberValue, formatPercent as formatPercentValue, formatShortDate } from '@/lib/format';
 
 export { formatAbsoluteTime, formatRelativeTime } from '@/lib/relative-time';
 
-const numberFormatter = new Intl.NumberFormat('en-US');
-
-export function formatNumber(value: number): string {
-    return numberFormatter.format(value);
+/**
+ * One number formatter for the whole dashboard (T14). Dates moved to
+ * `src/lib/relative-time.ts` in T15 so the projects list shares them instead
+ * of keeping a second copy.
+ *
+ * AR-014: the locale is an argument — the layer under `src/lib/format/`
+ * owns the formatting.
+ */
+export function formatNumber(value: number, locale: AppLocale): string {
+    return formatNumberValue(value, locale);
 }
 
-export function formatPercent(value: number): string {
-    return `${numberFormatter.format(value)}%`;
+export function formatPercent(value: number, locale: AppLocale): string {
+    return formatPercentValue(value, locale);
 }
 
-export function formatShortMonthDay(iso: string): string {
-    const date = new Date(iso);
-    if (Number.isNaN(date.getTime())) return '';
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+export function formatShortMonthDay(value: string, locale: AppLocale): string {
+    return formatShortDate(value, locale);
 }

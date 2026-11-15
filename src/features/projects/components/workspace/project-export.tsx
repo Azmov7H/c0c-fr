@@ -1,5 +1,7 @@
 'use client';
 
+import { useUrlLocale } from '@/i18n/locale';
+import { formatDate } from '@/lib/format';
 import * as React from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2, PackageOpen } from 'lucide-react';
@@ -78,6 +80,7 @@ function failureNote(record: ExportRecordView): string | null {
  * never silently paid for.
  */
 export function ProjectExport({ projectId, title }: { projectId: string; title: string }) {
+    const locale = useUrlLocale();
     const [scope, setScope] = React.useState<Scope>('full');
     const [pending, setPending] = React.useState(false);
     const [idempotencyKey, setIdempotencyKey] = React.useState(newIdempotencyKey);
@@ -207,7 +210,11 @@ export function ProjectExport({ projectId, title }: { projectId: string; title: 
                                 className="flex flex-wrap items-center justify-between gap-2 text-xs"
                             >
                                 <span className="text-muted-foreground">
-                                    {new Date(record.startedAt).toLocaleDateString()} ·{' '}
+                                    {formatDate(new Date(record.startedAt), locale, {
+                                        month: 'numeric',
+                                        day: 'numeric',
+                                        year: 'numeric',
+                                    })} ·{' '}
                                     {record.scope}
                                 </span>
                                 <span className="flex items-center gap-2">

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Space_Grotesk } from 'next/font/google';
+import { Inter, Noto_Sans_Arabic, Space_Grotesk } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
 
@@ -20,6 +20,22 @@ const inter = Inter({
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-space-grotesk',
+  display: 'swap',
+});
+
+/**
+ * AR-016 — the Arabic face.
+ *
+ * Noto Sans Arabic, VARIABLE, Arabic subset only (TYPOGRAPHY §2): it covers
+ * the Arabic script and nothing else, so the Latin characters inside an
+ * Arabic sentence fall through the stack to Inter — one Latin voice in the
+ * whole product, not two. next/font self-hosts it (no external request on
+ * first paint, and the CSP needs no change: `font-src 'self' data:`), and
+ * `adjustFontFallback` keeps the swap from shifting the layout.
+ */
+const notoSansArabic = Noto_Sans_Arabic({
+  subsets: ['arabic'],
+  variable: '--font-arabic',
   display: 'swap',
 });
 
@@ -83,7 +99,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} dir={directionFor(locale)} suppressHydrationWarning>
-      <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans`}>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} ${notoSansArabic.variable} font-sans`}>
         {/* ThemeProvider lives in AppProviders ((auth)/(dashboard) groups).
             Marketing routes use the dependency-free toggle + pre-paint script
             — see theme-pre-paint-script.tsx for the T11 budget reasoning. */}

@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlLocale } from '@/i18n/locale';
 import Link from 'next/link';
 import { AlertTriangle, ArrowRight, CalendarDays, FileText, Image as ImageIcon, Music, FolderKanban } from 'lucide-react';
 
@@ -18,6 +19,7 @@ import { formatNumber, formatRelativeTime } from '@/features/dashboard/lib/forma
  * generation activity is creation activity, never "views".
  */
 export function AnalyticsDashboard() {
+    const locale = useUrlLocale();
   const stats = useDashboardStats();
   const data = stats.data;
   const totalProjects = data?.overview.totalProjects ?? 0;
@@ -137,7 +139,7 @@ export function AnalyticsDashboard() {
                   {data.recentProjects.map((project) => (
                     <div key={project._id} className="flex items-center justify-between p-2 text-sm">
                       <span className="min-w-0 truncate font-semibold">{project.title}</span>
-                      <span className="text-xs text-muted-foreground">{formatRelativeTime(project.updatedAt ?? project.createdAt).relative}</span>
+                      <span className="text-xs text-muted-foreground">{formatRelativeTime(project.updatedAt ?? project.createdAt, locale).relative}</span>
                     </div>
                   ))}
                 </CardContent>
@@ -157,6 +159,7 @@ export function AnalyticsDashboard() {
 }
 
 function Metric({ label, value, sub, icon: Icon }: { label: string; value: number; sub: string; icon: React.ElementType }) {
+    const locale = useUrlLocale();
   return (
     <Card className="border-border/50">
       <CardContent className="p-5">
@@ -164,7 +167,7 @@ function Metric({ label, value, sub, icon: Icon }: { label: string; value: numbe
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
           <Icon className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
         </div>
-        <p className="mt-2 text-3xl font-black tracking-tight tabular-nums">{formatNumber(value)}</p>
+        <p className="mt-2 text-3xl font-black tracking-tight tabular-nums">{formatNumber(value, locale)}</p>
         <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
       </CardContent>
     </Card>
