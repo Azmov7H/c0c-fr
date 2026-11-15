@@ -66,3 +66,50 @@ export function isAppLocale(value: unknown): value is AppLocale {
 export function directionFor(locale: AppLocale): 'ltr' | 'rtl' {
     return locale === 'ar' ? 'rtl' : 'ltr';
 }
+
+/**
+ * The locale a path is rendered in, or null when the path carries none.
+ *
+ * The app matches its own routes against the path WITHOUT the locale prefix
+ * (`/dashboard`, never `/en/dashboard`) — the prefix is a routing detail, and
+ * the shell's breadcrumbs, the active-nav lookup and the workspace's tab
+ * detection all work on the locale-less path.
+ */
+export function localeFromPath(pathname: string): AppLocale | null {
+    const first = pathname.split('/')[1];
+    return isAppLocale(first) ? first : null;
+}
+
+/**
+ * The path without its locale prefix: `/en/dashboard` → `/dashboard`,
+ * `/en` → `/`, `/dashboard` → `/dashboard` (unchanged — there is no prefix).
+ */
+export function stripLocaleFromPath(pathname: string): string {
+    const locale = localeFromPath(pathname);
+    if (!locale) return pathname;
+    const segments = pathname.split('/').slice(2);
+    return segments.length ? `/${segments.join('/')}` : '/';
+}
+
+/**
+ * The same path in another locale: `/en/dashboard` → `/ar/dashboard`.
+ *
+ * Used by the language switcher: the visitor keeps the page they are on and
+ * the query they typed, and only the language changes.
+ */
+export function pathInLocale(pathname: string, locale: AppLocale): string {
+    const stripped = stripLocaleFromPath(pathname);
+    return stripped === '/' ? `/${locale}` : `/${locale}${stripped}`;
+}
+
+/**
+ * A locale-less path inside a locale: `/dashboard` → `/ar/dashboard`.
+ *
+ * The mirror of `stripLocaleFromPath`, for the places that build a redirect
+ * target: the target has to carry the locale the visitor is in, or the
+ * redirect drops them back into the default language.
+ */
+export function withLocale(pathname: string, locale: AppLocale): string {
+    if (!pathname.startsWith('/')) return `/${locale}`;
+    return pathname === '/' ? `/${locale}` : `/${locale}${pathname}`;
+}
