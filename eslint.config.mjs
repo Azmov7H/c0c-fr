@@ -2,6 +2,8 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 
+import { i18nPlugin } from "./eslint-plugin-i18n.mjs";
+
 // ─── Design-system guard (T08) ───────────────────────────────────────────────
 // Raw palette classes (`text-emerald-500`) bypass the token layer, so they do not
 // follow the theme, cannot be adjusted globally, and were how 99 ad-hoc colours
@@ -54,9 +56,15 @@ const eslintConfig = defineConfig([
   ...nextTs,
   {
     files: ["src/**/*.{ts,tsx,js,jsx}"],
-    plugins: { "design-system": designSystemPlugin },
+    plugins: { "design-system": designSystemPlugin, i18n: i18nPlugin },
     rules: {
       "design-system/no-raw-palette-classes": "error",
+      // AR-012: the interface language must not be baked into the code. A
+      // hardcoded locale is a second, invisible locale; a comparison against
+      // 'en'/'ar' is usually copy that belongs in a catalog. The allowlist
+      // lives in src/i18n/exceptions.ts.
+      "i18n/no-hardcoded-locale": "error",
+      "i18n/no-locale-equality": "error",
     },
   },
   {
