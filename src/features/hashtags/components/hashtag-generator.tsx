@@ -94,7 +94,7 @@ export function HashtagGenerator() {
               </Select>
             </div>
             <Button onClick={handleGenerate} disabled={isGenerating || !topic.trim()} className="w-full">
-              {isGenerating ? <Sparkles className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+              {isGenerating ? <Sparkles className="w-4 h-4 me-2 animate-spin" /> : <Sparkles className="w-4 h-4 me-2" />}
               {isGenerating ? 'Generating...' : 'Generate Hashtags'}
             </Button>
           </CardContent>
@@ -105,7 +105,7 @@ export function HashtagGenerator() {
             <CardTitle className="text-base font-bold">Generated Hashtags</CardTitle>
             {hashtags.length > 0 && (
               <Button variant="outline" size="sm" onClick={copyAll}>
-                <Copy className="w-3.5 h-3.5 mr-1" /> Copy All
+                <Copy className="w-3.5 h-3.5 me-1" /> Copy All
               </Button>
             )}
           </CardHeader>

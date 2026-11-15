@@ -70,12 +70,12 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                 >
                     {isGenerating ? (
                         <>
-                            <Loader2 className="w-6 h-6 mr-3 animate-spin" />
+                            <Loader2 className="w-6 h-6 me-3 animate-spin" />
                             Analyzing Niches...
                         </>
                     ) : (
                         <>
-                            <Sparkles className="w-6 h-6 mr-3 group-hover:rotate-12 transition-transform" />
+                            <Sparkles className="w-6 h-6 me-3 group-hover:rotate-12 transition-transform" />
                             Initialize Growth Engine
                         </>
                     )}
@@ -104,12 +104,12 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                             <button
                                 key={i}
                                 type="button"
-                                className="group relative w-full text-left p-5 rounded-2xl border border-border/50 bg-muted/20 hover:border-primary/40 hover:bg-muted/40 transition-all cursor-pointer shadow-sm hover:shadow-premium"
+                                className="group relative w-full text-start p-5 rounded-2xl border border-border/50 bg-muted/20 hover:border-primary/40 hover:bg-muted/40 transition-all cursor-pointer shadow-sm hover:shadow-premium"
                                 onClick={() => copyToClipboard(title, `title-${i}`)}
                                 aria-label={`Copy title suggestion: ${title}`}
                             >
-                                <span className="text-base font-bold text-foreground pr-12 leading-relaxed tracking-tight block">{title}</span>
-                                <span className="absolute top-1/2 -translate-y-1/2 right-4">
+                                <span className="text-base font-bold text-foreground pe-12 leading-relaxed tracking-tight block">{title}</span>
+                                <span className="absolute top-1/2 -translate-y-1/2 end-4">
                                     <span className={cn(
                                         "h-10 w-10 rounded-xl flex items-center justify-center transition-all",
                                         copiedId === `title-${i}` ? "bg-success/20 text-success" : "bg-muted/50 text-muted-foreground group-hover:text-primary group-hover:bg-primary/10"
@@ -145,7 +145,7 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                                 className="h-12 rounded-xl bg-primary text-primary-foreground font-bold shadow-glow-sm transition-all hover:scale-[1.02]"
                                 onClick={() => copyToClipboard(analysis.description, 'desc')}
                             >
-                                {copiedId === 'desc' ? <CheckCircle2 className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                                {copiedId === 'desc' ? <CheckCircle2 className="w-4 h-4 me-2" /> : <Copy className="w-4 h-4 me-2" />}
                                 {copiedId === 'desc' ? 'Copied' : 'Sync Description'}
                             </Button>
                         </div>
@@ -235,7 +235,7 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                         className="h-12 rounded-xl border-border/50 glass hover:bg-muted/50 font-bold text-xs uppercase tracking-[0.2em] transition-all group"
                         onClick={handleGenerate}
                     >
-                        <RefreshCw className="w-4 h-4 mr-2 group-hover:rotate-180 transition-transform duration-700" />
+                        <RefreshCw className="w-4 h-4 me-2 group-hover:rotate-180 transition-transform duration-700" />
                         Re-Architect Logic
                     </Button>
                 </div>

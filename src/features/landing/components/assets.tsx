@@ -111,15 +111,15 @@ function ExampleOutput({ id }: { id: LandingAsset['id'] }) {
             {id === 'scripts' && (
                 <div className="space-y-2 p-4 font-mono text-xs">
                     <p className="text-muted-foreground">
-                        <span className="mr-2 rounded bg-primary px-1.5 py-0.5 font-semibold text-primary-foreground">HOOK</span>
+                        <span className="me-2 rounded bg-primary px-1.5 py-0.5 font-semibold text-primary-foreground">HOOK</span>
                         Nobody talks about the second week.
                     </p>
                     <p className="text-muted-foreground">
-                        <span className="mr-2 rounded bg-muted px-1.5 py-0.5 font-semibold text-foreground">BEAT 1</span>
+                        <span className="me-2 rounded bg-muted px-1.5 py-0.5 font-semibold text-foreground">BEAT 1</span>
                         The first week is easy — the format is new.
                     </p>
                     <p className="text-muted-foreground">
-                        <span className="mr-2 rounded bg-muted px-1.5 py-0.5 font-semibold text-foreground">BEAT 2</span>
+                        <span className="me-2 rounded bg-muted px-1.5 py-0.5 font-semibold text-foreground">BEAT 2</span>
                         Then the numbers flatten, and here is why.
                     </p>
                 </div>

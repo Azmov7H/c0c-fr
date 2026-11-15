@@ -46,7 +46,7 @@ export function FilterBar({
           aria-label={searchPlaceholder}
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-9 h-9 rounded-xl bg-muted/30 border-border/60 focus-visible:ring-1"
+          className="ps-9 h-9 rounded-xl bg-muted/30 border-border/60 focus-visible:ring-1"
         />
       </div>
 

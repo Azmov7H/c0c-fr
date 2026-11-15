@@ -39,7 +39,7 @@ export function ProjectsTableSkeleton({ count = 6 }: { count?: number }) {
                     <Skeleton className="h-6 w-24 rounded-full motion-reduce:animate-none" />
                     <Skeleton className="h-6 w-24 rounded-full motion-reduce:animate-none" />
                     <Skeleton className="h-4 w-24 motion-reduce:animate-none" />
-                    <Skeleton className="ml-auto size-8 motion-reduce:animate-none" />
+                    <Skeleton className="ms-auto size-8 motion-reduce:animate-none" />
                 </div>
             ))}
         </div>

@@ -69,7 +69,7 @@ export function OptionGrid({
                         disabled={disabled || isBlocked}
                         onClick={() => onToggle(option.value)}
                         className={cn(
-                            'min-h-11 w-full rounded-lg border p-3 text-left text-sm transition-colors',
+                            'min-h-11 w-full rounded-lg border p-3 text-start text-sm transition-colors',
                             'focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none',
                             'hover:bg-muted/60 disabled:cursor-not-allowed disabled:opacity-50',
                             isSelected

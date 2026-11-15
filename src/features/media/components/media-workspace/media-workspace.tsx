@@ -58,7 +58,7 @@ function LayerCard({
                     disabled={generate.isPending}
                     onClick={() => generate.mutate({ projectId })}
                 >
-                    <RefreshCw className="mr-1 size-4" aria-hidden={generate.isPending} />
+                    <RefreshCw className="me-1 size-4" aria-hidden={generate.isPending} />
                     Regenerate
                 </Button>
             </CardHeader>
@@ -80,7 +80,7 @@ function LayerCard({
                                 <div className="flex gap-2">
                                     <Button asChild variant="outline" size="sm" className="h-11">
                                         <a href={current.fileUrl} download={`audio.${current.format ?? 'mp3'}`} rel="noreferrer">
-                                            <Download className="mr-1 size-4" aria-hidden="true" /> Download
+                                            <Download className="me-1 size-4" aria-hidden="true" /> Download
                                         </a>
                                     </Button>
                                 </div>
@@ -205,7 +205,7 @@ export function MediaWorkspace({ projectId }: { projectId: string }) {
                             <div className="flex flex-wrap gap-2">
                                 <Button asChild variant="outline" size="sm" className="h-11">
                                     <a href={thumbUrl} download={`thumbnail.png`} rel="noreferrer">
-                                        <Download className="mr-1 size-4" aria-hidden="true" /> Download
+                                        <Download className="me-1 size-4" aria-hidden="true" /> Download
                                     </a>
                                 </Button>
                                 {latestThumb && (
@@ -216,7 +216,7 @@ export function MediaWorkspace({ projectId }: { projectId: string }) {
                                         disabled={regenThumb.isPending}
                                         onClick={() => regenThumb.mutate({ id: latestThumb.id })}
                                     >
-                                        <RefreshCw className="mr-1 size-4" aria-hidden={regenThumb.isPending} /> Regenerate
+                                        <RefreshCw className="me-1 size-4" aria-hidden={regenThumb.isPending} /> Regenerate
                                     </Button>
                                 )}
                             </div>
@@ -316,12 +316,12 @@ export function MediaWorkspace({ projectId }: { projectId: string }) {
                                                     disabled={!item}
                                                     onClick={() => setReplacing(slot)}
                                                 >
-                                                    <Upload className="mr-1 size-4" aria-hidden="true" /> Replace
+                                                    <Upload className="me-1 size-4" aria-hidden="true" /> Replace
                                                 </Button>
                                                 {item?.fileUrl && (
                                                     <Button asChild variant="ghost" size="sm" className="h-11">
                                                         <a href={item.fileUrl} download={`image-${slot + 1}.png`} rel="noreferrer">
-                                                            <Download className="mr-1 size-4" aria-hidden="true" /> Download
+                                                            <Download className="me-1 size-4" aria-hidden="true" /> Download
                                                         </a>
                                                     </Button>
                                                 )}

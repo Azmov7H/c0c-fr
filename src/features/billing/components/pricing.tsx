@@ -112,7 +112,7 @@ export function PricingCards({ className, currentPlan, locale }: PricingCardsPro
 export function PlanComparisonTable({ locale }: { locale: AppLocale }) {
     return (
         <div className="overflow-x-auto rounded-xl border border-border/60">
-            <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[640px] border-collapse text-start text-sm">
                 <caption className="sr-only">
                     Feature and quota comparison for Starter, Pro and Studio
                 </caption>

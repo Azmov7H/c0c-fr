@@ -79,7 +79,7 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
                                 placeholder="A cybernetic detective in a neon-lit alleyway, hyper-detailed, synthwave color palette..."
                                 className="min-h-[160px] glass bg-muted/20 border-border/50 rounded-2xl resize-none focus-visible:ring-primary/30 p-5 text-sm font-medium leading-relaxed group-hover:border-primary/20 transition-all"
                             />
-                            <div className="absolute bottom-4 right-4 text-[10px] font-bold text-muted-foreground/30 uppercase tracking-widest">
+                            <div className="absolute bottom-4 end-4 text-[10px] font-bold text-muted-foreground/30 uppercase tracking-widest">
                                 {prompt.length} chars
                             </div>
                         </div>
@@ -131,9 +131,9 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
                             className="w-full bg-primary text-primary-foreground h-14 rounded-2xl font-bold text-lg shadow-glow transition-all hover:scale-[1.02] active:scale-[0.98]"
                         >
                             {isGenerating ? (
-                                <Loader2 className="w-6 h-6 mr-3 animate-spin" />
+                                <Loader2 className="w-6 h-6 me-3 animate-spin" />
                             ) : (
-                                <Sparkles className="w-6 h-6 mr-3" />
+                                <Sparkles className="w-6 h-6 me-3" />
                             )}
                             {isGenerating ? 'Rendering...' : 'Breathe Life'}
                         </Button>
@@ -155,7 +155,7 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
                     </div>
                     {activeThumbnail && activeThumbnail.status === 'completed' && activeThumbnail.imageUrl && (
                         <Button variant="outline" size="sm" className="hidden sm:flex h-10 rounded-xl border-border/50 bg-background/50 font-bold text-xs uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-all">
-                            <Download className="w-4 h-4 mr-2" />
+                            <Download className="w-4 h-4 me-2" />
                             Fetch Artifact
                         </Button>
                     )}

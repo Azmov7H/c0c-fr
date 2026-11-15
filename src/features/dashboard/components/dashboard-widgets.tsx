@@ -198,9 +198,9 @@ function TrendingWidget() {
                     </li>
                 ))}
             </ul>
-            <div className="mt-2 text-right">
+            <div className="mt-2 text-end">
                 <Link href="/trends" className="text-xs font-medium text-primary hover:underline">
-                    Explore trends <ArrowRight className="ml-0.5 inline size-3" aria-hidden="true" />
+                    Explore trends <ArrowRight className="ms-0.5 inline size-3" aria-hidden="true" />
                 </Link>
             </div>
         </DataState>
@@ -372,8 +372,8 @@ function HealthWidget() {
                 {label}
             </p>
             {isError ? (
-                <Button variant="ghost" size="sm" className="ml-auto h-7 px-2 text-xs" onClick={() => void refetch()}>
-                    <RotateCcw className="mr-1 size-3" aria-hidden="true" /> Retry
+                <Button variant="ghost" size="sm" className="ms-auto h-7 px-2 text-xs" onClick={() => void refetch()}>
+                    <RotateCcw className="me-1 size-3" aria-hidden="true" /> Retry
                 </Button>
             ) : null}
         </div>

@@ -136,7 +136,7 @@ export function StepDetails({ form }: StepProps) {
                         )
                     }
                 >
-                    <Sparkles className="mr-2 size-4" aria-hidden="true" />
+                    <Sparkles className="me-2 size-4" aria-hidden="true" />
                     Start from a prompt
                 </Button>
             ) : null}
@@ -165,14 +165,14 @@ export function StepPlatformTone({ form }: StepProps) {
                                             aria-checked={selected}
                                             onClick={() => field.onChange(choice.value)}
                                             className={cn(
-                                                'relative flex min-h-[132px] flex-col items-start rounded-2xl border-2 p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                                                'relative flex min-h-[132px] flex-col items-start rounded-2xl border-2 p-4 text-start transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                                                 selected
                                                     ? 'border-primary bg-primary/5'
                                                     : 'border-border/60 bg-muted/20 hover:border-primary/40'
                                             )}
                                         >
                                             {selected ? (
-                                                <Check className="absolute right-3 top-3 size-4 text-primary" aria-hidden="true" />
+                                                <Check className="absolute end-3 top-3 size-4 text-primary" aria-hidden="true" />
                                             ) : null}
                                             <span className="font-semibold">{choice.label}</span>
                                             <span className="text-xs text-muted-foreground">{choice.summary}</span>
@@ -207,7 +207,7 @@ export function StepPlatformTone({ form }: StepProps) {
                                             aria-checked={selected}
                                             onClick={() => field.onChange(choice.value)}
                                             className={cn(
-                                                'flex min-h-[72px] flex-col items-start rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                                                'flex min-h-[72px] flex-col items-start rounded-xl border p-3 text-start transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                                                 selected
                                                     ? 'border-primary bg-primary/5'
                                                     : 'border-border/60 hover:border-primary/40'
@@ -261,7 +261,7 @@ export function StepConfiguration({ form }: StepProps) {
                                             aria-checked={selected}
                                             onClick={() => field.onChange(choice.value)}
                                             className={cn(
-                                                'flex min-h-[72px] flex-col items-start rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                                                'flex min-h-[72px] flex-col items-start rounded-xl border p-3 text-start transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                                                 selected
                                                     ? 'border-primary bg-primary/5'
                                                     : 'border-border/60 hover:border-primary/40'

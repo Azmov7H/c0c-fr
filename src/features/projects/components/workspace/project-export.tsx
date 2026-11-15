@@ -160,9 +160,9 @@ export function ProjectExport({ projectId, title }: { projectId: string; title: 
                 </select>
                 <Button size="sm" className="h-11" disabled={!canExport} onClick={onExport}>
                     {pending ? (
-                        <Loader2 className="mr-1 size-4 animate-spin" aria-hidden="true" />
+                        <Loader2 className="me-1 size-4 animate-spin" aria-hidden="true" />
                     ) : (
-                        <PackageOpen className="mr-1 size-4" aria-hidden="true" />
+                        <PackageOpen className="me-1 size-4" aria-hidden="true" />
                     )}
                     {pending ? 'Preparing…' : 'Export'}
                 </Button>

@@ -207,7 +207,7 @@ export function TrendsContent() {
                 <div className="flex items-center gap-4 border-b border-border/50 bg-muted/40 px-4 py-2.5">
                   <div className="flex-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Topic</div>
                   <div className="w-32 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Score</div>
-                  <div className="w-16 text-right text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Growth</div>
+                  <div className="w-16 text-end text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Growth</div>
                 </div>
                 {topics.map((topic) => (
                   <div key={`${topic.topic}-${topic.rank}`} className="flex items-center gap-4 border-b border-border/40 px-4 py-3 last:border-0">

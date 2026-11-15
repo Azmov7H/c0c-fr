@@ -29,7 +29,7 @@ function ProjectThumbnail({ project }: { project: Project }) {
                     </span>
                 </div>
             )}
-            <div className="absolute left-3 top-3">
+            <div className="absolute start-3 top-3">
                 <PlatformBadge platform={project.platform} />
             </div>
         </div>

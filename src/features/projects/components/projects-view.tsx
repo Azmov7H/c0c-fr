@@ -29,7 +29,7 @@ import { ProjectsToolbar } from './projects-toolbar';
 
 function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
     return (
-        <span className="inline-flex h-8 items-center gap-1 rounded-full border border-border/60 bg-muted/40 pl-3 pr-1 text-xs font-medium">
+        <span className="inline-flex h-8 items-center gap-1 rounded-full border border-border/60 bg-muted/40 ps-3 pe-1 text-xs font-medium">
             {label}
             <button
                 type="button"
@@ -132,7 +132,7 @@ export function ProjectsView() {
                 actions={
                     <Button asChild className="h-11 px-4">
                         <Link href="/projects/new">
-                            <Plus className="mr-2 size-4" aria-hidden="true" />
+                            <Plus className="me-2 size-4" aria-hidden="true" />
                             New Project
                         </Link>
                     </Button>

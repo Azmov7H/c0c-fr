@@ -73,37 +73,37 @@ export function UserButton() {
 
         {/* /settings/profile never existed — 404 for everyone until T10. */}
         <DropdownMenuItem onClick={() => router.push("/settings?tab=profile")}>
-          <User className="mr-2 h-4 w-4" />
+          <User className="me-2 h-4 w-4" />
           Profile
         </DropdownMenuItem>
 
         <DropdownMenuItem onClick={() => router.push("/settings")}>
-          <Settings className="mr-2 h-4 w-4" />
+          <Settings className="me-2 h-4 w-4" />
           Account settings
         </DropdownMenuItem>
 
         <DropdownMenuItem onClick={() => router.push("/settings/billing")}>
-          <CreditCard className="mr-2 h-4 w-4" />
+          <CreditCard className="me-2 h-4 w-4" />
           Billing &amp; Plan
         </DropdownMenuItem>
 
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
-            <SunMoon className="mr-2 h-4 w-4" />
+            <SunMoon className="me-2 h-4 w-4" />
             Theme
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
             <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
               <DropdownMenuRadioItem value="light">
-                <Sun className="mr-2 h-4 w-4" />
+                <Sun className="me-2 h-4 w-4" />
                 Light
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="dark">
-                <Moon className="mr-2 h-4 w-4" />
+                <Moon className="me-2 h-4 w-4" />
                 Dark
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="system">
-                <Monitor className="mr-2 h-4 w-4" />
+                <Monitor className="me-2 h-4 w-4" />
                 System
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
@@ -117,7 +117,7 @@ export function UserButton() {
           className="text-destructive focus:bg-destructive focus:text-destructive-foreground"
           disabled={isPending}
         >
-          <LogOut className="mr-2 h-4 w-4" />
+          <LogOut className="me-2 h-4 w-4" />
           {isPending ? "Signing out..." : "Sign out"}
         </DropdownMenuItem>
       </DropdownMenuContent>

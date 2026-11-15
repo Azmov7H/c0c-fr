@@ -58,7 +58,7 @@ export function MediaLibrary() {
                 description="Every generated or attached asset for the selected project."
                 actions={
                     <Button className="h-11" disabled title="Uploads need a storage provider, which is not configured yet.">
-                        <Upload className="mr-2 size-4" aria-hidden="true" />
+                        <Upload className="me-2 size-4" aria-hidden="true" />
                         Upload
                     </Button>
                 }

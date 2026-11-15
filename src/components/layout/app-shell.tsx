@@ -47,7 +47,7 @@ function ShellSkeleton() {
                 <div className="flex h-14 items-center gap-3 border-b border-border/60 px-4 md:px-6">
                     <Skeleton className="h-7 w-7 motion-reduce:animate-none" />
                     <Skeleton className="h-4 w-40 motion-reduce:animate-none" />
-                    <Skeleton className="ml-auto hidden h-9 w-64 md:block motion-reduce:animate-none" />
+                    <Skeleton className="me-auto hidden h-9 w-64 md:block motion-reduce:animate-none" />
                 </div>
 
                 <main className="flex-1">
@@ -82,7 +82,7 @@ function OnboardingChrome({ children }: { children: React.ReactNode }) {
                 href="#main-content"
                 className="
                     sr-only focus:not-sr-only
-                    focus:fixed focus:left-4 focus:top-4 focus:z-50
+                    focus:fixed focus:start-4 focus:top-4 focus:z-50
                     focus:rounded-md focus:bg-background focus:px-3 focus:py-2
                     focus:text-sm focus:font-medium focus:ring-2 focus:ring-ring
                 "
@@ -147,7 +147,7 @@ export function AppShell({
                 href="#main-content"
                 className="
                     sr-only focus:not-sr-only
-                    focus:fixed focus:left-4 focus:top-4 focus:z-50
+                    focus:fixed focus:start-4 focus:top-4 focus:z-50
                     focus:rounded-md focus:bg-background focus:px-3 focus:py-2
                     focus:text-sm focus:font-medium focus:ring-2 focus:ring-ring
                 "

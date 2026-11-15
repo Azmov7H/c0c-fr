@@ -66,7 +66,7 @@ const WidgetSettings = dynamic(
     ssr: false,
     loading: () => (
       <Button variant="outline" size="sm" className="h-9 rounded-xl px-4" disabled>
-        <Settings2 className="mr-1.5 size-3.5" aria-hidden="true" />
+        <Settings2 className="me-1.5 size-3.5" aria-hidden="true" />
         Customise
       </Button>
     ),
@@ -339,7 +339,7 @@ function ProjectsWidget({
               className="h-8 rounded-full px-3 text-xs"
             >
               {filter.label}
-              <span className="ml-1.5 tabular-nums text-muted-foreground">
+              <span className="ms-1.5 tabular-nums text-muted-foreground">
                 {isLoading ? "–" : formatNumber(counts[filter.value], locale)}
               </span>
             </Button>
@@ -347,7 +347,7 @@ function ProjectsWidget({
         </div>
         <Link href="/projects">
           <Button variant="ghost" size="sm" className="h-8 px-3 text-xs text-primary hover:bg-primary/10">
-            View all <ArrowRight className="ml-1 size-3" aria-hidden="true" />
+            View all <ArrowRight className="ms-1 size-3" aria-hidden="true" />
           </Button>
         </Link>
       </div>
@@ -365,7 +365,7 @@ function ProjectsWidget({
           </div>
           <Link href={`/projects/${continueProject._id}`}>
             <Button size="sm" className="h-8 rounded-lg px-3 text-xs">
-              Resume <ArrowRight className="ml-1 size-3" aria-hidden="true" />
+              Resume <ArrowRight className="ms-1 size-3" aria-hidden="true" />
             </Button>
           </Link>
         </div>
@@ -512,7 +512,7 @@ export function DashboardView() {
             />
             <Link href="/projects/new">
               <Button size="sm" className="h-9 rounded-xl px-4">
-                <Plus className="mr-1.5 size-3.5" aria-hidden="true" />
+                <Plus className="me-1.5 size-3.5" aria-hidden="true" />
                 New Project
               </Button>
             </Link>

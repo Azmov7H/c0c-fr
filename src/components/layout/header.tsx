@@ -257,7 +257,7 @@ export function Header() {
                 >
                   <action.icon className="h-4 w-4 text-primary" />
                   {action.title}
-                  <kbd className="ml-auto font-mono text-[10px] tracking-wider text-muted-foreground">
+                  <kbd className="me-auto font-mono text-[10px] tracking-wider text-muted-foreground">
                     G&thinsp;{action.shortcutKey.toUpperCase()}
                   </kbd>
                 </Link>

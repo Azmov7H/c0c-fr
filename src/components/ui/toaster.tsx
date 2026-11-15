@@ -1,3 +1,7 @@
+// RTL (AR-017): upstream uses the physical side; converted to the logical edge
+// so the mirror is the browser's job (RTL-DESIGN-SYSTEM §3). The classes keyed
+// to Radix's `data-side` stay physical — they follow the placement Radix
+// decides. Re-apply on re-vendoring.
 'use client';
 
 import * as React from 'react';
@@ -56,7 +60,7 @@ export function Toaster() {
         <div
             role="status"
             aria-live="polite"
-            className="pointer-events-none fixed inset-x-4 bottom-4 z-[100] flex flex-col items-end gap-2 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-full sm:max-w-sm"
+            className="pointer-events-none fixed inset-x-4 bottom-4 z-[100] flex flex-col items-end gap-2 sm:inset-x-auto sm:end-6 sm:bottom-6 sm:w-full sm:max-w-sm"
         >
             {items.map((item) => {
                 const { icon: Icon, className } = TONE[item.tone];

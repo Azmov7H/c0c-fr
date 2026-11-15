@@ -85,7 +85,7 @@ export function TitleGenerator() {
               </Select>
             </div>
             <Button onClick={handleGenerate} disabled={isGenerating || !topic.trim()} className="w-full">
-              {isGenerating ? <Sparkles className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+              {isGenerating ? <Sparkles className="w-4 h-4 me-2 animate-spin" /> : <Sparkles className="w-4 h-4 me-2" />}
               {isGenerating ? 'Generating...' : 'Generate Titles'}
             </Button>
           </CardContent>

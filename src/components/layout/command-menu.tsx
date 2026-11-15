@@ -144,7 +144,7 @@ export function CommandMenu() {
               >
                 <action.icon className="w-4 h-4 text-muted-foreground" />
                 <span>{action.title}</span>
-                <kbd className="ml-auto text-[10px] font-mono text-muted-foreground tracking-wider">
+                <kbd className="me-auto text-[10px] font-mono text-muted-foreground tracking-wider">
                   G&thinsp;{action.shortcutKey.toUpperCase()}
                 </kbd>
               </CommandItem>

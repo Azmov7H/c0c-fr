@@ -183,7 +183,7 @@ export function ActivityTab({ projectId }: { projectId: string }) {
                                         disabled={!meta.hasPrevPage}
                                         onClick={() => setPage((current) => Math.max(1, current - 1))}
                                     >
-                                        <ChevronLeft className="mr-1 size-4" aria-hidden="true" />
+                                        <ChevronLeft className="me-1 size-4" aria-hidden="true" />
                                         Previous
                                     </Button>
                                     <Button
@@ -193,7 +193,7 @@ export function ActivityTab({ projectId }: { projectId: string }) {
                                         onClick={() => setPage((current) => current + 1)}
                                     >
                                         Next
-                                        <ChevronRight className="ml-1 size-4" aria-hidden="true" />
+                                        <ChevronRight className="ms-1 size-4" aria-hidden="true" />
                                     </Button>
                                 </div>
                             </div>
