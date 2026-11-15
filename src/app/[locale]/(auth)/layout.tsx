@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import { AppProviders } from '@/components/app-providers';
+import { LocaleSwitcher } from '@/components/layout/locale-switcher';
 
 /**
  * Auth pages are data-shaped: login/register mutations go through react-query
@@ -26,6 +27,11 @@ export default function AuthLayout({
 }) {
     return (
         <AppProviders>
+            {/* FR-1: the language switch is reachable from the auth pages too.
+                The auth layout has no header bar, so it sits in the corner. */}
+            <div className="fixed end-4 top-4 z-10">
+                <LocaleSwitcher />
+            </div>
             <a
                 href="#main-content"
                 className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
