@@ -77,6 +77,12 @@ jobs:
           node-version: '22'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # AR-011: the catalog gates. They are gates, not reports — a missing
+      # Arabic key, a dropped ICU argument, a reference to a key that does
+      # not exist, or a catalog key nobody uses fails the build here, not in
+      # a page. Both scripts need no dependencies.
+      - run: node scripts/i18n/check-parity.mjs
+      - run: node scripts/i18n/extract-usage.mjs
       - run: pnpm exec vitest run --coverage
 
   e2e:
