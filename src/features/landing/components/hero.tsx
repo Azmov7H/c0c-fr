@@ -21,7 +21,7 @@ export function Hero() {
                 className="pointer-events-none absolute inset-0 -z-10"
             >
                 <div className="absolute left-1/2 top-[-20%] h-[480px] w-[720px] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px] motion-reduce:animate-none" />
-                <div className="absolute bottom-[-30%] right-[-10%] h-[360px] w-[360px] rounded-full bg-brand-violet/10 blur-[100px] motion-reduce:animate-none" />
+                <div className="absolute bottom-[-30%] end-[-10%] h-[360px] w-[360px] rounded-full bg-brand-violet/10 blur-[100px] motion-reduce:animate-none" />
             </div>
 
             <div className="container mx-auto max-w-6xl px-4 pb-16 pt-16 text-center md:pt-24">

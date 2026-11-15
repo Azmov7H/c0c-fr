@@ -243,7 +243,7 @@ export function Header() {
             >
               {t("action.create")}
             </summary>
-            <div className="absolute right-0 top-full z-50 mt-1 w-56 rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+            <div className="absolute end-0 top-full z-50 mt-1 w-56 rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
               <p className="px-2 py-1.5 text-xs text-muted-foreground">{t("navigation.quickCreate")}</p>
               <div className="my-1 h-px bg-border" />
               {QUICK_ACTIONS.map((action) => (

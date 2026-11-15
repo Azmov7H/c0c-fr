@@ -45,7 +45,7 @@ export function EmptyState({
             </p>
             {action && (
                 <Button onClick={action.onClick} disabled={action.disabled} className="h-11 px-8 shadow-sm">
-                    {action.icon ?? <Plus className="mr-2 h-4 w-4" />}
+                    {action.icon ?? <Plus className="me-2 h-4 w-4" />}
                     {action.label}
                 </Button>
             )}

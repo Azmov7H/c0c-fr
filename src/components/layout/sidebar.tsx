@@ -73,7 +73,7 @@ export function AppSidebar() {
   const activeUrl = getActiveNavUrl(pathname)
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border/60">
+    <Sidebar collapsible="icon" className="border-e border-border/60">
 
       {/* Logo Header */}
       <SidebarHeader className="h-16 flex items-center px-4 border-b border-border/60">

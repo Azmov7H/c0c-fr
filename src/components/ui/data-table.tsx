@@ -136,7 +136,7 @@ export function DataTable<TData, TValue>({
             {pageCount > 1 && (
                 <Pagination className="justify-end">
                     <PaginationContent>
-                        <span className="mr-2 text-xs text-muted-foreground">
+                        <span className="me-2 text-xs text-muted-foreground">
                             Page {table.getState().pagination.pageIndex + 1} of {pageCount}
                         </span>
                         <PaginationItem>
