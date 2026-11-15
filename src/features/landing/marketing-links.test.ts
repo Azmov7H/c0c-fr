@@ -153,23 +153,58 @@ describe('public route table (robots / sitemap)', () => {
         // T12: the auth pages are linked from public pages, so they are listed
         // explicitly. Private prefixes (/dashboard, /settings, …) stay out —
         // see robots.ts for the rationale.
-        expect(disallow).toEqual([
+        for (const path of [
             '/login',
             '/signup',
             '/register',
             '/forgot-password',
             '/reset-password',
             '/verify-email',
-        ]);
+        ]) {
+            expect(disallow).toContain(path);
+        }
         expect(result.sitemap).toBe(`${SITE_URL}/sitemap.xml`);
+    });
+
+    it('AR-007: robots.txt also disallows the locale-prefixed auth pages', async () => {
+        const { default: robots } = await import('@/app/robots');
+        const result = robots();
+        const rules = Array.isArray(result.rules) ? result.rules : [result.rules];
+        const disallow = rules.flatMap((rule) => rule?.disallow ?? []);
+        // Every auth page exists in every locale; a crawler that follows the
+        // locale redirect lands on a prefixed URL, so those are listed too.
+        for (const locale of ['en', 'ar']) {
+            for (const path of ['/login', '/signup', '/register', '/forgot-password']) {
+                expect(disallow).toContain(`/${locale}${path}`);
+            }
+        }
+        // …and the private prefixes stay out in every locale.
+        for (const locale of ['en', 'ar']) {
+            expect(disallow).not.toContain(`/${locale}/dashboard`);
+            expect(disallow).not.toContain(`/${locale}/settings`);
+        }
     });
 
     it('sitemap URLs come from the route table, nothing else', async () => {
         const { default: sitemap } = await import('@/app/sitemap');
         const urls = sitemap().map((entry) => entry.url);
-        const expected = PUBLIC_ROUTES.map((route) =>
-            route.path === '/' ? SITE_URL : `${SITE_URL}${route.path}`
+        const expected = PUBLIC_ROUTES.flatMap((route) =>
+            ['en', 'ar'].map((locale) =>
+                route.path === '/' ? `${SITE_URL}/${locale}` : `${SITE_URL}/${locale}${route.path}`
+            )
         );
         expect(urls).toEqual(expected);
+    });
+
+    it('AR-007: every sitemap entry carries the alternates of its locale pair', async () => {
+        const { default: sitemap } = await import('@/app/sitemap');
+        const entries = sitemap();
+        expect(entries.length).toBe(PUBLIC_ROUTES.length * 2);
+        for (const entry of entries) {
+            const languages = entry.alternates?.languages as Record<string, string>;
+            expect(Object.keys(languages).sort()).toEqual(['ar', 'en']);
+            // The entry's own URL is one of its alternates.
+            expect(Object.values(languages)).toContain(entry.url);
+        }
     });
 });
