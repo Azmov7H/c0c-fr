@@ -71,8 +71,15 @@ export const i18nPlugin = {
                 const allowed = allowedPaths(repoRootOf(context));
                 const relative = context.filename.replace(`${process.cwd()}/`, '');
                 // The allowlist file itself is exempt: it is where the
-                // legitimate comparisons live.
-                if (allowed.has(relative) || relative === EXCEPTIONS_FILE) return {};
+                // legitimate comparisons live. The format layer is exempt
+                // too — FORMATTING-STRATEGY §7.3: the only allowed `new
+                // Intl.` sites are inside the module that owns the locale.
+                if (
+                    allowed.has(relative) ||
+                    relative === EXCEPTIONS_FILE ||
+                    relative.startsWith('src/lib/format/')
+                )
+                    return {};
 
                 function report(node, messageId, data) {
                     context.report({ node, messageId, data });
@@ -134,8 +141,15 @@ export const i18nPlugin = {
                 const allowed = allowedPaths(repoRootOf(context));
                 const relative = context.filename.replace(`${process.cwd()}/`, '');
                 // The allowlist file itself is exempt: it is where the
-                // legitimate comparisons live.
-                if (allowed.has(relative) || relative === EXCEPTIONS_FILE) return {};
+                // legitimate comparisons live. The format layer is exempt
+                // too — FORMATTING-STRATEGY §7.3: the only allowed `new
+                // Intl.` sites are inside the module that owns the locale.
+                if (
+                    allowed.has(relative) ||
+                    relative === EXCEPTIONS_FILE ||
+                    relative.startsWith('src/lib/format/')
+                )
+                    return {};
 
                 const looksLikeLocale = (node) =>
                     node.type === 'Identifier' && /locale/i.test(node.name);

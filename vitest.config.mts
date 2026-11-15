@@ -34,6 +34,8 @@ export default defineConfig({
                         // AR-002: the i18n compatibility gate (next-intl ↔
                         // Next 16 proxy.ts) is a node-environment suite.
                         'tests/i18n/**/*.test.ts',
+                        // AR-013: the format layer's golden snapshots.
+                        'tests/format/**/*.test.ts',
                     ],
                     setupFiles: ['tests/setup/node.ts'],
                     /**
