@@ -50,6 +50,15 @@ ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
 # 0.0.0.0 is the standard standalone-image binding.
 ENV HOSTNAME=0.0.0.0
 
+# The runtime never installs anything — it runs `node server.js`. The npm CLI
+# that ships inside the node base image is therefore pure attack surface, and
+# it is the source of every HIGH/CRITICAL finding the image scan reports:
+# pacote, sigstore, ip-address, picomatch and brace-expansion are npm's OWN
+# dependencies, not the application's. The application's dependency tree is
+# scanned where it is actually resolved — `pnpm audit --prod` in CI, and
+# `pnpm install --frozen-lockfile` in the builder stage.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
+
 # .next/standalone already carries its own minimal node_modules + server.js
 COPY --from=builder --chown=node:node /app/.next/standalone ./
 # static chunks and public files must be layered externally (standalone does
