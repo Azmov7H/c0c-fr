@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlLocale } from '@/i18n/locale';
 import { useState, type ReactNode } from 'react';
 import {
     FileText,
@@ -59,6 +60,7 @@ function AssetRow({
     createdAt?: string;
     imageUrl?: string;
 }) {
+    const locale = useUrlLocale();
     return (
         <li className="flex items-center gap-3 py-3">
             {imageUrl ? (
@@ -72,7 +74,7 @@ function AssetRow({
             <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{title}</p>
                 <p className="text-xs text-muted-foreground">
-                    {[subtitle, createdAt ? formatRelativeTime(createdAt).relative : null]
+                    {[subtitle, createdAt ? formatRelativeTime(createdAt, locale).relative : null]
                         .filter(Boolean)
                         .join(' · ')}
                 </p>

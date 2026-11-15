@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlLocale } from '@/i18n/locale';
 import { useMemo, useState } from 'react';
 import { FileAudio, Image as ImageIcon, Search, Upload, Video } from 'lucide-react';
 
@@ -30,6 +31,7 @@ const ICONS = {
 } as const;
 
 export function MediaLibrary() {
+    const locale = useUrlLocale();
     const projects = useProjects({ limit: 100 });
     const [projectId, setProjectId] = useState('');
     const [search, setSearch] = useState('');
@@ -137,7 +139,7 @@ export function MediaLibrary() {
                                                 <div className="flex items-center justify-between">
                                                     <Badge variant="secondary" className="text-[10px]">{item.category}</Badge>
                                                     <span className="text-[10px] text-muted-foreground">
-                                                        {formatRelativeTime(item.createdAt).relative}
+                                                        {formatRelativeTime(item.createdAt, locale).relative}
                                                     </span>
                                                 </div>
                                             </div>

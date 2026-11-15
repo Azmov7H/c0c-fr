@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlLocale } from '@/i18n/locale';
 import * as React from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
@@ -50,6 +51,7 @@ function usePrefersReducedMotion(): boolean {
  * table are always in the DOM, and the table is reachable without hover.
  */
 export default function CreationTrendChart({ data }: { data: CreationTrendPoint[] }) {
+    const locale = useUrlLocale();
     const reducedMotion = usePrefersReducedMotion();
     const total = data.reduce((sum, point) => sum + point.count, 0);
     const peak = data.reduce<CreationTrendPoint | null>(
@@ -60,8 +62,8 @@ export default function CreationTrendChart({ data }: { data: CreationTrendPoint[
     const summary =
         data.length === 0
             ? 'No projects were created in the last seven days.'
-            : `${formatNumber(total)} project${total === 1 ? '' : 's'} created in the last seven days.` +
-              (peak ? ` Busiest day: ${formatShortMonthDay(peak.date)} with ${formatNumber(peak.count)}.` : '');
+            : `${formatNumber(total, locale)} project${total === 1 ? '' : 's'} created in the last seven days.` +
+              (peak ? ` Busiest day: ${formatShortMonthDay(peak.date, locale)} with ${formatNumber(peak.count, locale)}.` : '');
 
     return (
         <figure className="space-y-3">
@@ -72,7 +74,7 @@ export default function CreationTrendChart({ data }: { data: CreationTrendPoint[
                     <CartesianGrid vertical={false} />
                     <XAxis
                         dataKey="date"
-                        tickFormatter={formatShortMonthDay}
+                        tickFormatter={(value) => formatShortMonthDay(String(value), locale)}
                         tickLine={false}
                         axisLine={false}
                         tickMargin={8}
@@ -86,7 +88,7 @@ export default function CreationTrendChart({ data }: { data: CreationTrendPoint[
                     <ChartTooltip
                         content={
                             <ChartTooltipContent
-                                labelFormatter={(value) => formatShortMonthDay(String(value))}
+                                labelFormatter={(value) => formatShortMonthDay(String(value), locale)}
                             />
                         }
                     />
@@ -114,9 +116,9 @@ export default function CreationTrendChart({ data }: { data: CreationTrendPoint[
                     <tbody>
                         {data.map((point) => (
                             <tr key={point.date} className="border-b border-border/30 last:border-0">
-                                <td className="py-1">{formatShortMonthDay(point.date)}</td>
+                                <td className="py-1">{formatShortMonthDay(point.date, locale)}</td>
                                 <td className="py-1 text-right tabular-nums">
-                                    {formatNumber(point.count)}
+                                    {formatNumber(point.count, locale)}
                                 </td>
                             </tr>
                         ))}

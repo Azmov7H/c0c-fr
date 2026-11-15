@@ -1,10 +1,11 @@
+import { useUrlLocale } from '@/i18n/locale';
 import { Check } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
     PLAN_CATALOGUE,
-    PLAN_COMPARISON,
+    planComparison,
     PLAN_IDS,
     PRICING_FAQ,
     formatMonthlyPrice,
@@ -27,6 +28,7 @@ interface PricingCardsProps {
 }
 
 export function PricingCards({ className, currentPlan }: PricingCardsProps) {
+    const locale = useUrlLocale();
     return (
         <div className={cn('grid grid-cols-1 gap-6 md:grid-cols-3', className)}>
             {PLAN_IDS.map((id) => {
@@ -57,7 +59,7 @@ export function PricingCards({ className, currentPlan }: PricingCardsProps) {
                             {plan.audience}
                         </p>
                         <p className="mt-4">
-                            <span className="text-2xl font-bold">{formatMonthlyPrice(plan)}</span>
+                            <span className="text-2xl font-bold">{formatMonthlyPrice(plan, locale)}</span>
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
                             {plan.monthlyPriceCents === 0
@@ -66,7 +68,7 @@ export function PricingCards({ className, currentPlan }: PricingCardsProps) {
                         </p>
 
                         <ul className="mt-6 flex-1 space-y-3 text-sm">
-                            {planHighlights(plan).map((feature) => (
+                            {planHighlights(plan, locale).map((feature) => (
                                 <li key={feature} className="flex items-start gap-2">
                                     <Check
                                         className="mt-0.5 h-4 w-4 shrink-0 text-primary"
@@ -98,6 +100,7 @@ export function PricingCards({ className, currentPlan }: PricingCardsProps) {
 }
 
 export function PlanComparisonTable() {
+    const locale = useUrlLocale();
     return (
         <div className="overflow-x-auto rounded-xl border border-border/60">
             <table className="w-full min-w-[640px] border-collapse text-left text-sm">
@@ -117,7 +120,7 @@ export function PlanComparisonTable() {
                     </tr>
                 </thead>
                 <tbody>
-                    {PLAN_COMPARISON.map((row) => (
+                    {planComparison(locale).map((row) => (
                         <tr key={row.label} className="border-b border-border/40 last:border-0">
                             <th scope="row" className="p-4 font-medium">
                                 {row.label}

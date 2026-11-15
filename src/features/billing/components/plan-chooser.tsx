@@ -1,3 +1,4 @@
+import { useUrlLocale } from '@/i18n/locale';
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,7 @@ export function PlanChooser({
     onCheckout,
     onPortal,
 }: PlanChooserProps) {
+    const locale = useUrlLocale();
     const currentRank = planRank(summary.plan);
     const paidPlan = summary.plan !== 'starter';
 
@@ -43,7 +45,7 @@ export function PlanChooser({
             {paidPlan ? (
                 <p className="rounded-lg border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
                     Downgrades take effect at the end of the current billing period
-                    {summary.renewalDate ? ` (${formatDate(summary.renewalDate)})` : ''}. You
+                    {summary.renewalDate ? ` (${formatDate(summary.renewalDate, locale)})` : ''}. You
                     keep {PLAN_CATALOGUE[summary.plan].name} until then; after that the lower
                     plan&apos;s generation, storage and member limits apply.
                 </p>
@@ -66,10 +68,10 @@ export function PlanChooser({
                                 {current ? <Badge variant="secondary">Current</Badge> : null}
                             </div>
                             <p className="mt-1 text-sm text-muted-foreground">
-                                {formatMonthlyPrice(plan)}
+                                {formatMonthlyPrice(plan, locale)}
                             </p>
                             <ul className="mt-3 flex-1 space-y-1 text-xs text-muted-foreground">
-                                {planHighlights(plan).slice(0, 4).map((item) => (
+                                {planHighlights(plan, locale).slice(0, 4).map((item) => (
                                     <li key={item}>{item}</li>
                                 ))}
                             </ul>

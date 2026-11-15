@@ -75,8 +75,8 @@ export function directionFor(locale: AppLocale): 'ltr' | 'rtl' {
  * the shell's breadcrumbs, the active-nav lookup and the workspace's tab
  * detection all work on the locale-less path.
  */
-export function localeFromPath(pathname: string): AppLocale | null {
-    const first = pathname.split('/')[1];
+export function localeFromPath(pathname: string | null | undefined): AppLocale | null {
+    const first = (pathname ?? '').split('/')[1];
     return isAppLocale(first) ? first : null;
 }
 
@@ -84,7 +84,8 @@ export function localeFromPath(pathname: string): AppLocale | null {
  * The path without its locale prefix: `/en/dashboard` → `/dashboard`,
  * `/en` → `/`, `/dashboard` → `/dashboard` (unchanged — there is no prefix).
  */
-export function stripLocaleFromPath(pathname: string): string {
+export function stripLocaleFromPath(pathname: string | null | undefined): string {
+    if (!pathname) return '/';
     const locale = localeFromPath(pathname);
     if (!locale) return pathname;
     const segments = pathname.split('/').slice(2);

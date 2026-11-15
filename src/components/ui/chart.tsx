@@ -1,5 +1,7 @@
 "use client"
 
+import { formatNumber } from '@/lib/format';
+import { useUrlLocale } from '@/i18n/locale';
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import * as RechartsPrimitive from "recharts"
@@ -143,6 +145,8 @@ function ChartTooltipContent({
     >,
     "accessibilityLayer"
   >) {
+  // AR-014: the value is displayed, so it is formatted — with the locale.
+  const locale = useUrlLocale();
   const { config } = useChart()
 
   const tooltipLabel = React.useMemo(() => {
@@ -254,7 +258,7 @@ function ChartTooltipContent({
                       {item.value != null && (
                         <span className="font-mono font-medium text-foreground tabular-nums">
                           {typeof item.value === "number"
-                            ? item.value.toLocaleString()
+                            ? formatNumber(item.value, locale)
                             : String(item.value)}
                         </span>
                       )}

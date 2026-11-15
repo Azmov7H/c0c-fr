@@ -1,3 +1,5 @@
+import type { AppLocale } from '@/i18n/routing';
+
 import type { BillingSummary } from '../types';
 import { formatDate } from './format';
 import { PLAN_CATALOGUE } from './plans';
@@ -13,7 +15,8 @@ export interface BillingNotice {
 }
 
 export function deriveBillingNotice(
-    summary: BillingSummary | undefined
+    summary: BillingSummary | undefined,
+    locale: AppLocale
 ): BillingNotice | null {
     if (!summary) return null;
 
@@ -37,10 +40,7 @@ export function deriveBillingNotice(
         return {
             kind: 'cancelled',
             title: 'Your plan is ending',
-            description: `Your ${planName} plan stays active until ${formatDate(
-                summary.renewalDate,
-                'the end of the billing period'
-            )}. After that it changes to Starter and paid limits stop.`,
+            description: `Your ${planName} plan stays active until ${formatDate(summary.renewalDate, locale, 'the end of the billing period')}. After that it changes to Starter and paid limits stop.`,
             action: 'plans',
             actionLabel: 'Choose a plan',
         };
@@ -50,10 +50,7 @@ export function deriveBillingNotice(
         return {
             kind: 'trial',
             title: 'Your trial is active',
-            description: `Your trial ends on ${formatDate(
-                summary.renewalDate,
-                'the date shown in the portal'
-            )}. You will keep ${planName} after that unless you cancel.`,
+            description: `Your trial ends on ${formatDate(summary.renewalDate, locale, 'the date shown in the portal')}. You will keep ${planName} after that unless you cancel.`,
             action: 'portal',
             actionLabel: 'Manage subscription',
         };

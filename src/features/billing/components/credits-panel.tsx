@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlLocale } from '@/i18n/locale';
 import * as React from 'react';
 import { ChevronLeft, ChevronRight, CircleSlash, Coins, ShieldQuestion } from 'lucide-react';
 
@@ -28,6 +29,7 @@ const HISTORY_PAGE_SIZE = 10;
  * panel never shows a cost and never invents one.
  */
 export function CreditsPanel() {
+    const locale = useUrlLocale();
     const credits = useCredits();
     const { data, isLoading, error, refetch } = credits;
 
@@ -40,12 +42,12 @@ export function CreditsPanel() {
                         <CardTitle className="mt-1 flex items-center gap-2 text-2xl">
                             <Coins className="size-5 text-muted-foreground" aria-hidden />
                             {data ? (
-                                <span>{`${formatCount(data.balance)} available`}</span>
+                                <span>{`${formatCount(data.balance, locale)} available`}</span>
                             ) : (
                                 <span>Credits</span>
                             )}
                             {data && data.held > 0 ? (
-                                <Badge variant="secondary">{formatCount(data.held)} held</Badge>
+                                <Badge variant="secondary">{formatCount(data.held, locale)} held</Badge>
                             ) : null}
                         </CardTitle>
                     </div>
@@ -69,14 +71,14 @@ export function CreditsPanel() {
                                 <div>
                                     <dt className="text-muted-foreground">Available</dt>
                                     <dd className="mt-1 font-medium tabular-nums">
-                                        {formatCount(data.balance)}
+                                        {formatCount(data.balance, locale)}
                                     </dd>
                                 </div>
                                 <div>
                                     <dt className="text-muted-foreground">In progress</dt>
                                     <dd className="mt-1 font-medium tabular-nums">
                                         {data.held > 0
-                                            ? `${formatCount(data.held)} held`
+                                            ? `${formatCount(data.held, locale)} held`
                                             : 'None'}
                                     </dd>
                                 </div>
@@ -85,7 +87,7 @@ export function CreditsPanel() {
                                     <dd className="mt-1 font-medium">
                                         {data.period}
                                         {data.resetAt
-                                            ? ` — resets ${formatDate(data.resetAt)}`
+                                            ? ` — resets ${formatDate(data.resetAt, locale)}`
                                             : ''}
                                     </dd>
                                 </div>
@@ -113,6 +115,7 @@ export function CreditsPanel() {
 }
 
 function CreditHistory() {
+    const locale = useUrlLocale();
     const [page, setPage] = React.useState(1);
     const history = useCreditHistory(page, HISTORY_PAGE_SIZE);
     const { data, isLoading, error, refetch } = history;
@@ -153,8 +156,8 @@ function CreditHistory() {
                                         {creditHistoryLabel(event)}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
-                                        {formatDate(event.createdAt)} · balance{' '}
-                                        {formatCount(event.balanceAfter)}
+                                        {formatDate(event.createdAt, locale)} · balance{' '}
+                                        {formatCount(event.balanceAfter, locale)}
                                     </p>
                                 </div>
                                 <DeltaBadge event={event} />
@@ -197,6 +200,7 @@ function CreditHistory() {
 }
 
 function DeltaBadge({ event }: { event: CreditEvent }) {
+    const locale = useUrlLocale();
     const sign =
         event.kind === 'grant' || event.kind === 'topup'
             ? '+'
@@ -215,7 +219,7 @@ function DeltaBadge({ event }: { event: CreditEvent }) {
             aria-label={`amount ${event.amount}`}
         >
             {sign}
-            {formatCount(event.amount)}
+            {formatCount(event.amount, locale)}
         </span>
     );
 }

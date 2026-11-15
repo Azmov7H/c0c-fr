@@ -1,5 +1,7 @@
 "use client"
 
+import { formatDate, formatMonth } from '@/lib/format';
+import { useUrlLocale } from '@/i18n/locale';
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import {
@@ -27,6 +29,7 @@ function Calendar({
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
 }) {
+  const locale = useUrlLocale();
   const defaultClassNames = getDefaultClassNames()
 
   return (
@@ -40,8 +43,10 @@ function Calendar({
       )}
       captionLayout={captionLayout}
       formatters={{
-        formatMonthDropdown: (date) =>
-          date.toLocaleString("default", { month: "short" }),
+        // AR-014: the month name comes from the format layer — the locale
+        // decides its language, and the calendar's own default ("default")
+        // meant the ambient locale.
+        formatMonthDropdown: (date) => formatMonth(date, locale),
         ...formatters,
       }}
       classNames={{
@@ -185,6 +190,7 @@ function CalendarDayButton({
   modifiers,
   ...props
 }: React.ComponentProps<typeof DayButton>) {
+  const locale = useUrlLocale();
   const defaultClassNames = getDefaultClassNames()
 
   const ref = React.useRef<HTMLButtonElement>(null)
@@ -197,7 +203,7 @@ function CalendarDayButton({
       ref={ref}
       variant="ghost"
       size="icon"
-      data-day={day.date.toLocaleDateString()}
+      data-day={formatDate(day.date, locale, { month: "numeric", day: "numeric", year: "numeric" })}
       data-selected-single={
         modifiers.selected &&
         !modifiers.range_start &&

@@ -1,5 +1,6 @@
 'use client';
 
+import { useUrlLocale } from '@/i18n/locale';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -131,6 +132,7 @@ function WizardForm({
     initialDraft: ProjectDraft | null;
     returnTo?: 'projects';
 }) {
+    const locale = useUrlLocale();
     const router = useRouter();
     const create = useCreateProject();
     const onboarding = useOnboardingState();
@@ -308,7 +310,7 @@ function WizardForm({
                 >
                     <p className="text-sm">
                         <Sparkles className="mr-2 inline size-4 text-primary" aria-hidden="true" />
-                        Draft restored from {formatRelativeTime(restored.savedAt).relative}.
+                        Draft restored from {formatRelativeTime(restored.savedAt, locale).relative}.
                     </p>
                     <div className="flex gap-2">
                         <Button

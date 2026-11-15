@@ -17,7 +17,7 @@ const base: BillingSummary = {
 
 describe('billing notices', () => {
     it('treats a failed payment as the highest-priority state', () => {
-        const notice = deriveBillingNotice({ ...base, status: 'past_due' });
+        const notice = deriveBillingNotice({ ...base, status: 'past_due' }, 'en');
         expect(notice).toMatchObject({
             kind: 'payment_failed',
             action: 'portal',
@@ -26,22 +26,22 @@ describe('billing notices', () => {
     });
 
     it('shows the end date for a scheduled cancellation', () => {
-        const notice = deriveBillingNotice({ ...base, cancelAtPeriodEnd: true });
+        const notice = deriveBillingNotice({ ...base, cancelAtPeriodEnd: true }, 'en');
         expect(notice).toMatchObject({ kind: 'cancelled', action: 'plans' });
         expect(notice?.description).toContain('Nov 5, 2026');
         expect(notice?.description).toMatch(/changes to Starter/i);
     });
 
     it('shows trial end date and portal action', () => {
-        const notice = deriveBillingNotice({ ...base, status: 'trialing' });
+        const notice = deriveBillingNotice({ ...base, status: 'trialing' }, 'en');
         expect(notice).toMatchObject({ kind: 'trial', action: 'portal' });
         expect(notice?.description).toContain('Nov 5, 2026');
     });
 
     it('does not nag an active or free account', () => {
-        expect(deriveBillingNotice(base)).toBeNull();
+        expect(deriveBillingNotice(base, 'en')).toBeNull();
         expect(
-            deriveBillingNotice({ ...base, plan: 'starter', status: null, managedByStripe: false })
+            deriveBillingNotice({ ...base, plan: 'starter', status: null, managedByStripe: false }, 'en')
         ).toBeNull();
     });
 });

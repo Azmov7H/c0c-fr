@@ -1,3 +1,4 @@
+import { useUrlLocale } from '@/i18n/locale';
 import Link from 'next/link';
 
 import {
@@ -15,6 +16,7 @@ import { ProjectActions } from './project-actions';
 import { PlatformBadge, StatusBadge } from './project-badges';
 
 export function ProjectsTable({ projects }: { projects: Project[] }) {
+    const locale = useUrlLocale();
     return (
         <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
             <Table>
@@ -31,7 +33,7 @@ export function ProjectsTable({ projects }: { projects: Project[] }) {
                 </TableHeader>
                 <TableBody>
                     {projects.map((project) => {
-                        const updated = formatRelativeTime(project.updatedAt);
+                        const updated = formatRelativeTime(project.updatedAt, locale);
                         return (
                             <TableRow key={project._id}>
                                 <TableCell>
