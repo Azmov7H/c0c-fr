@@ -21,7 +21,6 @@ import { stripLocaleFromPath } from "@/i18n/routing"
  * authenticated chrome with an empty user, and never page content.
  */
 function ShellSkeleton() {
-    const t = useTranslations("common")
     return (
         <div className="flex min-h-screen w-full bg-background" aria-busy="true">
             <span className="sr-only" role="status">Loading session</span>
