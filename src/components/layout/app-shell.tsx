@@ -26,7 +26,7 @@ function ShellSkeleton() {
             <span className="sr-only" role="status">Loading session</span>
 
             {/* Sidebar column (matches w-64 default) */}
-            <div className="hidden md:flex w-64 shrink-0 flex-col gap-3 border-r border-border/60 p-4">
+            <div className="hidden md:flex w-64 shrink-0 flex-col gap-3 border-e border-border/60 p-4">
                 <Skeleton className="h-9 w-32 motion-reduce:animate-none" />
                 <div className="mt-4 space-y-2">
                     <Skeleton className="h-4 w-20 motion-reduce:animate-none" />

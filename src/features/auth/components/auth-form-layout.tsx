@@ -37,8 +37,8 @@ export function AuthFormLayout({
                 className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none"
                 aria-hidden="true"
             >
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-pulse motion-reduce:animate-none" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-info/10 rounded-full blur-[120px] animate-pulse delay-700 motion-reduce:animate-none" />
+                <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-pulse motion-reduce:animate-none" />
+                <div className="absolute bottom-[-10%] end-[-10%] w-[40%] h-[40%] bg-info/10 rounded-full blur-[120px] animate-pulse delay-700 motion-reduce:animate-none" />
             </div>
 
             <div

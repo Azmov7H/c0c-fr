@@ -83,6 +83,9 @@ jobs:
       # a page. Both scripts need no dependencies.
       - run: node scripts/i18n/check-parity.mjs
       - run: node scripts/i18n/extract-usage.mjs
+      # AR-020: the RTL gate — a physical utility without a documented
+      # exception fails the build, and the exception list may only shrink.
+      - run: node scripts/check-rtl.mjs
       - run: pnpm exec vitest run --coverage
 
   e2e:
