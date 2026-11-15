@@ -1,12 +1,15 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { SignJWT } from 'jose';
 import { NextRequest } from 'next/server';
-import { proxy, sanitizeRedirectPath, config as proxyConfig } from './proxy';
+import { proxy, sanitizeRedirectPath, splitLocalePath, config as proxyConfig } from './proxy';
 
 /**
  * T09 proxy tests — the gate must verify, not merely sniff a cookie.
  * Tokens are signed for real (jose, HS256) against the same contract the
  * backend implements, so these tests fail if either side drifts.
+ *
+ * AR-005 added the locale dimension: the gate runs on the LOCALE-STRIPPED
+ * path, and every redirect it produces is locale-aware.
  */
 
 const SECRET = 'test-secret-that-is-at-least-32-chars-long!!';
@@ -78,24 +81,40 @@ function locationOf(res: Response): string {
 
 describe('proxy session verification (AC: verify, do not merely check)', () => {
     it('missing cookie on a protected route → redirects to /login with callbackUrl', async () => {
-        const res = await proxy(makeRequest('/dashboard/projects'));
+        const res = await proxy(makeRequest('/en/dashboard/projects'));
         expect(res.status).toBe(307);
         const loc = locationOf(res);
-        expect(loc).toContain('/login');
-        expect(loc).toContain('callbackUrl=%2Fdashboard%2Fprojects');
+        expect(loc).toContain('/en/login');
+        expect(loc).toContain('callbackUrl=%2Fen%2Fdashboard%2Fprojects');
     });
 
     it('T13: /onboarding is protected for a signed-out visitor', async () => {
-        const res = await proxy(makeRequest('/onboarding'));
+        const res = await proxy(makeRequest('/en/onboarding'));
         expect(res.status).toBe(307);
         const loc = locationOf(res);
-        expect(loc).toContain('/login');
-        expect(loc).toContain('callbackUrl=%2Fonboarding');
+        expect(loc).toContain('/en/login');
+        expect(loc).toContain('callbackUrl=%2Fen%2Fonboarding');
+    });
+
+    it('AR-005: the login redirect keeps the Arabic locale', async () => {
+        const res = await proxy(makeRequest('/ar/dashboard'));
+        expect(res.status).toBe(307);
+        const loc = new URL(locationOf(res));
+        expect(loc.pathname).toBe('/ar/login');
+        expect(loc.searchParams.get('callbackUrl')).toBe('/ar/dashboard');
+    });
+
+    it('AR-005: a locale-less path is answered by the locale middleware, not the gate', async () => {
+        const res = await proxy(makeRequest('/dashboard'));
+        expect(res.status).toBe(307);
+        // The locale middleware owns this hop: it negotiates the locale and
+        // sends the visitor to the prefixed URL, where the gate runs.
+        expect(new URL(locationOf(res)).pathname).toBe('/en/dashboard');
     });
 
     it('valid token → request passes through', async () => {
         const res = await proxy(
-            makeRequest('/dashboard', { cookies: { [SESSION_COOKIE]: await signToken() } })
+            makeRequest('/en/dashboard', { cookies: { [SESSION_COOKIE]: await signToken() } })
         );
         expect(res.status).toBe(200);
         expect(res.headers.get('x-proxy-next')).toBe('1');
@@ -104,12 +123,12 @@ describe('proxy session verification (AC: verify, do not merely check)', () => {
     it('expired token → redirected AND the dead cookie is cleared', async () => {
         const now = Math.floor(Date.now() / 1000);
         const res = await proxy(
-            makeRequest('/dashboard', {
+            makeRequest('/en/dashboard', {
                 cookies: { [SESSION_COOKIE]: await signToken({ exp: now - 60 }) },
             })
         );
         expect(res.status).toBe(307);
-        expect(locationOf(res)).toContain('/login');
+        expect(locationOf(res)).toContain('/en/login');
         const setCookie = res.headers.get('set-cookie') ?? '';
         expect(setCookie).toContain(`${SESSION_COOKIE}=`);
         expect(setCookie.toLowerCase()).toContain('max-age=0');
@@ -117,24 +136,24 @@ describe('proxy session verification (AC: verify, do not merely check)', () => {
 
     it('tampered payload → rejected (the presence-only check would have allowed it)', async () => {
         const res = await proxy(
-            makeRequest('/dashboard', {
+            makeRequest('/en/dashboard', {
                 cookies: { [SESSION_COOKIE]: await signToken({ tamperPayload: true }) },
             })
         );
         expect(res.status).toBe(307);
-        expect(locationOf(res)).toContain('/login');
+        expect(locationOf(res)).toContain('/en/login');
     });
 
     it('garbage value in the cookie → rejected', async () => {
         const res = await proxy(
-            makeRequest('/dashboard', { cookies: { [SESSION_COOKIE]: 'not-a-jwt' } })
+            makeRequest('/en/dashboard', { cookies: { [SESSION_COOKIE]: 'not-a-jwt' } })
         );
         expect(res.status).toBe(307);
     });
 
     it('token signed with the wrong secret → rejected', async () => {
         const res = await proxy(
-            makeRequest('/dashboard', {
+            makeRequest('/en/dashboard', {
                 cookies: { [SESSION_COOKIE]: await signToken({ secret: 'a'.repeat(40) }) },
             })
         );
@@ -143,7 +162,7 @@ describe('proxy session verification (AC: verify, do not merely check)', () => {
 
     it('a refresh-audience token is not a session token → rejected', async () => {
         const res = await proxy(
-            makeRequest('/dashboard', {
+            makeRequest('/en/dashboard', {
                 cookies: {
                     [SESSION_COOKIE]: await signToken({ typ: 'refresh', aud: 'c0c-refresh' }),
                 },
@@ -157,10 +176,10 @@ describe('proxy session verification (AC: verify, do not merely check)', () => {
         delete process.env.JWT_SECRET;
         try {
             const res = await proxy(
-                makeRequest('/dashboard', { cookies: { [SESSION_COOKIE]: await signToken() } })
+                makeRequest('/en/dashboard', { cookies: { [SESSION_COOKIE]: await signToken() } })
             );
             expect(res.status).toBe(307);
-            expect(locationOf(res)).toContain('/login');
+            expect(locationOf(res)).toContain('/en/login');
             expect(errorSpy).toHaveBeenCalled();
         } finally {
             process.env.JWT_SECRET = SECRET;
@@ -170,19 +189,19 @@ describe('proxy session verification (AC: verify, do not merely check)', () => {
 
     it('valid token visiting /login → redirected to /dashboard', async () => {
         const res = await proxy(
-            makeRequest('/login', { cookies: { [SESSION_COOKIE]: await signToken() } })
+            makeRequest('/en/login', { cookies: { [SESSION_COOKIE]: await signToken() } })
         );
         expect(res.status).toBe(307);
-        expect(locationOf(res)).toContain('/dashboard');
+        expect(locationOf(res)).toContain('/en/dashboard');
     });
 });
 
 describe('open-redirect guard on callbackUrl (no test existed before T09)', () => {
     const evilTargets = ['https://evil.com', 'http://evil.com', '//evil.com', '/\\evil.com', 'javascript:alert(1)'];
 
-    it.each(evilTargets)('callbackUrl=%s → falls back to /dashboard', async (evil) => {
+    it.each(evilTargets)('callbackUrl=%s → falls back to the dashboard', async (evil) => {
         const res = await proxy(
-            makeRequest('/login', {
+            makeRequest('/en/login', {
                 cookies: { [SESSION_COOKIE]: await signToken() },
                 search: `?callbackUrl=${encodeURIComponent(evil)}`,
             })
@@ -190,12 +209,12 @@ describe('open-redirect guard on callbackUrl (no test existed before T09)', () =
         expect(res.status).toBe(307);
         const loc = locationOf(res);
         expect(new URL(loc).origin).toBe('http://localhost');
-        expect(new URL(loc).pathname).toBe('/dashboard');
+        expect(new URL(loc).pathname).toBe('/en/dashboard');
     });
 
     it('safe relative callbackUrl is honoured', async () => {
         const res = await proxy(
-            makeRequest('/login', {
+            makeRequest('/en/login', {
                 cookies: { [SESSION_COOKIE]: await signToken() },
                 search: '?callbackUrl=%2Fprojects%2F42%3Ftab%3Daudio',
             })
@@ -212,6 +231,28 @@ describe('open-redirect guard on callbackUrl (no test existed before T09)', () =
         expect(sanitizeRedirectPath('/\\evil.com')).toBe('/dashboard');
         expect(sanitizeRedirectPath('https://evil.com')).toBe('/dashboard');
     });
+
+    it('AR-005: a locale-prefixed path is a valid redirect target', () => {
+        expect(sanitizeRedirectPath('/ar/dashboard')).toBe('/ar/dashboard');
+        expect(sanitizeRedirectPath('/ar/dashboard', '/en/dashboard')).toBe('/ar/dashboard');
+    });
+});
+
+describe('AR-005 locale splitting', () => {
+    it('splits the locale from the path the gate matches against', () => {
+        expect(splitLocalePath('/en/dashboard')).toEqual({ locale: 'en', corePath: '/dashboard' });
+        expect(splitLocalePath('/ar/projects/42')).toEqual({ locale: 'ar', corePath: '/projects/42' });
+        expect(splitLocalePath('/en')).toEqual({ locale: 'en', corePath: '/' });
+        expect(splitLocalePath('/en/settings/billing')).toEqual({
+            locale: 'en',
+            corePath: '/settings/billing',
+        });
+    });
+
+    it('a locale-less path falls back to the default locale', () => {
+        expect(splitLocalePath('/dashboard')).toEqual({ locale: 'en', corePath: '/dashboard' });
+        expect(splitLocalePath('/fr/dashboard')).toEqual({ locale: 'en', corePath: '/fr/dashboard' });
+    });
 });
 
 describe('rollout modes (AUTH_MIDDLEWARE_MODE)', () => {
@@ -219,7 +260,7 @@ describe('rollout modes (AUTH_MIDDLEWARE_MODE)', () => {
         process.env.AUTH_MIDDLEWARE_MODE = 'presence';
         try {
             const res = await proxy(
-                makeRequest('/dashboard', { cookies: { [SESSION_COOKIE]: 'x' } })
+                makeRequest('/en/dashboard', { cookies: { [SESSION_COOKIE]: 'x' } })
             );
             expect(res.status).toBe(200);
         } finally {
@@ -230,7 +271,7 @@ describe('rollout modes (AUTH_MIDDLEWARE_MODE)', () => {
     it('off mode: no gate at all (last resort)', async () => {
         process.env.AUTH_MIDDLEWARE_MODE = 'off';
         try {
-            const res = await proxy(makeRequest('/dashboard'));
+            const res = await proxy(makeRequest('/en/dashboard'));
             expect(res.status).toBe(200);
         } finally {
             delete process.env.AUTH_MIDDLEWARE_MODE;
@@ -240,21 +281,21 @@ describe('rollout modes (AUTH_MIDDLEWARE_MODE)', () => {
 
 describe('CSP header delivery', () => {
     it('ships report-only by default with a nonce and no unsafe-inline for scripts', async () => {
-        const res = await proxy(makeRequest('/'));
+        const res = await proxy(makeRequest('/en'));
         const csp = res.headers.get('content-security-policy-report-only') ?? '';
         expect(csp).not.toBe('');
         expect(res.headers.get('content-security-policy')).toBeNull();
         expect(csp).toMatch(/script-src 'self' 'nonce-[^']+' 'strict-dynamic' https:/);
         expect(csp).not.toContain("script-src 'self' 'unsafe-inline'");
         expect(csp).toContain("style-src 'self' 'unsafe-inline'");
-        expect(csp).toContain("frame-ancestors 'none'");
+        expect(csp).toContain('frame-ancestors \'none\'');
         expect(csp).toContain("object-src 'none'");
     });
 
     it('CSP_ENFORCE=true flips to the enforcing header (config change, not a rebuild)', async () => {
         process.env.CSP_ENFORCE = 'true';
         try {
-            const res = await proxy(makeRequest('/'));
+            const res = await proxy(makeRequest('/en'));
             expect(res.headers.get('content-security-policy')).not.toBeNull();
             expect(res.headers.get('content-security-policy-report-only')).toBeNull();
         } finally {
@@ -263,10 +304,10 @@ describe('CSP header delivery', () => {
     });
 
     it('a nonce is generated per request (two requests never share one)', async () => {
-        const a = (await proxy(makeRequest('/'))).headers.get(
+        const a = (await proxy(makeRequest('/en'))).headers.get(
             'content-security-policy-report-only'
         );
-        const b = (await proxy(makeRequest('/'))).headers.get(
+        const b = (await proxy(makeRequest('/en'))).headers.get(
             'content-security-policy-report-only'
         );
         const nonceOf = (csp: string | null) => csp?.match(/'nonce-([^']+)'/)?.[1];
@@ -279,10 +320,11 @@ describe('matcher is narrowed (R-14)', () => {
     const matcher = new RegExp(`^${proxyConfig.matcher[0]}$`);
 
     it.each([
-        ['/dashboard', true],
-        ['/projects/new', true],
-        ['/login', true],
-        ['/', true],
+        ['/en/dashboard', true],
+        ['/en/projects/new', true],
+        ['/en/login', true],
+        ['/ar/pricing', true],
+        ['/en/invites/abc123', true],
         ['/api/auth/session', false],
         ['/api/v1/trends', false],
         ['/_next/static/chunk.js', false],
@@ -294,6 +336,10 @@ describe('matcher is narrowed (R-14)', () => {
         ['/manifest.webmanifest', false],
         ['/sw.js', false],
         ['/placeholder.png', false],
+        // AR-005: /register stays outside the locale processing — it is a 301
+        // handler to /signup, and the locale middleware resolves /signup.
+        ['/register', false],
+        ['/registry', true],
     ])('%s → matched: %s', (path, expected) => {
         expect(matcher.test(path)).toBe(expected);
     });
