@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { AppProviders } from '@/components/app-providers';
 import { LocaleSwitcher } from '@/components/layout/locale-switcher';
+import { getTranslations } from '@/i18n/server';
 
 /**
  * Auth pages are data-shaped: login/register mutations go through react-query
@@ -20,11 +21,15 @@ export const metadata: Metadata = {
     robots: { index: false, follow: false },
 };
 
-export default function AuthLayout({
+export default async function AuthLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    // AR-009: the server reads the catalog directly — no provider, no client
+    // runtime, and the string is rendered in the server's language.
+    const t = await getTranslations('common');
+
     return (
         <AppProviders>
             {/* FR-1: the language switch is reachable from the auth pages too.
@@ -36,7 +41,7 @@ export default function AuthLayout({
                 href="#main-content"
                 className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
             >
-                Skip to content
+                {t('_a11y.skipToContent')}
             </a>
             <main id="main-content" tabIndex={-1}>
                 {children}

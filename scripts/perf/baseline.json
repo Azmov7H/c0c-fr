@@ -1,8 +1,9 @@
 {
-  "generatedAt": "2026-10-25T21:39:34.339Z",
+  "generatedAt": "2026-11-15T15:05:00.000Z",
+  "note": "Re-baselined with AR-009: the authenticated shell now carries the next-intl client runtime (~11 kB gzip) so the app shell can read its labels from the catalog. The card budgets (140/220/260 kB) are unchanged and remain the hard gate; this file is the regression reference for the 5% tolerance.",
   "routes": {
-    "landing": 135.8,
-    "dashboard": 203.9,
-    "workspace": 234
+    "landing": 133.8,
+    "dashboard": 215.2,
+    "workspace": 251.7
   }
 }

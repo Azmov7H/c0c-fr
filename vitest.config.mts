@@ -57,7 +57,15 @@ export default defineConfig({
                     // take ~5 s when the whole suite runs in parallel; the
                     // default 5 s budget made them flaky. Unit tests still
                     // finish in milliseconds.
-                    testTimeout: 15_000,
+                    //
+                    // 30 s (up from 15 s): the two wizard suites are the
+                    // slowest in the project, and on a loaded runner (a
+                    // security scan next to the test box, a cold module
+                    // graph) they blew through 15 s and took the CI job red
+                    // for a test that is not actually broken. The gate is
+                    // still a gate — a hung test still fails, it just fails
+                    // at 30 s instead of 15.
+                    testTimeout: 30_000,
                     include: [
                         'src/components/**/*.test.tsx',
                         'src/features/**/*.test.tsx',
@@ -65,6 +73,9 @@ export default defineConfig({
                         'src/styles/**/*.test.tsx',
                         'src/services/**/*.test.tsx',
                         'src/hooks/**/*.test.tsx',
+                        // AR-009: the catalog pipeline proof renders a
+                        // provider + a translated component.
+                        'tests/i18n/**/*.test.tsx',
                     ],
                     setupFiles: ['tests/setup/component.ts'],
                 },

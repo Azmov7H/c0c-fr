@@ -1,1 +1,13 @@
-{}
+{
+  "_a11y": {
+    "skipToContent": "تخطَّ إلى المحتوى",
+    "searchWorkspace": "ابحث في مساحة العمل"
+  },
+  "action": {
+    "search": "ابحث في مساحة العمل...",
+    "create": "إنشاء"
+  },
+  "navigation": {
+    "quickCreate": "إنشاء سريع"
+  }
+}
