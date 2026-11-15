@@ -73,7 +73,7 @@ describe('SessionInitializer', () => {
 
     it('authenticated complete user on an app page → user set, no redirect, loading settles', async () => {
         mocks.session = { authenticated: true, user: completeUser };
-        mount('/dashboard');
+        mount('/en/dashboard');
 
         await vi.waitFor(() => expect(mocks.setLoading).toHaveBeenLastCalledWith(false));
         expect(mocks.setUser).toHaveBeenCalledWith(completeUser);
@@ -85,23 +85,23 @@ describe('SessionInitializer', () => {
             authenticated: true,
             user: { ...completeUser, onboardingCompleted: false },
         };
-        mount('/dashboard');
+        mount('/en/dashboard');
 
         await vi.waitFor(() => expect(firstReplace()).not.toBeNull());
-        expect(firstReplace()).toBe('/onboarding');
+        expect(firstReplace()).toBe('/en/onboarding');
     });
 
     it('complete user parked on /onboarding is escorted back out (no edit param)', async () => {
         mocks.session = { authenticated: true, user: completeUser };
-        mount('/onboarding');
+        mount('/en/onboarding');
 
         await vi.waitFor(() => expect(firstReplace()).not.toBeNull());
-        expect(firstReplace()).toBe('/dashboard');
+        expect(firstReplace()).toBe('/en/dashboard');
     });
 
     it('authenticated user on /login bounces to the callbackUrl ?from= target', async () => {
         mocks.session = { authenticated: true, user: completeUser };
-        mount('/login', 'from=/projects/42');
+        mount('/en/login', 'from=/projects/42');
 
         await vi.waitFor(() => expect(firstReplace()).not.toBeNull());
         expect(firstReplace()).toBe('/projects/42');
@@ -109,30 +109,37 @@ describe('SessionInitializer', () => {
 
     it('authenticated user on /login without a callback lands on the default target', async () => {
         mocks.session = { authenticated: true, user: completeUser };
-        mount('/login');
+        mount('/en/login');
 
         await vi.waitFor(() => expect(firstReplace()).not.toBeNull());
-        expect(firstReplace()).toBe('/dashboard');
+        expect(firstReplace()).toBe('/en/dashboard');
     });
 
     it('untrusted callbackUrl (open redirect) is ignored → default target', async () => {
         mocks.session = { authenticated: true, user: completeUser };
-        mount('/login', 'callbackUrl=//evil.com');
+        mount('/en/login', 'callbackUrl=//evil.com');
 
         await vi.waitFor(() => expect(firstReplace()).not.toBeNull());
-        expect(firstReplace()).toBe('/dashboard');
+        expect(firstReplace()).toBe('/en/dashboard');
     });
 
     it('signed-out visitor on an app page → login carries the current path as callback', async () => {
-        mount('/dashboard/projects');
+        mount('/en/dashboard/projects');
 
         await vi.waitFor(() => expect(firstReplace()).not.toBeNull());
         expect(mocks.setUser).toHaveBeenCalledWith(null);
-        expect(firstReplace()).toBe('/login?callbackUrl=%2Fdashboard%2Fprojects');
+        expect(firstReplace()).toBe('/en/login?callbackUrl=%2Fen%2Fdashboard%2Fprojects');
+    });
+
+    it('AR-004: an Arabic visitor is sent to the Arabic login, not the English one', async () => {
+        mount('/ar/dashboard/projects');
+
+        await vi.waitFor(() => expect(firstReplace()).not.toBeNull());
+        expect(firstReplace()).toBe('/ar/login?callbackUrl=%2Far%2Fdashboard%2Fprojects');
     });
 
     it('signed-out visitor on an auth-flow page → no redirect loop', async () => {
-        mount('/login');
+        mount('/en/login');
 
         await vi.waitFor(() => expect(mocks.setLoading).toHaveBeenLastCalledWith(false));
         expect(mocks.setUser).toHaveBeenCalledWith(null);
@@ -140,7 +147,7 @@ describe('SessionInitializer', () => {
     });
 
     it('signed-out visitor on /invites/token → stays (accepting an invite may precede signup)', async () => {
-        mount('/invites', 'token=tok-123');
+        mount('/en/invites', 'token=tok-123');
 
         await vi.waitFor(() => expect(mocks.setLoading).toHaveBeenLastCalledWith(false));
         expect(mocks.setUser).toHaveBeenCalledWith(null);
@@ -149,7 +156,7 @@ describe('SessionInitializer', () => {
 
     it('the session endpoint itself fails → loading settles with no user and no redirect', async () => {
         mocks.sessionError = true;
-        mount('/dashboard');
+        mount('/en/dashboard');
 
         await vi.waitFor(() => expect(mocks.setLoading).toHaveBeenLastCalledWith(false));
         // The catch branch deliberately does not navigate: with the network

@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
+import { stripLocaleFromPath } from "@/i18n/routing"
+
 import {
   Sidebar,
   SidebarHeader,
@@ -64,7 +66,8 @@ function NavItem({
 
 export function AppSidebar() {
   const { user } = useAuthStore()
-  const pathname = usePathname()
+  // AR-004: the active-nav lookup works on the locale-less route.
+  const pathname = stripLocaleFromPath(usePathname())
   const { state } = useSidebar()
   const collapsed = state === "collapsed"
   const activeUrl = getActiveNavUrl(pathname)

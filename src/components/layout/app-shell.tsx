@@ -10,6 +10,7 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuthStore } from "@/store/auth-store"
 import { ONBOARDING_PATH } from "@/lib/onboarding-gate"
+import { stripLocaleFromPath } from "@/i18n/routing"
 
 /**
  * Rendered while the session is still resolving, shaped like the real shell
@@ -114,7 +115,7 @@ export function AppShell({
 }) {
     const isLoading = useAuthStore((s) => s.isLoading)
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-    const pathname = usePathname()
+    const pathname = stripLocaleFromPath(usePathname())
 
     // While the client session resolves, trust the verified cookie for the
     // initial paint. A failed session fetch still redirects via

@@ -24,6 +24,7 @@ import {
 import { UserButtonSlot } from "./user-button-slot"
 import { useTheme } from "@/components/theme-provider"
 import { QUICK_ACTIONS, ROUTE_LABELS } from "@/lib/navigation"
+import { stripLocaleFromPath } from "@/i18n/routing"
 import { useBreadcrumbStore } from "@/store/breadcrumb-store"
 
 /** T20: the bell dropdown is interaction-only; its menu runtime loads on demand. */
@@ -50,7 +51,10 @@ const CommandMenu = dynamic(() => import("./command-menu").then((mod) => mod.Com
 })
 
 function useBreadcrumbs() {
-  const pathname = usePathname()
+  // AR-004: the browser path carries the locale prefix (`/en/dashboard`),
+  // but the breadcrumbs are built from the locale-less route
+  // (`/dashboard`) — the prefix is a routing detail, not a crumb.
+  const pathname = stripLocaleFromPath(usePathname())
   const projectId = useBreadcrumbStore((state) => state.projectId)
   const projectTitle = useBreadcrumbStore((state) => state.projectTitle)
   const segments = pathname.split("/").filter(Boolean)

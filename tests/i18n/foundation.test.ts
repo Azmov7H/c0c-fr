@@ -3,7 +3,16 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { NAMESPACES, loadMessages } from '../../src/i18n/messages';
-import { defaultLocale, directionFor, isAppLocale, locales } from '../../src/i18n/routing';
+import {
+    defaultLocale,
+    directionFor,
+    isAppLocale,
+    localeFromPath,
+    locales,
+    pathInLocale,
+    stripLocaleFromPath,
+    withLocale,
+} from '../../src/i18n/routing';
 
 /**
  * AR-003 — the foundation's own contract.
@@ -34,6 +43,44 @@ describe('AR-003 locale model', () => {
     it('renders Arabic right-to-left and English left-to-right', () => {
         expect(directionFor('ar')).toBe('rtl');
         expect(directionFor('en')).toBe('ltr');
+    });
+});
+
+describe('AR-004 path helpers', () => {
+    it('reads the locale out of a path', () => {
+        expect(localeFromPath('/en/dashboard')).toBe('en');
+        expect(localeFromPath('/ar/dashboard')).toBe('ar');
+        expect(localeFromPath('/en')).toBe('en');
+        expect(localeFromPath('/dashboard')).toBeNull();
+        expect(localeFromPath('/fr/dashboard')).toBeNull();
+    });
+
+    it('strips the locale prefix for the locale-less route', () => {
+        expect(stripLocaleFromPath('/en/dashboard')).toBe('/dashboard');
+        expect(stripLocaleFromPath('/ar/settings/billing')).toBe('/settings/billing');
+        expect(stripLocaleFromPath('/en')).toBe('/');
+        expect(stripLocaleFromPath('/dashboard')).toBe('/dashboard');
+        expect(stripLocaleFromPath('/fr/dashboard')).toBe('/fr/dashboard');
+    });
+
+    it('builds the same path in another locale (the switcher)', () => {
+        expect(pathInLocale('/en/dashboard', 'ar')).toBe('/ar/dashboard');
+        expect(pathInLocale('/ar/projects/42', 'en')).toBe('/en/projects/42');
+        expect(pathInLocale('/en', 'ar')).toBe('/ar');
+    });
+
+    it('puts a locale-less path back into a locale (the redirects)', () => {
+        expect(withLocale('/dashboard', 'ar')).toBe('/ar/dashboard');
+        expect(withLocale('/', 'ar')).toBe('/ar');
+        expect(withLocale('/onboarding', 'en')).toBe('/en/onboarding');
+    });
+
+    it('the two are inverses of each other', () => {
+        for (const path of ['/en/dashboard', '/ar/projects/42', '/en']) {
+            const stripped = stripLocaleFromPath(path);
+            const locale = localeFromPath(path)!;
+            expect(withLocale(stripped, locale)).toBe(path);
+        }
     });
 });
 

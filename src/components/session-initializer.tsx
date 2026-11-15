@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { authService } from '@/features/auth/services/auth.service';
 import { safeCallbackUrl } from '@/features/auth/lib/callback-url';
 import { defaultPostAuthTarget, onboardingRedirect } from '@/lib/onboarding-gate';
+import { defaultLocale, localeFromPath, stripLocaleFromPath, withLocale } from '@/i18n/routing';
 import { useAuthStore } from '@/store/auth-store';
 
 /**
@@ -30,7 +31,14 @@ const REDIRECT_WHEN_AUTHENTICATED = ['/login', '/signup', '/forgot-password'];
 export function SessionInitializer() {
     const { setUser, setLoading } = useAuthStore();
     const router = useRouter();
-    const pathname = usePathname();
+    // AR-004: the browser path carries the locale prefix (`/en/login`), while
+    // the page classification and the gate rules work on the locale-less route
+    // (`/login`). The redirects, on the other hand, must carry the locale the
+    // visitor is in — a redirect that drops them into the default language
+    // would undo the switch they just made.
+    const browserPath = usePathname();
+    const locale = localeFromPath(browserPath) ?? defaultLocale;
+    const pathname = stripLocaleFromPath(browserPath);
 
     useEffect(() => {
         let cancelled = false;
@@ -54,7 +62,7 @@ export function SessionInitializer() {
                         onboardingCompleted: session.user.onboardingCompleted,
                     });
                     if (gate) {
-                        router.replace(gate);
+                        router.replace(withLocale(gate, locale));
                         return;
                     }
 
@@ -65,7 +73,7 @@ export function SessionInitializer() {
                         const callbackUrl =
                             safeCallbackUrl(params.get('callbackUrl') || params.get('from'));
                         router.replace(
-                            callbackUrl ?? defaultPostAuthTarget(session.user.onboardingCompleted)
+                            callbackUrl ?? withLocale(defaultPostAuthTarget(session.user.onboardingCompleted), locale)
                         );
                     }
                 } else {
@@ -74,8 +82,13 @@ export function SessionInitializer() {
                         AUTH_FLOW_PAGES.some((p) => pathname?.startsWith(p)) ||
                         isInvitePage(pathname);
                     if (!isAuthFlowPage) {
-                        const cb = safeCallbackUrl(pathname);
-                        router.replace(`/login${cb ? `?callbackUrl=${encodeURIComponent(cb)}` : ''}`);
+                        // The callback keeps the locale-prefixed path, so the
+                        // visitor returns to the page they were on, in the
+                        // language they were reading.
+                        const cb = safeCallbackUrl(browserPath);
+                        router.replace(
+                            `/${locale}/login${cb ? `?callbackUrl=${encodeURIComponent(cb)}` : ''}`
+                        );
                     }
                 }
             } catch {
@@ -87,7 +100,7 @@ export function SessionInitializer() {
 
         initSession();
         return () => { cancelled = true; };
-    }, [setUser, setLoading, pathname, router]);
+    }, [setUser, setLoading, pathname, browserPath, locale, router]);
 
     return null;
 }
