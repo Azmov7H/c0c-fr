@@ -303,7 +303,19 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
         ['node_modules/next/dist/bin/next', 'start', '-p', String(FE_PORT)],
         {
             cwd: REPO_ROOT,
-            env: { ...process.env, API_URL, JWT_SECRET, NODE_ENV: 'production' },
+            env: {
+                ...process.env,
+                API_URL,
+                JWT_SECRET,
+                NODE_ENV: 'production',
+                // AR-021: the QA route is closed in production by default.
+                // The E2E stack runs the PRODUCTION build, and the RTL pass
+                // has to prove that the gallery renders and passes axe in
+                // both directions — so the stack opens the route explicitly.
+                // The flag is read at request time: the same artifact serves
+                // the gallery here and 404s it in the deployed product.
+                ENABLE_QA_ROUTES: '1',
+            },
             stdio: ['ignore', 'pipe', 'pipe'],
         }
     );

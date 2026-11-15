@@ -8,9 +8,9 @@ import { useTranslations } from "next-intl"
 
 import {
   Plus, Search, Sun, Moon, Monitor,
-  ChevronRight,
 } from "lucide-react"
 
+import { DirIcon } from "@/components/icons/dir-icon"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import {
@@ -164,7 +164,7 @@ export function Header() {
                           {crumb.label}
                         </BreadcrumbLink>
                         <BreadcrumbSeparator>
-                          <ChevronRight className="w-3 h-3" />
+                          <DirIcon name="ChevronRight" className="w-3 h-3" />
                         </BreadcrumbSeparator>
                       </>
                     ) : (

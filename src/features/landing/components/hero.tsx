@@ -1,6 +1,5 @@
 import { getImageProps } from 'next/image';
-import { ArrowRight } from 'lucide-react';
-
+import { DirIcon } from '@/components/icons/dir-icon';
 import { MarketingCtaLink } from '@/components/layout/marketing-cta';
 
 /**
@@ -36,7 +35,7 @@ export function Hero() {
                 <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                     <MarketingCtaLink href="/signup" size="lg" className="h-12 px-8 text-base">
                         Start creating — free
-                        <ArrowRight className="ms-2 h-4 w-4" aria-hidden />
+                        <DirIcon name="ArrowRight" className="ms-2 h-4 w-4" aria-hidden />
                     </MarketingCtaLink>
                     <MarketingCtaLink
                         href="#assets"

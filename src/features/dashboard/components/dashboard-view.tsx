@@ -5,7 +5,6 @@ import * as React from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import {
-  ArrowRight,
   BarChart3,
   FileText,
   LayoutDashboard,
@@ -15,6 +14,7 @@ import {
   Zap,
 } from "lucide-react"
 
+import { DirIcon } from "@/components/icons/dir-icon"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -347,7 +347,8 @@ function ProjectsWidget({
         </div>
         <Link href="/projects">
           <Button variant="ghost" size="sm" className="h-8 px-3 text-xs text-primary hover:bg-primary/10">
-            View all <ArrowRight className="ms-1 size-3" aria-hidden="true" />
+            View all{' '}
+            <DirIcon name="ArrowRight" className="ms-1 size-3" aria-hidden="true" />
           </Button>
         </Link>
       </div>
@@ -365,7 +366,8 @@ function ProjectsWidget({
           </div>
           <Link href={`/projects/${continueProject._id}`}>
             <Button size="sm" className="h-8 rounded-lg px-3 text-xs">
-              Resume <ArrowRight className="ms-1 size-3" aria-hidden="true" />
+              Resume{' '}
+              <DirIcon name="ArrowRight" className="ms-1 size-3" aria-hidden="true" />
             </Button>
           </Link>
         </div>

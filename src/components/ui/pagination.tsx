@@ -1,11 +1,8 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  MoreHorizontalIcon,
-} from "lucide-react"
+import { MoreHorizontalIcon } from "lucide-react"
 
+import { DirIcon } from "@/components/icons/dir-icon"
 import { buttonVariants, type Button } from "@/components/ui/button"
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
@@ -76,7 +73,7 @@ function PaginationPrevious({
       className={cn("gap-1 px-2.5 sm:ps-2.5", className)}
       {...props}
     >
-      <ChevronLeftIcon />
+      <DirIcon name="ChevronLeft" />
       <span className="hidden sm:block">Previous</span>
     </PaginationLink>
   )
@@ -94,7 +91,7 @@ function PaginationNext({
       {...props}
     >
       <span className="hidden sm:block">Next</span>
-      <ChevronRightIcon />
+      <DirIcon name="ChevronRight" />
     </PaginationLink>
   )
 }

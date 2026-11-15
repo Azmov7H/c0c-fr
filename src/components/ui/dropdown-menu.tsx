@@ -5,9 +5,10 @@
 "use client"
 
 import * as React from "react"
-import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
+import { CheckIcon, CircleIcon } from "lucide-react"
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui"
 
+import { DirIcon } from "@/components/icons/dir-icon"
 import { cn } from "@/lib/utils"
 
 function DropdownMenu({
@@ -221,7 +222,7 @@ function DropdownMenuSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="me-auto size-4" />
+      <DirIcon name="ChevronRight" className="me-auto size-4" />
     </DropdownMenuPrimitive.SubTrigger>
   )
 }

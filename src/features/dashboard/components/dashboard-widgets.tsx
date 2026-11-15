@@ -4,7 +4,6 @@ import { formatMonth } from '@/lib/format';
 import { useUrlLocale } from '@/i18n/locale';
 import Link from 'next/link';
 import {
-    ArrowRight,
     Calendar,
     FileText,
     Flame,
@@ -16,6 +15,7 @@ import {
     Zap,
 } from 'lucide-react';
 
+import { DirIcon } from '@/components/icons/dir-icon';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -200,7 +200,8 @@ function TrendingWidget() {
             </ul>
             <div className="mt-2 text-end">
                 <Link href="/trends" className="text-xs font-medium text-primary hover:underline">
-                    Explore trends <ArrowRight className="ms-0.5 inline size-3" aria-hidden="true" />
+                    Explore trends{' '}
+                    <DirIcon name="ArrowRight" className="ms-0.5 inline size-3" aria-hidden="true" />
                 </Link>
             </div>
         </DataState>
