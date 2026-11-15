@@ -5,8 +5,9 @@ import type { AppLocale } from '@/i18n/routing';
 import { useUrlLocale } from '@/i18n/locale';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Bell, Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import { Bell, Calendar, Clock } from 'lucide-react';
 
+import { DirIcon } from '@/components/icons/dir-icon';
 import { PageHeader } from '@/components/shared/page-header';
 import { SectionCard } from '@/components/shared/section-card';
 import { DataState } from '@/components/shared/data-state';
@@ -187,11 +188,11 @@ export function ContentPlanner() {
                 </Select>
                 <div className="flex items-center gap-2">
                     <Button variant="outline" size="icon" className="size-11" aria-label="Previous month" onClick={() => setMonthOffset((value) => value - 1)}>
-                        <ChevronLeft className="size-4" aria-hidden="true" />
+                        <DirIcon name="ChevronLeft" className="size-4" aria-hidden="true" />
                     </Button>
                     <span className="min-w-40 text-center text-sm font-medium">{monthLabelWith(month, locale)}</span>
                     <Button variant="outline" size="icon" className="size-11" aria-label="Next month" onClick={() => setMonthOffset((value) => value + 1)}>
-                        <ChevronRight className="size-4" aria-hidden="true" />
+                        <DirIcon name="ChevronRight" className="size-4" aria-hidden="true" />
                     </Button>
                 </div>
             </div>

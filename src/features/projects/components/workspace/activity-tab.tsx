@@ -4,8 +4,6 @@ import { useUrlLocale } from '@/i18n/locale';
 import { useState } from 'react';
 import {
     Activity,
-    ChevronLeft,
-    ChevronRight,
     FileText,
     Image as ImageIcon,
     Mail,
@@ -17,6 +15,7 @@ import {
     UserPlus,
 } from 'lucide-react';
 
+import { DirIcon } from '@/components/icons/dir-icon';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -183,7 +182,7 @@ export function ActivityTab({ projectId }: { projectId: string }) {
                                         disabled={!meta.hasPrevPage}
                                         onClick={() => setPage((current) => Math.max(1, current - 1))}
                                     >
-                                        <ChevronLeft className="me-1 size-4" aria-hidden="true" />
+                                        <DirIcon name="ChevronLeft" className="me-1 size-4" aria-hidden="true" />
                                         Previous
                                     </Button>
                                     <Button
@@ -193,7 +192,7 @@ export function ActivityTab({ projectId }: { projectId: string }) {
                                         onClick={() => setPage((current) => current + 1)}
                                     >
                                         Next
-                                        <ChevronRight className="ms-1 size-4" aria-hidden="true" />
+                                        <DirIcon name="ChevronRight" className="ms-1 size-4" aria-hidden="true" />
                                     </Button>
                                 </div>
                             </div>

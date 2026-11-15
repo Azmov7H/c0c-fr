@@ -1,5 +1,4 @@
-import { ArrowRight } from 'lucide-react';
-
+import { DirIcon } from '@/components/icons/dir-icon';
 import { MarketingCtaLink } from '@/components/layout/marketing-cta';
 
 /** Repeat the hero promise, one CTA. The last thing on the page converts. */
@@ -16,7 +15,7 @@ export function FinalCta() {
                 </p>
                 <MarketingCtaLink href="/signup" size="lg" className="mt-8 h-12 px-8 text-base">
                     Start creating — free
-                    <ArrowRight className="ms-2 h-4 w-4" aria-hidden />
+                    <DirIcon name="ArrowRight" className="ms-2 h-4 w-4" aria-hidden />
                 </MarketingCtaLink>
             </div>
         </section>

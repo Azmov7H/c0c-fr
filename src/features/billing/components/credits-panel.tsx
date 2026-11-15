@@ -2,8 +2,9 @@
 
 import { useUrlLocale } from '@/i18n/locale';
 import * as React from 'react';
-import { ChevronLeft, ChevronRight, CircleSlash, Coins, ShieldQuestion } from 'lucide-react';
+import { CircleSlash, Coins, ShieldQuestion } from 'lucide-react';
 
+import { DirIcon } from '@/components/icons/dir-icon';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -174,7 +175,7 @@ function CreditHistory() {
                                 onClick={() => setPage((current) => Math.max(1, current - 1))}
                                 disabled={page <= 1 || isLoading}
                             >
-                                <ChevronLeft className="size-4" aria-hidden />
+                                <DirIcon name="ChevronLeft" className="size-4" aria-hidden />
                                 Newer
                             </Button>
                             <span className="text-xs tabular-nums text-muted-foreground">
@@ -189,7 +190,7 @@ function CreditHistory() {
                                 disabled={page >= totalPages || isLoading}
                             >
                                 Older
-                                <ChevronRight className="size-4" aria-hidden />
+                                <DirIcon name="ChevronRight" className="size-4" aria-hidden />
                             </Button>
                         </div>
                     ) : null}

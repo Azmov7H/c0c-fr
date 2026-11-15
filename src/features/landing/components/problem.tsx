@@ -1,4 +1,6 @@
-import { FileText, Image as ImageIcon, Music, MoveRight, Palette } from 'lucide-react';
+import { FileText, Image as ImageIcon, Music, Palette } from 'lucide-react';
+
+import { DirIcon } from '@/components/icons/dir-icon';
 
 /**
  * Make the pain legible. No invented numbers — the section describes the
@@ -22,15 +24,15 @@ export function Problem() {
                     <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2">
                         <FileText className="h-4 w-4 text-muted-foreground" aria-hidden /> Docs for the script
                     </span>
-                    <MoveRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                    <DirIcon name="MoveRight" className="h-4 w-4 text-muted-foreground" aria-hidden />
                     <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2">
                         <Palette className="h-4 w-4 text-muted-foreground" aria-hidden /> An editor for thumbnails
                     </span>
-                    <MoveRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                    <DirIcon name="MoveRight" className="h-4 w-4 text-muted-foreground" aria-hidden />
                     <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2">
                         <Music className="h-4 w-4 text-muted-foreground" aria-hidden /> Stock sites for SFX
                     </span>
-                    <MoveRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                    <DirIcon name="MoveRight" className="h-4 w-4 text-muted-foreground" aria-hidden />
                     <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2">
                         <ImageIcon className="h-4 w-4 text-muted-foreground" aria-hidden /> Somewhere else for images
                     </span>

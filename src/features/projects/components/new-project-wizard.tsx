@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { toast } from '@/lib/toast';
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
+import { CheckCircle2, Loader2, Sparkles } from 'lucide-react';
 
+import { DirIcon } from '@/components/icons/dir-icon';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -297,7 +298,7 @@ function WizardForm({
                     className="-ms-2 h-11 gap-2 text-muted-foreground hover:text-foreground"
                     onClick={requestCancel}
                 >
-                    <ArrowLeft className="size-4" aria-hidden="true" />
+                    <DirIcon name="ArrowLeft" className="size-4" aria-hidden="true" />
                     Projects
                 </Button>
                 <StepIndicator current={step} />
@@ -375,7 +376,7 @@ function WizardForm({
                             onClick={previousStep}
                             disabled={step === 1 || create.isPending}
                         >
-                            <ArrowLeft className="me-2 size-4" aria-hidden="true" />
+                            <DirIcon name="ArrowLeft" className="me-2 size-4" aria-hidden="true" />
                             Back
                         </Button>
 
@@ -398,7 +399,7 @@ function WizardForm({
                                 }}
                             >
                                 {primaryLabel}
-                                <ArrowRight className="ms-2 size-4" aria-hidden="true" />
+                                <DirIcon name="ArrowRight" className="ms-2 size-4" aria-hidden="true" />
                             </Button>
                         ) : (
                             <Button
