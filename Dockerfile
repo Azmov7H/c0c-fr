@@ -19,7 +19,7 @@
 # Update the digest, never `docker pull` a moving tag:
 #   docker manifest inspect node:22-bookworm-slim
 
-FROM node:22-bookworm-slim@sha256:ea11b74b986d520137cdef9a5346e447a00f275ecc4abc0055b7151226231e09 AS base
+FROM node:22-bookworm-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee AS base
 
 # PNPM_VERSION mirrors packageManager in package.json — the ARG is the visible,
 # cache-busting surface.
@@ -49,6 +49,15 @@ ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
 # container id, which would leave loopback (and therefore HEALTHCHECK) refused;
 # 0.0.0.0 is the standard standalone-image binding.
 ENV HOSTNAME=0.0.0.0
+
+# The runtime never installs anything — it runs `node server.js`. The npm CLI
+# that ships inside the node base image is therefore pure attack surface, and
+# it is the source of every HIGH/CRITICAL finding the image scan reports:
+# pacote, sigstore, ip-address, picomatch and brace-expansion are npm's OWN
+# dependencies, not the application's. The application's dependency tree is
+# scanned where it is actually resolved — `pnpm audit --prod` in CI, and
+# `pnpm install --frozen-lockfile` in the builder stage.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
 # .next/standalone already carries its own minimal node_modules + server.js
 COPY --from=builder --chown=node:node /app/.next/standalone ./

@@ -5,6 +5,8 @@
 #   §test         full two-project suite (node + jsdom) under coverage, with
 #                 per-group floors from T18/T21 — silent drops go red
 #   §coverage     bundle budgets still on every route (T20 hard gate)
+#   §secrets      the client-bundle secret scan runs in the build job (it
+#                 reads the built `.next/static` artifact)
 #   §e2e          playwright journeys — gated on the backend sibling repo PAT
 #                 (T21_SIBLING_PAT must be added by the repo owner; the job
 #                 no-ops green with a marker until it exists)
@@ -16,7 +18,17 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      # AR program branches (feat/fix/test/docs/chore/AR0NN-<slug>). The AR
+      # branches are verified on the branch itself so a change is proven green
+      # BEFORE it is merged into main — the repo has no branch protection and
+      # the AR workflow needs a per-task green signal, not only a main signal.
+      - 'feat/AR**'
+      - 'fix/AR**'
+      - 'test/AR**'
+      - 'docs/AR**'
+      - 'chore/AR**'
   pull_request:
   workflow_dispatch:
 
@@ -46,9 +58,14 @@ jobs:
       - run: pnpm exec tsc --noEmit
       # `pnpm build` = next build && bundle-budget: budgets are blocking here.
       - run: pnpm build
+      # The client-secret scan reads the BUILT client bundle, so it runs here —
+      # this is the job that produces `.next/static`. It used to live in the
+      # `test` job, which never builds, so it could only ever fail there
+      # ("`.next/static` not found") and never actually scanned anything.
+      - run: pnpm check:client-secrets
 
   test:
-    name: vitest · coverage floors · client-secret scan
+    name: vitest · coverage floors
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -61,7 +78,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec vitest run --coverage
-      - run: pnpm check:client-secrets   # component bundles must not carry secrets
 
   e2e:
     name: playwright journeys (gated on backend sibling)

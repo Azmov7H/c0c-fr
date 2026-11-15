@@ -9,7 +9,15 @@ name: Docker
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      # AR program branches — same rationale as ci.yml: the image is proven on
+      # the branch before the change is merged into main.
+      - 'feat/AR**'
+      - 'fix/AR**'
+      - 'test/AR**'
+      - 'docs/AR**'
+      - 'chore/AR**'
   pull_request:
   workflow_dispatch:
 
@@ -66,10 +74,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t c0c-fr:ci .
-      - uses: aquasecurity/trivy-action@v0.28.0
+      - uses: aquasecurity/trivy-action@v0.36.0
+        # v0.28.0 pinned `aquasecurity/setup-trivy@v0.2.1`, a tag that no
+        # longer resolves — the job failed before it ever scanned the image.
+        # v0.36.0 pins setup-trivy by commit SHA (v0.2.6), so the action
+        # resolves and the scan actually runs.
         with:
           image-ref: c0c-fr:ci
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: '1'
           format: table
+      # The scan's findings are re-emitted as GitHub error annotations, so the
+      # evidence sits with the check run (visible in the PR view) instead of
+      # only in a log. The step above is still the gate — it fails the job.
+      - name: publish the findings as annotations
+        if: always()
+        run: |
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed \
+            --format json --output trivy-report.json c0c-fr:ci || true
+          node scripts/publish-trivy-annotations.mjs trivy-report.json
