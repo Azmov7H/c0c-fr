@@ -19,7 +19,9 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const GLOBALS_CSS = path.join(ROOT, 'src/styles/globals.css');
-const LAYOUT_TSX = path.join(ROOT, 'src/app/layout.tsx');
+// AR-004: the root layout moved under the locale segment — it is the layout
+// that renders <html lang dir>.
+const LAYOUT_TSX = path.join(ROOT, 'src/app/[locale]/layout.tsx');
 // T11 split the providers: the theme provider moved to AppProviders
 // ((auth)/(dashboard) groups) and marketing routes get the dependency-free
 // pre-paint script instead — both are asserted where they now live.

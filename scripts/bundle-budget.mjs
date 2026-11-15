@@ -39,12 +39,12 @@ const WORKSPACE_ID = '507f1f77bcf86cd799439011';
 
 /** Card budgets, in kB gzip. */
 const ROUTES = [
-  { id: 'landing', label: '/ (landing)', requestPath: '/', budget: 140 },
-  { id: 'dashboard', label: '/dashboard', requestPath: '/dashboard', budget: 220 },
+  { id: 'landing', label: '/en (landing)', requestPath: '/en', budget: 140 },
+  { id: 'dashboard', label: '/en/dashboard', requestPath: '/en/dashboard', budget: 220 },
   {
     id: 'workspace',
-    label: '/projects/[id]',
-    requestPath: `/projects/${WORKSPACE_ID}`,
+    label: '/en/projects/[id]',
+    requestPath: `/en/projects/${WORKSPACE_ID}`,
     budget: 260,
   },
 ];
@@ -158,7 +158,10 @@ const startServer = async (port) => {
   while (Date.now() < deadline) {
     if (child.exitCode !== null) break;
     try {
-      const response = await fetch(`${baseUrl}/`, {
+      // The probe asks for the default locale's landing page: every route
+      // lives under the locale segment since AR-004, so the bare `/` is not
+      // a page any more.
+      const response = await fetch(`${baseUrl}/en`, {
         headers: { cookie: AUTH_COOKIE },
         signal: AbortSignal.timeout(2_000),
       });

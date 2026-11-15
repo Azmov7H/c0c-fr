@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import createMiddleware from 'next-intl/middleware';
 import { verifySessionToken } from '@/lib/auth-verify';
+import { isAppLocale, routing } from '@/i18n/routing';
+import type { AppLocale } from '@/i18n/routing';
 
 /**
  * Optimistic gate, NOT an authorization boundary.
  *
  * Decision D2 (tasks/plan/ARCHITECTURE.md): the middleware never reads the
  * database; the backend remains the only authority on what a user may do.
- * This file decides two things: whether to bounce a stranger without a valid
- * session to /login, and which CSP header to hand the browser.
+ * This file decides three things: which locale a request is rendered in,
+ * whether to bounce a stranger without a valid session to /login, and which
+ * CSP header to hand the browser.
  *
  * Modes via AUTH_MIDDLEWARE_MODE (read per request — an env change plus a
  * restart, no rebuild):
@@ -20,8 +24,23 @@ import { verifySessionToken } from '@/lib/auth-verify';
  * a signed-out visitor gets bounced to login with a callback, while the
  * completed/incomplete routing itself is client-side (the flag lives in the
  * session payload, and the backend's 428 remains the real boundary).
+ *
+ * AR-005 — the locale composition (ROUTING-STRATEGY §5):
+ *
+ *   1. the locale middleware runs FIRST: it negotiates the locale, redirects
+ *      a locale-less path to the negotiated locale and hands the request on;
+ *   2. the auth gate then runs against the LOCALE-STRIPPED path, so the
+ *      prefix lists below stay in their plain form (`/dashboard`, not
+ *      `/en/dashboard`) and there is exactly one place that knows about the
+ *      prefix;
+ *   3. the CSP nonce is attached last, on the request that is passed through.
  */
 
+/**
+ * Pages a signed-in user is redirected away from. `/register` is not here:
+ * it is a 301 handler to /signup (T12), and reset/verify pages must stay
+ * reachable regardless of session state (see session-initializer.tsx).
+ */
 const protectedPrefixes = [
     '/dashboard',
     '/onboarding',
@@ -40,11 +59,6 @@ const protectedPrefixes = [
     '/settings',
 ];
 
-/**
- * Pages a signed-in user is redirected away from. `/register` is not here:
- * it is a 301 handler to /signup (T12), and reset/verify pages must stay
- * reachable regardless of session state (see session-initializer.tsx).
- */
 const authPrefixes = ['/login', '/signup', '/forgot-password'];
 
 /**
@@ -67,6 +81,11 @@ function readSessionCookie(request: NextRequest): { name: string; value: string 
  * `startsWith('/')` alone is not enough: `//evil.com` and `/\evil.com` both
  * parse as absolute URLs in `new URL(target, base)` — that is the open
  * redirect this guard exists to stop.
+ *
+ * AR-005: a locale-prefixed path (`/ar/dashboard`) is a valid target — it is
+ * still a single-slash, same-origin path, and the locale prefix is part of
+ * the route, not of the origin. The invariant is unchanged; only the set of
+ * accepted targets grew.
  */
 export function sanitizeRedirectPath(
     target: string | null | undefined,
@@ -75,6 +94,25 @@ export function sanitizeRedirectPath(
     if (!target) return fallback;
     if (!/^\/($|[^/\\])/.test(target)) return fallback;
     return target;
+}
+
+/**
+ * Splits a request path into its locale and the locale-less path the auth
+ * gate matches against.
+ *
+ * `/en/dashboard` → `{ locale: 'en', corePath: '/dashboard' }`
+ * `/dashboard`    → `{ locale: 'en', corePath: '/dashboard' }` (the default
+ *                    locale: the locale middleware redirects this path to
+ *                    `/en/dashboard` before the gate ever sees it)
+ */
+export function splitLocalePath(pathname: string): { locale: AppLocale; corePath: string } {
+    const segments = pathname.split('/');
+    const first = segments[1];
+    if (isAppLocale(first)) {
+        const rest = segments.slice(2).join('/');
+        return { locale: first, corePath: `/${rest}` };
+    }
+    return { locale: routing.defaultLocale, corePath: pathname };
 }
 
 function createNonce(): string {
@@ -108,11 +146,33 @@ export function buildContentSecurityPolicy(scriptNonce: string, enforce = false)
     ].join('; ');
 }
 
+/**
+ * The locale middleware (AR-002). It resolves the locale from the URL, the
+ * cookie or `Accept-Language`, redirects a locale-less path to the
+ * negotiated locale and remembers the choice in the locale cookie.
+ */
+const handleI18nRouting = createMiddleware(routing);
+
+/** A redirect response — the locale middleware's answer to a locale-less path. */
+function isRedirect(response: Response): boolean {
+    return response.status >= 300 && response.status < 400;
+}
+
 export async function proxy(request: NextRequest) {
     const mode = process.env.AUTH_MIDDLEWARE_MODE ?? 'verify';
-    if (mode === 'off') return NextResponse.next();
+
+    // ── 1. the locale ──────────────────────────────────────────────────────
+    // The locale middleware runs first and owns the redirect matrix: a
+    // locale-less path is answered with a redirect to the negotiated locale,
+    // and the auth gate then sees the locale-prefixed path.
+    const intlResponse = handleI18nRouting(request);
+    if (isRedirect(intlResponse)) return intlResponse;
 
     const { pathname } = request.nextUrl;
+    const { locale, corePath } = splitLocalePath(pathname);
+
+    if (mode === 'off') return intlResponse;
+
     const session = readSessionCookie(request);
 
     let authenticated = false;
@@ -132,11 +192,13 @@ export async function proxy(request: NextRequest) {
         }
     }
 
-    const isProtectedRoute = protectedPrefixes.some((prefix) => pathname.startsWith(prefix));
+    const isProtectedRoute = protectedPrefixes.some((prefix) => corePath.startsWith(prefix));
 
     if (isProtectedRoute && !authenticated) {
-        const loginUrl = new URL('/login', request.url);
-        loginUrl.searchParams.set('callbackUrl', pathname + request.nextUrl.search);
+        // The login page is locale-aware and the callback keeps the locale,
+        // so a signed-out visitor lands in the language they asked for.
+        const loginUrl = new URL(`/${locale}/login`, request.url);
+        loginUrl.searchParams.set('callbackUrl', `/${locale}${corePath}`);
         const response = NextResponse.redirect(loginUrl);
         if (session) {
             // Expired, forged or revoked: drop the useless cookie so the browser
@@ -152,27 +214,43 @@ export async function proxy(request: NextRequest) {
         return response;
     }
 
-    const isAuthRoute = authPrefixes.some((prefix) => pathname.startsWith(prefix));
+    const isAuthRoute = authPrefixes.some((prefix) => corePath.startsWith(prefix));
 
     if (isAuthRoute && authenticated) {
         const from = sanitizeRedirectPath(
             request.nextUrl.searchParams.get('from') ??
-                request.nextUrl.searchParams.get('callbackUrl')
+                request.nextUrl.searchParams.get('callbackUrl'),
+            `/${locale}/dashboard`
         );
         return NextResponse.redirect(new URL(from, request.url));
     }
 
+    // ── 3. the CSP ─────────────────────────────────────────────────────────
     // CSP: report-only until the reports are clean; CSP_ENFORCE=true flips the header
     // name. A config change, not a rebuild — and trivially revertible.
     const scriptNonce = createNonce();
+    const enforce = process.env.CSP_ENFORCE === 'true';
+    const headerName = enforce ? 'Content-Security-Policy' : 'Content-Security-Policy-Report-Only';
+    const policy = buildContentSecurityPolicy(scriptNonce, enforce);
+
     const requestHeaders = new Headers(request.headers);
     // Next.js reads this to stamp the per-request nonce onto its inline scripts.
     requestHeaders.set('x-nonce', scriptNonce);
+    // …and it reads the POLICY on the request, not only on the response: the
+    // nonce is extracted from the request's CSP header while the page is
+    // rendered. Without the policy on the request, the rendered scripts carry
+    // no nonce at all and the enforced policy would block them.
+    requestHeaders.set(headerName, policy);
 
-    const response = NextResponse.next({ request: { headers: requestHeaders } });
-    const enforce = process.env.CSP_ENFORCE === 'true';
-    const headerName = enforce ? 'Content-Security-Policy' : 'Content-Security-Policy-Report-Only';
-    response.headers.set(headerName, buildContentSecurityPolicy(scriptNonce, enforce));
+    // The locale middleware's response carries the locale cookie and the
+    // alternate-links header; the request it built carries the locale. The
+    // pass-through is re-issued here so the CSP nonce can ride along on the
+    // REQUEST headers (that is where Next.js reads it from).
+    const response = NextResponse.next({
+        request: { headers: requestHeaders },
+        headers: intlResponse.headers,
+    });
+    response.headers.set(headerName, policy);
     // Observability marker (T21): distinguishes "proved by the auth gate" from
     // "reached the edge without the gate active" (mode: off bypasses above and
     // never carries this header).
@@ -187,6 +265,11 @@ export const config = {
         // cookies, the backend checks tokens), and static assets — images, fonts,
         // favicon, manifest, service worker, anything with a file extension — are
         // exempt so the gate is not paid on every byte (R-14).
-        '/((?!api/|_next/|favicon.ico|robots.txt|sitemap.xml|manifest.webmanifest|sw.js|.*\\..*).*)',
+        //
+        // `/register` is exempt as well: it is a 301 handler to `/signup` that
+        // must stay outside the locale processing (ROUTING-STRATEGY §5.6) — the
+        // signup target is resolved by the locale middleware's default-locale
+        // redirect.
+        '/((?!api/|_next/|favicon.ico|robots.txt|sitemap.xml|manifest.webmanifest|sw.js|register$|.*\\..*).*)',
     ],
 };

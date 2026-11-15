@@ -27,7 +27,7 @@
  * Usage: node scripts/check-links.mjs [--verbose]
  * Exit: 0 all links resolve, 1 one or more dead links (each named file:line).
  */
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 const ROOT = process.cwd();
@@ -61,16 +61,33 @@ function routePattern(file) {
 	return `/${segments.join('/')}`;
 }
 
+/**
+ * The locales the app serves (AR-004). Read from the message catalog
+ * directory, which is the one place that must list exactly the locales the
+ * app ships — the catalog parity gate (AR-011) enforces the same set.
+ */
+const MESSAGES_DIR = join(ROOT, 'messages');
+const LOCALES = existsSync(MESSAGES_DIR)
+	? readdirSync(MESSAGES_DIR).filter((entry) => statSync(join(MESSAGES_DIR, entry)).isDirectory())
+	: ['en', 'ar'];
+
 /** Route patterns → matchers. Static wins over dynamic for equal depth. */
 function compileRoute(pattern) {
 	const segments = pattern.split('/').filter(Boolean);
 	const parts = segments.map((segment) => {
 		if (/^\[\[\.\.\..+\]\]$/.test(segment)) return '(?:/.*)?'; // optional catch-all
 		if (/^\[\.\.\..+\]$/.test(segment)) return '/.+'; // catch-all
+		// The locale segment (AR-004): every page lives under it, and the
+		// locale-less form has to keep resolving — the app's own links stay
+		// locale-less in the source and the locale-aware Link prefixes them.
+		if (segment === '[locale]') return `(?:/(?:${LOCALES.join('|')}))?`;
 		if (/^\[.+\]$/.test(segment)) return '/[^/]+'; // dynamic
 		return `/${segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`;
 	});
-	return new RegExp(`^${parts.join('') || '/'}$`);
+	// The optional trailing slash keeps the bare landing URL (`/`) resolving
+	// against the locale segment (`/[locale]`), which is where the landing
+	// page lives since AR-004.
+	return new RegExp(`^${parts.join('') || '/'}/?$`);
 }
 
 const pageFiles = walk(join(ROOT, 'src/app'), 'page.tsx');
@@ -84,7 +101,6 @@ const routes = patterns.map((pattern) => ({ pattern, match: compileRoute(pattern
  */
 function resolves(rawPath) {
 	const path = rawPath.split(/[?#]/)[0] || '/';
-	if (path === '/') return routes.some((route) => route.pattern === '/');
 	if (path.startsWith('/api/v1/')) return true; // proxied rewrite, backend-owned
 	return routes.some((route) => route.match.test(path));
 }

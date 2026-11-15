@@ -1,4 +1,4 @@
-import Link from "next/link"
+/* eslint-disable @next/next/no-html-link-for-pages -- AR-004: this page lives inside the `[locale]` segment, so a client-side Link here would pull the locale-aware navigation runtime into EVERY route's client chunk (the segment boundary) — the landing page's first-load budget does not have room for it. Plain anchors keep the 404 page dependency-free; the proxy resolves the locale on the way. */
 import { Compass, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -22,13 +22,13 @@ export default function NotFound() {
 
         <div className="flex flex-wrap items-center justify-center gap-2">
           <Button asChild className="gap-2">
-            <Link href="/dashboard">
+            <a href="/dashboard">
               <LayoutDashboard className="size-4" aria-hidden="true" />
               Go to dashboard
-            </Link>
+            </a>
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/">Back home</Link>
+            <a href="/">Back home</a>
           </Button>
         </div>
       </div>

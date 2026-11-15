@@ -22,7 +22,7 @@ import { PUBLIC_ROUTES, SITE_URL } from '@/lib/public-routes';
 const ROOT = path.resolve(__dirname, '..', '..');
 const APP_DIR = path.join(ROOT, 'app');
 const SCAN_ROOTS = [
-    path.join(APP_DIR, '(marketing)'),
+    path.join(APP_DIR, '[locale]', '(marketing)'),
     path.join(ROOT, 'features', 'landing'),
     path.join(ROOT, 'components', 'layout', 'marketing-header.tsx'),
     path.join(ROOT, 'components', 'layout', 'marketing-footer.tsx'),
@@ -67,10 +67,13 @@ function extractIds(): Set<string> {
 
 function pageExists(urlPath: string): boolean {
     const parts = urlPath.split('/').filter(Boolean);
+    // AR-004: every page lives under the locale segment, so the route table
+    // the marketing surface links into starts at `src/app/[locale]`.
     const candidates = [
-        path.join(APP_DIR, '(marketing)', ...parts, 'page.tsx'),
-        path.join(APP_DIR, '(auth)', ...parts, 'page.tsx'),
-        path.join(APP_DIR, '(dashboard)', ...parts, 'page.tsx'),
+        path.join(APP_DIR, '[locale]', '(marketing)', ...parts, 'page.tsx'),
+        path.join(APP_DIR, '[locale]', '(auth)', ...parts, 'page.tsx'),
+        path.join(APP_DIR, '[locale]', '(dashboard)', ...parts, 'page.tsx'),
+        path.join(APP_DIR, '[locale]', ...parts, 'page.tsx'),
         path.join(APP_DIR, ...parts, 'page.tsx'),
     ];
     return candidates.some((candidate) => fs.existsSync(candidate));

@@ -53,11 +53,20 @@ jobs:
           exit 1
       - name: served routes are the real Next app (not an error page)
         run: |
-          code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5110/)
+          # AR-004: every page lives under the locale segment, so the landing
+          # page is served at /en (the bare / answers with the locale
+          # redirect to it — that redirect is the routing contract, not an
+          # error page).
+          code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5110/en)
           if [ "$code" != "200" ]; then
-            echo "GET / returned $code — expected 200"; docker logs c0c-fr; exit 1
+            echo "GET /en returned $code — expected 200"; docker logs c0c-fr; exit 1
           fi
-          echo "GET / → 200 from the standalone server"
+          echo "GET /en → 200 from the standalone server"
+          root=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5110/)
+          if [ "$root" != "307" ]; then
+            echo "GET / returned $root — expected the locale redirect (307)"; docker logs c0c-fr; exit 1
+          fi
+          echo "GET / → 307 to the default locale"
       - name: process is non-root (uid 1000)
         run: |
           uid=$(docker exec c0c-fr node -e "console.log(process.getuid())")
