@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { NAMESPACES, loadMessages } from '../../src/i18n/messages';
@@ -95,6 +95,15 @@ describe('AR-003 catalog registry', () => {
                 const file = join(ROOT, 'messages', locale, `${namespace}.json`);
                 expect(existsSync(file), `${locale}/${namespace}.json is missing`).toBe(true);
             }
+        }
+    });
+
+    it('every catalog file on disk is registered — no orphan namespace', () => {
+        for (const locale of locales) {
+            const files = readdirSync(join(ROOT, 'messages', locale))
+                .filter((file) => file.endsWith('.json'))
+                .map((file) => file.replace(/\.json$/, ''));
+            expect(files.sort()).toEqual([...NAMESPACES].sort());
         }
     });
 
