@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- T20: these are document navigations to another route group; next/link would add a client chunk to the 140 kB landing budget. */
 import { MarketingCtaLink } from "@/components/layout/marketing-cta"
+import { LocaleSwitcher } from "@/components/layout/locale-switcher"
 import { ThemeQuickToggle } from "@/components/theme-quick-toggle"
 import { Zap } from "lucide-react"
 
@@ -48,6 +49,8 @@ export function MarketingHeader() {
 
                 <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">
                     <ThemeQuickToggle />
+                    {/* FR-1: the language switch is reachable from the marketing header. */}
+                    <LocaleSwitcher />
                     <MarketingCtaLink href="/login" variant="ghost">
                         Log in
                     </MarketingCtaLink>

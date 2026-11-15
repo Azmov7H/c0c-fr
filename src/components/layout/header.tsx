@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/breadcrumb"
 
 import { UserButtonSlot } from "./user-button-slot"
+import { LocaleSwitcher } from "./locale-switcher"
 import { useTheme } from "@/components/theme-provider"
 import { QUICK_ACTIONS, ROUTE_LABELS } from "@/lib/navigation"
 import { stripLocaleFromPath } from "@/i18n/routing"
@@ -261,6 +262,9 @@ export function Header() {
 
           {/* Notifications */}
           <NotificationBell />
+
+          {/* FR-1: the language switch is reachable from the app header too. */}
+          <LocaleSwitcher className="inline-flex h-9 max-md:h-11 items-center rounded-md px-2.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground" />
 
           {/* Theme Switcher */}
           <ThemeCycler />
