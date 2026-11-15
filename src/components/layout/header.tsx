@@ -4,6 +4,7 @@ import Link from "next/link"
 import dynamic from "next/dynamic"
 import { usePathname } from "next/navigation"
 import { useCallback, useSyncExternalStore } from "react"
+import { useTranslations } from "next-intl"
 
 import {
   Plus, Search, Sun, Moon, Monitor,
@@ -116,6 +117,10 @@ function ThemeCycler() {
 
 export function Header() {
   const breadcrumbs = useBreadcrumbs()
+  // AR-009: the app shell reads its labels from the `common` namespace. The
+  // catalog is the source of truth for the words; the layout is only the
+  // shape around them.
+  const t = useTranslations("common")
 
   // The palette owns its open state; a synthetic ⌘K event is the shared
   // open path for both the mobile button and the desktop search field.
@@ -178,7 +183,7 @@ export function Header() {
         <Button
           variant="outline"
           onClick={openCmd}
-          aria-label="Search workspace"
+          aria-label={t("_a11y.searchWorkspace")}
           className="
             hidden md:flex h-9 w-full max-w-xs
             items-center justify-between gap-2
@@ -189,7 +194,7 @@ export function Header() {
         >
           <div className="flex items-center gap-2">
             <Search className="w-3.5 h-3.5 shrink-0" />
-            <span className="text-xs">Search workspace...</span>
+            <span className="text-xs">{t("action.search")}</span>
           </div>
           <kbd className="hidden lg:flex items-center h-5 px-1.5 rounded-md border bg-background text-[10px] font-mono text-muted-foreground">
             ⌘K
@@ -204,7 +209,7 @@ export function Header() {
             variant="ghost"
             size="icon"
             onClick={openCmd}
-            aria-label="Search workspace"
+            aria-label={t("_a11y.searchWorkspace")}
             className="md:hidden size-11 text-muted-foreground hover:text-foreground transition-colors"
           >
             <Search className="w-4 h-4" />
@@ -236,10 +241,10 @@ export function Header() {
             <summary
               className="inline-flex h-9 max-md:h-11 cursor-pointer list-none items-center rounded-lg border border-input bg-background px-3 text-xs font-semibold shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground [&::-webkit-details-marker]:hidden"
             >
-              Create
+              {t("action.create")}
             </summary>
             <div className="absolute right-0 top-full z-50 mt-1 w-56 rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
-              <p className="px-2 py-1.5 text-xs text-muted-foreground">Quick Create</p>
+              <p className="px-2 py-1.5 text-xs text-muted-foreground">{t("navigation.quickCreate")}</p>
               <div className="my-1 h-px bg-border" />
               {QUICK_ACTIONS.map((action) => (
                 <Link

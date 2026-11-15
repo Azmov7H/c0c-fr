@@ -1,1 +1,13 @@
-{}
+{
+  "_a11y": {
+    "skipToContent": "Skip to content",
+    "searchWorkspace": "Search workspace"
+  },
+  "action": {
+    "search": "Search workspace...",
+    "create": "Create"
+  },
+  "navigation": {
+    "quickCreate": "Quick Create"
+  }
+}

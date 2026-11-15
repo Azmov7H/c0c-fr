@@ -2,6 +2,7 @@
 
 import React from "react"
 import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { AppSidebar } from "./sidebar"
 import { Header } from "./header"
 import { ConnectionBanner } from "./connection-banner"
@@ -20,6 +21,7 @@ import { stripLocaleFromPath } from "@/i18n/routing"
  * authenticated chrome with an empty user, and never page content.
  */
 function ShellSkeleton() {
+    const t = useTranslations("common")
     return (
         <div className="flex min-h-screen w-full bg-background" aria-busy="true">
             <span className="sr-only" role="status">Loading session</span>
@@ -74,6 +76,7 @@ function ShellSkeleton() {
  * inside the shell so the session gate, providers and skip link are unchanged.
  */
 function OnboardingChrome({ children }: { children: React.ReactNode }) {
+    const t = useTranslations("common")
     return (
         <div className="flex min-h-screen w-full flex-col bg-background">
             <a
@@ -85,7 +88,7 @@ function OnboardingChrome({ children }: { children: React.ReactNode }) {
                     focus:text-sm focus:font-medium focus:ring-2 focus:ring-ring
                 "
             >
-                Skip to content
+                {t("_a11y.skipToContent")}
             </a>
             <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto">
                 <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8">{children}</div>
@@ -116,6 +119,9 @@ export function AppShell({
     const isLoading = useAuthStore((s) => s.isLoading)
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
     const pathname = stripLocaleFromPath(usePathname())
+    // AR-009: the shell's own labels come from the `common` namespace.
+    const t = useTranslations("common")
+    const skipToContent = t("_a11y.skipToContent")
 
     // While the client session resolves, trust the verified cookie for the
     // initial paint. A failed session fetch still redirects via
@@ -147,7 +153,7 @@ export function AppShell({
                     focus:text-sm focus:font-medium focus:ring-2 focus:ring-ring
                 "
             >
-                Skip to content
+                {skipToContent}
             </a>
 
             <div className="flex min-h-screen w-full bg-background">
