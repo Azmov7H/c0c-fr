@@ -1,7 +1,7 @@
-import { useUrlLocale } from '@/i18n/locale';
 import { Check } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import type { AppLocale } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import {
     PLAN_CATALOGUE,
@@ -25,10 +25,20 @@ function planCta(plan: PlanDefinition): { href: string; label: string } {
 interface PricingCardsProps {
     className?: string;
     currentPlan?: PlanId;
+    /**
+     * AR-014: the pricing surface is rendered on the marketing pages, which
+     * have no client runtime — so the server reads the locale and hands it
+     * down, instead of a component reading it from a hook.
+     */
+    locale: AppLocale;
 }
 
-export function PricingCards({ className, currentPlan }: PricingCardsProps) {
-    const locale = useUrlLocale();
+/**
+ * AR-014: the pricing surface is rendered on the marketing pages, which are
+ * SERVER components (the landing page's first-load budget has no room for a
+ * client runtime) — so the locale comes from the server, not from a hook.
+ */
+export function PricingCards({ className, currentPlan, locale }: PricingCardsProps) {
     return (
         <div className={cn('grid grid-cols-1 gap-6 md:grid-cols-3', className)}>
             {PLAN_IDS.map((id) => {
@@ -99,8 +109,7 @@ export function PricingCards({ className, currentPlan }: PricingCardsProps) {
     );
 }
 
-export function PlanComparisonTable() {
-    const locale = useUrlLocale();
+export function PlanComparisonTable({ locale }: { locale: AppLocale }) {
     return (
         <div className="overflow-x-auto rounded-xl border border-border/60">
             <table className="w-full min-w-[640px] border-collapse text-left text-sm">
