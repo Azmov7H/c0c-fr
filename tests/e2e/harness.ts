@@ -59,6 +59,30 @@ export const JWT_REFRESH_SECRET = 't18-e2e-refresh-secret-fedcba9876543210';
 /** Real Stripe signature header could never be reproduced without the delivery secret. */
 export const STRIPE_WEBHOOK_SECRET = 'whsec_t18_e2e_delivery_secret_0001';
 
+/**
+ * AR-008 — the locale the journeys run in.
+ *
+ * Every page lives under a locale segment since AR-004, so a journey that
+ * navigates to `/projects` would be answering a question about the locale
+ * redirect, not about the product. The English journeys state their locale
+ * explicitly (the English baseline is the regression floor), and a journey
+ * that needs the other language asks for it by name.
+ */
+export const E2E_LOCALE = 'en';
+export const E2E_ARABIC_LOCALE = 'ar';
+
+/**
+ * A locale-prefixed path for a journey: `/projects` → `/en/projects`.
+ *
+ * The helper is deliberately dumb — it prefixes, it does not rewrite — so a
+ * journey that asserts on a URL can still read what it wrote.
+ */
+export function localePath(path: string, locale: string = E2E_LOCALE): string {
+    if (!path || path === '/') return `/${locale}`;
+    const suffix = path.startsWith('/') ? path : `/${path}`;
+    return `/${locale}${suffix}`;
+}
+
 /** Password policy: backend and frontend both demand ≥ 8 + upper/lower/digit. */
 export const E2E_PASSWORD = 'Pl4n9e-Dr1ft-2026!';
 

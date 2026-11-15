@@ -25,6 +25,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { expect, test } from '@playwright/test';
+
+import { localePath } from '../harness';
 import { deliverStripeEvent, stripeEvent } from '../harness';
 
 interface FixturePersona {
@@ -66,7 +68,7 @@ test('starter quota exhausts → upgrade webhook lands → pro generation succee
     }
 
     // ── In-app: the exhausted quota is visible in the shipped UI ─────────────
-    await page.goto(`/projects/${staged.projectId}`);
+    await page.goto(localePath(`/projects/${staged.projectId}`));
     const quotaClick = page.waitForResponse(
         (res) => res.url().includes('/scripts/generate'),
         { timeout: 20_000 }

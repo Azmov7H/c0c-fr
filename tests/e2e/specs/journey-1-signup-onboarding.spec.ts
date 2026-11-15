@@ -14,11 +14,13 @@
 
 import { expect, test } from '@playwright/test';
 
+import { localePath } from '../harness';
+
 test.use({ storageState: undefined }); // brand-new visitor; no pre-existing jar
 
 test('landing CTA → signup → onboarding wizard → seeded project', async ({ page }) => {
     // ── Landing → signup ─────────────────────────────────────────────────────
-    await page.goto('/');
+    await page.goto(localePath('/'));
     await expect(page.getByRole('link', { name: /Start creating/ }).first()).toBeVisible();
     await page.getByRole('link', { name: /Start creating/ }).first().click();
     await expect(page).toHaveURL(/\/signup$/);
@@ -99,7 +101,7 @@ test('landing CTA → signup → onboarding wizard → seeded project', async ({
     // ── The dashboard surfaces it too (T14 projects widget) ─────────────────
     // The widget heading is ALSO named "Projects" — scope by unique role+name
     // to the labelled list itself, inside the main content region.
-    await page.goto('/dashboard');
+    await page.goto(localePath('/dashboard'));
     await expect(
         page.locator('#main-content').getByRole('list', { name: 'Projects' })
     ).toContainText(seededTitle);

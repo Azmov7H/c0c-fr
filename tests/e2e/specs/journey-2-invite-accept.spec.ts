@@ -19,6 +19,8 @@
 
 import { expect, test } from '@playwright/test';
 
+import { localePath } from '../harness';
+
 test.use({ storageState: 'tests/e2e/.auth/journey2.owner.json' });
 
 test('owner invites → invitee accepts in a second context → editor contribution', async ({
@@ -26,7 +28,7 @@ test('owner invites → invitee accepts in a second context → editor contribut
     browser,
 }) => {
     // ── Owner: create the project through the real wizard ───────────────────
-    await page.goto('/projects');
+    await page.goto(localePath('/projects'));
     // Two "New Project" links exist (page header + inline CTA); scope to the
     // main content so the locator is unique.
     await page.locator('#main-content').getByRole('link', { name: 'New Project' }).click();

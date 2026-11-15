@@ -19,6 +19,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { expect, test } from '@playwright/test';
+
+import { localePath } from '../harness';
 import { mintExpiredAccessToken } from '../harness';
 
 interface FixturePersona {
@@ -38,7 +40,7 @@ test.use({ storageState: 'tests/e2e/.auth/journey5.owner.json' });
 
 test('expired access token silently refreshes mid-session', async ({ page, context }) => {
     const staged = FIXTURES.personas['journey5.owner'];
-    const projectUrl = `/projects/${staged.projectId}`;
+    const projectUrl = localePath(`/projects/${staged.projectId}`);
 
     // Valid session; land on a page that performs axios calls (the workspace).
     await page.goto(projectUrl);
