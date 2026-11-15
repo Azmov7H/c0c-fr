@@ -1,3 +1,10 @@
 allowBuilds:
   msw: true
   unrs-resolver: true
+  # next-intl's toolchain: @swc/core (the SWC binary next-intl uses to extract
+  # message keys at build time) and @parcel/watcher (its file watcher for
+  # catalog hot-reload in dev). Both ship prebuilt binaries for the supported
+  # platforms; pnpm still needs the explicit approval to run their install
+  # scripts, exactly like msw and unrs-resolver above.
+  '@swc/core': true
+  '@parcel/watcher': true

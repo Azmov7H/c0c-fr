@@ -31,8 +31,20 @@ export default defineConfig({
                         'src/proxy.test.ts',
                         'src/features/**/*.test.ts',
                         'tests/security/**/*.test.ts',
+                        // AR-002: the i18n compatibility gate (next-intl ↔
+                        // Next 16 proxy.ts) is a node-environment suite.
+                        'tests/i18n/**/*.test.ts',
                     ],
                     setupFiles: ['tests/setup/node.ts'],
+                    /**
+                     * AR-002: next-intl ships an ESM build that imports
+                     * `next/server` without the file extension. Node's native
+                     * ESM resolver rejects that; vitest's externalized
+                     * dependencies are loaded natively, so next-intl has to be
+                     * inlined (transformed) for the compatibility gate to run
+                     * in the node environment.
+                     */
+                    server: { deps: { inline: ['next-intl'] } },
                 },
             },
             {

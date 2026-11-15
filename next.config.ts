@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import bundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs/config";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const withBundleAnalyzer = bundleAnalyzer({
   // `ANALYZE=true pnpm build` writes the interactive treemap to .next/analyze.
@@ -106,6 +107,17 @@ const nextConfig: NextConfig = {
 
 const withAnalyzer = withBundleAnalyzer(nextConfig);
 
+/**
+ * AR-002 — the next-intl plugin. It is the only wiring the library needs: it
+ * makes the request configuration in `src/i18n/request.ts` (the locale + the
+ * message catalog) available to every server component and to
+ * `getTranslations`.
+ *
+ * It wraps the whole config — analyzer, Sentry and all — so the request
+ * configuration is resolved before anything else reads it.
+ */
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
 // T21: source-map upload is opt-in at deploy time. Without a token the build
 // is exactly the same as before (maps are still emitted by
 // `productionBrowserSourceMaps`); with one, Sentry's build plugin uploads them
@@ -114,14 +126,16 @@ const sentryOrg = process.env.SENTRY_ORG;
 const sentryProject = process.env.SENTRY_PROJECT;
 const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
 
-export default sentryOrg && sentryProject && sentryAuthToken
-  ? withSentryConfig(withAnalyzer, {
-      org: sentryOrg,
-      project: sentryProject,
-      authToken: sentryAuthToken,
-      silent: true,
-      telemetry: false,
-      widenClientFileUpload: true,
-      sourcemaps: { deleteSourcemapsAfterUpload: true },
-    })
-  : withAnalyzer;
+export default withNextIntl(
+  sentryOrg && sentryProject && sentryAuthToken
+    ? withSentryConfig(withAnalyzer, {
+        org: sentryOrg,
+        project: sentryProject,
+        authToken: sentryAuthToken,
+        silent: true,
+        telemetry: false,
+        widenClientFileUpload: true,
+        sourcemaps: { deleteSourcemapsAfterUpload: true },
+      })
+    : withAnalyzer
+);
