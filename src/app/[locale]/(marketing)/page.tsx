@@ -11,7 +11,7 @@ import { FinalCta } from '@/features/landing/components/final-cta';
 import { PLAN_CATALOGUE, PLAN_IDS } from '@/features/billing/lib/plans';
 import { getTranslations } from '@/i18n/server';
 
-const SITE_URL = 'https://aicontentengine.com';
+const SITE_URL = 'https://c0c-fr.vercel.app';
 
 /**
  * AR-022: the metadata copy is in the catalog, so the page speaks the
@@ -69,7 +69,7 @@ export default async function LandingPage() {
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'SoftwareApplication',
-        name: 'AI Content Engine',
+        name: 'C0C',
         applicationCategory: 'MultimediaApplication',
         operatingSystem: 'Web',
         url: SITE_URL,

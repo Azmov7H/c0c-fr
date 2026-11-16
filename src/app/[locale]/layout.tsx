@@ -45,21 +45,21 @@ export const metadata: Metadata = {
   // to the production domain).
   metadataBase: new URL('https://c0c-fr.vercel.app'),
   title: {
-    template: '%s | AI Content Engine',
+    template: '%s | C0C || AI Content Engine',
     default: 'AI Content Engine - Transform raw concepts into high-performing content',
   },
   description: 'Transform raw concepts into high-performing content. Manage projects, write scripts, and automate workflows.',
   openGraph: {
-    title: 'AI Content Engine',
+    title: 'C0C || AI Content Engine',
     description: 'Transform raw concepts into high-performing content.',
     url: 'https://c0c-fr.vercel.app',
-    siteName: 'AI Content Engine',
+    siteName: 'C0C || AI Content Engine',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AI Content Engine',
+    title: 'C0C || AI Content Engine',
     description: 'Transform raw concepts into high-performing content.',
   },
 };
