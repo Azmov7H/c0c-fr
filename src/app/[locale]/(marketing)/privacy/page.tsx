@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-    title: 'Privacy Policy',
-    description: 'How AI Content Engine handles account and usage data.',
-};
+import {
+    LegalDocument,
+    type LegalSection,
+} from '@/features/legal/components/legal-document';
+import { getTranslations } from '@/i18n/server';
 
 /**
  * Minimal placeholder, deliberately obvious about it. The footer used to
@@ -13,44 +14,32 @@ export const metadata: Metadata = {
  *
  * The [BRACKETED] fields are placeholders. Do not remove the notice until a
  * lawyer has replaced them (tracked in T11-STATUS follow-ups).
+ *
+ * AR-024: the copy is in the catalog (`messages/{en,ar}/legal.json`), and
+ * the metadata is per locale — the page speaks the visitor's language in the
+ * search result too.
  */
-export default function PrivacyPage() {
-    return (
-        <div className="container mx-auto max-w-2xl px-4 py-16">
-            <h1 className="text-3xl font-bold tracking-tight">Privacy Policy</h1>
-            <p className="mt-4 rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm text-foreground">
-                <strong>Template — pending legal review.</strong> This is a minimal
-                placeholder so the footer link resolves. It is not a binding policy,
-                and the bracketed fields below are fill-ins, not facts.
-            </p>
+export async function generateMetadata(): Promise<Metadata> {
+    const t = await getTranslations('legal');
 
-            <div className="mt-8 space-y-6 text-sm leading-relaxed text-muted-foreground">
-                <section>
-                    <h2 className="text-lg font-semibold text-foreground">What we collect</h2>
-                    <p className="mt-2">
-                        Account details you provide (name, email address), the content
-                        you create in the product, and basic usage data needed to run
-                        the service and enforce plan quotas.
-                    </p>
-                </section>
-                <section>
-                    <h2 className="text-lg font-semibold text-foreground">How it is used</h2>
-                    <p className="mt-2">
-                        To operate your account, generate the assets you request, and
-                        keep the service secure. We do not sell personal data.
-                    </p>
-                </section>
-                <section>
-                    <h2 className="text-lg font-semibold text-foreground">Contact</h2>
-                    <p className="mt-2">
-                        Questions about this policy: [CONTACT EMAIL].
-                    </p>
-                </section>
-                <p className="text-xs">
-                    Governing entity: [COMPANY LEGAL NAME], [JURISDICTION]. Effective
-                    date: [DATE].
-                </p>
-            </div>
-        </div>
+    return {
+        title: t('privacy.meta.title'),
+        description: t('privacy.meta.description'),
+    };
+}
+
+export default async function PrivacyPage() {
+    const t = await getTranslations('legal');
+
+    return (
+        <LegalDocument
+            title={t('privacy.title')}
+            notice={{
+                title: t('privacy.notice.title'),
+                body: t('privacy.notice.body'),
+            }}
+            sections={t.raw('privacy.sections') as LegalSection[]}
+            governing={t('privacy.governing')}
+        />
     );
 }
