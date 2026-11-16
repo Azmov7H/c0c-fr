@@ -1,17 +1,19 @@
+import { useTranslations } from 'next-intl';
+
 import { useUrlLocale } from '@/i18n/locale';
 import { AlertTriangle } from 'lucide-react';
 
 import { Progress } from '@/components/ui/progress';
 import { usagePercent } from '../lib/entitlements';
 import { formatCount, formatDate } from '../lib/format';
-import { QUOTA_LABELS, formatLimit } from '../lib/plans';
+import { buildPricingCopy } from '../lib/pricing-copy';
 import type { BillingSummary, UsageRow } from '../types';
 
 interface UsageSummaryProps {
     summary: BillingSummary;
 }
 
-function usageRows(summary: BillingSummary): UsageRow[] {
+function usageRows(summary: BillingSummary, quotaOrder: string[]): UsageRow[] {
     const rows = [...summary.usage];
     if (!rows.some((row) => row.feature === 'ai.generation')) {
         const limit = summary.quota['ai.generation'] ?? null;
@@ -26,14 +28,17 @@ function usageRows(summary: BillingSummary): UsageRow[] {
     }
     return rows.sort(
         (a, b) =>
-            Object.keys(QUOTA_LABELS).indexOf(a.feature) -
-            Object.keys(QUOTA_LABELS).indexOf(b.feature)
+            quotaOrder.indexOf(a.feature) - quotaOrder.indexOf(b.feature)
     );
 }
 
 export function UsageSummary({ summary }: UsageSummaryProps) {
     const locale = useUrlLocale();
-    const rows = usageRows(summary);
+    // AR-023: the quota labels and the "Unlimited" word are the catalogue's
+    // copy; the counters are the code's.
+    const t = useTranslations('pricing');
+    const copy = buildPricingCopy(t);
+    const rows = usageRows(summary, copy.quotaOrder());
     const limitRows = Object.entries(summary.quota).filter(
         ([key]) => !rows.some((row) => row.feature === key)
     );
@@ -52,7 +57,7 @@ export function UsageSummary({ summary }: UsageSummaryProps) {
 
             <div className="grid gap-4 sm:grid-cols-2">
                 {rows.map((row) => {
-                    const label = QUOTA_LABELS[row.feature] ?? row.feature;
+                    const label = copy.quotaLabel(row.feature);
                     const limit = row.limit;
                     const percent = usagePercent(row.used, limit);
                     const exhausted = limit !== null && row.used >= limit;
@@ -63,7 +68,7 @@ export function UsageSummary({ summary }: UsageSummaryProps) {
                                 <p className="text-sm font-medium">{label}</p>
                                 <p className="text-sm tabular-nums text-muted-foreground">
                                     {limit === null
-                                        ? 'Unlimited'
+                                        ? copy.limit(null, locale)
                                         : `${formatCount(row.used, locale)} / ${formatCount(limit, locale)}`}
                                 </p>
                             </div>
@@ -106,10 +111,10 @@ export function UsageSummary({ summary }: UsageSummaryProps) {
                         {limitRows.map(([key, value]) => (
                             <div key={key} className="rounded-lg border border-border/50 px-3 py-2">
                                 <dt className="text-xs text-muted-foreground">
-                                    {QUOTA_LABELS[key] ?? key}
+                                    {copy.quotaLabel(key)}
                                 </dt>
                                 <dd className="mt-0.5 text-sm font-medium">
-                                    {formatLimit(value, locale)}
+                                    {copy.limit(value, locale)}
                                 </dd>
                             </div>
                         ))}

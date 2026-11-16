@@ -76,14 +76,43 @@ function namespaces(locale) {
  *   const t = useTranslations('common')
  *   const t = await getTranslations('common')
  *   const t = await getTranslations({ namespace: 'common' })
+ *
+ * AR-023: a translator can also arrive as a PARAMETER. The pricing copy is
+ * read through one seam (`buildPricingCopy(t)`) that the server-rendered
+ * marketing page and the client-rendered app surfaces share, and the seam
+ * never calls a hook itself. The namespace is still statically known,
+ * because the translator's TYPE carries it:
+ *
+ *   type PricingTranslator = ReturnType<typeof useTranslations<'pricing'>>
+ *   function buildPricingCopy(t: PricingTranslator) { … }
+ *
+ * So the type aliases in a file are read first, and every parameter or
+ * object field typed as one of them becomes a binding. A key inside the seam
+ * is checked exactly like a key inside a component.
  */
 function translatorBindings(source) {
     const bindings = new Map();
-    const pattern =
+
+    const direct =
         /(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:await\s+)?(?:useTranslations|getTranslations)\s*\(\s*(?:\{[^}]*namespace\s*:\s*)?['"]([^'"]+)['"]/g;
-    for (const match of source.matchAll(pattern)) {
+    for (const match of source.matchAll(direct)) {
         bindings.set(match[1], match[2]);
     }
+
+    const aliases = new Map();
+    const aliasPattern =
+        /type\s+([A-Za-z_$][\w$]*)\s*=\s*ReturnType\s*<\s*typeof\s+useTranslations\s*<\s*['"]([^'"]+)['"]\s*>\s*>/g;
+    for (const match of source.matchAll(aliasPattern)) {
+        aliases.set(match[1], match[2]);
+    }
+
+    for (const [typeName, namespace] of aliases) {
+        const typed = new RegExp(`([A-Za-z_$][\\w$]*)\\s*:\\s*${typeName}\\b`, 'g');
+        for (const match of source.matchAll(typed)) {
+            bindings.set(match[1], namespace);
+        }
+    }
+
     return bindings;
 }
 
