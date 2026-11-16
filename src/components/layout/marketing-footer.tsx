@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- T20: see marketing-header.tsx; the footer is static chrome and its links cross a route group. */
+import { getTranslations } from "@/i18n/server"
 import { Zap } from "lucide-react"
 
 /**
@@ -12,7 +13,10 @@ import { Zap } from "lucide-react"
  * as marketing-header.tsx. These are document navigations either way, and the
  * link runtime is a ~3 kB gzip client chunk on the landing budget.
  */
-export function MarketingFooter() {
+export async function MarketingFooter() {
+    const t = await getTranslations("common")
+    const year = new Date().getFullYear()
+
     return (
         <footer className="border-t py-12 bg-background/90 md:py-16 lg:py-20">
             <div className="container mx-auto max-w-screen-2xl px-4 md:px-6">
@@ -23,28 +27,27 @@ export function MarketingFooter() {
                             <span className="font-bold">AI Content Engine</span>
                         </a>
                         <p className="max-w-xs text-sm text-muted-foreground">
-                            Thumbnails, scripts, sound effects and images — everything
-                            a video needs, in one place.
+                            {t("marketing.footer.tagline")}
                         </p>
                     </div>
                     <div className="space-y-4">
-                        <h2 className="text-sm font-semibold">Product</h2>
+                        <h2 className="text-sm font-semibold">{t("marketing.footer.productHeading")}</h2>
                         <ul className="space-y-3 text-sm text-muted-foreground">
-                            <li><a href="/#assets" className="hover:text-foreground">The four assets</a></li>
-                            <li><a href="/#how-it-works" className="hover:text-foreground">How it works</a></li>
-                            <li><a href="/pricing" className="hover:text-foreground">Pricing</a></li>
+                            <li><a href="/#assets" className="hover:text-foreground">{t("marketing.nav.assets")}</a></li>
+                            <li><a href="/#how-it-works" className="hover:text-foreground">{t("marketing.nav.howItWorks")}</a></li>
+                            <li><a href="/pricing" className="hover:text-foreground">{t("marketing.nav.pricing")}</a></li>
                         </ul>
                     </div>
                     <div className="space-y-4">
-                        <h2 className="text-sm font-semibold">Legal</h2>
+                        <h2 className="text-sm font-semibold">{t("marketing.footer.legalHeading")}</h2>
                         <ul className="space-y-3 text-sm text-muted-foreground">
-                            <li><a href="/privacy" className="hover:text-foreground">Privacy Policy</a></li>
-                            <li><a href="/terms" className="hover:text-foreground">Terms of Service</a></li>
+                            <li><a href="/privacy" className="hover:text-foreground">{t("marketing.footer.privacy")}</a></li>
+                            <li><a href="/terms" className="hover:text-foreground">{t("marketing.footer.terms")}</a></li>
                         </ul>
                     </div>
                 </div>
                 <div className="mt-12 flex flex-col items-center justify-between border-t border-border/40 pt-8 sm:flex-row text-xs text-muted-foreground">
-                    <p>© 2026 AI Content Engine. All rights reserved.</p>
+                    <p>{t("marketing.footer.copyright", { year })}</p>
                 </div>
             </div>
         </footer>

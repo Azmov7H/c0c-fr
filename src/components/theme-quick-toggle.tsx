@@ -1,3 +1,5 @@
+import { getTranslations } from "@/i18n/server"
+
 /**
  * Dependency-free light/dark toggle for the marketing header.
  *
@@ -23,12 +25,17 @@
  * runs once on document load and survives every subsequent navigation.
  * This component therefore renders ONLY the button.
  */
-export function ThemeQuickToggle() {
+export async function ThemeQuickToggle() {
+    // AR-022: the label is copy, and the copy lives in the catalog. The
+    // button itself stays a server component (T20 — a client component cost
+    // this route its own first-load chunk).
+    const t = await getTranslations("common")
+
     return (
             <button
                 id="theme-quick-toggle"
                 type="button"
-                aria-label="Toggle color theme"
+                aria-label={t("marketing.themeToggle")}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground/70 transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
                 <span aria-hidden className="grid">

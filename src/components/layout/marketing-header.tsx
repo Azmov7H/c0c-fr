@@ -2,6 +2,7 @@
 import { MarketingCtaLink } from "@/components/layout/marketing-cta"
 import { LocaleSwitcher } from "@/components/layout/locale-switcher"
 import { ThemeQuickToggle } from "@/components/theme-quick-toggle"
+import { getTranslations } from "@/i18n/server"
 import { Zap } from "lucide-react"
 
 /**
@@ -19,7 +20,12 @@ import { Zap } from "lucide-react"
  * to the visitor — while the App Router link component is a ~3 kB gzip client
  * chunk on the one route with the tightest budget.
  */
-export function MarketingHeader() {
+export async function MarketingHeader() {
+    // AR-022: the marketing chrome is server-rendered (it has no client
+    // runtime at all — that is what the 140 kB landing budget buys), so the
+    // copy is read from the catalog on the server.
+    const t = await getTranslations("common")
+
     return (
         <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/60 backdrop-blur-md">
             <div className="container mx-auto flex h-14 max-w-screen-2xl items-center px-4 md:px-6">
@@ -33,17 +39,17 @@ export function MarketingHeader() {
                 </div>
 
                 <nav
-                    aria-label="Marketing"
+                    aria-label={t("marketing.navLabel")}
                     className="hidden md:flex flex-1 items-center justify-center space-x-6 text-sm font-medium"
                 >
                     <a href="/#assets" className="transition-colors hover:text-foreground/80 text-foreground/60">
-                        The four assets
+                        {t("marketing.nav.assets")}
                     </a>
                     <a href="/#how-it-works" className="transition-colors hover:text-foreground/80 text-foreground/60">
-                        How it works
+                        {t("marketing.nav.howItWorks")}
                     </a>
                     <a href="/pricing" className="transition-colors hover:text-foreground/80 text-foreground/60">
-                        Pricing
+                        {t("marketing.nav.pricing")}
                     </a>
                 </nav>
 
@@ -52,9 +58,9 @@ export function MarketingHeader() {
                     {/* FR-1: the language switch is reachable from the marketing header. */}
                     <LocaleSwitcher />
                     <MarketingCtaLink href="/login" variant="ghost">
-                        Log in
+                        {t("marketing.action.logIn")}
                     </MarketingCtaLink>
-                    <MarketingCtaLink href="/signup">Get Started</MarketingCtaLink>
+                    <MarketingCtaLink href="/signup">{t("marketing.action.getStarted")}</MarketingCtaLink>
                 </div>
             </div>
         </header>
