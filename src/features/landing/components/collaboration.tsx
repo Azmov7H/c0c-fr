@@ -1,14 +1,22 @@
 import { ShieldCheck, Users } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
+import { getTranslations } from '@/i18n/server';
 
-const ROLES = ['Owner', 'Admin', 'Editor', 'Viewer'] as const;
+interface ActivityCopy {
+    asset: string;
+    status: string;
+}
 
 /**
  * The differentiator teams care about. Roles are the real ones the product
  * enforces (TeamRole enum: owner/admin/editor/viewer) — not invented tiers.
  */
-export function Collaboration() {
+export async function Collaboration() {
+    const t = await getTranslations('landing');
+    const roles = t.raw('collaboration.roles') as string[];
+    const activity = t.raw('collaboration.activity') as ActivityCopy[];
+
     return (
         <section className="py-16 md:py-24">
             <div className="container mx-auto max-w-6xl px-4">
@@ -16,18 +24,16 @@ export function Collaboration() {
                     <div>
                         <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-foreground">
                             <Users className="h-3.5 w-3.5" aria-hidden />
-                            Built for teams
+                            {t('collaboration.badge')}
                         </span>
                         <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl">
-                            One project, every asset, the whole team
+                            {t('collaboration.title')}
                         </h2>
                         <p className="mt-4 leading-relaxed text-muted-foreground">
-                            Invite your editor to the script and your designer to the
-                            thumbnails — everyone works from the same project, so the
-                            version you reviewed is the version that ships.
+                            {t('collaboration.description')}
                         </p>
                         <div className="mt-6 flex flex-wrap gap-2">
-                            {ROLES.map((role) => (
+                            {roles.map((role) => (
                                 <Badge key={role} variant="secondary" className="rounded-full px-3">
                                     {role}
                                 </Badge>
@@ -41,29 +47,34 @@ export function Collaboration() {
                                 <ShieldCheck className="h-5 w-5" aria-hidden />
                             </span>
                             <div>
-                                <p className="text-sm font-semibold">Roles you already understand</p>
+                                <p className="text-sm font-semibold">{t('collaboration.rolesTitle')}</p>
                                 <p className="text-xs text-muted-foreground">
-                                    Owner and admin can manage members; editors work on assets;
-                                    viewers see the result.
+                                    {t('collaboration.rolesDescription')}
                                 </p>
                             </div>
                         </div>
                         <ul className="mt-4 space-y-3 text-sm">
-                            <li className="flex items-center justify-between">
-                                <span className="text-muted-foreground">Script — “Week 2 Retention”</span>
-                                <span className="text-xs font-medium text-primary">Editing: Mina (editor)</span>
-                            </li>
-                            <li className="flex items-center justify-between">
-                                <span className="text-muted-foreground">Thumbnail — v3</span>
-                                <span className="text-xs font-medium text-primary">Reviewing: Leo (admin)</span>
-                            </li>
-                            <li className="flex items-center justify-between">
-                                <span className="text-muted-foreground">Sound bed — “tense build”</span>
-                                <span className="text-xs font-medium text-muted-foreground">Ready</span>
-                            </li>
+                            {activity.map((entry, index) => (
+                                <li key={entry.asset} className="flex items-center justify-between">
+                                    <span className="text-muted-foreground">{entry.asset}</span>
+                                    {/* The last sample row is a FINISHED item and
+                                        is styled neutral, while the two active
+                                        rows carry the accent — a presentation
+                                        decision, so it stays in the code. */}
+                                    <span
+                                        className={
+                                            index === activity.length - 1
+                                                ? 'text-xs font-medium text-muted-foreground'
+                                                : 'text-xs font-medium text-primary'
+                                        }
+                                    >
+                                        {entry.status}
+                                    </span>
+                                </li>
+                            ))}
                         </ul>
                         <p className="mt-4 text-[11px] text-muted-foreground">
-                            Example project view — sample names.
+                            {t('collaboration.exampleNote')}
                         </p>
                     </div>
                 </div>

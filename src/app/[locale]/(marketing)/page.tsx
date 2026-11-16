@@ -9,53 +9,41 @@ import { Proof } from '@/features/landing/components/proof';
 import { PricingTeaser } from '@/features/landing/components/pricing-teaser';
 import { FinalCta } from '@/features/landing/components/final-cta';
 import { PLAN_CATALOGUE, PLAN_IDS } from '@/features/billing/lib/plans';
+import { getTranslations } from '@/i18n/server';
 
 const SITE_URL = 'https://aicontentengine.com';
 
-export const metadata: Metadata = {
-    title: 'Thumbnails, scripts, sound effects and images for video creators',
-    description:
-        'Everything a video needs, in one place. Generate thumbnails, scripts, sound effects and images around your brief — kept in one project, ready to publish.',
-    alternates: { canonical: '/' },
-    openGraph: {
-        title: 'Everything a video needs, in one place',
-        description:
-            'Thumbnails, scripts, sound effects and images — generated around your brief and kept in one project.',
-        url: SITE_URL,
-        siteName: 'AI Content Engine',
-        locale: 'en_US',
-        type: 'website',
-        // og:image comes from opengraph-image.tsx (next/og, 1200×630).
-    },
-    twitter: {
-        card: 'summary_large_image',
-        title: 'Everything a video needs, in one place',
-        description:
-            'Thumbnails, scripts, sound effects and images — generated around your brief and kept in one project.',
-    },
-};
+/**
+ * AR-022: the metadata copy is in the catalog, so the page speaks the
+ * visitor's language in the search result too.
+ *
+ * What is NOT here yet: the per-locale canonical, the hreflang pairs and the
+ * per-locale Open Graph locale. Those are AR-025's job (the public route
+ * pairs), and this task is the copy extraction.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+    const t = await getTranslations('landing');
 
-const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: 'AI Content Engine',
-    applicationCategory: 'MultimediaApplication',
-    operatingSystem: 'Web',
-    url: SITE_URL,
-    description:
-        'Generate thumbnails, scripts, sound effects and images for video creators — in one project workspace.',
-    offers: PLAN_IDS.map((id) => {
-        const plan = PLAN_CATALOGUE[id];
-        return {
-            '@type': 'Offer',
-            name: plan.name,
-            price: (plan.monthlyPriceCents / 100).toFixed(0),
-            priceCurrency: 'USD',
-            category: plan.monthlyPriceCents === 0 ? 'free' : 'subscription',
-            url: `${SITE_URL}/pricing`,
-        };
-    }),
-};
+    return {
+        title: t('meta.title'),
+        description: t('meta.description'),
+        alternates: { canonical: '/' },
+        openGraph: {
+            title: t('meta.ogTitle'),
+            description: t('meta.ogDescription'),
+            url: SITE_URL,
+            siteName: 'AI Content Engine',
+            locale: 'en_US',
+            type: 'website',
+            // og:image comes from opengraph-image.tsx (next/og, 1200×630).
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: t('meta.ogTitle'),
+            description: t('meta.ogDescription'),
+        },
+    };
+}
 
 /**
  * The one and only landing page. Every section is a server component; the
@@ -72,7 +60,33 @@ const jsonLd = {
  *   pricing → qualify visitors (real tiers, no invented prices)
  *   final-cta → convert
  */
-export default function LandingPage() {
+export default async function LandingPage() {
+    const t = await getTranslations('landing');
+
+    // The structured data is built per request (per locale) so the
+    // description is the visitor's language. The plan names are still the
+    // catalogue's own strings — AR-023 moves that copy into the catalog.
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'AI Content Engine',
+        applicationCategory: 'MultimediaApplication',
+        operatingSystem: 'Web',
+        url: SITE_URL,
+        description: t('meta.jsonLdDescription'),
+        offers: PLAN_IDS.map((id) => {
+            const plan = PLAN_CATALOGUE[id];
+            return {
+                '@type': 'Offer',
+                name: plan.name,
+                price: (plan.monthlyPriceCents / 100).toFixed(0),
+                priceCurrency: 'USD',
+                category: plan.monthlyPriceCents === 0 ? 'free' : 'subscription',
+                url: `${SITE_URL}/pricing`,
+            };
+        }),
+    };
+
     return (
         <>
             <script

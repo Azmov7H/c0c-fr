@@ -9,5 +9,26 @@
   },
   "navigation": {
     "quickCreate": "Quick Create"
+  },
+  "marketing": {
+    "navLabel": "Marketing",
+    "nav": {
+      "assets": "The four assets",
+      "howItWorks": "How it works",
+      "pricing": "Pricing"
+    },
+    "action": {
+      "logIn": "Log in",
+      "getStarted": "Get Started"
+    },
+    "themeToggle": "Toggle color theme",
+    "footer": {
+      "tagline": "Thumbnails, scripts, sound effects and images — everything a video needs, in one place.",
+      "productHeading": "Product",
+      "legalHeading": "Legal",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "copyright": "© {year} AI Content Engine. All rights reserved."
+    }
   }
 }

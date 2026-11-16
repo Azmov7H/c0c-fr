@@ -1,6 +1,8 @@
 import { getImageProps } from 'next/image';
+
 import { DirIcon } from '@/components/icons/dir-icon';
 import { MarketingCtaLink } from '@/components/layout/marketing-cta';
+import { getTranslations } from '@/i18n/server';
 
 /**
  * Above the fold: headline, subhead, one primary CTA, one secondary CTA, one
@@ -12,7 +14,12 @@ import { MarketingCtaLink } from '@/components/layout/marketing-cta';
  * docs/screenshots + T11-STATUS for how it was taken), not an illustration.
  * It is the only `priority` image on the page — it is the LCP element.
  */
-export function Hero() {
+export async function Hero() {
+    // AR-022: the landing page is a SERVER component tree (no client runtime
+    // on this route — the 140 kB budget has no room for one), so the copy is
+    // read from the catalog on the server.
+    const t = await getTranslations('landing');
+
     return (
         <section className="relative overflow-hidden">
             <div
@@ -25,16 +32,15 @@ export function Hero() {
 
             <div className="container mx-auto max-w-6xl px-4 pb-16 pt-16 text-center md:pt-24">
                 <h1 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-6xl">
-                    Everything a video needs, in one place.
+                    {t('hero.title')}
                 </h1>
                 <p className="mx-auto mt-6 max-w-2xl text-balance text-lg text-muted-foreground md:text-xl">
-                    Thumbnails, scripts, sound effects and images — generated around
-                    your brief, kept in one project, ready to publish.
+                    {t('hero.subtitle')}
                 </p>
 
                 <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                     <MarketingCtaLink href="/signup" size="lg" className="h-12 px-8 text-base">
-                        Start creating — free
+                        {t('hero.ctaPrimary')}
                         <DirIcon name="ArrowRight" className="ms-2 h-4 w-4" aria-hidden />
                     </MarketingCtaLink>
                     <MarketingCtaLink
@@ -43,7 +49,7 @@ export function Hero() {
                         variant="outline"
                         className="h-12 px-8 text-base"
                     >
-                        See the four assets
+                        {t('hero.ctaSecondary')}
                     </MarketingCtaLink>
                 </div>
 
@@ -63,7 +69,7 @@ export function Hero() {
                       passed too so the generated props keep the same eager
                       semantics the component had.
                     */}
-                    <HeroImage />
+                    <HeroImage alt={t('hero.imageAlt')} />
                 </div>
             </div>
         </section>
@@ -76,7 +82,11 @@ export function Hero() {
  */
 const HERO_IMAGE = {
     src: '/landing/dashboard.jpg',
-    alt: 'The Ideas & Trends workspace ranking viral topics with score bars and growth percentages',
+    // AR-022: the alt text is COPY, and copy comes from the catalog — it is
+    // rendered per locale, so it cannot live in a module-level constant.
+    // The placeholder keeps `getImageProps` honest about the prop; the
+    // rendered <img> always receives the real alt.
+    alt: '',
     width: 1600,
     height: 1000,
     priority: true,
@@ -88,7 +98,7 @@ const HERO_IMAGE = {
 
 const { props: heroImageProps } = getImageProps(HERO_IMAGE);
 
-function HeroImage() {
+function HeroImage({ alt }: { alt: string }) {
     return (
         <>
             <link
@@ -100,7 +110,7 @@ function HeroImage() {
                 fetchPriority="high"
             />
             {/* eslint-disable-next-line @next/next/no-img-element -- props come from next/image's getImageProps (optimizer, srcSet, sizes); the lint rule cannot see through the spread. */}
-            <img {...heroImageProps} alt={HERO_IMAGE.alt} />
+            <img {...heroImageProps} alt={alt} />
         </>
     );
 }

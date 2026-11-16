@@ -7,38 +7,22 @@ import {
     Type,
 } from 'lucide-react';
 
-import type { LandingAsset } from '../types';
+import { getTranslations } from '@/i18n/server';
 
-const ASSETS: readonly LandingAsset[] = [
-    {
-        id: 'thumbnails',
-        title: 'Thumbnails',
-        description:
-            'Generate on-brand cover images from your script — one style per project, so every thumbnail looks like the same channel.',
-        icon: Captions,
-    },
-    {
-        id: 'scripts',
-        title: 'Scripts',
-        description:
-            'Draft the hook, the outline and the full script with the structure of your niche built in. Edit anything by hand; the draft is a starting point, not a locked output.',
-        icon: FileText,
-    },
-    {
-        id: 'sound-effects',
-        title: 'Sound Effects',
-        description:
-            'Describe the mood — "tense build to a punchline" — and get sound effects and music beds that fit the cut instead of hunting stock libraries.',
-        icon: ListMusic,
-    },
-    {
-        id: 'images',
-        title: 'Images',
-        description:
-            'Scene stills and supporting visuals that match the thumbnails, stored next to the project they belong to.',
-        icon: ImageIcon,
-    },
-];
+import type { LandingAsset, LandingAssetCopy } from '../types';
+
+/**
+ * AR-022: the copy is in the catalog; the code keeps the ICONS.
+ *
+ * The icon is chosen by the asset's id — a code concern — while the title and
+ * the description are copy, and copy belongs to `landing.assets.items`.
+ */
+const ASSETS: Record<LandingAsset['id'], LandingAsset['icon']> = {
+    thumbnails: Captions,
+    scripts: FileText,
+    'sound-effects': ListMusic,
+    images: ImageIcon,
+};
 
 /**
  * The four assets, one card each, each with a small example output. The
@@ -46,40 +30,45 @@ const ASSETS: readonly LandingAsset[] = [
  * labelled "Example" — they are illustrative samples, not fabricated
  * customer work, and the label says so.
  */
-export function Assets() {
+export async function Assets() {
+    const t = await getTranslations('landing');
+    const items = t.raw('assets.items') as LandingAssetCopy[];
+
     return (
         <section id="assets" className="scroll-mt-20 py-16 md:py-24">
             <div className="container mx-auto max-w-6xl px-4">
                 <div className="mx-auto max-w-2xl text-center">
                     <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-                        The four assets, in one project
+                        {t('assets.title')}
                     </h2>
                     <p className="mt-4 text-muted-foreground md:text-lg">
-                        Every generation is stored with the project it belongs to, in the
-                        style you set once.
+                        {t('assets.description')}
                     </p>
                 </div>
 
                 <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2">
-                    {ASSETS.map((asset) => (
-                        <article
-                            key={asset.id}
-                            className="flex flex-col rounded-2xl border border-border/60 bg-card p-6 shadow-sm"
-                        >
-                            <div className="flex items-center gap-3">
-                                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                    <asset.icon className="h-5 w-5" aria-hidden />
-                                </span>
-                                <h3 className="text-xl font-semibold">{asset.title}</h3>
-                            </div>
-                            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                                {asset.description}
-                            </p>
-                            <div className="mt-5 flex-1">
-                                <ExampleOutput id={asset.id} />
-                            </div>
-                        </article>
-                    ))}
+                    {items.map((asset) => {
+                        const Icon = ASSETS[asset.id];
+                        return (
+                            <article
+                                key={asset.id}
+                                className="flex flex-col rounded-2xl border border-border/60 bg-card p-6 shadow-sm"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                        <Icon className="h-5 w-5" aria-hidden />
+                                    </span>
+                                    <h3 className="text-xl font-semibold">{asset.title}</h3>
+                                </div>
+                                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                                    {asset.description}
+                                </p>
+                                <div className="mt-5 flex-1">
+                                    <ExampleOutput id={asset.id} example={asset.example} />
+                                </div>
+                            </article>
+                        );
+                    })}
                 </div>
             </div>
         </section>
@@ -87,22 +76,34 @@ export function Assets() {
 }
 
 /** Small, token-styled previews. `<figure>` + visible "Example" badge. */
-function ExampleOutput({ id }: { id: LandingAsset['id'] }) {
+async function ExampleOutput({
+    id,
+    example,
+}: {
+    id: LandingAsset['id'];
+    /** The label form the aria-label uses (the catalog owns the wording). */
+    example: string;
+}) {
+    const t = await getTranslations('landing');
+    const thumbnailSamples = t.raw('assets.samples.thumbnails') as string[];
+    const scriptLabels = t.raw('assets.samples.scriptLabels') as string[];
+    const scriptSamples = t.raw('assets.samples.scripts') as string[];
+
     return (
         <figure
             className="overflow-hidden rounded-xl border border-border/60 bg-muted/40"
-            aria-label={`Example ${id.replace('-', ' ')} output`}
+            aria-label={t('assets.exampleLabel', { asset: example })}
         >
             {id === 'thumbnails' && (
                 <div className="grid grid-cols-2 gap-2 p-3">
                     <div className="flex aspect-video flex-col justify-end rounded-lg bg-linear-to-tr from-brand-violet/70 to-brand-cyan/60 p-3">
                         <span className="text-sm font-bold leading-tight text-white">
-                            5 Editing Tricks I Wish I Knew
+                            {thumbnailSamples[0]}
                         </span>
                     </div>
                     <div className="flex aspect-video flex-col justify-end rounded-lg bg-linear-to-br from-brand-pink/70 to-brand-red/60 p-3">
                         <span className="text-sm font-bold leading-tight text-white">
-                            Why Your Hook Fails
+                            {thumbnailSamples[1]}
                         </span>
                     </div>
                 </div>
@@ -110,18 +111,23 @@ function ExampleOutput({ id }: { id: LandingAsset['id'] }) {
 
             {id === 'scripts' && (
                 <div className="space-y-2 p-4 font-mono text-xs">
-                    <p className="text-muted-foreground">
-                        <span className="me-2 rounded bg-primary px-1.5 py-0.5 font-semibold text-primary-foreground">HOOK</span>
-                        Nobody talks about the second week.
-                    </p>
-                    <p className="text-muted-foreground">
-                        <span className="me-2 rounded bg-muted px-1.5 py-0.5 font-semibold text-foreground">BEAT 1</span>
-                        The first week is easy — the format is new.
-                    </p>
-                    <p className="text-muted-foreground">
-                        <span className="me-2 rounded bg-muted px-1.5 py-0.5 font-semibold text-foreground">BEAT 2</span>
-                        Then the numbers flatten, and here is why.
-                    </p>
+                    {scriptSamples.map((sample, index) => (
+                        <p key={sample} className="text-muted-foreground">
+                            {/* The first beat is the HOOK and carries the accent;
+                                the beats that follow are muted — a presentation
+                                decision, so it stays in the code. */}
+                            <span
+                                className={
+                                    index === 0
+                                        ? 'me-2 rounded bg-primary px-1.5 py-0.5 font-semibold text-primary-foreground'
+                                        : 'me-2 rounded bg-muted px-1.5 py-0.5 font-semibold text-foreground'
+                                }
+                            >
+                                {scriptLabels[index]}
+                            </span>
+                            {sample}
+                        </p>
+                    ))}
                 </div>
             )}
 
@@ -164,7 +170,7 @@ function ExampleOutput({ id }: { id: LandingAsset['id'] }) {
 
             <figcaption className="flex items-center gap-1.5 border-t border-border/60 bg-card px-3 py-1.5 text-[11px] text-muted-foreground">
                 <Type className="h-3 w-3" aria-hidden />
-                Example output — sample content, not a customer project
+                {t('assets.exampleCaption')}
             </figcaption>
         </figure>
     );

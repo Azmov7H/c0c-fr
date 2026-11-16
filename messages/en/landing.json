@@ -1,1 +1,141 @@
-{}
+{
+  "meta": {
+    "title": "Thumbnails, scripts, sound effects and images for video creators",
+    "description": "Everything a video needs, in one place. Generate thumbnails, scripts, sound effects and images around your brief — kept in one project, ready to publish.",
+    "ogTitle": "Everything a video needs, in one place",
+    "ogDescription": "Thumbnails, scripts, sound effects and images — generated around your brief and kept in one project.",
+    "jsonLdDescription": "Generate thumbnails, scripts, sound effects and images for video creators — in one project workspace."
+  },
+  "hero": {
+    "title": "Everything a video needs, in one place.",
+    "subtitle": "Thumbnails, scripts, sound effects and images — generated around your brief, kept in one project, ready to publish.",
+    "ctaPrimary": "Start creating — free",
+    "ctaSecondary": "See the four assets",
+    "imageAlt": "The Ideas & Trends workspace ranking viral topics with score bars and growth percentages"
+  },
+  "problem": {
+    "title": "A finished video touches five different tools",
+    "description": "The script lives in one app, the thumbnail in another, the sound effects come from a stock site, the images from somewhere else — and the style quietly drifts apart between all of them.",
+    "tools": [
+      "Docs for the script",
+      "An editor for thumbnails",
+      "Stock sites for SFX",
+      "Somewhere else for images"
+    ],
+    "note": "Moving files between them is the part that eats the evening."
+  },
+  "assets": {
+    "title": "The four assets, in one project",
+    "description": "Every generation is stored with the project it belongs to, in the style you set once.",
+    "exampleCaption": "Example output — sample content, not a customer project",
+    "exampleLabel": "Example {asset} output",
+    "items": [
+      {
+        "id": "thumbnails",
+        "example": "thumbnails",
+        "title": "Thumbnails",
+        "description": "Generate on-brand cover images from your script — one style per project, so every thumbnail looks like the same channel."
+      },
+      {
+        "id": "scripts",
+        "example": "scripts",
+        "title": "Scripts",
+        "description": "Draft the hook, the outline and the full script with the structure of your niche built in. Edit anything by hand; the draft is a starting point, not a locked output."
+      },
+      {
+        "id": "sound-effects",
+        "example": "sound effects",
+        "title": "Sound Effects",
+        "description": "Describe the mood — \"tense build to a punchline\" — and get sound effects and music beds that fit the cut instead of hunting stock libraries."
+      },
+      {
+        "id": "images",
+        "example": "images",
+        "title": "Images",
+        "description": "Scene stills and supporting visuals that match the thumbnails, stored next to the project they belong to."
+      }
+    ],
+    "samples": {
+      "thumbnails": [
+        "5 Editing Tricks I Wish I Knew",
+        "Why Your Hook Fails"
+      ],
+      "scriptLabels": [
+        "HOOK",
+        "BEAT 1",
+        "BEAT 2"
+      ],
+      "scripts": [
+        "Nobody talks about the second week.",
+        "The first week is easy — the format is new.",
+        "Then the numbers flatten, and here is why."
+      ]
+    }
+  },
+  "howItWorks": {
+    "title": "From brief to assets in three steps",
+    "description": "No pipeline to configure before you see anything.",
+    "steps": [
+      {
+        "id": "create",
+        "title": "Create a project",
+        "body": "Pick the channel and the style once. Every thumbnail, script, sound and image after this point matches it."
+      },
+      {
+        "id": "invite",
+        "title": "Invite your team",
+        "body": "Bring in your editor and designer with roles — owner, admin, editor or viewer — and they land straight in the same project."
+      },
+      {
+        "id": "generate",
+        "title": "Generate everything",
+        "body": "Write the brief. Collect the four assets: thumbnails, scripts, sound effects and images, all stored with the project."
+      }
+    ]
+  },
+  "collaboration": {
+    "badge": "Built for teams",
+    "title": "One project, every asset, the whole team",
+    "description": "Invite your editor to the script and your designer to the thumbnails — everyone works from the same project, so the version you reviewed is the version that ships.",
+    "roles": [
+      "Owner",
+      "Admin",
+      "Editor",
+      "Viewer"
+    ],
+    "rolesTitle": "Roles you already understand",
+    "rolesDescription": "Owner and admin can manage members; editors work on assets; viewers see the result.",
+    "activity": [
+      {
+        "asset": "Script — “Week 2 Retention”",
+        "status": "Editing: Mina (editor)"
+      },
+      {
+        "asset": "Thumbnail — v3",
+        "status": "Reviewing: Leo (admin)"
+      },
+      {
+        "asset": "Sound bed — “tense build”",
+        "status": "Ready"
+      }
+    ],
+    "exampleNote": "Example project view — sample names."
+  },
+  "proof": {
+    "title": "Creator stories, coming soon",
+    "description": "We would rather show you nothing than invent a testimonial. Real creator quotes go here as soon as our first teams are ready to share their numbers.",
+    "quote": "This space is reserved for a real creator quote.",
+    "caption": "Placeholder — no customer claims are published yet"
+  },
+  "pricingTeaser": {
+    "title": "Simple plans that match how much you publish",
+    "description": "Start free. Paid plans add more generations, more storage and more people — never a feature you already had.",
+    "note": "Every new account starts on Starter, no card required.",
+    "link": "See the full comparison"
+  },
+  "finalCta": {
+    "title": "Everything a video needs, in one place.",
+    "description": "Your first project — and your first set of thumbnails, scripts, sounds and images — takes minutes.",
+    "cta": "Start creating — free"
+  }
+}

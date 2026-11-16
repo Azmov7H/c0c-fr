@@ -9,5 +9,26 @@
   },
   "navigation": {
     "quickCreate": "إنشاء سريع"
+  },
+  "marketing": {
+    "navLabel": "التسويق",
+    "nav": {
+      "assets": "الأصول الأربعة",
+      "howItWorks": "كيف يعمل",
+      "pricing": "الأسعار"
+    },
+    "action": {
+      "logIn": "تسجيل الدخول",
+      "getStarted": "ابدأ الآن"
+    },
+    "themeToggle": "بدّل بين الوضع الفاتح والداكن",
+    "footer": {
+      "tagline": "صور مصغّرة ونصوص ومؤثرات صوتية وصور — كل ما يحتاجه الفيديو، في مكان واحد.",
+      "productHeading": "المنتج",
+      "legalHeading": "قانوني",
+      "privacy": "سياسة الخصوصية",
+      "terms": "شروط الخدمة",
+      "copyright": "© {year} AI Content Engine. جميع الحقوق محفوظة."
+    }
   }
 }
