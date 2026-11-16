@@ -1,8 +1,11 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { NextIntlClientProvider } from 'next-intl';
 
 import type { BillingSummary } from '@/features/billing/types';
+import enBilling from '../../../../messages/en/billing.json';
+import enPricing from '../../../../messages/en/pricing.json';
 import { BillingSettings } from './billing-settings';
 
 const mocks = vi.hoisted(() => ({
@@ -65,6 +68,22 @@ const summary = (overrides: Partial<BillingSummary> = {}): BillingSummary => ({
     ...overrides,
 });
 
+/**
+ * AR-023: the screen reads the plan catalogue's copy (`pricing`) and the
+ * billing notices (`billing`) through the client provider, exactly as the
+ * dashboard layout hands them to it in production.
+ */
+function renderSettings() {
+    return render(
+        <NextIntlClientProvider
+            locale="en"
+            messages={{ pricing: enPricing, billing: enBilling }}
+        >
+            <BillingSettings />
+        </NextIntlClientProvider>
+    );
+}
+
 beforeEach(() => {
     mocks.summary = summary();
     mocks.checkoutReturn.phase = 'idle';
@@ -78,7 +97,7 @@ afterEach(() => {
 
 describe('billing settings', () => {
     it('shows the plan, price, renewal date and usage meters', () => {
-        render(<BillingSettings />);
+        renderSettings();
 
         expect(screen.getAllByText('Pro').length).toBeGreaterThan(0);
         expect(screen.getAllByText('$49/month').length).toBeGreaterThan(0);
@@ -89,7 +108,7 @@ describe('billing settings', () => {
 
     it('surfaces a failed payment and sends the user to the portal', () => {
         mocks.summary = summary({ status: 'past_due' });
-        render(<BillingSettings />);
+        renderSettings();
 
         expect(screen.getByText('Your payment needs attention')).toBeTruthy();
         fireEvent.click(screen.getByRole('button', { name: /update payment method/i }));
@@ -98,7 +117,7 @@ describe('billing settings', () => {
 
     it('explains a scheduled cancellation and offers a new plan', () => {
         mocks.summary = summary({ cancelAtPeriodEnd: true });
-        render(<BillingSettings />);
+        renderSettings();
 
         expect(screen.getByText('Your plan is ending')).toBeTruthy();
         const link = screen.getByRole('link', { name: 'Choose a plan' });
@@ -107,7 +126,7 @@ describe('billing settings', () => {
     });
 
     it('starts an upgrade through checkout from the plan chooser', () => {
-        render(<BillingSettings />);
+        renderSettings();
 
         fireEvent.click(screen.getByRole('button', { name: /upgrade to studio/i }));
         expect(mocks.checkout.mutate).toHaveBeenCalledWith(
@@ -117,7 +136,7 @@ describe('billing settings', () => {
     });
 
     it('sends downgrades through the portal rather than changing the plan locally', () => {
-        render(<BillingSettings />);
+        renderSettings();
 
         fireEvent.click(screen.getByRole('button', { name: /downgrade to starter/i }));
         expect(mocks.portal.mutate).toHaveBeenCalled();
@@ -132,7 +151,7 @@ describe('billing settings', () => {
         });
         mocks.checkoutReturn.phase = 'confirming';
         mocks.checkoutReturn.target = 'pro';
-        render(<BillingSettings />);
+        renderSettings();
 
         expect(screen.getByText(/We're confirming your payment/i)).toBeTruthy();
         expect(screen.queryByText('Payment confirmed')).toBeNull();
@@ -141,7 +160,7 @@ describe('billing settings', () => {
     it('shows a processing state with a refresh control after a timeout', () => {
         mocks.checkoutReturn.phase = 'processing';
         mocks.checkoutReturn.target = 'pro';
-        render(<BillingSettings />);
+        renderSettings();
 
         expect(screen.getByText('Your payment is processing')).toBeTruthy();
         expect(screen.getByRole('button', { name: /refresh status/i })).toBeTruthy();

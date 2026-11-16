@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 
 import { PlanComparisonTable, PricingCards, PricingFaq } from './pricing';
@@ -9,11 +9,36 @@ import { PlanComparisonTable, PricingCards, PricingFaq } from './pricing';
 // The English locale is the baseline the assertions below expect.
 const LOCALE = 'en' as const;
 
+/**
+ * AR-023: the components are async server components now — they read the
+ * catalog through `getTranslations`, exactly like the marketing page does.
+ * A client test has no request, so the server seam is mocked with a real
+ * translator over the real English catalog: the assertions below are about
+ * the RENDERED surface, not about how the messages arrive.
+ */
+vi.mock('@/i18n/server', async () => {
+    const { createTranslator } = await import('next-intl');
+    const catalog = (await import('../../../../messages/en/pricing.json')).default;
+    const translator = createTranslator({
+        locale: 'en',
+        messages: { pricing: catalog },
+        namespace: 'pricing',
+    });
+    return {
+        getTranslations: async (namespace: string) => {
+            if (namespace !== 'pricing') {
+                throw new Error(`unexpected namespace: ${namespace}`);
+            }
+            return translator;
+        },
+    };
+});
+
 afterEach(cleanup);
 
 describe('pricing surface', () => {
-    it('renders all three tiers with the single-source prices and quotas', () => {
-        render(<PricingCards locale={LOCALE} />);
+    it('renders all three tiers with the single-source prices and quotas', async () => {
+        render(await PricingCards({ locale: LOCALE }));
 
         expect(screen.getByRole('heading', { name: 'Starter' })).toBeTruthy();
         expect(screen.getByRole('heading', { name: 'Pro' })).toBeTruthy();
@@ -26,8 +51,8 @@ describe('pricing surface', () => {
         expect(screen.getByText('Recommended for weekly publishing')).toBeTruthy();
     });
 
-    it('routes paid CTAs to billing and free CTAs to signup', () => {
-        render(<PricingCards locale={LOCALE} />);
+    it('routes paid CTAs to billing and free CTAs to signup', async () => {
+        render(await PricingCards({ locale: LOCALE }));
 
         expect(screen.getByRole('link', { name: /start free/i }).getAttribute('href')).toBe(
             '/signup'
@@ -40,8 +65,8 @@ describe('pricing surface', () => {
         );
     });
 
-    it('renders every enforced capability in a semantically labelled table', () => {
-        render(<PlanComparisonTable locale={LOCALE} />);
+    it('renders every enforced capability in a semantically labelled table', async () => {
+        render(await PlanComparisonTable({ locale: LOCALE }));
 
         const table = screen.getByRole('table', {
             name: /Feature and quota comparison/i,
@@ -59,8 +84,8 @@ describe('pricing surface', () => {
         expect(within(table).getByRole('columnheader', { name: 'Studio' })).toBeTruthy();
     });
 
-    it('answers only billing questions the product can honour', () => {
-        render(<PricingFaq />);
+    it('answers only billing questions the product can honour', async () => {
+        render(await PricingFaq({ locale: LOCALE }));
 
         expect(screen.getByText('Do you offer annual billing?')).toBeTruthy();
         expect(screen.getByText(/Every paid plan is billed monthly/i)).toBeTruthy();

@@ -1,1 +1,17 @@
-{}
+{
+  "notice": {
+    "paymentFailedTitle": "دفعتك تحتاج إلى انتباهك",
+    "paymentFailedDescription": "لم نتمكن من تأكيد آخر دفعة لك. حدّث وسيلة الدفع الخاصة بك للحفاظ على خطتك وحصتك.",
+    "paymentFailedAction": "تحديث وسيلة الدفع",
+    "cancelledTitle": "خطتك على وشك الانتهاء",
+    "cancelledDescription": "تبقى خطة {plan} فعّالة حتى {date}. وبعد ذلك تتحوّل إلى {starter} وتتوقف حدود الخطة المدفوعة.",
+    "cancelledAction": "اختر خطة",
+    "trialTitle": "فترتك التجريبية سارية",
+    "trialDescription": "تنتهي فترتك التجريبية في {date}. وستحتفظ بخطة {plan} بعدها ما لم تلغِ الاشتراك.",
+    "trialAction": "إدارة الاشتراك",
+    "endOfBillingPeriod": "نهاية دورة الفوترة",
+    "portalDate": "التاريخ الظاهر في البوابة"
+  },
+  "cancellationScheduled": "الإلغاء مجدول. تحتفظ بخطة {plan} حتى {date}. <link>اختر خطة للاستمرار</link>.",
+  "cancellationEndFallback": "نهاية الفترة"
+}

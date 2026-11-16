@@ -3,12 +3,14 @@
 import Link from 'next/link';
 import { AlertTriangle, CheckCircle2, Clock3, Info } from 'lucide-react';
 
+import { useTranslations } from 'next-intl';
+
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { buildPricingCopy } from '../lib/pricing-copy';
 import type { CheckoutReturnPhase } from '../hooks/use-billing';
 import type { PlanId } from '../types';
 import type { BillingNotice } from '../lib/billing-state';
-import { PLAN_CATALOGUE } from '../lib/plans';
 
 interface CheckoutStatusProps {
     phase: CheckoutReturnPhase;
@@ -17,6 +19,10 @@ interface CheckoutStatusProps {
 }
 
 export function CheckoutStatus({ phase, target, onRefresh }: CheckoutStatusProps) {
+    // AR-023: the plan's NAME is the catalogue's copy.
+    const t = useTranslations('pricing');
+    const copy = buildPricingCopy(t);
+
     if (phase === 'idle') return null;
 
     if (phase === 'cancelled') {
@@ -35,7 +41,7 @@ export function CheckoutStatus({ phase, target, onRefresh }: CheckoutStatusProps
     }
 
     if (phase === 'confirmed') {
-        const planName = target ? PLAN_CATALOGUE[target].name : 'your new plan';
+        const planName = target ? copy.planName(target) : 'your new plan';
         return (
             <Alert>
                 <CheckCircle2 />

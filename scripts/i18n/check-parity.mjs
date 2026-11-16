@@ -67,34 +67,82 @@ function flatten(value, prefix = '') {
 }
 
 /**
- * The ICU arguments of a message: the identifiers of the top-level `{…}`
- * groups. `{name}` and `{count, plural, …}` both yield one argument; the
- * nested `{one {…} other {…}}` branches do not.
+ * The ICU arguments of a message: every identifier the message reads.
+ *
+ * `{name}` and `{count, plural, …}` both yield one argument. A plural's
+ * CATEGORY bodies (`one {…}`, `few {…}`) are not arguments — but a group
+ * INSIDE a body is:
+ *
+ *     "{count, plural, one {{value} item} other {{value} items}}"
+ *
+ * Here `count` selects the branch and `value` is what the branch displays.
+ * Both are arguments, and both have to exist in every locale: a message that
+ * displays `{value}` in English and forgets it in Arabic renders the
+ * fallback (or throws) at runtime, and only the gate can see it.
+ *
+ * AR-023: the gate learned to look inside the branches when the pricing
+ * catalogue started to carry a plural whose DISPLAYED number comes from the
+ * app's format layer (`{value}`) while the branch is selected by a raw
+ * count (`{count}`) — see AR-D-04 and the pricing copy.
  */
 function placeholders(value) {
     const found = new Set();
     if (typeof value !== 'string') return found;
+    collectArguments(value, found);
+    return found;
+}
+
+/** Reads the balanced `{…}` group that starts at `start`. */
+function readGroup(text, start) {
     let depth = 0;
-    let current = '';
-    for (const character of value) {
-        if (character === '{') {
-            depth += 1;
-            if (depth === 1) {
-                current = '';
-                continue;
-            }
-        }
-        if (character === '}') {
+    for (let index = start; index < text.length; index += 1) {
+        if (text[index] === '{') depth += 1;
+        else if (text[index] === '}') {
             depth -= 1;
             if (depth === 0) {
-                const name = current.split(',')[0].trim();
-                if (name) found.add(name);
-                continue;
+                return { content: text.slice(start + 1, index), end: index + 1 };
             }
         }
-        if (depth === 1) current += character;
     }
-    return found;
+    return { content: text.slice(start + 1), end: text.length };
+}
+
+const IDENTIFIER = /^[A-Za-z_$][\w$]*$/;
+
+/** Collects the arguments of every group in `text` into `found`. */
+function collectArguments(text, found) {
+    let index = 0;
+    while (index < text.length) {
+        if (text[index] !== '{') {
+            index += 1;
+            continue;
+        }
+        const { content, end } = readGroup(text, index);
+        index = end;
+
+        const firstComma = content.indexOf(',');
+        if (firstComma === -1) {
+            const name = content.trim();
+            if (IDENTIFIER.test(name)) found.add(name);
+            // A plural CATEGORY body has no comma and is not an identifier:
+            // its braces are a body, not an argument — look inside it.
+            else collectArguments(content, found);
+            continue;
+        }
+
+        const name = content.slice(0, firstComma).trim();
+        if (IDENTIFIER.test(name)) found.add(name);
+
+        const rest = content.slice(firstComma + 1);
+        const secondComma = rest.indexOf(',');
+        const type = (secondComma === -1 ? rest : rest.slice(0, secondComma)).trim();
+        if (type === 'plural' || type === 'selectordinal' || type === 'select') {
+            // The categories are `one {…}`, `two {…}`, …; walk into every
+            // body, because a body can display other arguments.
+            const body = secondComma === -1 ? '' : rest.slice(secondComma + 1);
+            collectArguments(body, found);
+        }
+    }
 }
 
 const problems = [];

@@ -1,1 +1,17 @@
-{}
+{
+  "notice": {
+    "paymentFailedTitle": "Your payment needs attention",
+    "paymentFailedDescription": "We could not confirm your latest payment. Update your payment method to keep your plan and quota.",
+    "paymentFailedAction": "Update payment method",
+    "cancelledTitle": "Your plan is ending",
+    "cancelledDescription": "Your {plan} plan stays active until {date}. After that it changes to {starter} and paid limits stop.",
+    "cancelledAction": "Choose a plan",
+    "trialTitle": "Your trial is active",
+    "trialDescription": "Your trial ends on {date}. You will keep {plan} after that unless you cancel.",
+    "trialAction": "Manage subscription",
+    "endOfBillingPeriod": "the end of the billing period",
+    "portalDate": "the date shown in the portal"
+  },
+  "cancellationScheduled": "Cancellation is scheduled. You keep {plan} until {date}. <link>Choose a plan to continue</link>.",
+  "cancellationEndFallback": "the end of the period"
+}

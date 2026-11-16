@@ -1,26 +1,45 @@
 import { describe, expect, it } from 'vitest';
-import fs from 'node:fs';
-import path from 'node:path';
 
 import {
-    FEATURE_LABELS,
     PLAN_CATALOGUE,
-    planComparison,
     PLAN_IDS,
-    formatMonthlyPrice,
-    planHighlights,
+    isPaidPlan,
+    nextPlan,
+    planRank,
 } from './plans';
 
-const ROOT = path.resolve(__dirname, '../../../..');
-
+/**
+ * AR-023 — the plan catalogue is DATA.
+ *
+ * The copy moved to `messages/{locale}/pricing.json` and is read through
+ * `pricing-copy.ts` (see `pricing-extraction.test.ts`, which owns the copy
+ * and the extraction gates). This suite pins what is left in the code: the
+ * prices, the limits, the ranks and the capability matrix.
+ */
 describe('plan catalogue', () => {
     it('defines the monthly list prices once', () => {
         expect(PLAN_CATALOGUE.starter.monthlyPriceCents).toBe(0);
         expect(PLAN_CATALOGUE.pro.monthlyPriceCents).toBe(4900);
         expect(PLAN_CATALOGUE.studio.monthlyPriceCents).toBe(19900);
-        expect(formatMonthlyPrice(PLAN_CATALOGUE.starter, 'en')).toBe('Free');
-        expect(formatMonthlyPrice(PLAN_CATALOGUE.pro, 'en')).toBe('$49/month');
-        expect(formatMonthlyPrice(PLAN_CATALOGUE.studio, 'en')).toBe('$199/month');
+        for (const id of PLAN_IDS) expect(PLAN_CATALOGUE[id].currency).toBe('usd');
+    });
+
+    it('keeps the plan order the upgrade path depends on', () => {
+        expect(PLAN_IDS).toEqual(['starter', 'pro', 'studio']);
+        expect(planRank('starter')).toBe(0);
+        expect(planRank('pro')).toBe(1);
+        expect(planRank('studio')).toBe(2);
+        expect(nextPlan('starter', 'upgrade')).toBe('pro');
+        expect(nextPlan('pro', 'upgrade')).toBe('studio');
+        expect(nextPlan('studio', 'upgrade')).toBeNull();
+        expect(nextPlan('starter', 'downgrade')).toBeNull();
+        expect(nextPlan('studio', 'downgrade')).toBe('pro');
+    });
+
+    it('knows which plans are paid', () => {
+        expect(isPaidPlan('starter')).toBe(false);
+        expect(isPaidPlan('pro')).toBe(true);
+        expect(isPaidPlan('studio')).toBe(true);
     });
 
     it('mirrors the backend quota matrix', () => {
@@ -47,41 +66,17 @@ describe('plan catalogue', () => {
         });
     });
 
-    it('lists every enforced backend capability in the comparison table', () => {
-        const labels = planComparison('en').map((row) => row.label);
-        for (const label of Object.values(FEATURE_LABELS)) {
-            expect(labels).toContain(label);
-        }
-        expect(labels).toContain('Storage');
-        expect(labels).toContain('Concurrent generations');
-    });
-
     it('sells the studio tier with capabilities pro does not have', () => {
         const studio = PLAN_CATALOGUE.studio.features;
         const pro = PLAN_CATALOGUE.pro.features;
         expect(studio.filter((feature) => !pro.includes(feature))).toEqual([
             'priority_queue',
         ]);
-        expect(planHighlights(PLAN_CATALOGUE.studio, 'en')).toContain(
-            'Priority generation queue'
-        );
     });
 
     it('does not advertise annual billing', () => {
         for (const id of PLAN_IDS) {
             expect(PLAN_CATALOGUE[id]).not.toHaveProperty('annualPriceCents');
-        }
-    });
-
-    it('keeps public prices out of display components', () => {
-        const files = [
-            'src/features/billing/components/pricing.tsx',
-            'src/features/landing/components/pricing-teaser.tsx',
-            'src/features/settings/components/billing-settings.tsx',
-        ];
-        for (const file of files) {
-            const source = fs.readFileSync(path.join(ROOT, file), 'utf8');
-            expect(source, `${file} hardcodes a dollar price`).not.toMatch(/\$\d{2,}/);
         }
     });
 });

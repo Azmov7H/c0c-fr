@@ -9,6 +9,7 @@ import { Proof } from '@/features/landing/components/proof';
 import { PricingTeaser } from '@/features/landing/components/pricing-teaser';
 import { FinalCta } from '@/features/landing/components/final-cta';
 import { PLAN_CATALOGUE, PLAN_IDS } from '@/features/billing/lib/plans';
+import { buildPricingCopy } from '@/features/billing/lib/pricing-copy';
 import { getTranslations } from '@/i18n/server';
 
 const SITE_URL = 'https://c0c-fr.vercel.app';
@@ -62,10 +63,12 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function LandingPage() {
     const t = await getTranslations('landing');
+    // AR-023: the plan names in the structured data are copy — the catalogue
+    // owns them, so the offer names speak the visitor's language too.
+    const pricingCopy = buildPricingCopy(await getTranslations('pricing'));
 
     // The structured data is built per request (per locale) so the
-    // description is the visitor's language. The plan names are still the
-    // catalogue's own strings — AR-023 moves that copy into the catalog.
+    // description — and the plan names — are the visitor's language.
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'SoftwareApplication',
@@ -78,7 +81,7 @@ export default async function LandingPage() {
             const plan = PLAN_CATALOGUE[id];
             return {
                 '@type': 'Offer',
-                name: plan.name,
+                name: pricingCopy.planName(id),
                 price: (plan.monthlyPriceCents / 100).toFixed(0),
                 priceCurrency: 'USD',
                 category: plan.monthlyPriceCents === 0 ? 'free' : 'subscription',

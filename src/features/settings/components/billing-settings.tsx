@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { useUrlLocale } from '@/i18n/locale';
 import * as React from 'react';
 import Link from 'next/link';
@@ -33,7 +35,7 @@ import { UsageSummary } from '@/features/billing/components/usage-summary';
 import { CreditsPanel } from '@/features/billing/components/credits-panel';
 import { deriveBillingNotice } from '@/features/billing/lib/billing-state';
 import { formatDate } from '@/features/billing/lib/format';
-import { PLAN_CATALOGUE, formatMonthlyPrice } from '@/features/billing/lib/plans';
+import { buildPricingCopy } from '@/features/billing/lib/pricing-copy';
 import type { BillingSummary, PlanId, SubscriptionStatus } from '@/features/billing/types';
 
 function statusBadge(status: SubscriptionStatus | null) {
@@ -70,7 +72,10 @@ function CurrentPlan({ summary, onPortal, portalPending }: {
     portalPending: boolean;
 }) {
     const locale = useUrlLocale();
-    const plan = PLAN_CATALOGUE[summary.plan];
+    // AR-023: the plan's NAME and its PRICE are the catalogue's copy.
+    const t = useTranslations('pricing');
+    const billingT = useTranslations('billing');
+    const copy = buildPricingCopy(t);
     const renewalLabel = summary.cancelAtPeriodEnd ? 'Access ends' : 'Renews';
 
     return (
@@ -80,7 +85,7 @@ function CurrentPlan({ summary, onPortal, portalPending }: {
                     <div>
                         <CardDescription>Current plan</CardDescription>
                         <CardTitle className="mt-1 flex items-center gap-2 text-2xl">
-                            {plan.name}
+                            {copy.planName(summary.plan)}
                             {statusBadge(summary.status)}
                         </CardTitle>
                     </div>
@@ -91,7 +96,9 @@ function CurrentPlan({ summary, onPortal, portalPending }: {
                 <dl className="grid gap-4 text-sm sm:grid-cols-3">
                     <div>
                         <dt className="text-muted-foreground">Price</dt>
-                        <dd className="mt-1 font-medium">{formatMonthlyPrice(plan, locale)}</dd>
+                        <dd className="mt-1 font-medium">
+                            {copy.monthlyPrice(summary.plan, locale)}
+                        </dd>
                     </div>
                     <div>
                         <dt className="text-muted-foreground">{renewalLabel}</dt>
@@ -137,12 +144,24 @@ function CurrentPlan({ summary, onPortal, portalPending }: {
 
                 {summary.cancelAtPeriodEnd ? (
                     <p className="text-sm text-muted-foreground">
-                        Cancellation is scheduled. You keep {plan.name} until{' '}
-                        {formatDate(summary.renewalDate, locale, 'the end of the period')}.{' '}
-                        <Link className="underline underline-offset-4" href="#choose-plan">
-                            Choose a plan to continue
-                        </Link>
-                        .
+                        {/* AR-023: the sentence names the plan, so it cannot
+                            stay English while the plan's name is Arabic. */}
+                        {billingT.rich('cancellationScheduled', {
+                            plan: copy.planName(summary.plan),
+                            date: formatDate(
+                                summary.renewalDate,
+                                locale,
+                                billingT('cancellationEndFallback')
+                            ),
+                            link: (chunks) => (
+                                <Link
+                                    className="underline underline-offset-4"
+                                    href="#choose-plan"
+                                >
+                                    {chunks}
+                                </Link>
+                            ),
+                        })}
                     </p>
                 ) : null}
             </CardContent>
@@ -152,6 +171,9 @@ function CurrentPlan({ summary, onPortal, portalPending }: {
 
 export function BillingSettings() {
     const locale = useUrlLocale();
+    const billingT = useTranslations('billing');
+    const pricingT = useTranslations('pricing');
+    const pricingCopy = buildPricingCopy(pricingT);
     const summaryQuery = useBillingSummary();
     const checkout = useCheckout();
     const portal = usePortal();
@@ -159,7 +181,11 @@ export function BillingSettings() {
     const checkoutReturn = useCheckoutReturn({ summary: data, refetch });
     const [mutationError, setMutationError] = React.useState<string | null>(null);
 
-    const notice = deriveBillingNotice(data, locale);
+    const notice = deriveBillingNotice(data, locale, {
+        t: billingT,
+        plan: pricingCopy.planName(data?.plan ?? 'starter'),
+        starter: pricingCopy.planName('starter'),
+    });
     const pending = checkout.isPending || portal.isPending;
 
     const onPortal = () => {

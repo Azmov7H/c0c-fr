@@ -6,52 +6,66 @@ import {
     PricingFaq,
 } from '@/features/billing/components/pricing';
 import { PLAN_CATALOGUE, PLAN_IDS } from '@/features/billing/lib/plans';
+import { buildPricingCopy } from '@/features/billing/lib/pricing-copy';
 import { PUBLIC_ROUTES } from '@/lib/public-routes';
-import { getLocale } from '@/i18n/server';
+import { getLocale, getTranslations } from '@/i18n/server';
 
 const SITE_URL = 'https://aicontentengine.com';
 const canonical = PUBLIC_ROUTES.find((route) => route.path === '/pricing')?.path ?? '/pricing';
 
-export const metadata: Metadata = {
-    title: 'Pricing — Starter, Pro and Studio',
-    description:
-        'Compare AI generations, storage, members and API access. Starter is free; Pro and Studio add higher quotas and team capabilities.',
-    alternates: { canonical },
-    openGraph: {
-        title: 'Pricing — Starter, Pro and Studio',
-        description:
-            'Start free, then add generations, storage and team capabilities as you publish more.',
-        url: `${SITE_URL}/pricing`,
-        siteName: 'AI Content Engine',
-        locale: 'en_US',
-        type: 'website',
-    },
-};
+/**
+ * AR-023: the metadata copy is in the catalog, so the pricing page speaks the
+ * visitor's language in the search result too.
+ *
+ * What is NOT here yet: the per-locale canonical and the hreflang pairs —
+ * those are AR-025's job (the public route pairs).
+ */
+export async function generateMetadata(): Promise<Metadata> {
+    const t = await getTranslations('pricing');
 
-const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: 'AI Content Engine',
-    applicationCategory: 'MultimediaApplication',
-    operatingSystem: 'Web',
-    url: `${SITE_URL}/pricing`,
-    description:
-        'Generate thumbnails, scripts, sound effects and images for video creators in one project workspace.',
-    offers: PLAN_IDS.map((id) => {
-        const plan = PLAN_CATALOGUE[id];
-        return {
-            '@type': 'Offer',
-            name: plan.name,
-            price: (plan.monthlyPriceCents / 100).toFixed(0),
-            priceCurrency: 'USD',
-            category: plan.monthlyPriceCents === 0 ? 'free' : 'subscription',
+    return {
+        title: t('meta.title'),
+        description: t('meta.description'),
+        alternates: { canonical },
+        openGraph: {
+            title: t('meta.ogTitle'),
+            description: t('meta.ogDescription'),
             url: `${SITE_URL}/pricing`,
-        };
-    }),
-};
+            siteName: 'AI Content Engine',
+            locale: 'en_US',
+            type: 'website',
+        },
+    };
+}
 
 export default async function PricingPage() {
     const locale = await getLocale();
+    const t = await getTranslations('pricing');
+    const copy = buildPricingCopy(t);
+
+    // The structured data is built per request (per locale) so the
+    // description — and the plan names — are the visitor's language.
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'AI Content Engine',
+        applicationCategory: 'MultimediaApplication',
+        operatingSystem: 'Web',
+        url: `${SITE_URL}/pricing`,
+        description: t('meta.jsonLdDescription'),
+        offers: PLAN_IDS.map((id) => {
+            const plan = PLAN_CATALOGUE[id];
+            return {
+                '@type': 'Offer',
+                name: copy.planName(id),
+                price: (plan.monthlyPriceCents / 100).toFixed(0),
+                priceCurrency: 'USD',
+                category: plan.monthlyPriceCents === 0 ? 'free' : 'subscription',
+                url: `${SITE_URL}/pricing`,
+            };
+        }),
+    };
+
     return (
         <div id="pricing" className="scroll-mt-20">
             <script
@@ -62,17 +76,15 @@ export default async function PricingPage() {
                 <div className="container mx-auto max-w-6xl px-4">
                     <div className="mx-auto max-w-2xl text-center">
                         <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-                            Pricing that stays honest about limits
+                            {t('page.title')}
                         </h1>
                         <p className="mt-4 text-muted-foreground md:text-lg">
-                            Every quota and capability below is enforced by the product.
-                            Start free, then move up when your publishing schedule needs it.
+                            {t('page.description')}
                         </p>
                     </div>
                     <PricingCards className="mt-12" locale={locale} />
                     <p className="mt-6 text-center text-xs text-muted-foreground">
-                        All paid plans are billed monthly in USD. Prices exclude any
-                        taxes that may apply.
+                        {t('page.billingNote')}
                     </p>
                 </div>
             </section>
@@ -80,11 +92,10 @@ export default async function PricingPage() {
             <section className="py-16 md:py-24">
                 <div className="container mx-auto max-w-6xl px-4">
                     <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-                        Compare every limit
+                        {t('compare.title')}
                     </h2>
                     <p className="mt-2 max-w-2xl text-muted-foreground">
-                        Quotas reset each billing period for paid plans and each calendar
-                        month for Starter.
+                        {t('compare.description')}
                     </p>
                     <div className="mt-8">
                         <PlanComparisonTable locale={locale} />
@@ -95,10 +106,10 @@ export default async function PricingPage() {
             <section className="border-t border-border/40 py-16 md:py-24">
                 <div className="container mx-auto max-w-3xl px-4">
                     <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-                        Questions before you upgrade
+                        {t('faq.title')}
                     </h2>
                     <div className="mt-8">
-                        <PricingFaq />
+                        <PricingFaq locale={locale} />
                     </div>
                 </div>
             </section>

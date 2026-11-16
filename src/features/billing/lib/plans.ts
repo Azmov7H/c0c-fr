@@ -1,5 +1,5 @@
 import type { AppLocale } from '@/i18n/routing';
-import { formatCurrency, formatNumber } from '@/lib/format';
+import { formatNumber } from '@/lib/format';
 
 import type { BillingFeature, PlanId } from '../types';
 
@@ -11,13 +11,21 @@ export interface PlanLimits {
     concurrentGenerations: number;
 }
 
+/**
+ * AR-023 — a plan is DATA.
+ *
+ * The name, the audience and the badge are COPY, and copy lives in the
+ * catalog (`messages/{locale}/pricing.json`); the code reaches it through
+ * `pricing-copy.ts`. What is left here is what a plan really is: what it
+ * costs, what it allows and what it enforces.
+ *
+ * The ids stay in the code — they travel in the API, in the URLs and in the
+ * database, and they are never translated (GLOSSARY §2).
+ */
 export interface PlanDefinition {
     id: PlanId;
-    name: string;
-    audience: string;
     monthlyPriceCents: number;
     currency: 'usd';
-    recommendedLabel?: string;
     limits: PlanLimits;
     features: readonly BillingFeature[];
 }
@@ -27,8 +35,6 @@ export const PLAN_IDS: readonly PlanId[] = ['starter', 'pro', 'studio'];
 export const PLAN_CATALOGUE: Record<PlanId, PlanDefinition> = {
     starter: {
         id: 'starter',
-        name: 'Starter',
-        audience: 'For getting the first videos out.',
         monthlyPriceCents: 0,
         currency: 'usd',
         limits: {
@@ -51,11 +57,8 @@ export const PLAN_CATALOGUE: Record<PlanId, PlanDefinition> = {
     },
     pro: {
         id: 'pro',
-        name: 'Pro',
-        audience: 'For creators publishing on a schedule.',
         monthlyPriceCents: 4900,
         currency: 'usd',
-        recommendedLabel: 'Recommended for weekly publishing',
         limits: {
             generations: 500,
             storageGB: 50,
@@ -75,8 +78,6 @@ export const PLAN_CATALOGUE: Record<PlanId, PlanDefinition> = {
     },
     studio: {
         id: 'studio',
-        name: 'Studio',
-        audience: 'For teams running multiple channels.',
         monthlyPriceCents: 19900,
         currency: 'usd',
         limits: {
@@ -99,46 +100,15 @@ export const PLAN_CATALOGUE: Record<PlanId, PlanDefinition> = {
     },
 };
 
-export const FEATURE_LABELS: Record<BillingFeature, string> = {
-    'ai.generation': 'AI generations',
-    'teams.create': 'Team workspaces',
-    'teams.invite': 'Invite collaborators',
-    'media.publish': 'Publish media',
-    'project.members': 'Project members',
-    priority_queue: 'Priority generation queue',
-    'analytics.advanced': 'Advanced analytics',
-    'export.csv': 'CSV export',
-};
-
-export const QUOTA_LABELS: Record<string, string> = {
-    'ai.generation': 'AI generations this period',
-    'teams.create': 'Team workspaces',
-    'project.members': 'Members per project',
-    storageGB: 'Storage',
-};
-
 /**
- * AR-014: the locale is an ARGUMENT — the layer under `src/lib/format/`
- * owns the formatting, and the plan catalogue keeps the ids and the prices.
+ * AR-023 — the limit as a NUMBER, or null when the plan does not cap it.
+ *
+ * "Unlimited" is copy (the catalog's `limit.unlimited`), so this function
+ * only ever deals with numbers: the copy module turns the null into the
+ * word.
  */
-export function formatPrice(
-    cents: number,
-    locale: AppLocale,
-    currency: PlanDefinition['currency'] = 'usd'
-): string {
-    if (cents === 0) return 'Free';
-    return formatCurrency(cents, currency, locale);
-}
-
-export function formatMonthlyPrice(plan: PlanDefinition, locale: AppLocale): string {
-    return plan.monthlyPriceCents === 0
-        ? 'Free'
-        : `${formatPrice(plan.monthlyPriceCents, locale, plan.currency)}/month`;
-}
-
-export function formatLimit(value: number | null, locale: AppLocale, suffix = ''): string {
-    if (value === null) return 'Unlimited';
-    return `${formatNumber(value, locale)}${suffix}`;
+export function limitValue(value: number | null, locale: AppLocale): string | null {
+    return value === null ? null : formatNumber(value, locale);
 }
 
 export function planRank(plan: PlanId): number {
@@ -154,139 +124,3 @@ export function nextPlan(plan: PlanId, direction: 'upgrade' | 'downgrade'): Plan
     const target = direction === 'upgrade' ? index + 1 : index - 1;
     return PLAN_IDS[target] ?? null;
 }
-
-export function planHighlights(plan: PlanDefinition, locale: AppLocale): readonly string[] {
-    const highlights = [
-        `${formatNumber(plan.limits.generations, locale)} AI generations per month`,
-        `${plan.limits.storageGB} GB storage`,
-        `${formatLimit(plan.limits.membersPerProject, locale)} ${
-            plan.limits.membersPerProject === 1 ? 'member' : 'members'
-        } per project`,
-        `${plan.limits.concurrentGenerations} ${
-            plan.limits.concurrentGenerations === 1 ? 'generation' : 'generations'
-        } at a time`,
-    ];
-
-    if (plan.features.includes('analytics.advanced')) highlights.push('Advanced analytics');
-    if (plan.features.includes('export.csv')) {
-        // P09.2: Free exports ONCE per project; paid plans export per export
-        // (priced). Saying "CSV export" for both would be a lie.
-        highlights.push(
-            plan.monthlyPriceCents === 0 ? '1 project export' : 'Project export per download'
-        );
-    }
-    if (plan.features.includes('priority_queue')) {
-        highlights.push('Priority generation queue', 'Everything in Pro');
-    }
-
-    return highlights;
-}
-
-export interface ComparisonRow {
-    label: string;
-    values: Record<PlanId, string>;
-}
-
-const included = (value: boolean): string => (value ? 'Included' : 'Not included');
-
-/**
- * AR-014: the comparison table is a FUNCTION of the locale — the values are
- * display strings, and a module-level constant cannot know the locale.
- */
-export function planComparison(locale: AppLocale): ComparisonRow[] {
-    return [
-    {
-        label: FEATURE_LABELS['ai.generation'],
-        values: {
-            starter: `${formatNumber(PLAN_CATALOGUE.starter.limits.generations, locale)} / month`,
-            pro: `${formatNumber(PLAN_CATALOGUE.pro.limits.generations, locale)} / month`,
-            studio: `${formatNumber(PLAN_CATALOGUE.studio.limits.generations, locale)} / month`,
-        },
-    },
-    {
-        label: 'Storage',
-        values: {
-            starter: `${PLAN_CATALOGUE.starter.limits.storageGB} GB`,
-            pro: `${PLAN_CATALOGUE.pro.limits.storageGB} GB`,
-            studio: `${PLAN_CATALOGUE.studio.limits.storageGB} GB`,
-        },
-    },
-    {
-        label: FEATURE_LABELS['teams.create'],
-        values: {
-            starter: formatLimit(PLAN_CATALOGUE.starter.limits.teamWorkspaces, locale),
-            pro: formatLimit(PLAN_CATALOGUE.pro.limits.teamWorkspaces, locale),
-            studio: formatLimit(PLAN_CATALOGUE.studio.limits.teamWorkspaces, locale),
-        },
-    },
-    {
-        label: FEATURE_LABELS['project.members'],
-        values: {
-            starter: formatLimit(PLAN_CATALOGUE.starter.limits.membersPerProject, locale),
-            pro: formatLimit(PLAN_CATALOGUE.pro.limits.membersPerProject, locale),
-            studio: formatLimit(PLAN_CATALOGUE.studio.limits.membersPerProject, locale),
-        },
-    },
-    {
-        label: 'Concurrent generations',
-        values: {
-            starter: String(PLAN_CATALOGUE.starter.limits.concurrentGenerations),
-            pro: String(PLAN_CATALOGUE.pro.limits.concurrentGenerations),
-            studio: String(PLAN_CATALOGUE.studio.limits.concurrentGenerations),
-        },
-    },
-    {
-        // P09.2/P09.3: the export row is not a boolean — Free gets one
-        // export per project, paid plans are priced per export.
-        label: FEATURE_LABELS['export.csv'],
-        values: {
-            starter: '1 per project',
-            pro: 'Per export',
-            studio: 'Per export',
-        },
-    },
-    ...(
-        [
-            ['teams.invite', 'teams.invite'],
-            ['media.publish', 'media.publish'],
-            ['analytics.advanced', 'analytics.advanced'],
-            ['priority_queue', 'priority_queue'],
-        ] as const
-    ).map(([feature, key]) => ({
-        label: FEATURE_LABELS[key],
-        values: {
-            starter: included(PLAN_CATALOGUE.starter.features.includes(feature)),
-            pro: included(PLAN_CATALOGUE.pro.features.includes(feature)),
-            studio: included(PLAN_CATALOGUE.studio.features.includes(feature)),
-        },
-    })),
-    ];
-}
-
-export interface PricingFaqItem {
-    question: string;
-    answer: string;
-}
-
-export const PRICING_FAQ: readonly PricingFaqItem[] = [
-    {
-        question: 'Do I need a plan to try the product?',
-        answer: 'No. Starter is free, needs no card, and includes 50 AI generations every month.',
-    },
-    {
-        question: 'What happens when I reach a quota?',
-        answer: 'Generation for that feature stops until the quota resets or you upgrade. Your existing projects and assets stay available.',
-    },
-    {
-        question: 'Can I cancel?',
-        answer: 'Yes. Use Manage subscription to cancel in the Stripe Customer Portal. You keep the paid plan until the end of the period you have already paid for.',
-    },
-    {
-        question: 'How do refunds work?',
-        answer: 'The Customer Portal does not issue refunds. Contact support and we will review the request against the payment record.',
-    },
-    {
-        question: 'Do you offer annual billing?',
-        answer: 'Not yet. Every paid plan is billed monthly.',
-    },
-];

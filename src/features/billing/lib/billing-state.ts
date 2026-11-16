@@ -1,8 +1,9 @@
+import type { useTranslations } from 'next-intl';
+
 import type { AppLocale } from '@/i18n/routing';
 
 import type { BillingSummary } from '../types';
 import { formatDate } from './format';
-import { PLAN_CATALOGUE } from './plans';
 
 export type BillingNoticeKind = 'payment_failed' | 'cancelled' | 'trial';
 
@@ -14,22 +15,41 @@ export interface BillingNotice {
     actionLabel: string;
 }
 
+/**
+ * AR-023 — the notices' copy comes from the catalog.
+ *
+ * The translator is bound to the `billing` namespace; the plan names are
+ * VALUES, because a notice that names the plan cannot be split across two
+ * languages: the sentence and the name it carries have to be the same
+ * language.
+ */
+export type BillingTranslator = ReturnType<typeof useTranslations<'billing'>>;
+
+export interface BillingNoticeContext {
+    /** The catalog's translator, bound to the `billing` namespace. */
+    t: BillingTranslator;
+    /** The current plan's display name. */
+    plan: string;
+    /** The free plan's display name — the plan the subscription changes to. */
+    starter: string;
+}
+
 export function deriveBillingNotice(
     summary: BillingSummary | undefined,
-    locale: AppLocale
+    locale: AppLocale,
+    context: BillingNoticeContext
 ): BillingNotice | null {
     if (!summary) return null;
 
-    const planName = PLAN_CATALOGUE[summary.plan].name;
+    const { t, plan: planName, starter: starterName } = context;
 
     if (summary.status === 'past_due' || summary.status === 'incomplete') {
         return {
             kind: 'payment_failed',
-            title: 'Your payment needs attention',
-            description:
-                'We could not confirm your latest payment. Update your payment method to keep your plan and quota.',
+            title: t('notice.paymentFailedTitle'),
+            description: t('notice.paymentFailedDescription'),
             action: 'portal',
-            actionLabel: 'Update payment method',
+            actionLabel: t('notice.paymentFailedAction'),
         };
     }
 
@@ -39,20 +59,35 @@ export function deriveBillingNotice(
     ) {
         return {
             kind: 'cancelled',
-            title: 'Your plan is ending',
-            description: `Your ${planName} plan stays active until ${formatDate(summary.renewalDate, locale, 'the end of the billing period')}. After that it changes to Starter and paid limits stop.`,
+            title: t('notice.cancelledTitle'),
+            description: t('notice.cancelledDescription', {
+                plan: planName,
+                date: formatDate(
+                    summary.renewalDate,
+                    locale,
+                    t('notice.endOfBillingPeriod')
+                ),
+                starter: starterName,
+            }),
             action: 'plans',
-            actionLabel: 'Choose a plan',
+            actionLabel: t('notice.cancelledAction'),
         };
     }
 
     if (summary.status === 'trialing') {
         return {
             kind: 'trial',
-            title: 'Your trial is active',
-            description: `Your trial ends on ${formatDate(summary.renewalDate, locale, 'the date shown in the portal')}. You will keep ${planName} after that unless you cancel.`,
+            title: t('notice.trialTitle'),
+            description: t('notice.trialDescription', {
+                date: formatDate(
+                    summary.renewalDate,
+                    locale,
+                    t('notice.portalDate')
+                ),
+                plan: planName,
+            }),
             action: 'portal',
-            actionLabel: 'Manage subscription',
+            actionLabel: t('notice.trialAction'),
         };
     }
 

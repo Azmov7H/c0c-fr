@@ -1,1 +1,166 @@
-{}
+{
+  "meta": {
+    "title": "Pricing — Starter, Pro and Studio",
+    "description": "Compare AI generations, storage, members and API access. Starter is free; Pro and Studio add higher quotas and team capabilities.",
+    "ogTitle": "Pricing — Starter, Pro and Studio",
+    "ogDescription": "Start free, then add generations, storage and team capabilities as you publish more.",
+    "jsonLdDescription": "Generate thumbnails, scripts, sound effects and images for video creators in one project workspace."
+  },
+  "page": {
+    "title": "Pricing that stays honest about limits",
+    "description": "Every quota and capability below is enforced by the product. Start free, then move up when your publishing schedule needs it.",
+    "billingNote": "All paid plans are billed monthly in USD. Prices exclude any taxes that may apply."
+  },
+  "compare": {
+    "title": "Compare every limit",
+    "description": "Quotas reset each billing period for paid plans and each calendar month for Starter.",
+    "caption": "Feature and quota comparison for Starter, Pro and Studio",
+    "header": "Compare plans"
+  },
+  "faq": {
+    "title": "Questions before you upgrade",
+    "try": {
+      "question": "Do I need a plan to try the product?",
+      "answer": "No. Starter is free, needs no card, and includes {count} AI generations every month."
+    },
+    "quota": {
+      "question": "What happens when I reach a quota?",
+      "answer": "Generation for that feature stops until the quota resets or you upgrade. Your existing projects and assets stay available."
+    },
+    "cancel": {
+      "question": "Can I cancel?",
+      "answer": "Yes. Use Manage subscription to cancel in the Stripe Customer Portal. You keep the paid plan until the end of the period you have already paid for."
+    },
+    "refunds": {
+      "question": "How do refunds work?",
+      "answer": "The Customer Portal does not issue refunds. Contact support and we will review the request against the payment record."
+    },
+    "annual": {
+      "question": "Do you offer annual billing?",
+      "answer": "Not yet. Every paid plan is billed monthly."
+    }
+  },
+  "plans": [
+    {
+      "id": "starter",
+      "name": "Starter",
+      "audience": "For getting the first videos out."
+    },
+    {
+      "id": "pro",
+      "name": "Pro",
+      "audience": "For creators publishing on a schedule.",
+      "recommended": "Recommended for weekly publishing"
+    },
+    {
+      "id": "studio",
+      "name": "Studio",
+      "audience": "For teams running multiple channels."
+    }
+  ],
+  "price": {
+    "free": "Free",
+    "perMonth": "{price}/month",
+    "noCard": "No card required",
+    "billedMonthly": "Billed monthly · cancel any time",
+    "currentPlan": "Current plan"
+  },
+  "cta": {
+    "startFree": "Start free",
+    "choose": "Choose {plan}"
+  },
+  "limit": {
+    "unlimited": "Unlimited",
+    "included": "Included",
+    "notIncluded": "Not included",
+    "perMonth": "{count} / month",
+    "storage": "{size} GB",
+    "onePerProject": "1 per project",
+    "perExport": "Per export"
+  },
+  "quota": [
+    {
+      "id": "ai.generation",
+      "label": "AI generations this period"
+    },
+    {
+      "id": "teams.create",
+      "label": "Team workspaces"
+    },
+    {
+      "id": "project.members",
+      "label": "Members per project"
+    },
+    {
+      "id": "storageGB",
+      "label": "Storage"
+    }
+  ],
+  "comparison": {
+    "rows": [
+      {
+        "id": "generations",
+        "label": "AI generations"
+      },
+      {
+        "id": "storage",
+        "label": "Storage"
+      },
+      {
+        "id": "workspaces",
+        "label": "Team workspaces"
+      },
+      {
+        "id": "members",
+        "label": "Project members"
+      },
+      {
+        "id": "concurrent",
+        "label": "Concurrent generations"
+      },
+      {
+        "id": "export",
+        "label": "CSV export"
+      },
+      {
+        "id": "invite",
+        "label": "Invite collaborators"
+      },
+      {
+        "id": "publish",
+        "label": "Publish media"
+      },
+      {
+        "id": "analytics",
+        "label": "Advanced analytics"
+      },
+      {
+        "id": "priority",
+        "label": "Priority generation queue"
+      }
+    ]
+  },
+  "highlight": {
+    "generations": "{count} AI generations per month",
+    "storage": "{size} GB storage",
+    "members": "{count, plural, one {{value} member per project} other {{value} members per project}}",
+    "unlimitedMembers": "Unlimited members per project",
+    "concurrent": "{count, plural, one {{value} generation at a time} other {{value} generations at a time}}",
+    "advancedAnalytics": "Advanced analytics",
+    "freeExport": "1 project export",
+    "paidExport": "Project export per download",
+    "priorityQueue": "Priority generation queue",
+    "everythingInPro": "Everything in Pro"
+  },
+  "chooser": {
+    "title": "Change plan",
+    "description": "Upgrades start in Stripe Checkout. Downgrades and cancellation happen in the Customer Portal, so nothing changes without your confirmation.",
+    "downgradeNotice": "Downgrades take effect at the end of the current billing period{date}. You keep {plan} until then; after that the lower plan's generation, storage and member limits apply.",
+    "current": "Current",
+    "openingCheckout": "Opening checkout…",
+    "openingPortal": "Opening portal…",
+    "upgradeTo": "Upgrade to {plan}",
+    "downgradeTo": "Downgrade to {plan}",
+    "manualPlan": "This plan was granted manually. Support manages changes to it."
+  }
+}
