@@ -131,7 +131,10 @@ export function buildContentSecurityPolicy(scriptNonce: string, enforce = false)
         // Required by Tailwind v4's injected styles and Radix's runtime style
         // attributes. Documented rather than pretended away — scripts stay nonce-only.
         "style-src 'self' 'unsafe-inline'",
-        "img-src 'self' data: blob:",
+        // `images.unsplash.com` is the Unsplash CDN: the photos picked with the
+        // stock-photo picker are hotlinked from it (the URL the API returned,
+        // ixid included), so the browser has to be allowed to load them.
+        "img-src 'self' data: blob: https://images.unsplash.com",
         // next/font self-hosts (T08); data: covers inlined subsets.
         "font-src 'self' data:",
         // Same-origin topology (FE-01): BFF and socket both go through this origin.

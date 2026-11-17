@@ -1,1 +1,28 @@
-{}
+{
+  "picker": {
+    "trigger": "Choose a photo",
+    "title": "Choose a photo",
+    "description": "Search Unsplash and pick one photo. The photo is credited to its photographer wherever it is used.",
+    "search": "Search",
+    "searchLabel": "Search photos",
+    "searchPlaceholder": "Search photos...",
+    "orientationLabel": "Orientation",
+    "orientationAll": "Any orientation",
+    "orientation": {
+      "landscape": "Landscape",
+      "portrait": "Portrait",
+      "squarish": "Square"
+    },
+    "loading": "Searching photos",
+    "idleTitle": "Search for a photo",
+    "idleDescription": "Type a keyword to find photos on Unsplash.",
+    "emptyTitle": "No photos found",
+    "emptyDescription": "Try a different keyword.",
+    "errorTitle": "Could not reach Unsplash",
+    "errorDescription": "The photo search is unavailable right now. Please try again in a moment.",
+    "loadMore": "Load more",
+    "selected": "Selected photo",
+    "selectedAlt": "The selected photo",
+    "clear": "Clear"
+  }
+}

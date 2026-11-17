@@ -1,1 +1,28 @@
-{}
+{
+  "picker": {
+    "trigger": "اختر صورة",
+    "title": "اختر صورة",
+    "description": "ابحث في Unsplash واختر صورة واحدة. تُنسب الصورة إلى مصوّرها أينما استُخدمت.",
+    "search": "بحث",
+    "searchLabel": "ابحث عن الصور",
+    "searchPlaceholder": "ابحث عن الصور...",
+    "orientationLabel": "الاتجاه",
+    "orientationAll": "أي اتجاه",
+    "orientation": {
+      "landscape": "أفقي",
+      "portrait": "عمودي",
+      "squarish": "مربع"
+    },
+    "loading": "جارٍ البحث عن الصور",
+    "idleTitle": "ابحث عن صورة",
+    "idleDescription": "اكتب كلمة مفتاحية للبحث عن صور على Unsplash.",
+    "emptyTitle": "لم يُعثر على صور",
+    "emptyDescription": "جرّب كلمة مفتاحية أخرى.",
+    "errorTitle": "تعذّر الوصول إلى Unsplash",
+    "errorDescription": "البحث عن الصور غير متاح الآن. يرجى المحاولة بعد قليل.",
+    "loadMore": "عرض المزيد",
+    "selected": "الصورة المختارة",
+    "selectedAlt": "الصورة المختارة",
+    "clear": "إزالة"
+  }
+}
