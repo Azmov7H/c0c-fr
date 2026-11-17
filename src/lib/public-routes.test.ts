@@ -42,7 +42,10 @@ describe('public route table', () => {
         expect(alternateLanguages('/pricing')).toEqual({
             en: `${SITE_URL}/en/pricing`,
             ar: `${SITE_URL}/ar/pricing`,
+            // AR-025: `x-default` is where a crawler that sends no
+            // `Accept-Language` is sent — the default locale's face.
+            'x-default': `${SITE_URL}/en/pricing`,
         });
-        expect(Object.keys(alternateLanguages('/'))).toEqual(['en', 'ar']);
+        expect(Object.keys(alternateLanguages('/'))).toEqual(['en', 'ar', 'x-default']);
     });
 });

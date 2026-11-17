@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next'
 
-import { PUBLIC_ROUTES, absolutePublicUrl } from '@/lib/public-routes'
+import { PUBLIC_ROUTES, absolutePublicUrl, alternateLanguages } from '@/lib/public-routes'
 import { locales } from '@/i18n/routing'
 
 /**
@@ -23,9 +23,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: route.changeFrequency,
             priority: route.priority,
             alternates: {
-                languages: Object.fromEntries(
-                    locales.map((alternate) => [alternate, absolutePublicUrl(route.path, alternate)])
-                )
+                // AR-025: the sitemap and the pages' hreflang pairs are the
+                // SAME map, built by the same helper — including `x-default`.
+                languages: alternateLanguages(route.path),
             },
         }))
     )

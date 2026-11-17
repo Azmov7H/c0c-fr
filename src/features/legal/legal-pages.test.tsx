@@ -20,6 +20,9 @@ vi.mock('@/i18n/server', async () => {
         namespace: 'legal',
     });
     return {
+        // AR-025: the pages' metadata asks the seam for the locale as well
+        // (the canonical and the hreflang pairs are per locale).
+        getLocale: async () => 'en',
         getTranslations: async (namespace: string) => {
             if (namespace !== 'legal') {
                 throw new Error(`unexpected namespace: ${namespace}`);
