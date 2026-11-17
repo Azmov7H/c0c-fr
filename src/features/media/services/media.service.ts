@@ -30,6 +30,23 @@ export interface MediaAllowance {
     images: { used: number; limit: number | null };
 }
 
+/**
+ * The replacement for a gallery slot's image.
+ *
+ * `fileUrl` is the hotlinked image. For a photo picked with the Unsplash
+ * picker it is the URL the API returned — `thumbnailUrl`, `source` and
+ * `metadata` carry the rest of the provenance.
+ */
+export interface MediaReplacement {
+    fileUrl: string;
+    thumbnailUrl?: string;
+    source?: 'upload' | 'generated' | 'external';
+    metadata?: Record<string, unknown>;
+    fileSize?: number;
+    width?: number;
+    height?: number;
+}
+
 export const mediaService = {
     async getMedia(params?: {
         page?: number;
@@ -53,8 +70,11 @@ export const mediaService = {
     },
 
     /** P07.4: replace one gallery row's bytes in place (siblings untouched). */
-    async regenerate(id: string, fileUrl: string): Promise<MediaItem> {
-        const { data } = await apiClient.post<{ data: MediaItem }>(`/media/${id}/regenerate`, { fileUrl });
+    async regenerate(id: string, replacement: MediaReplacement): Promise<MediaItem> {
+        const { data } = await apiClient.post<{ data: MediaItem }>(
+            `/media/${id}/regenerate`,
+            replacement
+        );
         return data.data;
     },
 

@@ -5,6 +5,8 @@ import { audioLayerOf } from '@/features/audio/types';
 import { useProjectMedia } from '@/features/media/hooks/use-media';
 import { useProjectScripts } from '@/features/scripts/hooks/use-scripts';
 import { useProjectThumbnails } from '@/features/thumbnails/hooks/use-thumbnails';
+import { UnsplashAttribution } from '@/features/images/components/unsplash-attribution';
+import { unsplashMetadataOf } from '@/features/images/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -118,18 +120,27 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
                     </CardHeader>
                     <CardContent>
                         <ul className="grid gap-3 sm:grid-cols-3">
-                            {images.map((item) => (
-                                <li key={item._id} className="overflow-hidden rounded-xl border border-border/50">
-                                    {item.fileUrl ? (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img
-                                            src={item.fileUrl}
-                                            alt={item.title || 'Scene image'}
-                                            className="aspect-video w-full object-cover"
-                                        />
-                                    ) : null}
-                                </li>
-                            ))}
+                            {images.map((item) => {
+                                const unsplash = unsplashMetadataOf(item.metadata);
+                                return (
+                                    <li key={item._id} className="overflow-hidden rounded-xl border border-border/50">
+                                        {item.fileUrl ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img
+                                                src={item.fileUrl}
+                                                alt={item.title || 'Scene image'}
+                                                className="aspect-video w-full object-cover"
+                                            />
+                                        ) : null}
+                                        {/* The credit the Unsplash guidelines require. */}
+                                        {unsplash && (
+                                            <div className="p-2">
+                                                <UnsplashAttribution photo={unsplash} />
+                                            </div>
+                                        )}
+                                    </li>
+                                );
+                            })}
                         </ul>
                     </CardContent>
                 </Card>

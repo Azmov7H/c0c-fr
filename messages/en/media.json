@@ -1,4 +1,45 @@
 {
+  "download": "Download",
+  "regenerate": "Regenerate",
+  "thumbnail": {
+    "title": "Project Thumbnail",
+    "alt": "Project thumbnail",
+    "expired": "This image link expired — regenerate it.",
+    "empty": "No thumbnail yet. Generate one from the Thumbnails section.",
+    "usage": "{used} of {limit} thumbnail(s) used.",
+    "atLimit": "At limit — regenerate or remove to add more.",
+    "replace": "Replace photo"
+  },
+  "gallery": {
+    "title": "Images",
+    "slot": "Slot {n}",
+    "empty": "Empty",
+    "expired": "Source expired — regenerate.",
+    "imageAlt": "Scene image {n}",
+    "scene": "Scene {ref}",
+    "untitled": "Unsplash photo",
+    "pick": "Choose a photo",
+    "replace": "Replace photo",
+    "usage": "{used} of {limit} images used.",
+    "atLimit": "Gallery at limit ({used}/{limit} images) — regenerate or remove to add more."
+  },
+  "audio": {
+    "narration": "Narration",
+    "narrationDescription": "Voiceover from the verified TTS voice. Playback uses the current narration only.",
+    "music": "Music",
+    "musicDescription": "Background music suggestions. Volume and enable are per-layer.",
+    "sfx": "Sound effects",
+    "sfxDescription": "SFX suggestions. Independent of narration.",
+    "duration": "Duration: {duration} · Source: {source}",
+    "unknown": "unknown",
+    "generated": "generated",
+    "suggestionsOnly": "Suggestions only — no audio file from the provider yet.",
+    "volume": "Volume ({percent}%)",
+    "enable": "Enable {title}",
+    "history": "Older {title} from {duration} — history.",
+    "empty": "No {title} yet — regenerate to create it.",
+    "legacyNote": "Older audio combines narration and suggestions in one row — regenerate to split them into narration, music, and SFX."
+  },
   "picker": {
     "trigger": "Choose a photo",
     "title": "Choose a photo",

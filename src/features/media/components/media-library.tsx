@@ -21,6 +21,8 @@ import {
 } from '@/components/ui/select';
 import { useProjectMedia } from '@/features/media/hooks/use-media';
 import { useProjects } from '@/features/projects/hooks/use-projects';
+import { UnsplashAttribution } from '@/features/images/components/unsplash-attribution';
+import { unsplashMetadataOf } from '@/features/images/types';
 import { formatRelativeTime } from '@/lib/relative-time';
 
 const ICONS = {
@@ -123,6 +125,7 @@ export function MediaLibrary() {
                         <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-6">
                             {filtered.map((item) => {
                                 const Icon = ICONS[item.category] ?? ImageIcon;
+                                const unsplash = unsplashMetadataOf(item.metadata);
                                 return (
                                     <Card key={item._id} className="overflow-hidden">
                                         <CardContent className="p-0">
@@ -142,6 +145,8 @@ export function MediaLibrary() {
                                                         {formatRelativeTime(item.createdAt, locale).relative}
                                                     </span>
                                                 </div>
+                                                {/* The credit the Unsplash guidelines require. */}
+                                                {unsplash && <UnsplashAttribution photo={unsplash} />}
                                             </div>
                                         </CardContent>
                                     </Card>

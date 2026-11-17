@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { mediaService, type MediaItem } from '../services/media.service';
+import { mediaService, type MediaItem, type MediaReplacement } from '../services/media.service';
 
 export const mediaKeys = {
     all: ['media'] as const,
@@ -28,9 +28,10 @@ export function useMediaAllowance(projectId: string) {
 
 export function useRegenerateMedia(projectId: string) {
     const queryClient = useQueryClient();
+
     return useMutation({
-        mutationFn: ({ id, fileUrl }: { id: string; fileUrl: string }) =>
-            mediaService.regenerate(id, fileUrl),
+        mutationFn: ({ id, ...replacement }: MediaReplacement & { id: string }) =>
+            mediaService.regenerate(id, replacement),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: mediaKeys.list(projectId) });
             queryClient.invalidateQueries({ queryKey: mediaKeys.allowance(projectId) });
@@ -40,8 +41,22 @@ export function useRegenerateMedia(projectId: string) {
 
 export function useCreateMedia(projectId: string) {
     const queryClient = useQueryClient();
+
     return useMutation({
         mutationFn: (dto: Partial<MediaItem>) => mediaService.create(dto),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: mediaKeys.list(projectId) });
+            queryClient.invalidateQueries({ queryKey: mediaKeys.allowance(projectId) });
+        },
+    });
+}
+
+/** Removes an asset — the gallery slot it held is free again. */
+export function useDeleteMedia(projectId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => mediaService.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: mediaKeys.list(projectId) });
             queryClient.invalidateQueries({ queryKey: mediaKeys.allowance(projectId) });
