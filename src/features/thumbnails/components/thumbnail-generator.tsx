@@ -22,6 +22,22 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { ThumbnailStyle } from '../types';
 import { cn } from '@/lib/utils';
+import { UnsplashAttribution } from '@/features/images/components/unsplash-attribution';
+import { unsplashMetadataFromPhoto, type UnsplashPhoto } from '@/features/images/types';
+import dynamic from 'next/dynamic';
+
+/**
+ * The picker is loaded on demand (the P05.7 pattern): the dialog and the
+ * search machinery are only needed once somebody opens it, and the project
+ * page has a first-load budget.
+ */
+const ImagePicker = dynamic(
+    () => import('@/features/images/components/image-picker').then((m) => m.ImagePicker),
+    {
+        ssr: false,
+        loading: () => <Skeleton className="h-8 w-32 rounded-md" />,
+    }
+);
 
 interface ThumbnailGeneratorProps {
     projectId: string;
@@ -39,6 +55,9 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
 
     const [prompt, setPrompt] = useState('');
     const [stylePreset, setStylePreset] = useState<ThumbnailStyle>('3d-render');
+    // The stock photo the user picked. The AI still writes the concept; the
+    // picture comes from Unsplash and is credited to its photographer.
+    const [photo, setPhoto] = useState<UnsplashPhoto | null>(null);
 
     const handleGenerate = () => {
         if (!prompt.trim()) return;
@@ -47,10 +66,12 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
             projectId,
             prompt,
             stylePreset,
+            ...(photo ? { image: photo } : {}),
         });
     };
 
     const activeThumbnail = thumbnails && thumbnails.length > 0 ? thumbnails[0] : null;
+    const attribution = photo ? unsplashMetadataFromPhoto(photo) : null;
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full min-h-[600px] animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -114,7 +135,7 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
                                         <span className="cursor-pointer font-bold text-sm block">
                                             {style.label}
                                         </span>
-                                        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider block">
+                                        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider block">
                                             {style.description}
                                         </span>
                                     </span>
@@ -122,6 +143,34 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
                                 </label>
                             ))}
                         </RadioGroup>
+                    </div>
+
+                    {/* The stock photo. The AI writes the concept; the picture is
+                        the one the user picks. */}
+                    <div className="space-y-4">
+                        <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">The Photograph</Label>
+                        <div className="space-y-3">
+                            {photo && (
+                                <div className="overflow-hidden rounded-2xl border border-border/50">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={photo.imageUrl}
+                                        alt={photo.altDescription || photo.photographerName}
+                                        className="aspect-video w-full object-cover"
+                                    />
+                                    <div className="p-3">
+                                        <UnsplashAttribution photo={attribution!} />
+                                    </div>
+                                </div>
+                            )}
+                            <ImagePicker
+                                selected={attribution}
+                                triggerLabel={photo ? 'Change photo' : 'Choose a photo'}
+                                orientation="landscape"
+                                onSelect={setPhoto}
+                                onClear={photo ? () => setPhoto(null) : undefined}
+                            />
+                        </div>
                     </div>
 
                     <div className="pt-4">
@@ -151,7 +200,7 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
                             </div>
                             The Render
                         </CardTitle>
-                        <CardDescription className="font-medium text-[10px] uppercase tracking-widest opacity-70">Resolution: 3840 x 2160 (Lossless)</CardDescription>
+                        <CardDescription className="font-medium text-[10px] uppercase tracking-widest opacity-70">Stock photograph · Unsplash</CardDescription>
                     </div>
                     {activeThumbnail && activeThumbnail.status === 'completed' && activeThumbnail.imageUrl && (
                         <Button variant="outline" size="sm" className="hidden sm:flex h-10 rounded-xl border-border/50 bg-background/50 font-bold text-xs uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-all">
@@ -177,6 +226,25 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
                                 </p>
                             </div>
                         </div>
+                    ) : photo ? (
+                        <div className="w-full relative rounded-[40px] overflow-hidden shadow-2xl-premium group/image">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={photo.imageUrl}
+                                alt={photo.altDescription || photo.photographerName}
+                                className="w-full h-auto aspect-video object-cover transition-transform duration-1000 group-hover/image:scale-[1.05]"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-10">
+                                <div className="space-y-3 translate-y-4 group-hover/image:translate-y-0 transition-transform duration-500">
+                                    <Badge className="bg-primary shadow-glow text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-xl">
+                                        {stylePreset.replace('-', ' ')}
+                                    </Badge>
+                                    <p className="text-white font-medium text-lg line-clamp-2 italic leading-relaxed opacity-80">
+                                        &quot;{prompt}&quot;
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     ) : activeThumbnail && activeThumbnail.imageUrl ? (
                         <div className="w-full relative rounded-[40px] overflow-hidden shadow-2xl-premium group/image">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -185,16 +253,6 @@ export const ThumbnailGenerator = ({ projectId }: ThumbnailGeneratorProps) => {
                                 alt={activeThumbnail.prompt}
                                 className="w-full h-auto aspect-video object-cover transition-transform duration-1000 group-hover/image:scale-[1.05]"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-10">
-                                <div className="space-y-3 translate-y-4 group-hover/image:translate-y-0 transition-transform duration-500">
-                                    <Badge className="bg-primary shadow-glow text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-xl">
-                                        {activeThumbnail.stylePreset.replace('-', ' ')}
-                                    </Badge>
-                                    <p className="text-white font-medium text-lg line-clamp-2 italic leading-relaxed opacity-80">
-                                        &quot;{activeThumbnail.prompt}&quot;
-                                    </p>
-                                </div>
-                            </div>
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center p-20 text-center glass border-dashed border-primary/20 rounded-[40px] w-full aspect-video shadow-inner">

@@ -3,6 +3,7 @@ import { thumbnailsService } from '../services/thumbnails.service';
 import { CreateThumbnailDTO, UpdateThumbnailDTO } from '../types';
 import { toast } from '@/lib/toast';
 import { generationErrorMessage } from '@/features/billing/lib/generation-error';
+import type { UnsplashPhoto } from '@/features/images/types';
 
 export const thumbnailsKeys = {
     all: ['thumbnails'] as const,
@@ -65,8 +66,18 @@ export const useRegenerateThumbnail = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id, prompt, stylePreset }: { id: string; prompt?: string; stylePreset?: string }) =>
-            thumbnailsService.regenerateThumbnail(id, { prompt, stylePreset }),
+        mutationFn: ({
+            id,
+            prompt,
+            stylePreset,
+            image,
+        }: {
+            id: string;
+            prompt?: string;
+            stylePreset?: string;
+            /** A new stock photo for the thumbnail, if the user picked one. */
+            image?: UnsplashPhoto;
+        }) => thumbnailsService.regenerateThumbnail(id, { prompt, stylePreset, image }),
         onSuccess: (data) => {
             toast.success('Thumbnail regenerated');
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.detail(data.id) });
