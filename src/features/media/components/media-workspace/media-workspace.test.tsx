@@ -1,14 +1,20 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { NextIntlClientProvider } from 'next-intl';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { MediaWorkspace } from './media-workspace';
+import enMedia from '../../../../../messages/en/media.json';
 
 const mocks = vi.hoisted(() => ({
     audio: [] as Array<Record<string, unknown>>,
     update: vi.fn(),
     generate: vi.fn(),
     setGenerate: vi.fn(),
+    createMedia: vi.fn(),
+    deleteMedia: vi.fn(),
+    regenerateMedia: vi.fn(),
 }));
 
 vi.mock('@/features/projects/hooks/use-projects', () => ({
@@ -17,7 +23,9 @@ vi.mock('@/features/projects/hooks/use-projects', () => ({
 vi.mock('@/features/media/hooks/use-media', () => ({
     useProjectMedia: () => ({ data: { data: [] }, isLoading: false }),
     useMediaAllowance: () => ({ data: { thumbnail: { used: 0, limit: null }, images: { used: 0, limit: null } } }),
-    useRegenerateMedia: () => ({ mutate: vi.fn(), isPending: false }),
+    useRegenerateMedia: () => ({ mutate: mocks.regenerateMedia, isPending: false }),
+    useCreateMedia: () => ({ mutate: mocks.createMedia, isPending: false }),
+    useDeleteMedia: () => ({ mutate: mocks.deleteMedia, isPending: false }),
 }));
 vi.mock('@/features/thumbnails/hooks/use-thumbnails', () => ({
     useProjectThumbnails: () => ({ data: [], isLoading: false }),
@@ -45,6 +53,17 @@ vi.mock('@/features/billing/hooks/use-billing', () => ({
     }),
 }));
 
+// The workspace reads its copy from the catalog (AR-011), so the suite
+// renders it inside the same providers the app uses.
+const renderWorkspace = () =>
+    render(
+        <NextIntlClientProvider locale="en" messages={{ media: enMedia }}>
+            <QueryClientProvider client={new QueryClient()}>
+                <MediaWorkspace projectId="p1" />
+            </QueryClientProvider>
+        </NextIntlClientProvider>
+    );
+
 const row = (overrides: object = {}) =>
     ({
         id: 'a1',
@@ -67,7 +86,7 @@ describe('MediaWorkspace audio layers (P06.7)', () => {
             row({ id: 'm1', assetType: 'music', fileUrl: undefined }),
             row({ id: 's1', assetType: 'sfx', fileUrl: undefined }),
         ];
-        render(<MediaWorkspace projectId="p1" />);
+        renderWorkspace();
         expect(screen.getByText('Narration')).toBeTruthy();
         expect(screen.getByText('Music')).toBeTruthy();
         expect(screen.getByText('Sound effects')).toBeTruthy();
@@ -79,7 +98,7 @@ describe('MediaWorkspace audio layers (P06.7)', () => {
 
     it('legacy combined row shows under narration with an upgrade note', () => {
         mocks.audio = [row({ id: 'legacy1', assetType: undefined })];
-        render(<MediaWorkspace projectId="p1" />);
+        renderWorkspace();
         expect(screen.getByText('Narration')).toBeTruthy();
         expect(screen.getByText(/regenerate to split them/)).toBeTruthy();
         mocks.audio = [];
@@ -87,7 +106,7 @@ describe('MediaWorkspace audio layers (P06.7)', () => {
 
     it('volume + enable persist via update (P06.4)', () => {
         mocks.audio = [row({ id: 'n1' })];
-        render(<MediaWorkspace projectId="p1" />);
+        renderWorkspace();
         const volume = screen.getByLabelText('Volume (100%)');
         fireEvent.change(volume, { target: { value: '0.5' } });
         expect(mocks.update).toHaveBeenCalledWith({ id: 'n1', data: { volume: 0.5 } });

@@ -77,10 +77,18 @@ const nextConfig: NextConfig = {
      * http:. Force downloads instead of rendering active content.
      */
     // M2-T26 (R-13): exactly one explicit Cloudinary host. Never '**'.
+    // The Unsplash CDN joins it for the stock-photo picker: the photo is
+    // HOTLINKED — the URL the API returned is used as-is, with its `ixid`
+    // intact — so the optimiser is told about the host but the images
+    // themselves are rendered unoptimised (see `unsplash-image.tsx`).
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
       },
     ],
     contentDispositionType: 'attachment',

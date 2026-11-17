@@ -1,6 +1,7 @@
 import apiClient from '@/services/api-client';
 import { Thumbnail, CreateThumbnailDTO, UpdateThumbnailDTO } from '../types';
 import { ApiResponse } from '@/types';
+import type { UnsplashPhoto } from '@/features/images/types';
 
 class ThumbnailsService {
     private readonly baseUrl = '/thumbnails';
@@ -30,8 +31,14 @@ class ThumbnailsService {
     }
 
     /** P07.4: regenerate one thumbnail in place (no new asset). */
-    async regenerateThumbnail(id: string, data?: { prompt?: string; stylePreset?: string }): Promise<Thumbnail> {
-        const response = await apiClient.post<ApiResponse<Thumbnail>>(`${this.baseUrl}/${id}/regenerate`, data ?? {});
+    async regenerateThumbnail(
+        id: string,
+        data?: { prompt?: string; stylePreset?: string; image?: UnsplashPhoto }
+    ): Promise<Thumbnail> {
+        const response = await apiClient.post<ApiResponse<Thumbnail>>(
+            `${this.baseUrl}/${id}/regenerate`,
+            data ?? {}
+        );
         return response.data.data;
     }
 }

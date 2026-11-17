@@ -49,16 +49,19 @@ describe('security headers (AC1 / R-12)', () => {
 });
 
 describe('image host allowlist (AC: no wildcard, no http, unlisted hosts never fetched)', () => {
-    it('allowlists exactly the storage host — every other asset stays same-origin', () => {
-        // The Cloudinary storage integration (P07/P16) added the one host
-        // the app actually serves remote assets from. The AC is still the
-        // same: an explicit, bounded list — no wildcard, no http, and
-        // nothing else is ever fetched by the optimiser.
+    it('allowlists exactly the two asset hosts — every other asset stays same-origin', () => {
+        // The Cloudinary storage integration (P07/P16) added the first host
+        // the app actually serves remote assets from; the Unsplash migration
+        // added the second — the CDN the stock-photo picker hotlinks, and the
+        // only way a photograph may be served (re-hosting it is forbidden by
+        // the Unsplash guidelines). The AC is still the same: an explicit,
+        // bounded list — no wildcard, no http, and nothing else is ever
+        // fetched by the optimiser.
         const patterns = nextConfig.images?.remotePatterns ?? [];
         const hosts = patterns.map((pattern) =>
             typeof pattern === 'string' ? pattern : pattern.hostname
         );
-        expect(hosts).toEqual(['res.cloudinary.com']);
+        expect(hosts).toEqual(['res.cloudinary.com', 'images.unsplash.com']);
         for (const pattern of patterns) {
             if (typeof pattern !== 'string') {
                 expect(pattern.protocol).toBe('https');
