@@ -4,7 +4,8 @@ import {
     LegalDocument,
     type LegalSection,
 } from '@/features/legal/components/legal-document';
-import { getTranslations } from '@/i18n/server';
+import { getLocale, getTranslations } from '@/i18n/server';
+import { publicPageMetadata } from '@/lib/seo/public-metadata';
 
 /**
  * Minimal placeholder — see /privacy for the full reasoning. A dead legal
@@ -16,11 +17,17 @@ import { getTranslations } from '@/i18n/server';
  */
 export async function generateMetadata(): Promise<Metadata> {
     const t = await getTranslations('legal');
+    const locale = await getLocale();
 
-    return {
+    // AR-025: the legal pages are public pages too — the canonical, the
+    // hreflang pairs and the Open Graph locale are per locale, like every
+    // other public page.
+    return publicPageMetadata({
+        path: '/terms',
+        locale,
         title: t('terms.meta.title'),
         description: t('terms.meta.description'),
-    };
+    });
 }
 
 export default async function TermsPage() {

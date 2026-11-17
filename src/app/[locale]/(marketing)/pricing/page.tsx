@@ -7,35 +7,31 @@ import {
 } from '@/features/billing/components/pricing';
 import { PLAN_CATALOGUE, PLAN_IDS } from '@/features/billing/lib/plans';
 import { buildPricingCopy } from '@/features/billing/lib/pricing-copy';
-import { PUBLIC_ROUTES } from '@/lib/public-routes';
+import { absolutePublicUrl } from '@/lib/public-routes';
+import { publicPageMetadata } from '@/lib/seo/public-metadata';
 import { getLocale, getTranslations } from '@/i18n/server';
-
-const SITE_URL = 'https://aicontentengine.com';
-const canonical = PUBLIC_ROUTES.find((route) => route.path === '/pricing')?.path ?? '/pricing';
 
 /**
  * AR-023: the metadata copy is in the catalog, so the pricing page speaks the
  * visitor's language in the search result too.
  *
- * What is NOT here yet: the per-locale canonical and the hreflang pairs —
- * those are AR-025's job (the public route pairs).
+ * AR-025: the canonical is now THIS locale's URL (it used to be the
+ * locale-less `/pricing`, which told a crawler that the Arabic page was a
+ * duplicate of the English one), the hreflang pairs name both faces, and the
+ * Open Graph locale follows the visitor.
  */
 export async function generateMetadata(): Promise<Metadata> {
     const t = await getTranslations('pricing');
+    const locale = await getLocale();
 
-    return {
+    return publicPageMetadata({
+        path: '/pricing',
+        locale,
         title: t('meta.title'),
         description: t('meta.description'),
-        alternates: { canonical },
-        openGraph: {
-            title: t('meta.ogTitle'),
-            description: t('meta.ogDescription'),
-            url: `${SITE_URL}/pricing`,
-            siteName: 'AI Content Engine',
-            locale: 'en_US',
-            type: 'website',
-        },
-    };
+        ogTitle: t('meta.ogTitle'),
+        ogDescription: t('meta.ogDescription'),
+    });
 }
 
 export default async function PricingPage() {
@@ -48,10 +44,13 @@ export default async function PricingPage() {
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'SoftwareApplication',
-        name: 'AI Content Engine',
+        name: 'C0C',
         applicationCategory: 'MultimediaApplication',
         operatingSystem: 'Web',
-        url: `${SITE_URL}/pricing`,
+        // AR-025: the structured data points at THIS locale's page and
+        // declares its language.
+        url: absolutePublicUrl('/pricing', locale),
+        inLanguage: locale,
         description: t('meta.jsonLdDescription'),
         offers: PLAN_IDS.map((id) => {
             const plan = PLAN_CATALOGUE[id];
@@ -61,7 +60,7 @@ export default async function PricingPage() {
                 price: (plan.monthlyPriceCents / 100).toFixed(0),
                 priceCurrency: 'USD',
                 category: plan.monthlyPriceCents === 0 ? 'free' : 'subscription',
-                url: `${SITE_URL}/pricing`,
+                url: absolutePublicUrl('/pricing', locale),
             };
         }),
     };

@@ -202,7 +202,9 @@ describe('public route table (robots / sitemap)', () => {
         expect(entries.length).toBe(PUBLIC_ROUTES.length * 2);
         for (const entry of entries) {
             const languages = entry.alternates?.languages as Record<string, string>;
-            expect(Object.keys(languages).sort()).toEqual(['ar', 'en']);
+            // AR-025: the sitemap's alternates are the pages' hreflang
+            // pairs — the same map, including `x-default`.
+            expect(Object.keys(languages).sort()).toEqual(['ar', 'en', 'x-default']);
             // The entry's own URL is one of its alternates.
             expect(Object.values(languages)).toContain(entry.url);
         }

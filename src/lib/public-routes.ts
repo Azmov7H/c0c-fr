@@ -1,4 +1,4 @@
-import { locales } from '@/i18n/routing';
+import { defaultLocale, locales } from '@/i18n/routing';
 
 /**
  * The public route table (T11). robots.ts and sitemap.ts both read from
@@ -18,6 +18,16 @@ import { locales } from '@/i18n/routing';
  * real page, that no private route leaks in, and that robots/sitemap agree.
  */
 export const SITE_URL = 'https://c0c-fr.vercel.app';
+
+/**
+ * The site's name, as the layout's title template spells it.
+ *
+ * AR-025: the Open Graph `site_name` used to be written per page, and the
+ * pages had drifted from the layout (the layout says `C0C || AI Content
+ * Engine`, the pages said `AI Content Engine`). One constant, used by both,
+ * so a card cannot claim a different site than the page it links to.
+ */
+export const SITE_NAME = 'C0C || AI Content Engine';
 
 export interface PublicRoute {
     path: string;
@@ -61,5 +71,8 @@ export function alternateLanguages(path: string): Record<string, string> {
     for (const locale of locales) {
         languages[locale] = absolutePublicUrl(path, locale);
     }
+    // AR-025: `x-default` is the URL a crawler that sends no `Accept-Language`
+    // is sent to — the default locale's face of the same page.
+    languages['x-default'] = absolutePublicUrl(path, defaultLocale);
     return languages;
 }

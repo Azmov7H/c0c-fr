@@ -10,40 +10,31 @@ import { PricingTeaser } from '@/features/landing/components/pricing-teaser';
 import { FinalCta } from '@/features/landing/components/final-cta';
 import { PLAN_CATALOGUE, PLAN_IDS } from '@/features/billing/lib/plans';
 import { buildPricingCopy } from '@/features/billing/lib/pricing-copy';
-import { getTranslations } from '@/i18n/server';
-
-const SITE_URL = 'https://c0c-fr.vercel.app';
+import { getLocale, getTranslations } from '@/i18n/server';
+import { absolutePublicUrl } from '@/lib/public-routes';
+import { publicPageMetadata } from '@/lib/seo/public-metadata';
 
 /**
  * AR-022: the metadata copy is in the catalog, so the page speaks the
  * visitor's language in the search result too.
  *
- * What is NOT here yet: the per-locale canonical, the hreflang pairs and the
- * per-locale Open Graph locale. Those are AR-025's job (the public route
- * pairs), and this task is the copy extraction.
+ * AR-025: the metadata itself is now per locale — the canonical is THIS
+ * locale's URL, the hreflang pairs name both faces of the page, and the
+ * Open Graph locale follows the visitor. The URLs come from the public route
+ * table, so the canonical can never drift from the sitemap.
  */
 export async function generateMetadata(): Promise<Metadata> {
     const t = await getTranslations('landing');
+    const locale = await getLocale();
 
-    return {
+    return publicPageMetadata({
+        path: '/',
+        locale,
         title: t('meta.title'),
         description: t('meta.description'),
-        alternates: { canonical: '/' },
-        openGraph: {
-            title: t('meta.ogTitle'),
-            description: t('meta.ogDescription'),
-            url: SITE_URL,
-            siteName: 'AI Content Engine',
-            locale: 'en_US',
-            type: 'website',
-            // og:image comes from opengraph-image.tsx (next/og, 1200×630).
-        },
-        twitter: {
-            card: 'summary_large_image',
-            title: t('meta.ogTitle'),
-            description: t('meta.ogDescription'),
-        },
-    };
+        ogTitle: t('meta.ogTitle'),
+        ogDescription: t('meta.ogDescription'),
+    });
 }
 
 /**
@@ -63,6 +54,7 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function LandingPage() {
     const t = await getTranslations('landing');
+    const locale = await getLocale();
     // AR-023: the plan names in the structured data are copy — the catalogue
     // owns them, so the offer names speak the visitor's language too.
     const pricingCopy = buildPricingCopy(await getTranslations('pricing'));
@@ -75,7 +67,10 @@ export default async function LandingPage() {
         name: 'C0C',
         applicationCategory: 'MultimediaApplication',
         operatingSystem: 'Web',
-        url: SITE_URL,
+        // AR-025: the structured data describes THIS locale's page: its URL
+        // is the locale's URL, and it says which language it is in.
+        url: absolutePublicUrl('/', locale),
+        inLanguage: locale,
         description: t('meta.jsonLdDescription'),
         offers: PLAN_IDS.map((id) => {
             const plan = PLAN_CATALOGUE[id];
@@ -85,7 +80,7 @@ export default async function LandingPage() {
                 price: (plan.monthlyPriceCents / 100).toFixed(0),
                 priceCurrency: 'USD',
                 category: plan.monthlyPriceCents === 0 ? 'free' : 'subscription',
-                url: `${SITE_URL}/pricing`,
+                url: absolutePublicUrl('/pricing', locale),
             };
         }),
     };
