@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -13,24 +14,28 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { loginSchema } from '@/lib/auth-schemas';
 import { useLogin } from '../hooks/use-auth';
-import { LOGIN_GENERIC_ERROR, mapAuthError } from '../lib/auth-error-map';
+import { mapAuthError } from '../lib/auth-error-map';
+import { authFormMessages } from '../lib/validation-messages';
 import { AuthErrorAlert } from './auth-error-alert';
 import { AuthFormLayout } from './auth-form-layout';
 import { PasswordInput } from './password-input';
 
-type LoginValues = z.infer<typeof loginSchema>;
+type LoginValues = z.infer<ReturnType<typeof loginSchema>>;
 
 /**
- * Post-redirect confirmation messages keyed by the query param the redirect
- * came with: ?reset=1 (password reset), ?changed=1 (password change),
+ * Post-redirect confirmations keyed by the query param the redirect came
+ * with: ?reset=1 (password reset), ?changed=1 (password change),
  * ?signout=1 (signed out everywhere), ?verified=1 (email confirmed).
+ *
+ * AR-026: the KEY is the code, the SENTENCE is the catalog's
+ * (`login.success.<key>`).
  */
-const SUCCESS_MESSAGES: Record<string, string> = {
-    reset: 'Your password has been reset. Sign in with your new password.',
-    changed: 'Password changed. For security, every device was signed out — sign in again.',
-    signout: 'You have been signed out on all devices.',
-    verified: 'Email verified. Sign in to continue.',
-};
+const SUCCESS_MESSAGE_KEYS = {
+    reset: 'reset',
+    changed: 'changed',
+    signout: 'signout',
+    verified: 'verified',
+} as const;
 
 /**
  * T12 decisions encoded here:
@@ -42,11 +47,19 @@ const SUCCESS_MESSAGES: Record<string, string> = {
  *   that confirms whether an account exists.
  */
 export function LoginForm() {
+    // AR-026: every string on this card is the catalog's.
+    const t = useTranslations('auth');
     const searchParams = useSearchParams();
     const { mutate: login, isPending, error } = useLogin();
 
+    const messages = React.useMemo(() => authFormMessages(t), [t]);
+    const schema = React.useMemo(
+        () => loginSchema(messages.schema),
+        [messages]
+    );
+
     const form = useForm<LoginValues>({
-        resolver: zodResolver(loginSchema),
+        resolver: zodResolver(schema),
         mode: 'onBlur',
         defaultValues: { email: '', password: '' },
     });
@@ -55,26 +68,32 @@ export function LoginForm() {
         login(values);
     };
 
-    const successKey = Object.keys(SUCCESS_MESSAGES).find((key) => searchParams.has(key));
-    const successMessage = successKey ? SUCCESS_MESSAGES[successKey] : null;
+    const successKey = Object.keys(SUCCESS_MESSAGE_KEYS).find((key) =>
+        searchParams.has(key)
+    );
+    const successMessage = successKey
+        ? t(`login.success.${SUCCESS_MESSAGE_KEYS[successKey as keyof typeof SUCCESS_MESSAGE_KEYS]}`)
+        : null;
 
+    // AUTH-05: a failed login always says the same thing — never a variant
+    // that confirms whether an account exists.
     const mappedError = error
-        ? mapAuthError(error, 'Failed to sign in. Please try again.', {
-              unauthorizedMessage: LOGIN_GENERIC_ERROR,
+        ? mapAuthError(error, 'loginFallback', {
+              unauthorizedKey: 'invalidCredentials',
           })
         : null;
 
     return (
         <AuthFormLayout
-            heading="Welcome back"
-            subheading="Empower your content with Arch-AI"
-            title="Sign In"
-            description="Enter your credentials to access your workspace"
+            heading={t('login.heading')}
+            subheading={t('login.subheading')}
+            title={t('login.title')}
+            description={t('login.description')}
             footer={
                 <p className="text-sm text-muted-foreground">
-                    New to Arch-AI?{' '}
+                    {t('login.footerPrompt')}{' '}
                     <Link href="/signup" className="font-bold text-primary hover:underline transition-all">
-                        Create Free Account
+                        {t('login.footerLink')}
                     </Link>
                 </p>
             }
@@ -97,7 +116,7 @@ export function LoginForm() {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                                    Email Address
+                                    {t('login.emailLabel')}
                                 </FormLabel>
                                 <FormControl>
                                     <Input
@@ -120,13 +139,13 @@ export function LoginForm() {
                             <FormItem>
                                 <div className="flex items-center justify-between">
                                     <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                                        Password
+                                        {t('login.passwordLabel')}
                                     </FormLabel>
                                     <Link
                                         href="/forgot-password"
                                         className="text-xs font-bold text-primary hover:underline transition-all"
                                     >
-                                        Forgot password?
+                                        {t('login.forgotPassword')}
                                     </Link>
                                 </div>
                                 <FormControl>
@@ -152,10 +171,10 @@ export function LoginForm() {
                         {isPending ? (
                             <>
                                 <Loader2 className="h-4 w-4 me-2 animate-spin motion-reduce:animate-none" />
-                                Authenticating...
+                                {t('login.submitting')}
                             </>
                         ) : (
-                            'Sign In to Dashboard'
+                            t('login.submit')
                         )}
                     </Button>
                 </form>

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { toast } from '@/lib/toast';
 import { authService } from '../services/auth.service';
 import { useAuthStore } from '@/store/auth-store';
@@ -31,6 +32,8 @@ function postAuthTarget(user: User): string {
  * ../lib/auth-error-map.ts is the one place error copy is chosen.
  */
 export function useLogin() {
+    // AR-026: the toast is copy.
+    const t = useTranslations('auth');
     const router = useRouter();
     const setUser = useAuthStore((state) => state.setUser);
 
@@ -38,7 +41,7 @@ export function useLogin() {
         mutationFn: (credentials: LoginCredentials) => authService.login(credentials),
         onSuccess: (data) => {
             setUser(data.user);
-            toast.success('Welcome back!');
+            toast.success(t('toast.welcomeBack'));
             router.push(postAuthTarget(data.user));
             router.refresh();
         },
@@ -46,6 +49,8 @@ export function useLogin() {
 }
 
 export function useRegister() {
+    // AR-026: the toast is copy.
+    const t = useTranslations('auth');
     const router = useRouter();
     const setUser = useAuthStore((state) => state.setUser);
 
@@ -54,7 +59,7 @@ export function useRegister() {
         onSuccess: (data) => {
             setUser(data.user);
             trackEvent('signup_completed');
-            toast.success('Account created successfully!');
+            toast.success(t('toast.accountCreated'));
             router.push(postAuthTarget(data.user));
             router.refresh();
         },

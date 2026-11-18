@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   const tooLarge = enforceAuthBodyLimit(request);
   if (tooLarge) return tooLarge;
 
-  const parsed = await readValidatedJson(request, registerSchema);
+  const parsed = await readValidatedJson(request, registerSchema());
   if (!parsed.ok) return parsed.response;
   const { email, password, firstName, lastName } = parsed.data;
 

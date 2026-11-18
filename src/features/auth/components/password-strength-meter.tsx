@@ -1,8 +1,9 @@
 'use client';
 
 import { Check, Circle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
-import { passwordChecks, passwordScore } from '@/lib/password-policy';
+import { passwordChecks, passwordScore, PASSWORD_MIN_LENGTH } from '@/lib/password-policy';
 import { cn } from '@/lib/utils';
 
 /**
@@ -11,6 +12,8 @@ import { cn } from '@/lib/utils';
  * so the meter can never mark a password valid that the API will reject.
  */
 export function PasswordStrengthMeter({ value }: { value: string }) {
+    // AR-026: the checklist's labels are copy (the checks themselves are code).
+    const t = useTranslations('auth');
     if (!value) return null;
 
     const score = passwordScore(value);
@@ -22,7 +25,10 @@ export function PasswordStrengthMeter({ value }: { value: string }) {
             <div
                 className="flex gap-1"
                 role="img"
-                aria-label={`Password strength: ${score} of ${passwordChecks.length} requirements met`}
+                aria-label={t('password.strengthAria', {
+                    score,
+                    total: passwordChecks.length,
+                })}
             >
                 {passwordChecks.map((check, index) => (
                     <span
@@ -50,7 +56,9 @@ export function PasswordStrengthMeter({ value }: { value: string }) {
                             ) : (
                                 <Circle className="h-3 w-3 shrink-0" aria-hidden="true" />
                             )}
-                            {check.label}
+                            {t(`password.checks.${check.id}`, {
+                                count: PASSWORD_MIN_LENGTH,
+                            })}
                         </li>
                     );
                 })}

@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { FORGOT_PASSWORD_CONFIRMATION, ForgotPasswordForm } from './forgot-password-form';
+import { AUTH_EN, render } from '../test-utils';
+import { ForgotPasswordForm } from './forgot-password-form';
 
 vi.mock('next/navigation', () => ({
     useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
@@ -50,7 +51,7 @@ describe('ForgotPasswordForm', () => {
         fireEvent.click(screen.getByRole('button', { name: /Send Reset Link/i }));
 
         const confirmation = await screen.findByTestId('forgot-confirmation');
-        expect(confirmation.textContent).toContain(FORGOT_PASSWORD_CONFIRMATION);
+        expect(confirmation.textContent).toContain(AUTH_EN.forgotPassword.sent.confirmation);
         // Non-enumeration: the copy can never reference the submitted address
         // or an existence outcome.
         expect(confirmation.textContent).not.toContain('nobody@example.com');

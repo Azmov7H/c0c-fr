@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -13,28 +14,36 @@ import { Input } from '@/components/ui/input';
 import { emailField } from '@/lib/auth-schemas';
 import { useForgotPassword } from '../hooks/use-auth';
 import { mapAuthError } from '../lib/auth-error-map';
+import { authFormMessages } from '../lib/validation-messages';
 import { AuthErrorAlert } from './auth-error-alert';
 import { AuthFormLayout } from './auth-form-layout';
 
-const forgotFormSchema = z.strictObject({ email: emailField });
-
-type ForgotValues = z.infer<typeof forgotFormSchema>;
+type ForgotValues = { email: string };
 
 /**
- * The one confirmation copy, exported so the non-enumeration test asserts the
- * rendered text rather than a paraphrase. Identical for existing and
- * non-existing accounts; the 1-hour validity doubles as the anti-enumeration
- * detail the card asks for (it is true for every account).
+ * The one confirmation copy the card shows.
+ *
+ * It is IDENTICAL for existing and non-existing accounts; the 1-hour validity
+ * doubles as the anti-enumeration detail the card asks for (it is true for
+ * every account).
+ *
+ * AR-026: the sentence lives in the catalog (`forgotPassword.sent.confirmation`)
+ * — one key, one sentence, both languages.
  */
-export const FORGOT_PASSWORD_CONFIRMATION =
-    "If an account exists for that email, we've sent a reset link. The link is valid for 1 hour.";
-
 export function ForgotPasswordForm() {
+    // AR-026: every string on this card is the catalog's.
+    const t = useTranslations('auth');
     const { mutate: forgotPassword, isPending, error } = useForgotPassword();
     const [sent, setSent] = React.useState(false);
 
+    const messages = React.useMemo(() => authFormMessages(t), [t]);
     const form = useForm<ForgotValues>({
-        resolver: zodResolver(forgotFormSchema),
+        resolver: zodResolver(
+            React.useMemo(
+                () => z.strictObject({ email: emailField(messages.schema) }),
+                [messages]
+            )
+        ),
         mode: 'onBlur',
         defaultValues: { email: '' },
     });
@@ -43,35 +52,35 @@ export function ForgotPasswordForm() {
         forgotPassword(values.email, { onSuccess: () => setSent(true) });
     };
 
-    const mappedError = error
-        ? mapAuthError(error, 'Could not send the reset email. Please try again.')
-        : null;
+    const mappedError = error ? mapAuthError(error, 'forgotFallback') : null;
+
+    const footer = (
+        <p className="text-sm text-muted-foreground">
+            {t('forgotPassword.footerPrompt')}{' '}
+            <Link href="/login" className="font-bold text-primary hover:underline transition-all">
+                {t('forgotPassword.footerLink')}
+            </Link>
+        </p>
+    );
 
     if (sent) {
         return (
             <AuthFormLayout
-                heading="Check your inbox"
-                subheading="We've got you covered"
-                title="Reset Link Sent"
-                description="Follow the link in the email to choose a new password."
-                footer={
-                    <p className="text-sm text-muted-foreground">
-                        Remembered it after all?{' '}
-                        <Link href="/login" className="font-bold text-primary hover:underline transition-all">
-                            Back to sign in
-                        </Link>
-                    </p>
-                }
+                heading={t('forgotPassword.sent.heading')}
+                subheading={t('forgotPassword.sent.subheading')}
+                title={t('forgotPassword.sent.title')}
+                description={t('forgotPassword.sent.description')}
+                footer={footer}
             >
                 <div
                     role="status"
                     data-testid="forgot-confirmation"
                     className="space-y-2 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-foreground"
                 >
-                    <p>{FORGOT_PASSWORD_CONFIRMATION}</p>
+                    <p>{t('forgotPassword.sent.confirmation')}</p>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                    Didn&apos;t arrive? Check spam, or try a different email address.
+                    {t('forgotPassword.sent.hint')}
                 </p>
                 <Button
                     type="button"
@@ -82,7 +91,7 @@ export function ForgotPasswordForm() {
                         form.reset();
                     }}
                 >
-                    Try a different email
+                    {t('forgotPassword.sent.retry')}
                 </Button>
             </AuthFormLayout>
         );
@@ -90,18 +99,11 @@ export function ForgotPasswordForm() {
 
     return (
         <AuthFormLayout
-            heading="Forgot password?"
-            subheading="We'll email you a link to reset it"
-            title="Reset Password"
-            description="Enter the email you signed up with."
-            footer={
-                <p className="text-sm text-muted-foreground">
-                    Remembered it after all?{' '}
-                    <Link href="/login" className="font-bold text-primary hover:underline transition-all">
-                        Back to sign in
-                    </Link>
-                </p>
-            }
+            heading={t('forgotPassword.heading')}
+            subheading={t('forgotPassword.subheading')}
+            title={t('forgotPassword.title')}
+            description={t('forgotPassword.description')}
+            footer={footer}
         >
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
@@ -111,13 +113,13 @@ export function ForgotPasswordForm() {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                                    Email Address
+                                    {t('forgotPassword.emailLabel')}
                                 </FormLabel>
                                 <FormControl>
                                     <Input
                                         type="email"
                                         autoComplete="email"
-                                        placeholder="name@company.com"
+                                        placeholder={t('signup.emailPlaceholder')}
                                         className="h-12 bg-muted/20 border-transparent focus-visible:bg-background focus-visible:ring-primary/20 transition-all rounded-xl px-4"
                                         {...field}
                                     />
@@ -137,10 +139,10 @@ export function ForgotPasswordForm() {
                         {isPending ? (
                             <>
                                 <Loader2 className="h-4 w-4 me-2 animate-spin motion-reduce:animate-none" />
-                                Sending link...
+                                {t('forgotPassword.submitting')}
                             </>
                         ) : (
-                            'Send Reset Link'
+                            t('forgotPassword.submit')
                         )}
                     </Button>
                 </form>
