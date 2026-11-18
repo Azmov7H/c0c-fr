@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import type { User } from '@/types';
 import { useAuthStore } from '@/store/auth-store';
+import { render } from '../test-utils';
 import { ChangePasswordForm } from './change-password-form';
 
 const nav = vi.hoisted(() => ({

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { registerSchema } from '@/lib/auth-schemas';
 import { useRegister } from '../hooks/use-auth';
 import { mapAuthError } from '../lib/auth-error-map';
+import { authFormMessages } from '../lib/validation-messages';
 import { AuthErrorAlert } from './auth-error-alert';
 import { AuthFormLayout } from './auth-form-layout';
 import { PasswordInput } from './password-input';
@@ -20,17 +22,14 @@ import { PasswordStrengthMeter } from './password-strength-meter';
 
 /**
  * Form-only schema: the BFF register schema plus the required terms checkbox.
- * Built from `registerSchema.shape` so the password field stays the shared
- * policy object (see password-policy.ts).
+ * Built from `registerSchema(...).shape` so the password field stays the
+ * shared policy object (see password-policy.ts).
+ *
+ * AR-026: the schema is built per locale — its messages are the catalog's.
  */
-const signupFormSchema = z.strictObject({
-    ...registerSchema.shape,
-    acceptedTerms: z
-        .boolean()
-        .refine((value) => value === true, 'You must accept the Terms of Service and Privacy Policy.'),
-});
-
-type SignupValues = z.infer<typeof signupFormSchema>;
+type SignupValues = z.infer<ReturnType<typeof registerSchema>> & {
+    acceptedTerms: boolean;
+};
 
 /**
  * T12: the signup page is not a generic email wall — it states the
@@ -39,10 +38,24 @@ type SignupValues = z.infer<typeof signupFormSchema>;
  * real strength feedback backed by the one shared password policy.
  */
 export function SignupForm() {
+    // AR-026: every string on this card is the catalog's.
+    const t = useTranslations('auth');
     const { mutate: register, isPending, error } = useRegister();
 
+    const messages = React.useMemo(() => authFormMessages(t), [t]);
+    const schema = React.useMemo(
+        () =>
+            z.strictObject({
+                ...registerSchema(messages.schema).shape,
+                acceptedTerms: z
+                    .boolean()
+                    .refine((value) => value === true, messages.termsRequired),
+            }),
+        [messages]
+    );
+
     const form = useForm<SignupValues>({
-        resolver: zodResolver(signupFormSchema),
+        resolver: zodResolver(schema),
         mode: 'onBlur',
         defaultValues: {
             firstName: '',
@@ -60,31 +73,39 @@ export function SignupForm() {
         register(credentials);
     };
 
-    const mappedError = error
-        ? mapAuthError(error, 'Failed to create your account. Please try again.')
-        : null;
+    const mappedError = error ? mapAuthError(error, 'signupFallback') : null;
 
     return (
         <AuthFormLayout
-            heading="Create Account"
-            subheading="Join the next generation of AI content creators"
-            title="Sign Up"
-            description="One account, then pick what to build — thumbnails, scripts, sound effects and images all live in one project."
+            heading={t('signup.heading')}
+            subheading={t('signup.subheading')}
+            title={t('signup.title')}
+            description={t('signup.description')}
             footer={
                 <p className="text-sm text-muted-foreground">
-                    Already have an account?{' '}
+                    {t('signup.footerPrompt')}{' '}
                     <Link href="/login" className="font-bold text-primary hover:underline transition-all">
-                        Sign In Instead
+                        {t('signup.footerLink')}
                     </Link>
                 </p>
             }
         >
             <p className="rounded-xl bg-muted/40 px-4 py-3 text-xs text-muted-foreground">
-                Free to start. After signup you pick your interests, and your workspace opens
-                ready to generate <span className="font-semibold text-foreground">Thumbnails</span>,{' '}
-                <span className="font-semibold text-foreground">Scripts</span>,{' '}
-                <span className="font-semibold text-foreground">Sound Effects</span> and{' '}
-                <span className="font-semibold text-foreground">Images</span>.
+                {t('signup.intro.lead') + ' '}
+                <span className="font-semibold text-foreground">
+                    {t('signup.assets.thumbnails')}
+                </span>
+                {t('signup.intro.separator')}
+                <span className="font-semibold text-foreground">
+                    {t('signup.assets.scripts')}
+                </span>
+                {t('signup.intro.separator')}
+                <span className="font-semibold text-foreground">
+                    {t('signup.assets.soundEffects')}
+                </span>
+                {t('signup.intro.lastSeparator')}
+                <span className="font-semibold text-foreground">{t('signup.assets.images')}</span>
+                {t('signup.intro.tail')}
             </p>
 
             <Form {...form}>
@@ -96,12 +117,12 @@ export function SignupForm() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                                        First Name
+                                        {t('signup.firstNameLabel')}
                                     </FormLabel>
                                     <FormControl>
                                         <Input
                                             autoComplete="given-name"
-                                            placeholder="Jane"
+                                            placeholder={t('signup.firstNamePlaceholder')}
                                             className="h-12 bg-muted/20 border-transparent focus-visible:bg-background focus-visible:ring-primary/20 transition-all rounded-xl px-4"
                                             {...field}
                                         />
@@ -116,12 +137,12 @@ export function SignupForm() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                                        Last Name
+                                        {t('signup.lastNameLabel')}
                                     </FormLabel>
                                     <FormControl>
                                         <Input
                                             autoComplete="family-name"
-                                            placeholder="Doe"
+                                            placeholder={t('signup.lastNamePlaceholder')}
                                             className="h-12 bg-muted/20 border-transparent focus-visible:bg-background focus-visible:ring-primary/20 transition-all rounded-xl px-4"
                                             {...field}
                                         />
@@ -138,13 +159,13 @@ export function SignupForm() {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                                    Email Address
+                                    {t('signup.emailLabel')}
                                 </FormLabel>
                                 <FormControl>
                                     <Input
                                         type="email"
                                         autoComplete="email"
-                                        placeholder="name@company.com"
+                                        placeholder={t('signup.emailPlaceholder')}
                                         className="h-12 bg-muted/20 border-transparent focus-visible:bg-background focus-visible:ring-primary/20 transition-all rounded-xl px-4"
                                         {...field}
                                     />
@@ -160,7 +181,7 @@ export function SignupForm() {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                                    Password
+                                    {t('signup.passwordLabel')}
                                 </FormLabel>
                                 <FormControl>
                                     <PasswordInput
@@ -194,25 +215,25 @@ export function SignupForm() {
                                         />
                                     </FormControl>
                                     <FormLabel className="text-sm font-normal leading-snug text-muted-foreground cursor-pointer">
-                                        I agree to the{' '}
+                                        {t('signup.termsPrefix')}{' '}
                                         <Link
                                             href="/terms"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="font-medium text-primary hover:underline"
                                         >
-                                            Terms of Service
+                                            {t('signup.termsLink')}
                                         </Link>{' '}
-                                        and{' '}
+                                        {t('signup.termsMiddle')}{' '}
                                         <Link
                                             href="/privacy"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="font-medium text-primary hover:underline"
                                         >
-                                            Privacy Policy
+                                            {t('signup.privacyLink')}
                                         </Link>
-                                        .
+                                        {t('signup.termsTail')}
                                     </FormLabel>
                                 </div>
                                 <FormMessage />
@@ -230,10 +251,10 @@ export function SignupForm() {
                         {isPending ? (
                             <>
                                 <Loader2 className="h-4 w-4 me-2 animate-spin motion-reduce:animate-none" />
-                                Creating account...
+                                {t('signup.submitting')}
                             </>
                         ) : (
-                            'Create Free Account'
+                            t('signup.submit')
                         )}
                     </Button>
                 </form>

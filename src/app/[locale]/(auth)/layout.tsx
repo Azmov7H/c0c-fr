@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import { NextIntlClientProvider } from 'next-intl';
 
 import { AppProviders } from '@/components/app-providers';
 import { LocaleSwitcher } from '@/components/layout/locale-switcher';
-import { getTranslations } from '@/i18n/server';
+import { getLocale, getMessages, getTranslations } from '@/i18n/server';
 
 /**
  * Auth pages are data-shaped: login/register mutations go through react-query
@@ -30,22 +31,32 @@ export default async function AuthLayout({
     // runtime, and the string is rendered in the server's language.
     const t = await getTranslations('common');
 
+    // AR-026: the auth cards are CLIENT components that read their own copy
+    // (`useTranslations('auth')`), so the subtree gets a provider. It carries
+    // the `auth` namespace and nothing else: the cards never read another
+    // namespace, and shipping the whole catalog here would put every other
+    // surface's copy in the login page's first-load bundle.
+    const locale = await getLocale();
+    const messages = await getMessages();
+
     return (
         <AppProviders>
-            {/* FR-1: the language switch is reachable from the auth pages too.
-                The auth layout has no header bar, so it sits in the corner. */}
-            <div className="fixed end-4 top-4 z-10">
-                <LocaleSwitcher />
-            </div>
-            <a
-                href="#main-content"
-                className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:start-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
-            >
-                {t('_a11y.skipToContent')}
-            </a>
-            <main id="main-content" tabIndex={-1}>
-                {children}
-            </main>
+            <NextIntlClientProvider locale={locale} messages={{ auth: messages.auth }}>
+                {/* FR-1: the language switch is reachable from the auth pages too.
+                    The auth layout has no header bar, so it sits in the corner. */}
+                <div className="fixed end-4 top-4 z-10">
+                    <LocaleSwitcher />
+                </div>
+                <a
+                    href="#main-content"
+                    className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:start-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
+                >
+                    {t('_a11y.skipToContent')}
+                </a>
+                <main id="main-content" tabIndex={-1}>
+                    {children}
+                </main>
+            </NextIntlClientProvider>
         </AppProviders>
     );
 }

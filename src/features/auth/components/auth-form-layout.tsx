@@ -1,13 +1,18 @@
+'use client';
+
 import * as React from 'react';
 import { Sparkles } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 /**
  * One layout for every auth card (T12 acceptance: login and signup share a
- * single layout component, not two divergent copies). Server-renderable — the
- * interactive parts arrive as children.
+ * single layout component, not two divergent copies).
+ *
+ * AR-026: the card's own line (the copyright) is copy, so it comes from the
+ * catalog; everything else arrives as props from the form that owns it.
  */
 interface AuthFormLayoutProps {
     /** Figma-style page headline above the card. */
@@ -31,6 +36,9 @@ export function AuthFormLayout({
     footer,
     className,
 }: AuthFormLayoutProps) {
+    // AR-026: the catalog owns the card's own line.
+    const t = useTranslations('auth');
+
     return (
         <div className="relative min-h-screen flex items-center justify-center bg-background overflow-hidden px-4 py-12">
             <div
@@ -67,7 +75,7 @@ export function AuthFormLayout({
                 </Card>
 
                 <p className="text-center text-[10px] text-muted-foreground mt-8 uppercase tracking-[0.2em] font-bold opacity-50">
-                    &copy; 2026 Arch-AI Content Engine
+                    {t('layout.copyright', { year: new Date().getFullYear() })}
                 </p>
             </div>
         </div>

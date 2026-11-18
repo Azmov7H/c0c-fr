@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -13,22 +14,16 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { passwordSchema } from '@/lib/password-policy';
 import { useResetPassword } from '../hooks/use-auth';
 import { mapAuthError } from '../lib/auth-error-map';
+import { authFormMessages } from '../lib/validation-messages';
 import { AuthErrorAlert } from './auth-error-alert';
 import { AuthFormLayout } from './auth-form-layout';
 import { PasswordInput } from './password-input';
 import { PasswordStrengthMeter } from './password-strength-meter';
 
-const resetFormSchema = z
-    .strictObject({
-        newPassword: passwordSchema,
-        confirmPassword: z.string().min(1, 'Confirm your new password.'),
-    })
-    .refine((values) => values.newPassword === values.confirmPassword, {
-        message: 'Passwords do not match.',
-        path: ['confirmPassword'],
-    });
-
-type ResetValues = z.infer<typeof resetFormSchema>;
+type ResetValues = {
+    newPassword: string;
+    confirmPassword: string;
+};
 
 /** The backend's token floor is 20 chars; shorter values are malformed links. */
 const TOKEN_MIN_LENGTH = 20;
@@ -44,8 +39,13 @@ const TOKEN_MIN_LENGTH = 20;
  * Failure classes: missing (no token at all), malformed (too short to be a
  * real token), invalid/expired/used (one backend 400 — deliberately
  * indistinguishable server-side, see T12-STATUS), and success.
+ *
+ * AR-026: every sentence on this card is the catalog's. The token is DATA and
+ * still comes from the URL.
  */
 export function ResetPasswordForm() {
+    // AR-026: every string on this card is the catalog's.
+    const t = useTranslations('auth');
     const searchParams = useSearchParams();
     const router = useRouter();
 
@@ -66,8 +66,23 @@ export function ResetPasswordForm() {
 
     const { mutate: resetPassword, isPending, error } = useResetPassword();
 
+    const messages = React.useMemo(() => authFormMessages(t), [t]);
+    const schema = React.useMemo(
+        () =>
+            z
+                .strictObject({
+                    newPassword: passwordSchema(messages.schema),
+                    confirmPassword: z.string().min(1, messages.confirmPasswordRequired),
+                })
+                .refine((values) => values.newPassword === values.confirmPassword, {
+                    message: messages.passwordsMismatch,
+                    path: ['confirmPassword'],
+                }),
+        [messages]
+    );
+
     const form = useForm<ResetValues>({
-        resolver: zodResolver(resetFormSchema),
+        resolver: zodResolver(schema),
         mode: 'onBlur',
         defaultValues: { newPassword: '', confirmPassword: '' },
     });
@@ -79,21 +94,19 @@ export function ResetPasswordForm() {
         resetPassword({ token, newPassword: values.newPassword });
     };
 
-    const mappedError = error
-        ? mapAuthError(error, 'Could not reset your password. The link may have expired — request a new one.')
-        : null;
+    const mappedError = error ? mapAuthError(error, 'resetFallback') : null;
 
     const invalidPanel = (message: string) => (
         <AuthFormLayout
-            heading="Link problem"
-            subheading="This reset link can't be used"
-            title="Reset Link Unusable"
-            description="Request a fresh link and it will work like this one should have."
+            heading={t('resetPassword.invalid.heading')}
+            subheading={t('resetPassword.invalid.subheading')}
+            title={t('resetPassword.invalid.title')}
+            description={t('resetPassword.invalid.description')}
             footer={
                 <p className="text-sm text-muted-foreground">
-                    Prefer to sign in?{' '}
+                    {t('resetPassword.invalid.footerPrompt')}{' '}
                     <Link href="/login" className="font-bold text-primary hover:underline transition-all">
-                        Back to sign in
+                        {t('resetPassword.invalid.footerLink')}
                     </Link>
                 </p>
             }
@@ -102,30 +115,30 @@ export function ResetPasswordForm() {
                 {message}
             </div>
             <Button asChild className="w-full h-12 rounded-xl font-bold">
-                <Link href="/forgot-password">Request a new reset link</Link>
+                <Link href="/forgot-password">{t('resetPassword.invalid.request')}</Link>
             </Button>
         </AuthFormLayout>
     );
 
     if (tokenState === 'missing') {
-        return invalidPanel('This reset link is missing its token.');
+        return invalidPanel(t('resetPassword.invalid.missing'));
     }
 
     if (tokenState === 'malformed') {
-        return invalidPanel("This reset link doesn't look complete — it may have been truncated by the email client.");
+        return invalidPanel(t('resetPassword.invalid.malformed'));
     }
 
     return (
         <AuthFormLayout
-            heading="Choose a new password"
-            subheading="Make it one you haven't used before"
-            title="Reset Password"
-            description="This signs you out everywhere and signs in nobody — you'll use the new password on the login page."
+            heading={t('resetPassword.heading')}
+            subheading={t('resetPassword.subheading')}
+            title={t('resetPassword.title')}
+            description={t('resetPassword.description')}
             footer={
                 <p className="text-sm text-muted-foreground">
-                    Changed your mind?{' '}
+                    {t('resetPassword.footerPrompt')}{' '}
                     <Link href="/login" className="font-bold text-primary hover:underline transition-all">
-                        Back to sign in
+                        {t('resetPassword.footerLink')}
                     </Link>
                 </p>
             }
@@ -138,7 +151,7 @@ export function ResetPasswordForm() {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                                    New Password
+                                    {t('resetPassword.newPasswordLabel')}
                                 </FormLabel>
                                 <FormControl>
                                     <PasswordInput
@@ -160,7 +173,7 @@ export function ResetPasswordForm() {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                                    Confirm New Password
+                                    {t('resetPassword.confirmLabel')}
                                 </FormLabel>
                                 <FormControl>
                                     <PasswordInput
@@ -179,9 +192,9 @@ export function ResetPasswordForm() {
 
                     {mappedError ? (
                         <p className="text-center text-xs text-muted-foreground">
-                            Link expired or already used?{' '}
+                            {t('resetPassword.expiredPrompt')}{' '}
                             <Link href="/forgot-password" className="font-medium text-primary hover:underline">
-                                Request a new one
+                                {t('resetPassword.expiredLink')}
                             </Link>
                             .
                         </p>
@@ -195,10 +208,10 @@ export function ResetPasswordForm() {
                         {isPending ? (
                             <>
                                 <Loader2 className="h-4 w-4 me-2 animate-spin motion-reduce:animate-none" />
-                                Resetting password...
+                                {t('resetPassword.submitting')}
                             </>
                         ) : (
-                            'Reset Password'
+                            t('resetPassword.submit')
                         )}
                     </Button>
                 </form>

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -12,6 +13,8 @@ import { cn } from '@/lib/utils';
  * `<FormControl>` (the shadcn Slot forwards id / aria-* / refs).
  */
 export function PasswordInput({ className, ...props }: React.ComponentProps<'input'>) {
+    // AR-026: the toggle's label is copy.
+    const t = useTranslations('auth');
     const [visible, setVisible] = React.useState(false);
 
     return (
@@ -24,7 +27,7 @@ export function PasswordInput({ className, ...props }: React.ComponentProps<'inp
             <button
                 type="button"
                 onClick={() => setVisible((value) => !value)}
-                aria-label={visible ? 'Hide password' : 'Show password'}
+                aria-label={visible ? t('password.hide') : t('password.show')}
                 aria-pressed={visible}
                 className="absolute inset-y-0 end-0 flex w-11 items-center justify-center rounded-r-xl text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >

@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 import * as React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import type { User } from '@/types';
 import { useAuthStore } from '@/store/auth-store';
+import { render } from '../test-utils';
 import { EmailVerificationBanner, resendCooldownRemaining } from './email-verification-banner';
 
 vi.mock('next/navigation', () => ({

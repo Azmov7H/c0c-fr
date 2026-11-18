@@ -27,12 +27,12 @@ const BACKEND_MATRIX: Array<{ password: string; accepted: boolean; note: string 
 
 describe('password policy (shared with the backend)', () => {
     it.each(BACKEND_MATRIX)('$note: $password', ({ password, accepted }) => {
-        expect(passwordSchema.safeParse(password).success).toBe(accepted);
+        expect(passwordSchema().safeParse(password).success).toBe(accepted);
     });
 
     it('rejects values above the shared maximum', () => {
         const tooLong = `A1${'a'.repeat(PASSWORD_MAX_LENGTH)}`;
-        expect(passwordSchema.safeParse(tooLong).success).toBe(false);
+        expect(passwordSchema().safeParse(tooLong).success).toBe(false);
     });
 
     it('has one check per backend rule, in display order', () => {

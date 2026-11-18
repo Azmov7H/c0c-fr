@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { MailWarning } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { toast } from '@/lib/toast';
 
 import { Button } from '@/components/ui/button';
@@ -30,8 +31,13 @@ export function resendCooldownRemaining(until: number, now: number): number {
  * - Never auto-resends; the button is the only trigger, with a 60 s cooldown
  *   persisted in sessionStorage so a reload cannot bypass it.
  * - Non-blocking: it is a banner, not a wall.
+ *
+ * AR-026: every sentence the banner says is the catalog's; the address is the
+ * user's DATA and is rendered as it arrived.
  */
 export function EmailVerificationBanner() {
+    // AR-026: every string on the banner is the catalog's.
+    const t = useTranslations('auth');
     const user = useAuthStore((state) => state.user);
     const { mutate: resend, isPending } = useResendVerification();
 
@@ -58,10 +64,10 @@ export function EmailVerificationBanner() {
                 window.sessionStorage.setItem(COOLDOWN_STORAGE_KEY, String(until));
                 setCooldownUntil(until);
                 setNow(Date.now());
-                toast.success('Verification email sent. Check your inbox.');
+                toast.success(t('toast.verificationSent'));
             },
             onError: () => {
-                toast.error('Could not send the verification email. Please try again.');
+                toast.error(t('toast.verificationFailed'));
             },
         });
     };
@@ -69,16 +75,16 @@ export function EmailVerificationBanner() {
     return (
         <div
             role="region"
-            aria-label="Email verification"
+            aria-label={t('banner.ariaLabel')}
             data-testid="email-verification-banner"
             className="mb-6 flex flex-col gap-3 rounded-xl border border-warning/40 bg-warning/10 p-4 sm:flex-row sm:items-center sm:justify-between"
         >
             <div className="flex items-start gap-3">
                 <MailWarning className="mt-0.5 h-5 w-5 shrink-0 text-warning" aria-hidden="true" />
                 <div className="text-sm">
-                    <p className="font-medium text-foreground">Verify your email to secure your account</p>
+                    <p className="font-medium text-foreground">{t('banner.title')}</p>
                     <p className="text-muted-foreground">
-                        We sent a link to{' '}
+                        {t('banner.bodyLead')}{' '}
                         <span className="font-medium text-foreground">{user.email}</span>.
                     </p>
                 </div>
@@ -91,7 +97,11 @@ export function EmailVerificationBanner() {
                 disabled={isPending || remaining > 0}
                 onClick={handleResend}
             >
-                {isPending ? 'Sending...' : remaining > 0 ? `Resend in ${remaining}s` : 'Resend email'}
+                {isPending
+                    ? t('banner.sending')
+                    : remaining > 0
+                      ? t('banner.cooldown', { seconds: remaining })
+                      : t('banner.resend')}
             </Button>
         </div>
     );
