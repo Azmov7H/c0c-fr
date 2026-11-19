@@ -25,7 +25,7 @@ import {
 import { UserButtonSlot } from "./user-button-slot"
 import { LocaleSwitcher } from "./locale-switcher"
 import { useTheme } from "@/components/theme-provider"
-import { QUICK_ACTIONS, ROUTE_LABELS } from "@/lib/navigation"
+import { QUICK_ACTIONS, ROUTE_LABEL_KEYS } from "@/lib/navigation"
 import { stripLocaleFromPath } from "@/i18n/routing"
 import { useBreadcrumbStore } from "@/store/breadcrumb-store"
 
@@ -57,26 +57,35 @@ function useBreadcrumbs() {
   // but the breadcrumbs are built from the locale-less route
   // (`/dashboard`) — the prefix is a routing detail, not a crumb.
   const pathname = stripLocaleFromPath(usePathname())
+  // AR-029 — the crumbs' words are catalog copy; the English route labels stay
+  // data and only feed the unmapped-segment fallback.
+  const tNav = useTranslations("navigation")
   const projectId = useBreadcrumbStore((state) => state.projectId)
   const projectTitle = useBreadcrumbStore((state) => state.projectTitle)
   const segments = pathname.split("/").filter(Boolean)
 
-  return segments.map((seg, i) => ({
-    // A project id is not a label. The workspace registers the loaded title so
-    // the breadcrumb reads "Projects / My video" instead of the raw ObjectId.
-    label:
-      projectTitle && seg === projectId
-        ? projectTitle
-        : ROUTE_LABELS[seg] ?? seg.charAt(0).toUpperCase() + seg.slice(1),
-    href: "/" + segments.slice(0, i + 1).join("/"),
-    isLast: i === segments.length - 1,
-  }))
+  return segments.map((seg, i) => {
+    const key = ROUTE_LABEL_KEYS[seg]
+    return {
+      // A project id is not a label. The workspace registers the loaded title so
+      // the breadcrumb reads "Projects / My video" instead of the raw ObjectId.
+      label:
+        projectTitle && seg === projectId
+          ? projectTitle
+          : key
+            ? tNav(key)
+            : seg.charAt(0).toUpperCase() + seg.slice(1),
+      href: "/" + segments.slice(0, i + 1).join("/"),
+      isLast: i === segments.length - 1,
+    }
+  })
 }
 
 const emptySubscribe = () => () => {}
 
 function ThemeCycler() {
   const { theme, setTheme } = useTheme()
+  const tNav = useTranslations("navigation")
 
   // The resolved theme is unknown on the server, so subscribe to a no-op store
   // until hydration completes. This replaces a `mounted` flag set from an effect,
@@ -95,7 +104,7 @@ function ThemeCycler() {
         variant="ghost"
         size="icon"
         className="h-9 w-9 max-md:h-11 max-md:w-11 text-muted-foreground hover:text-foreground transition-colors"
-        aria-label="Toggle theme"
+        aria-label={tNav("header.toggleTheme")}
       >
         <Monitor className="w-4 h-4" />
       </Button>
@@ -108,7 +117,7 @@ function ThemeCycler() {
       size="icon"
       className="h-9 w-9 max-md:h-11 max-md:w-11 text-muted-foreground hover:text-foreground transition-colors"
       onClick={() => setTheme(next)}
-      aria-label="Toggle theme"
+      aria-label={tNav("header.toggleTheme")}
     >
       {icon}
     </Button>
@@ -121,6 +130,8 @@ export function Header() {
   // catalog is the source of truth for the words; the layout is only the
   // shape around them.
   const t = useTranslations("common")
+  // AR-029 — the route/quick-action labels live in the `navigation` catalog.
+  const tNav = useTranslations("navigation")
 
   // The palette owns its open state; a synthetic ⌘K event is the shared
   // open path for both the mobile button and the desktop search field.
@@ -226,9 +237,9 @@ export function Header() {
               transition-all shadow-sm hover:shadow-glow
             "
           >
-            <Link href={newProject.url} aria-label={newProject.title}>
+            <Link href={newProject.url} aria-label={tNav(newProject.titleKey)}>
               <Plus className="w-3.5 h-3.5" />
-              <span className="max-md:hidden">{newProject.title}</span>
+              <span className="max-md:hidden">{tNav(newProject.titleKey)}</span>
             </Link>
           </Button>
 
@@ -256,7 +267,7 @@ export function Header() {
                   }}
                 >
                   <action.icon className="h-4 w-4 text-primary" />
-                  {action.title}
+                  {tNav(action.titleKey)}
                   <kbd className="me-auto font-mono text-[10px] tracking-wider text-muted-foreground">
                     G&thinsp;{action.shortcutKey.toUpperCase()}
                   </kbd>

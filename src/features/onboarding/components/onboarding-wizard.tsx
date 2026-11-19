@@ -2,9 +2,10 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
-import { DataState } from '@/components/shared/data-state';
+import { LocalizedDataState } from '@/components/shared/localized-data-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toApiError } from '@/lib/api-error';
 import {
@@ -16,6 +17,7 @@ import {
     type OnboardingDraft,
 } from '../lib/onboarding-draft';
 import { REVIEW_STEP, missingForCompletion, validateStepAnswer } from '../lib/onboarding-schemas';
+import { onboardingValidationMessages } from '../lib/onboarding-validation-messages';
 import type { OnboardingOptions, SaveStepInput } from '../services/onboarding.service';
 import {
     useCompleteOnboarding,
@@ -53,6 +55,9 @@ interface OnboardingWizardProps {
  */
 export function OnboardingWizard({ edit = false }: OnboardingWizardProps) {
     const router = useRouter();
+    // AR-029 — the wizard's copy is catalog copy; the locale comes from the URL.
+    const t = useTranslations('onboarding');
+    const messages = onboardingValidationMessages(t);
     const optionsQuery = useOnboardingOptions();
     const stateQuery = useOnboardingState();
     const saveStep = useSaveOnboardingStep();
@@ -116,7 +121,7 @@ export function OnboardingWizard({ edit = false }: OnboardingWizardProps) {
         if (!options) return;
         setReason(null);
 
-        const invalid = validateStepAnswer(step, draft, options);
+        const invalid = validateStepAnswer(step, draft, options, messages);
         if (invalid) {
             setReason(invalid);
             return;
@@ -124,7 +129,7 @@ export function OnboardingWizard({ edit = false }: OnboardingWizardProps) {
 
         const input = stepInput(step, draft);
         if (!input) {
-            setReason('Choose an option to continue.');
+            setReason(t('wizard.errors.chooseOption'));
             return;
         }
 
@@ -142,7 +147,7 @@ export function OnboardingWizard({ edit = false }: OnboardingWizardProps) {
             // advance button is the retry.
             setFailedAdvance(true);
             setReason(
-                `${toApiError(error, 'We could not save that answer.').message} Your answers are safe — try again.`
+                `${toApiError(error, t('wizard.errors.saveFailed')).message} ${t('wizard.reassurance')}`
             );
         }
     };
@@ -157,9 +162,9 @@ export function OnboardingWizard({ edit = false }: OnboardingWizardProps) {
             return;
         }
 
-        const missing = missingForCompletion(draft, options);
+        const missing = missingForCompletion(draft, options, messages);
         if (missing.length > 0) {
-            setReason(`Still needed: ${missing.join(', ')}.`);
+            setReason(t('wizard.stillNeeded', { items: missing.join(', ') }));
             return;
         }
 
@@ -173,7 +178,7 @@ export function OnboardingWizard({ edit = false }: OnboardingWizardProps) {
             }
             setDone(true);
         } catch (error) {
-            setReason(toApiError(error, 'We could not finish onboarding.').message);
+            setReason(toApiError(error, t('wizard.errors.completeFailed')).message);
         }
     };
 
@@ -184,7 +189,7 @@ export function OnboardingWizard({ edit = false }: OnboardingWizardProps) {
             router.push('/dashboard');
             router.refresh();
         } catch (error) {
-            setReason(toApiError(error, 'We could not skip right now. Try again.').message);
+            setReason(toApiError(error, t('wizard.errors.skipFailed')).message);
         }
     };
 
@@ -194,31 +199,31 @@ export function OnboardingWizard({ edit = false }: OnboardingWizardProps) {
 
     if (optionsQuery.isLoading || stateQuery.isLoading) {
         return (
-            <DataState
+            <LocalizedDataState
                 isLoading
                 loadingFallback={<WizardSkeleton />}
             >
                 {null}
-            </DataState>
+            </LocalizedDataState>
         );
     }
 
     const queryError = optionsQuery.error ?? stateQuery.error;
     if (queryError || !options || options.niches.length === 0) {
         return (
-            <DataState
-                error={queryError ?? new Error('The topic list came back empty.')}
+            <LocalizedDataState
+                error={queryError ?? new Error(t('wizard.errors.emptyTaxonomy'))}
                 onRetry={() => {
                     void optionsQuery.refetch();
                     void stateQuery.refetch();
                 }}
             >
                 {null}
-            </DataState>
+            </LocalizedDataState>
         );
     }
 
-    const missing = missingForCompletion(draft, options);
+    const missing = missingForCompletion(draft, options, messages);
     const stepProps = { draft, options, onChange: handleChange };
 
     const panel = (() => {
@@ -245,17 +250,17 @@ export function OnboardingWizard({ edit = false }: OnboardingWizardProps) {
         <div className="mx-auto max-w-2xl space-y-8">
             <header className="space-y-1">
                 <h1 className="text-2xl font-bold tracking-tight">
-                    {edit ? 'Update your interests' : 'Let us personalise your workspace'}
+                    {edit ? t('header.editTitle') : t('header.personaliseTitle')}
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                    A few quick questions so your dashboard starts useful instead of empty.
+                    {t('header.personaliseDescription')}
                 </p>
             </header>
 
             <WizardProgress
                 current={step}
                 total={TOTAL_STEPS}
-                labels={options.steps.map((entry) => entry.label)}
+                steps={options.steps}
             />
 
             <div className="motion-safe:animate-in motion-safe:fade-in">{panel}</div>
@@ -274,7 +279,7 @@ export function OnboardingWizard({ edit = false }: OnboardingWizardProps) {
                     disabled={step === 0 || pending}
                     className="min-h-11"
                 >
-                    Back
+                    {t('wizard.back')}
                 </Button>
 
                 <div className="flex flex-wrap items-center justify-end gap-3">
@@ -286,7 +291,7 @@ export function OnboardingWizard({ edit = false }: OnboardingWizardProps) {
                         <>
                             {missing.length > 0 ? (
                                 <p className="text-sm text-muted-foreground">
-                                    To finish, add {missing.join(', ')}.
+                                    {t('wizard.toFinish', { items: missing.join(', ') })}
                                 </p>
                             ) : null}
                             <Button
@@ -296,10 +301,10 @@ export function OnboardingWizard({ edit = false }: OnboardingWizardProps) {
                                 className="min-h-11"
                             >
                                 {edit && alreadyComplete
-                                    ? 'Save and return'
+                                    ? t('wizard.saveAndReturn')
                                     : complete.isPending
-                                      ? 'Finishing…'
-                                      : 'Finish onboarding'}
+                                      ? t('wizard.finishing')
+                                      : t('wizard.finishOnboarding')}
                             </Button>
                         </>
                     ) : (
@@ -309,7 +314,11 @@ export function OnboardingWizard({ edit = false }: OnboardingWizardProps) {
                             disabled={saveStep.isPending}
                             className="min-h-11"
                         >
-                            {saveStep.isPending ? 'Saving…' : failedAdvance ? 'Try again' : 'Continue'}
+                            {saveStep.isPending
+                                ? t('wizard.saving')
+                                : failedAdvance
+                                  ? t('wizard.tryAgain')
+                                  : t('wizard.continue')}
                         </Button>
                     )}
                 </div>
@@ -319,6 +328,7 @@ export function OnboardingWizard({ edit = false }: OnboardingWizardProps) {
 }
 
 function WizardSkeleton() {
+    const t = useTranslations('onboarding');
     return (
         <div className="mx-auto max-w-2xl space-y-8">
             <div className="space-y-2">
@@ -331,7 +341,7 @@ function WizardSkeleton() {
                     <Skeleton key={index} className="h-11 w-full" />
                 ))}
             </div>
-            <span className="sr-only" role="status">Loading onboarding</span>
+            <span className="sr-only" role="status">{t('skeleton.loading')}</span>
         </div>
     );
 }

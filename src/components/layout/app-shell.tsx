@@ -21,9 +21,11 @@ import { stripLocaleFromPath } from "@/i18n/routing"
  * authenticated chrome with an empty user, and never page content.
  */
 function ShellSkeleton() {
+    // AR-029 — the skeleton's status text is shell copy, in the URL's language.
+    const tNav = useTranslations("navigation")
     return (
         <div className="flex min-h-screen w-full bg-background" aria-busy="true">
-            <span className="sr-only" role="status">Loading session</span>
+            <span className="sr-only" role="status">{tNav("shell.loadingSession")}</span>
 
             {/* Sidebar column (matches w-64 default) */}
             <div className="hidden md:flex w-64 shrink-0 flex-col gap-3 border-e border-border/60 p-4">

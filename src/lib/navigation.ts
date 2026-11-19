@@ -34,52 +34,65 @@ import type { LucideIcon } from 'lucide-react';
  * "Video" has none at all (see docs/nav-audit.md Q0).
  */
 
+/**
+ * AR-029 — the English `title`/`label` stay as DATA (routes, tests, the no-dead-
+ * links gate and the English floor all read them). The `*Key` fields are the
+ * `navigation` catalog keys the surfaces render; on `/en` the catalog values
+ * are verbatim copies of these strings.
+ */
 export interface NavItem {
     title: string;
+    titleKey: string;
     url: string;
     icon: LucideIcon;
 }
 
 export interface NavGroup {
     label: string;
+    labelKey: string;
     items: NavItem[];
 }
 
 export const NAV_GROUPS: NavGroup[] = [
     {
         label: 'Overview',
+        labelKey: 'groups.overview',
         items: [
-            { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
+            { title: 'Dashboard', titleKey: 'items.dashboard', url: '/dashboard', icon: LayoutDashboard },
         ],
     },
     {
         label: 'Content Engine',
+        labelKey: 'groups.contentEngine',
         items: [
-            { title: 'Projects', url: '/projects', icon: FolderKanban },
+            { title: 'Projects', titleKey: 'items.projects', url: '/projects', icon: FolderKanban },
         ],
     },
     {
         label: 'Studio Tools',
+        labelKey: 'groups.studioTools',
         items: [
-            { title: 'Thumbnails', url: '/thumbnails', icon: Image },
-            { title: 'Media Library', url: '/media', icon: Library },
+            { title: 'Thumbnails', titleKey: 'items.thumbnails', url: '/thumbnails', icon: Image },
+            { title: 'Media Library', titleKey: 'items.mediaLibrary', url: '/media', icon: Library },
         ],
     },
     {
         label: 'Insights',
+        labelKey: 'groups.insights',
         items: [
-            { title: 'Trending', url: '/trends', icon: Flame },
-            { title: 'Analytics', url: '/analytics', icon: BarChart3 },
-            { title: 'Planner', url: '/planner', icon: CalendarDays },
-            { title: 'SEO Analyzer', url: '/seo', icon: Search },
+            { title: 'Trending', titleKey: 'items.trending', url: '/trends', icon: Flame },
+            { title: 'Analytics', titleKey: 'items.analytics', url: '/analytics', icon: BarChart3 },
+            { title: 'Planner', titleKey: 'items.planner', url: '/planner', icon: CalendarDays },
+            { title: 'SEO Analyzer', titleKey: 'items.seoAnalyzer', url: '/seo', icon: Search },
         ],
     },
     {
         label: 'Management',
+        labelKey: 'groups.management',
         items: [
-            { title: 'Team', url: '/team', icon: Users },
-            { title: 'Billing & Plan', url: '/settings/billing', icon: CreditCard },
-            { title: 'Account', url: '/settings', icon: Settings },
+            { title: 'Team', titleKey: 'items.team', url: '/team', icon: Users },
+            { title: 'Billing & Plan', titleKey: 'items.billingPlan', url: '/settings/billing', icon: CreditCard },
+            { title: 'Account', titleKey: 'items.account', url: '/settings', icon: Settings },
         ],
     },
 ];
@@ -109,6 +122,22 @@ export const ROUTE_LABELS: Record<string, string> = {
 };
 
 /**
+ * AR-029 — the catalog keys behind `ROUTE_LABELS`, with the same precedence:
+ * the deeper nav destination wins (`billing` → `items.billingPlan`, not the
+ * `settings` → `items.account` entry). The header reads these through the
+ * `navigation` translator so a breadcrumb is in the page's language.
+ */
+export const ROUTE_LABEL_KEYS: Record<string, string> = {
+    ...Object.fromEntries(NAV_ITEMS.map((item) => [item.url.split('/').pop()!, item.titleKey])),
+    new: 'routes.new',
+    scripts: 'routes.scripts',
+    titles: 'routes.titles',
+    hashtags: 'routes.hashtags',
+    audio: 'routes.audio',
+    onboarding: 'routes.onboarding',
+};
+
+/**
  * The deepest nav destination that contains `pathname`, or null.
  * Longest-first so `/settings/billing` highlights "Billing & Plan", not both
  * it and "Account".
@@ -121,6 +150,7 @@ export function getActiveNavUrl(pathname: string): string | null {
 export interface QuickAction {
     id: string;
     title: string;
+    titleKey: string;
     url: string;
     icon: LucideIcon;
     /** Second key of the g-prefixed accelerator (g then p → New Project). */
@@ -132,9 +162,9 @@ export interface QuickAction {
  * page by src/lib/navigation.test.ts — no dead links from the shell.
  */
 export const QUICK_ACTIONS: QuickAction[] = [
-    { id: 'new-project', title: 'New Project', url: '/projects/new', icon: FolderKanban, shortcutKey: 'p' },
-    { id: 'new-script', title: 'New Script', url: '/projects', icon: FileText, shortcutKey: 's' },
-    { id: 'new-thumbnail', title: 'New Thumbnail', url: '/thumbnails', icon: Image, shortcutKey: 't' },
-    { id: 'new-planner-event', title: 'New Planner Event', url: '/planner', icon: CalendarDays, shortcutKey: 'e' },
-    { id: 'invite-member', title: 'Invite a Member', url: '/team', icon: Users, shortcutKey: 'i' },
+    { id: 'new-project', title: 'New Project', titleKey: 'quickActions.newProject', url: '/projects/new', icon: FolderKanban, shortcutKey: 'p' },
+    { id: 'new-script', title: 'New Script', titleKey: 'quickActions.newScript', url: '/projects', icon: FileText, shortcutKey: 's' },
+    { id: 'new-thumbnail', title: 'New Thumbnail', titleKey: 'quickActions.newThumbnail', url: '/thumbnails', icon: Image, shortcutKey: 't' },
+    { id: 'new-planner-event', title: 'New Planner Event', titleKey: 'quickActions.newPlannerEvent', url: '/planner', icon: CalendarDays, shortcutKey: 'e' },
+    { id: 'invite-member', title: 'Invite a Member', titleKey: 'quickActions.inviteMember', url: '/team', icon: Users, shortcutKey: 'i' },
 ];

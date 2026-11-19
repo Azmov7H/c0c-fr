@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react"
+import { useTranslations } from "next-intl"
 import { LoaderCircle, WifiOff } from "lucide-react"
 import { toast } from '@/lib/toast'
 import { useAuthStore } from "@/store/auth-store"
@@ -28,6 +29,8 @@ function subscribeOnline(callback: () => void) {
  */
 export function ConnectionBanner() {
     const user = useAuthStore((s) => s.user)
+    // AR-029 — the transport notices are shell copy, in the visitor's language.
+    const t = useTranslations("navigation")
     const status = useRealtimeStatus()
     const online = useSyncExternalStore(
         subscribeOnline,
@@ -46,11 +49,11 @@ export function ConnectionBanner() {
             return
         }
         if (prevOnline.current !== online) {
-            if (online) toast.success("Back online")
-            else toast.error("You're offline — changes may not save")
+            if (online) toast.success(t("connection.backOnline"))
+            else toast.error(t("connection.offline"))
             prevOnline.current = online
         }
-    }, [online])
+    }, [online, t])
 
     useEffect(() => {
         // Every setState is deferred out of the effect body itself
@@ -82,7 +85,7 @@ export function ConnectionBanner() {
             {offline ? (
                 <>
                     <WifiOff className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                    You&apos;re offline — changes may not save
+                    {t("connection.offline")}
                 </>
             ) : (
                 <>
@@ -90,7 +93,7 @@ export function ConnectionBanner() {
                         className="h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none"
                         aria-hidden="true"
                     />
-                    Reconnecting to realtime updates…
+                    {t("connection.reconnecting")}
                 </>
             )}
         </div>
