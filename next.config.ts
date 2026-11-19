@@ -57,6 +57,11 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['@sentry/nextjs', '@sentry/server-runtime-injection'],
 
   experimental: {
+    // Set by `next upgrade --agent=security`: this app follows the security
+    // upgrade policy, so a future `next upgrade` keeps it patched rather than
+    // jumping to the latest feature release.
+    agentUpgrade: 'security',
+
     /**
      * T20: these are barrel packages — importing one icon or one formatter
      * otherwise parses the whole export surface. Next rewrites the imports to
