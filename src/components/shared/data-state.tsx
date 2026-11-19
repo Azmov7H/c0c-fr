@@ -10,18 +10,18 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 /**
- * The four states every data-driven page has, in one component.
- *
- * Uxui.md mandates loading, empty, error and success states, but each page had
- * been inventing its own — a spinner here, a bare "No data" there. Encoding the
- * four states once is what makes the mandate real, and it is why no page should
- * render a spinner as its only loading affordance: the loading branch here is a
- * skeleton that mirrors the content's shape.
- *
- * Order matters — loading wins over error wins over empty. A query that is
- * refreshing after an error should show the skeleton, not a stale error banner,
- * and an empty result that is still loading should not flash the empty state.
+ * AR-027 — the shared-state copy, when the surface has a catalog to read it
+ * from. `DataState` keeps English defaults so it still renders in any test or
+ * surface that has not been extracted yet; the dashboard passes the catalog's
+ * labels through these props.
  */
+export interface DataStateLabels {
+    loading: string;
+    errorTitle: string;
+    errorFallback: string;
+    retry: string;
+}
+
 interface DataStateProps {
     isLoading?: boolean;
     error?: unknown;
@@ -48,6 +48,8 @@ interface DataStateProps {
      * of jumping when data lands.
      */
     loadingFallback?: React.ReactNode;
+    /** AR-027 — translated shared-state copy; omitted means the English defaults. */
+    labels?: Partial<DataStateLabels>;
     className?: string;
     children: React.ReactNode;
 }
@@ -57,6 +59,19 @@ function errorMessage(error: unknown): string | null {
     return null;
 }
 
+/**
+ * The four states every data-driven page has, in one component.
+ *
+ * Uxui.md mandates loading, empty, error and success states, but each page had
+ * been inventing its own — a spinner here, a bare "No data" there. Encoding the
+ * four states once is what makes the mandate real, and it is why no page should
+ * render a spinner as its only loading affordance: the loading branch here is a
+ * skeleton that mirrors the content's shape.
+ *
+ * Order matters — loading wins over error wins over empty. A query that is
+ * refreshing after an error should show the skeleton, not a stale error banner,
+ * and an empty result that is still loading should not flash the empty state.
+ */
 export function DataState({
     isLoading,
     error,
@@ -68,9 +83,18 @@ export function DataState({
     onRetry,
     skeletonRows = 4,
     loadingFallback,
+    labels,
     className,
     children,
 }: DataStateProps) {
+    const copy = {
+        loading: labels?.loading ?? 'Loading',
+        errorTitle: labels?.errorTitle ?? 'Something went wrong',
+        errorFallback:
+            labels?.errorFallback ?? 'The data could not be loaded. Try again in a moment.',
+        retry: labels?.retry ?? 'Try again',
+    };
+
     if (isLoading) {
         if (loadingFallback) {
             return (
@@ -90,7 +114,7 @@ export function DataState({
                         </div>
                     </div>
                 ))}
-                <span className="sr-only" role="status">Loading</span>
+                <span className="sr-only" role="status">{copy.loading}</span>
             </div>
         );
     }
@@ -100,17 +124,16 @@ export function DataState({
             <div className={className} data-state="error">
                 <Alert variant="destructive">
                     <AlertTriangle />
-                    <AlertTitle>Something went wrong</AlertTitle>
+                    <AlertTitle>{copy.errorTitle}</AlertTitle>
                     <AlertDescription>
-                        {errorMessage(error) ??
-                            'The data could not be loaded. Try again in a moment.'}
+                        {errorMessage(error) ?? copy.errorFallback}
                     </AlertDescription>
                 </Alert>
                 {onRetry ? (
                     <div className="mt-4">
                         <Button variant="outline" size="sm" className="gap-2" onClick={onRetry}>
                             <RotateCcw className="size-4" aria-hidden="true" />
-                            Try again
+                            {copy.retry}
                         </Button>
                     </div>
                 ) : null}

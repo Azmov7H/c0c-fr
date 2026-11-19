@@ -8,10 +8,11 @@
  */
 import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
 
 import type { DashboardStats, RecentActivityItem } from '../services/dashboard.service';
 import type { PlannerEvent } from '../../planner/services/planner.service';
+import { render } from '../test-utils';
 import { DashboardWidget } from './dashboard-widgets';
 
 const mocks = vi.hoisted(() => ({
@@ -270,7 +271,7 @@ describe('ActivityWidget', () => {
 
         expect(screen.getByText('Zen garden promo')).toBeTruthy();
         expect(screen.getByText(/project/i)).toBeTruthy();
-        expect(screen.getByText('completed')).toBeTruthy();
+        expect(screen.getByText('Completed')).toBeTruthy();
         expect(screen.getByText('new')).toBeTruthy(); // empty-status script falls back to "new"
         expect(screen.getByText(/script/i)).toBeTruthy();
     });

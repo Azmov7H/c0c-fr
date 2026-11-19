@@ -13,5 +13,11 @@
     "portalDate": "التاريخ الظاهر في البوابة"
   },
   "cancellationScheduled": "الإلغاء مجدول. تحتفظ بخطة {plan} حتى {date}. <link>اختر خطة للاستمرار</link>.",
-  "cancellationEndFallback": "نهاية الفترة"
+  "cancellationEndFallback": "نهاية الفترة",
+  "upgrade": {
+    "seePlans": "عرض الخطط",
+    "unlimited": "غير محدود",
+    "usage": "{used} من {limit} مستخدم",
+    "resets": "{usage} · يُتجدّد {date}"
+  }
 }

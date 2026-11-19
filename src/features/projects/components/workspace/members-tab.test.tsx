@@ -1,7 +1,10 @@
 // @vitest-environment jsdom
 import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { NextIntlClientProvider } from 'next-intl';
 import { cleanup, render, screen } from '@testing-library/react';
+
+import enBilling from '../../../../../messages/en/billing.json';
 
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { MembersTab } from './members-tab';
@@ -52,9 +55,11 @@ vi.mock('../../hooks/use-collaboration', () => {
 
 const renderTab = (role: 'owner' | 'editor' | 'viewer' = 'owner') =>
     render(
-        <TooltipProvider>
-            <MembersTab projectId="p1" role={role} />
-        </TooltipProvider>
+        <NextIntlClientProvider locale="en" messages={{ billing: enBilling }}>
+            <TooltipProvider>
+                <MembersTab projectId="p1" role={role} />
+            </TooltipProvider>
+        </NextIntlClientProvider>
     );
 
 describe('MembersTab', () => {

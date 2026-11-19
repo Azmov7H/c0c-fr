@@ -2,6 +2,7 @@
 
 import { formatMonth } from '@/lib/format';
 import { useUrlLocale } from '@/i18n/locale';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import {
     Calendar,
@@ -19,7 +20,7 @@ import { DirIcon } from '@/components/icons/dir-icon';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DataState } from '@/components/shared/data-state';
+import { DashboardDataState } from './dashboard-data-state';
 import type { Platform, ProjectStatus } from '@/types';
 
 import {
@@ -32,7 +33,11 @@ import { useForMeTrendFeed } from '@/features/trends/hooks/use-trends';
 import type { RecentActivityItem } from '../services/dashboard.service';
 import { DASHBOARD_ACTIVITY_LIMIT, DASHBOARD_TRENDS_WINDOW } from '../lib/queries';
 import {
+    ACTIVITY_TYPE_KEYS,
+    DATABASE_STATE_KEYS,
     EMPTY_PREFERENCES,
+    PLANNER_STATUS_KEYS,
+    PROJECT_STATUS_KEYS,
     orderPlatforms,
 } from '../lib/widget-layout';
 import { formatNumber, formatPercent, formatRelativeTime } from '../lib/format';
@@ -51,6 +56,29 @@ const PLATFORM_TONE: Record<Platform, string> = {
     facebook: 'bg-info/10 text-info',
 };
 
+type ProjectStatusKey = (typeof PROJECT_STATUS_KEYS)[keyof typeof PROJECT_STATUS_KEYS];
+type PlannerStatusKey = (typeof PLANNER_STATUS_KEYS)[keyof typeof PLANNER_STATUS_KEYS];
+
+function projectStatusLabel(
+    t: ReturnType<typeof useTranslations<'dashboard'>>,
+    status: string | undefined
+): string {
+    const key = status
+        ? (PROJECT_STATUS_KEYS as Record<string, ProjectStatusKey | undefined>)[status]
+        : undefined;
+    return key ? t(key) : status || t('activityWidget.new');
+}
+
+function plannerStatusLabel(
+    t: ReturnType<typeof useTranslations<'dashboard'>>,
+    status: string | undefined
+): string {
+    const key = status
+        ? (PLANNER_STATUS_KEYS as Record<string, PlannerStatusKey | undefined>)[status]
+        : undefined;
+    return key ? t(key) : status ?? '';
+}
+
 export type LazyWidgetId =
     | 'status'
     | 'platforms'
@@ -61,20 +89,21 @@ export type LazyWidgetId =
     | 'health';
 
 function StatusWidget() {
+    const t = useTranslations('dashboard');
     const locale = useUrlLocale();
     const { data, isLoading, isError, refetch } = useDashboardStats();
-    const rows: Array<{ key: ProjectStatus; label: string; count: number }> = [
-        { key: 'draft', label: 'Draft', count: data?.overview.draftProjects ?? 0 },
-        { key: 'processing', label: 'In progress', count: data?.overview.activeProjects ?? 0 },
-        { key: 'completed', label: 'Completed', count: data?.overview.completedProjects ?? 0 },
-        { key: 'archived', label: 'Archived', count: data?.overview.archivedProjects ?? 0 },
+    const rows: Array<{ key: ProjectStatus; count: number }> = [
+        { key: 'draft', count: data?.overview.draftProjects ?? 0 },
+        { key: 'processing', count: data?.overview.activeProjects ?? 0 },
+        { key: 'completed', count: data?.overview.completedProjects ?? 0 },
+        { key: 'archived', count: data?.overview.archivedProjects ?? 0 },
     ];
     const total = rows.reduce((sum, row) => sum + row.count, 0);
 
     return (
-        <DataState
+        <DashboardDataState
             isLoading={isLoading}
-            error={isError ? new Error('Project status could not be loaded.') : null}
+            error={isError ? new Error(t('statusWidget.error')) : null}
             onRetry={() => void refetch()}
             loadingFallback={<Skeleton className="h-36 w-full rounded-xl" />}
         >
@@ -84,7 +113,9 @@ function StatusWidget() {
                     return (
                         <li key={row.key} className="space-y-1">
                             <div className="flex items-center justify-between text-xs">
-                                <span className="font-medium">{row.label}</span>
+                                <span className="font-medium">
+                                    {t(PROJECT_STATUS_KEYS[row.key])}
+                                </span>
                                 <span className="tabular-nums text-muted-foreground">
                                     {formatNumber(row.count, locale)}
                                 </span>
@@ -100,11 +131,12 @@ function StatusWidget() {
                     );
                 })}
             </ul>
-        </DataState>
+        </DashboardDataState>
     );
 }
 
 function PlatformsWidget() {
+    const t = useTranslations('dashboard');
     const locale = useUrlLocale();
     const { data, isLoading, isError, refetch } = useDashboardStats();
     const preferences = useDashboardPreferences().data ?? EMPTY_PREFERENCES;
@@ -113,12 +145,12 @@ function PlatformsWidget() {
     const total = platforms.reduce((sum, platform) => sum + counts[platform], 0);
 
     return (
-        <DataState
+        <DashboardDataState
             isLoading={isLoading}
-            error={isError ? new Error('Platform split could not be loaded.') : null}
+            error={isError ? new Error(t('platformsWidget.error')) : null}
             isEmpty={!isLoading && total === 0}
-            emptyTitle="No projects by platform yet"
-            emptyDescription="Create a project and it will appear in this breakdown."
+            emptyTitle={t('platformsWidget.emptyTitle')}
+            emptyDescription={t('platformsWidget.emptyDescription')}
             emptyIcon={LayoutDashboard}
             onRetry={() => void refetch()}
             loadingFallback={<Skeleton className="h-36 w-full rounded-xl" />}
@@ -146,25 +178,26 @@ function PlatformsWidget() {
                     );
                 })}
             </ul>
-        </DataState>
+        </DashboardDataState>
     );
 }
 
 function TrendingWidget() {
+    const t = useTranslations('dashboard');
     const locale = useUrlLocale();
     const { data, isLoading, isError, refetch } = useForMeTrendFeed(DASHBOARD_TRENDS_WINDOW, false);
     const topics = data?.topics?.slice(0, 4) ?? [];
 
     return (
-        <DataState
+        <DashboardDataState
             isLoading={isLoading}
-            error={isError ? new Error('Your trend feed could not be loaded.') : null}
+            error={isError ? new Error(t('trendingWidget.error')) : null}
             isEmpty={topics.length === 0}
-            emptyTitle="No trends measured for you yet"
-            emptyDescription="Pick interests in onboarding and we can rank topics against them."
+            emptyTitle={t('trendingWidget.emptyTitle')}
+            emptyDescription={t('trendingWidget.emptyDescription')}
             emptyIcon={Flame}
             emptyAction={{
-                label: 'Update your interests',
+                label: t('trendingWidget.emptyAction'),
                 onClick: () => {
                     window.location.href = '/onboarding?edit=1';
                 },
@@ -184,41 +217,49 @@ function TrendingWidget() {
                         <div className="min-w-0">
                             <p className="truncate text-sm font-semibold">{topic.topic}</p>
                             <p className="truncate text-xs text-muted-foreground">
-                                {topic.matchedPlatforms.length > 0
-                                    ? topic.matchedPlatforms.join(' · ')
-                                    : topic.platforms.join(' · ')}
+                                {/* Brand constants: the platform enum is the
+                                    name, and it stays Latin in both locales.
+                                    Rendered raw to keep the English floor
+                                    byte-identical (AR-027). */}
+                                {(topic.matchedPlatforms.length > 0
+                                    ? topic.matchedPlatforms
+                                    : topic.platforms
+                                ).join(' · ')}
                             </p>
                         </div>
                         <Badge
                             variant="outline"
                             className="border-warning/30 bg-warning/10 text-[10px] font-semibold text-warning"
                         >
-                            {formatNumber(topic.viralScore, locale)} score
+                            {t('trendingWidget.score', {
+                                score: formatNumber(topic.viralScore, locale),
+                            })}
                         </Badge>
                     </li>
                 ))}
             </ul>
             <div className="mt-2 text-end">
                 <Link href="/trends" className="text-xs font-medium text-primary hover:underline">
-                    Explore trends{' '}
+                    {t('trendingWidget.explore')}{' '}
                     <DirIcon name="ArrowRight" className="ms-0.5 inline size-3" aria-hidden="true" />
                 </Link>
             </div>
-        </DataState>
+        </DashboardDataState>
     );
 }
 
 function ActivityWidget() {
+    const t = useTranslations('dashboard');
     const locale = useUrlLocale();
     const { data, isLoading, isError, refetch } = useRecentActivity(DASHBOARD_ACTIVITY_LIMIT);
 
     return (
-        <DataState
+        <DashboardDataState
             isLoading={isLoading}
-            error={isError ? new Error('Recent activity could not be loaded.') : null}
+            error={isError ? new Error(t('activityWidget.error')) : null}
             isEmpty={(data?.length ?? 0) === 0}
-            emptyTitle="No activity yet"
-            emptyDescription="Generate a script or create a project to start the feed."
+            emptyTitle={t('activityWidget.emptyTitle')}
+            emptyDescription={t('activityWidget.emptyDescription')}
             emptyIcon={Zap}
             onRetry={() => void refetch()}
             loadingFallback={
@@ -245,7 +286,10 @@ function ActivityWidget() {
                                 <div className="min-w-0">
                                     <p className="truncate text-sm font-semibold">{item.title}</p>
                                     <p className="text-xs text-muted-foreground capitalize">
-                                        {item.type} ·{' '}
+                                        {item.type === 'project'
+                                            ? t(ACTIVITY_TYPE_KEYS.project)
+                                            : t(ACTIVITY_TYPE_KEYS.script)}{' '}
+                                        ·{' '}
                                         <time dateTime={item.createdAt} title={when.absolute}>
                                             {when.relative}
                                         </time>
@@ -256,28 +300,29 @@ function ActivityWidget() {
                                 variant="outline"
                                 className="border-primary/30 bg-primary/10 text-[10px] font-semibold capitalize text-primary"
                             >
-                                {item.status || 'new'}
+                                {projectStatusLabel(t, item.status)}
                             </Badge>
                         </li>
                     );
                 })}
             </ul>
-        </DataState>
+        </DashboardDataState>
     );
 }
 
 function UpcomingWidget() {
+    const t = useTranslations('dashboard');
     const locale = useUrlLocale();
     const { data, isLoading, isError, refetch } = useDashboardStats();
     const events = data?.upcomingEvents ?? [];
 
     return (
-        <DataState
+        <DashboardDataState
             isLoading={isLoading}
-            error={isError ? new Error('Upcoming content could not be loaded.') : null}
+            error={isError ? new Error(t('upcomingWidget.error')) : null}
             isEmpty={events.length === 0}
-            emptyTitle="Nothing scheduled"
-            emptyDescription="Plan a publish date and it will show up here."
+            emptyTitle={t('upcomingWidget.emptyTitle')}
+            emptyDescription={t('upcomingWidget.emptyDescription')}
             emptyIcon={Calendar}
             onRetry={() => void refetch()}
             loadingFallback={<Skeleton className="h-24 w-full rounded-xl" />}
@@ -295,7 +340,9 @@ function UpcomingWidget() {
                             </div>
                             <div className="min-w-0 flex-1">
                                 <p className="truncate text-xs font-semibold">{event.title}</p>
-                                <p className="text-[10px] capitalize text-muted-foreground">{event.status}</p>
+                                <p className="text-[10px] capitalize text-muted-foreground">
+                                    {plannerStatusLabel(t, event.status)}
+                                </p>
                             </div>
                             {event.platform ? (
                                 <Badge variant="outline" className="h-4 px-1.5 text-[9px] capitalize">
@@ -306,22 +353,51 @@ function UpcomingWidget() {
                     );
                 })}
             </ul>
-        </DataState>
+        </DashboardDataState>
     );
 }
 
 function QuickActionsWidget() {
+    const t = useTranslations('dashboard');
     const actions = [
-        { title: 'Generate Script', sub: 'AI content engine', icon: Zap, href: '/scripts', tone: 'bg-primary/10 text-primary' },
-        { title: 'Explore Trends', sub: 'What is rising', icon: Lightbulb, href: '/trends', tone: 'bg-warning/10 text-warning' },
-        { title: 'New Project', sub: 'Start from an idea', icon: Plus, href: '/projects/new', tone: 'bg-success/10 text-success' },
-        { title: 'Team', sub: 'Invite collaborators', icon: Users, href: '/team', tone: 'bg-brand-violet/10 text-brand-violet' },
-    ];
+        {
+            key: 'script',
+            titleKey: 'quickActions.script.title',
+            subKey: 'quickActions.script.sub',
+            icon: Zap,
+            href: '/scripts',
+            tone: 'bg-primary/10 text-primary',
+        },
+        {
+            key: 'trends',
+            titleKey: 'quickActions.trends.title',
+            subKey: 'quickActions.trends.sub',
+            icon: Lightbulb,
+            href: '/trends',
+            tone: 'bg-warning/10 text-warning',
+        },
+        {
+            key: 'project',
+            titleKey: 'quickActions.project.title',
+            subKey: 'quickActions.project.sub',
+            icon: Plus,
+            href: '/projects/new',
+            tone: 'bg-success/10 text-success',
+        },
+        {
+            key: 'team',
+            titleKey: 'quickActions.team.title',
+            subKey: 'quickActions.team.sub',
+            icon: Users,
+            href: '/team',
+            tone: 'bg-brand-violet/10 text-brand-violet',
+        },
+    ] as const;
 
     return (
         <ul className="grid gap-2 sm:grid-cols-2">
             {actions.map((action) => (
-                <li key={action.title}>
+                <li key={action.key}>
                     <Link
                         href={action.href}
                         className="flex items-center gap-3 rounded-xl border border-border/40 p-3 transition-all hover:border-primary/30 hover:bg-muted/40"
@@ -330,9 +406,11 @@ function QuickActionsWidget() {
                             <action.icon className="size-4" aria-hidden="true" />
                         </div>
                         <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold">{action.title}</p>
+                            <p className="truncate text-sm font-semibold">
+                                {t(action.titleKey)}
+                            </p>
                             <p className="truncate text-[10px] uppercase tracking-wide text-muted-foreground">
-                                {action.sub}
+                                {t(action.subKey)}
                             </p>
                         </div>
                     </Link>
@@ -343,6 +421,7 @@ function QuickActionsWidget() {
 }
 
 function HealthWidget() {
+    const t = useTranslations('dashboard');
     const { data, isPending, isError, refetch } = useHealthReady();
 
     if (isPending) {
@@ -355,11 +434,19 @@ function HealthWidget() {
     }
 
     const degraded = isError || data?.status !== 'ready';
+    const databaseKey = data
+        ? DATABASE_STATE_KEYS[data.checks.database as keyof typeof DATABASE_STATE_KEYS]
+        : undefined;
+    const databaseLabel = data
+        ? databaseKey
+            ? t(databaseKey)
+            : data.checks.database
+        : '';
     const label = isError
-        ? 'Status unavailable — the API could not be reached'
+        ? t('health.unavailable')
         : data.status === 'ready'
-            ? 'API ready — database connected'
-            : `Degraded — database ${data.checks.database}`;
+            ? t('health.ready')
+            : t('health.degraded', { state: databaseLabel });
 
     return (
         <div
@@ -374,7 +461,7 @@ function HealthWidget() {
             </p>
             {isError ? (
                 <Button variant="ghost" size="sm" className="ms-auto h-7 px-2 text-xs" onClick={() => void refetch()}>
-                    <RotateCcw className="me-1 size-3" aria-hidden="true" /> Retry
+                    <RotateCcw className="me-1 size-3" aria-hidden="true" /> {t('health.retry')}
                 </Button>
             ) : null}
         </div>
