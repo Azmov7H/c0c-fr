@@ -1,1 +1,100 @@
-{}
+{
+  "@dynamic": [
+    "groups.overview",
+    "groups.contentEngine",
+    "groups.studioTools",
+    "groups.insights",
+    "groups.management",
+    "items.dashboard",
+    "items.projects",
+    "items.thumbnails",
+    "items.mediaLibrary",
+    "items.trending",
+    "items.analytics",
+    "items.planner",
+    "items.seoAnalyzer",
+    "items.team",
+    "items.billingPlan",
+    "items.account",
+    "routes.new",
+    "routes.scripts",
+    "routes.titles",
+    "routes.hashtags",
+    "routes.audio",
+    "routes.onboarding",
+    "quickActions.newProject",
+    "quickActions.newScript",
+    "quickActions.newThumbnail",
+    "quickActions.newPlannerEvent",
+    "quickActions.inviteMember"
+  ],
+  "groups": {
+    "overview": "Overview",
+    "contentEngine": "Content Engine",
+    "studioTools": "Studio Tools",
+    "insights": "Insights",
+    "management": "Management"
+  },
+  "items": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "thumbnails": "Thumbnails",
+    "mediaLibrary": "Media Library",
+    "trending": "Trending",
+    "analytics": "Analytics",
+    "planner": "Planner",
+    "seoAnalyzer": "SEO Analyzer",
+    "team": "Team",
+    "billingPlan": "Billing & Plan",
+    "account": "Account"
+  },
+  "routes": {
+    "new": "New",
+    "scripts": "Scripts",
+    "titles": "Titles",
+    "hashtags": "Hashtags",
+    "audio": "Audio Studio",
+    "onboarding": "Get started"
+  },
+  "quickActions": {
+    "newProject": "New Project",
+    "newScript": "New Script",
+    "newThumbnail": "New Thumbnail",
+    "newPlannerEvent": "New Planner Event",
+    "inviteMember": "Invite a Member"
+  },
+  "sidebar": {
+    "primary": "Primary"
+  },
+  "header": {
+    "toggleTheme": "Toggle theme"
+  },
+  "palette": {
+    "placeholder": "Search pages, actions, projects...",
+    "noResults": "No results found.",
+    "headingActions": "Actions",
+    "headingProjects": "Projects",
+    "toggleTheme": "Toggle Theme",
+    "signOut": "Sign out"
+  },
+  "userMenu": {
+    "accountMenu": "Account menu",
+    "profile": "Profile",
+    "accountSettings": "Account settings",
+    "billingPlan": "Billing & Plan",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "signOut": "Sign out",
+    "signingOut": "Signing out..."
+  },
+  "connection": {
+    "backOnline": "Back online",
+    "offline": "You're offline — changes may not save",
+    "reconnecting": "Reconnecting to realtime updates…"
+  },
+  "shell": {
+    "loadingSession": "Loading session"
+  }
+}

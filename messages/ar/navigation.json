@@ -1,1 +1,100 @@
-{}
+{
+  "@dynamic": [
+    "groups.overview",
+    "groups.contentEngine",
+    "groups.studioTools",
+    "groups.insights",
+    "groups.management",
+    "items.dashboard",
+    "items.projects",
+    "items.thumbnails",
+    "items.mediaLibrary",
+    "items.trending",
+    "items.analytics",
+    "items.planner",
+    "items.seoAnalyzer",
+    "items.team",
+    "items.billingPlan",
+    "items.account",
+    "routes.new",
+    "routes.scripts",
+    "routes.titles",
+    "routes.hashtags",
+    "routes.audio",
+    "routes.onboarding",
+    "quickActions.newProject",
+    "quickActions.newScript",
+    "quickActions.newThumbnail",
+    "quickActions.newPlannerEvent",
+    "quickActions.inviteMember"
+  ],
+  "groups": {
+    "overview": "نظرة عامة",
+    "contentEngine": "محرك المحتوى",
+    "studioTools": "أدوات الاستوديو",
+    "insights": "التحليلات",
+    "management": "الإدارة"
+  },
+  "items": {
+    "dashboard": "لوحة التحكم",
+    "projects": "المشاريع",
+    "thumbnails": "الصور المصغّرة",
+    "mediaLibrary": "مكتبة الوسائط",
+    "trending": "الأكثر رواجًا",
+    "analytics": "التحليلات",
+    "planner": "المخطط",
+    "seoAnalyzer": "محلل SEO",
+    "team": "الفريق",
+    "billingPlan": "الفواتير والخطة",
+    "account": "الحساب"
+  },
+  "routes": {
+    "new": "جديد",
+    "scripts": "النصوص",
+    "titles": "العناوين",
+    "hashtags": "الوسوم",
+    "audio": "استوديو الصوت",
+    "onboarding": "البدء"
+  },
+  "quickActions": {
+    "newProject": "مشروع جديد",
+    "newScript": "نص جديد",
+    "newThumbnail": "صورة مصغّرة جديدة",
+    "newPlannerEvent": "حدث جديد في المخطط",
+    "inviteMember": "دعوة عضو"
+  },
+  "sidebar": {
+    "primary": "رئيسي"
+  },
+  "header": {
+    "toggleTheme": "تبديل الوضع"
+  },
+  "palette": {
+    "placeholder": "ابحث في الصفحات والإجراءات والمشاريع...",
+    "noResults": "لا توجد نتائج.",
+    "headingActions": "الإجراءات",
+    "headingProjects": "المشاريع",
+    "toggleTheme": "تبديل الوضع",
+    "signOut": "تسجيل الخروج"
+  },
+  "userMenu": {
+    "accountMenu": "قائمة الحساب",
+    "profile": "الملف الشخصي",
+    "accountSettings": "إعدادات الحساب",
+    "billingPlan": "الفواتير والخطة",
+    "theme": "الوضع",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام",
+    "signOut": "تسجيل الخروج",
+    "signingOut": "جارٍ تسجيل الخروج..."
+  },
+  "connection": {
+    "backOnline": "عدت إلى الاتصال",
+    "offline": "أنت غير متصل — قد لا تُحفظ التغييرات",
+    "reconnecting": "جارٍ إعادة الاتصال بالتحديثات الفورية…"
+  },
+  "shell": {
+    "loadingSession": "جارٍ تحميل الجلسة"
+  }
+}

@@ -1,14 +1,17 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { Pencil, Search } from 'lucide-react';
 
+import { useUrlLocale } from '@/i18n/locale';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { OnboardingDraft } from '../lib/onboarding-draft';
 import { ONBOARDING_LIMITS, subtopicsFor } from '../lib/onboarding-schemas';
 import type { OnboardingOptions } from '../services/onboarding.service';
 import { PLATFORM_OPTIONS } from '../services/onboarding.service';
+import { localizeOptions, localizeTaxonomyLabel } from '../lib/taxonomy-labels';
 import { OptionGrid } from './option-grid';
 
 /**
@@ -29,11 +32,15 @@ interface StepProps {
 }
 
 function StepHeading({ step, options }: { step: number; options: OnboardingOptions }) {
+    const t = useTranslations('onboarding');
+    const locale = useUrlLocale();
+    const backend = options.steps[step];
+    const label = backend
+        ? localizeTaxonomyLabel(locale, t, 'steps', backend.key, backend.label)
+        : t('steps.fallbackTitle', { step: step + 1 });
     return (
         <div className="space-y-1">
-            <h2 className="text-xl font-semibold tracking-tight">
-                {options.steps[step]?.label ?? `Step ${step + 1}`}
-            </h2>
+            <h2 className="text-xl font-semibold tracking-tight">{label}</h2>
         </div>
     );
 }
@@ -68,7 +75,14 @@ function toggleValue(values: string[], value: string): string[] {
 
 export function NicheStep({ draft, options, onChange }: StepProps) {
     const [query, setQuery] = React.useState('');
-    const all = options.niches.map((entry) => ({ value: entry.slug, label: entry.label }));
+    const t = useTranslations('onboarding');
+    const locale = useUrlLocale();
+    const all = localizeOptions(
+        locale,
+        t,
+        'niches',
+        options.niches.map((entry) => ({ value: entry.slug, label: entry.label }))
+    );
     const filtered = query
         ? all.filter((entry) => entry.label.toLowerCase().includes(query.toLowerCase()))
         : all;
@@ -76,13 +90,13 @@ export function NicheStep({ draft, options, onChange }: StepProps) {
     return (
         <div className="space-y-4">
             <StepHeading step={0} options={options} />
-            <p className="text-sm text-muted-foreground">Pick the one that fits you best.</p>
+            <p className="text-sm text-muted-foreground">{t('steps.niche.description')}</p>
             {shouldOfferSearch(all.length) ? (
-                <SearchField value={query} onChange={setQuery} placeholder="Search niches" />
+                <SearchField value={query} onChange={setQuery} placeholder={t('steps.niche.search')} />
             ) : null}
             <OptionGrid
                 mode="single"
-                label="Niche"
+                label={t('steps.niche.label')}
                 options={filtered}
                 selected={draft.niche ? [draft.niche] : []}
                 onToggle={(value) =>
@@ -99,7 +113,9 @@ export function NicheStep({ draft, options, onChange }: StepProps) {
 
 export function SubtopicsStep({ draft, options, onChange }: StepProps) {
     const [query, setQuery] = React.useState('');
-    const all = subtopicsFor(options, draft.niche);
+    const t = useTranslations('onboarding');
+    const locale = useUrlLocale();
+    const all = localizeOptions(locale, t, 'subtopics', subtopicsFor(options, draft.niche));
     const filtered = query
         ? all.filter((entry) => entry.label.toLowerCase().includes(query.toLowerCase()))
         : all;
@@ -110,14 +126,14 @@ export function SubtopicsStep({ draft, options, onChange }: StepProps) {
         <div className="space-y-4">
             <StepHeading step={1} options={options} />
             <p className="text-sm text-muted-foreground">
-                Choose {min}–{max}. You have picked {draft.subtopics.length}.
+                {t('steps.subtopics.description', { min, max, count: draft.subtopics.length })}
             </p>
             {shouldOfferSearch(all.length) ? (
-                <SearchField value={query} onChange={setQuery} placeholder="Search subtopics" />
+                <SearchField value={query} onChange={setQuery} placeholder={t('steps.subtopics.search')} />
             ) : null}
             <OptionGrid
                 mode="multiple"
-                label="Subtopics"
+                label={t('steps.subtopics.label')}
                 options={filtered}
                 selected={draft.subtopics}
                 max={max}
@@ -136,16 +152,18 @@ export function SubtopicsStep({ draft, options, onChange }: StepProps) {
 }
 
 export function PlatformsStep({ draft, options, onChange }: StepProps) {
+    const t = useTranslations('onboarding');
+    const locale = useUrlLocale();
     const max = options.constraints?.maxPlatforms ?? ONBOARDING_LIMITS.maxPlatforms;
 
     return (
         <div className="space-y-4">
             <StepHeading step={2} options={options} />
-            <p className="text-sm text-muted-foreground">Pick up to {max}.</p>
+            <p className="text-sm text-muted-foreground">{t('steps.platforms.description', { max })}</p>
             <OptionGrid
                 mode="multiple"
-                label="Platforms"
-                options={PLATFORM_OPTIONS.map((entry) => ({ value: entry.value, label: entry.label }))}
+                label={t('steps.platforms.label')}
+                options={localizeOptions(locale, t, 'platforms', PLATFORM_OPTIONS)}
                 selected={draft.platforms}
                 max={max}
                 onToggle={(value) =>
@@ -157,15 +175,17 @@ export function PlatformsStep({ draft, options, onChange }: StepProps) {
 }
 
 export function ExperienceStep({ draft, options, onChange }: StepProps) {
+    const t = useTranslations('onboarding');
+    const locale = useUrlLocale();
     return (
         <div className="space-y-4">
             <StepHeading step={3} options={options} />
-            <p className="text-sm text-muted-foreground">This tunes the depth of what we suggest first.</p>
+            <p className="text-sm text-muted-foreground">{t('steps.experience.description')}</p>
             <OptionGrid
                 mode="single"
-                label="Experience level"
+                label={t('steps.experience.label')}
                 columns={1}
-                options={options.experienceLevels.map((entry) => ({ value: entry.value, label: entry.label }))}
+                options={localizeOptions(locale, t, 'experience', options.experienceLevels)}
                 selected={draft.experience ? [draft.experience] : []}
                 onToggle={(value) => onChange({ experience: value })}
             />
@@ -174,14 +194,16 @@ export function ExperienceStep({ draft, options, onChange }: StepProps) {
 }
 
 export function GoalsStep({ draft, options, onChange }: StepProps) {
+    const t = useTranslations('onboarding');
+    const locale = useUrlLocale();
     return (
         <div className="space-y-4">
             <StepHeading step={4} options={options} />
-            <p className="text-sm text-muted-foreground">Pick everything that applies.</p>
+            <p className="text-sm text-muted-foreground">{t('steps.goals.description')}</p>
             <OptionGrid
                 mode="multiple"
-                label="Goals"
-                options={options.goals.map((entry) => ({ value: entry.value, label: entry.label }))}
+                label={t('steps.goals.label')}
+                options={localizeOptions(locale, t, 'goals', options.goals)}
                 selected={draft.goals}
                 onToggle={(value) => onChange({ goals: toggleValue(draft.goals, value) })}
             />
@@ -198,33 +220,45 @@ export function ReviewStep({
     options: OnboardingOptions;
     onEdit: (step: number) => void;
 }) {
-    const nicheLabel = options.niches.find((entry) => entry.slug === draft.niche)?.label ?? '—';
-    const experienceLabel =
-        options.experienceLevels.find((entry) => entry.value === draft.experience)?.label ?? '—';
+    const t = useTranslations('onboarding');
+    const locale = useUrlLocale();
+    const empty = t('review.empty');
+    const niche = options.niches.find((entry) => entry.slug === draft.niche);
+    const nicheLabel = niche
+        ? localizeTaxonomyLabel(locale, t, 'niches', niche.slug, niche.label)
+        : empty;
+    const experience = options.experienceLevels.find((entry) => entry.value === draft.experience);
+    const experienceLabel = experience
+        ? localizeTaxonomyLabel(locale, t, 'experience', experience.value, experience.label)
+        : empty;
+    const subtopics = localizeOptions(locale, t, 'subtopics', subtopicsFor(options, draft.niche));
+    const goals = localizeOptions(locale, t, 'goals', options.goals);
+    const platforms = localizeOptions(locale, t, 'platforms', PLATFORM_OPTIONS);
     const goalLabels = draft.goals.map(
-        (goal) => options.goals.find((entry) => entry.value === goal)?.label ?? goal
+        (goal) => goals.find((entry) => entry.value === goal)?.label ?? goal
     );
     const platformLabels = draft.platforms.map(
-        (platform) => PLATFORM_OPTIONS.find((entry) => entry.value === platform)?.label ?? platform
+        (platform) => platforms.find((entry) => entry.value === platform)?.label ?? platform
+    );
+    const subtopicLabels = draft.subtopics.map(
+        (topic) => subtopics.find((entry) => entry.value === topic)?.label ?? topic
     );
 
     const rows: { step: number; label: string; value: string }[] = [
-        { step: 0, label: 'Niche', value: nicheLabel },
-        { step: 1, label: 'Subtopics', value: draft.subtopics.join(', ') || '—' },
-        { step: 2, label: 'Platforms', value: platformLabels.join(', ') || '—' },
-        { step: 3, label: 'Experience', value: experienceLabel },
-        { step: 4, label: 'Goals', value: goalLabels.join(', ') || '—' },
+        { step: 0, label: t('review.niche'), value: nicheLabel },
+        { step: 1, label: t('review.subtopics'), value: subtopicLabels.join(', ') || empty },
+        { step: 2, label: t('review.platforms'), value: platformLabels.join(', ') || empty },
+        { step: 3, label: t('review.experience'), value: experienceLabel },
+        { step: 4, label: t('review.goals'), value: goalLabels.join(', ') || empty },
     ];
 
     return (
         <div className="space-y-4">
             <StepHeading step={5} options={options} />
-            <p className="text-sm text-muted-foreground">
-                Check everything over — you can change any answer before finishing.
-            </p>
+            <p className="text-sm text-muted-foreground">{t('steps.review.description')}</p>
             <dl className="divide-y rounded-lg border">
                 {rows.map((row) => (
-                    <div key={row.label} className="flex items-start justify-between gap-4 p-3">
+                    <div key={row.step} className="flex items-start justify-between gap-4 p-3">
                         <div className="min-w-0">
                             <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                                 {row.label}
@@ -239,7 +273,7 @@ export function ReviewStep({
                             onClick={() => onEdit(row.step)}
                         >
                             <Pencil className="size-3.5" aria-hidden="true" />
-                            Edit
+                            {t('steps.review.edit')}
                             <span className="sr-only"> {row.label}</span>
                         </Button>
                     </div>

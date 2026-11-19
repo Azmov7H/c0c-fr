@@ -1,11 +1,15 @@
 import type { Metadata } from 'next';
+import { getTranslations } from '@/i18n/server';
 
 import { OnboardingWizard } from '@/features/onboarding/components/onboarding-wizard';
 
-export const metadata: Metadata = {
-    title: 'Get started',
-    description: 'Tell us what you make so your workspace starts personalised.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const t = await getTranslations('onboarding');
+    return {
+        title: t('metadata.title'),
+        description: t('metadata.description'),
+    };
+}
 
 export default async function OnboardingPage({
     searchParams,

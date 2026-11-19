@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CreditCard, LogOut, Monitor, Moon, Settings, Sun, SunMoon, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
+import { useTranslations } from "next-intl"
 import { useTheme } from "@/components/theme-provider"
 import { useAuthStore } from "@/store/auth-store"
 import { useLogout } from "@/features/auth/hooks/use-auth"
@@ -25,6 +26,8 @@ import { useLogout } from "@/features/auth/hooks/use-auth"
 export function UserButton() {
   const { user } = useAuthStore()
   const router = useRouter()
+  // AR-029 — the account menu's words come from the `navigation` catalog.
+  const t = useTranslations("navigation")
   const { mutate: logout, isPending } = useLogout()
   const { theme, setTheme } = useTheme()
 
@@ -42,7 +45,7 @@ export function UserButton() {
             size-9 max-md:size-11
             focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background
           "
-          aria-label="Account menu"
+          aria-label={t("userMenu.accountMenu")}
           aria-haspopup="menu"
         >
           <Avatar className="h-9 w-9 border border-border transition hover:scale-105">
@@ -74,37 +77,37 @@ export function UserButton() {
         {/* /settings/profile never existed — 404 for everyone until T10. */}
         <DropdownMenuItem onClick={() => router.push("/settings?tab=profile")}>
           <User className="me-2 h-4 w-4" />
-          Profile
+          {t("userMenu.profile")}
         </DropdownMenuItem>
 
         <DropdownMenuItem onClick={() => router.push("/settings")}>
           <Settings className="me-2 h-4 w-4" />
-          Account settings
+          {t("userMenu.accountSettings")}
         </DropdownMenuItem>
 
         <DropdownMenuItem onClick={() => router.push("/settings/billing")}>
           <CreditCard className="me-2 h-4 w-4" />
-          Billing &amp; Plan
+          {t("userMenu.billingPlan")}
         </DropdownMenuItem>
 
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <SunMoon className="me-2 h-4 w-4" />
-            Theme
+            {t("userMenu.theme")}
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
             <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
               <DropdownMenuRadioItem value="light">
                 <Sun className="me-2 h-4 w-4" />
-                Light
+                {t("userMenu.light")}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="dark">
                 <Moon className="me-2 h-4 w-4" />
-                Dark
+                {t("userMenu.dark")}
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="system">
                 <Monitor className="me-2 h-4 w-4" />
-                System
+                {t("userMenu.system")}
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuSubContent>
@@ -118,7 +121,7 @@ export function UserButton() {
           disabled={isPending}
         >
           <LogOut className="me-2 h-4 w-4" />
-          {isPending ? "Signing out..." : "Sign out"}
+          {isPending ? t("userMenu.signingOut") : t("userMenu.signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

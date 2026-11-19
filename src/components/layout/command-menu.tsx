@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { Search, SunMoon, LogOut, FolderKanban } from "lucide-react"
 
 import {
@@ -37,6 +38,8 @@ function isTypingTarget(target: EventTarget | null): boolean {
 export function CommandMenu() {
   const [open, setOpen] = useState(false)
   const router = useRouter()
+  // AR-029 — every visible word in the palette is catalog copy.
+  const t = useTranslations("navigation")
   const { theme, setTheme } = useTheme()
   const { mutate: logout } = useLogout()
 
@@ -103,29 +106,29 @@ export function CommandMenu() {
         onOpenChange={setOpen}
         className="motion-reduce:animate-none"
       >
-        <CommandInput placeholder="Search pages, actions, projects..." />
+        <CommandInput placeholder={t("palette.placeholder")} />
         <CommandList>
           <CommandEmpty>
             <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
               <Search className="w-8 h-8 opacity-30" />
-              <p className="text-sm">No results found.</p>
+              <p className="text-sm">{t("palette.noResults")}</p>
             </div>
           </CommandEmpty>
 
           {NAV_GROUPS.map((group, i) => (
             <div key={group.label}>
               {i > 0 && <CommandSeparator />}
-              <CommandGroup heading={group.label}>
+              <CommandGroup heading={t(group.labelKey)}>
                 {group.items.map((item) => (
                   <CommandItem
                     key={item.url}
                     value={`nav-${item.url}`}
-                    keywords={[item.title]}
+                    keywords={[item.title, t(item.titleKey)]}
                     onSelect={() => runCommand(() => router.push(item.url))}
                     className="flex items-center gap-3 cursor-pointer"
                   >
                     <item.icon className="w-4 h-4 text-muted-foreground" />
-                    <span>{item.title}</span>
+                    <span>{t(item.titleKey)}</span>
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -133,17 +136,17 @@ export function CommandMenu() {
           ))}
 
           <CommandSeparator />
-          <CommandGroup heading="Actions">
+          <CommandGroup heading={t("palette.headingActions")}>
             {QUICK_ACTIONS.map((action) => (
               <CommandItem
                 key={action.id}
                 value={`action-${action.id}`}
-                keywords={[action.title]}
+                keywords={[action.title, t(action.titleKey)]}
                 onSelect={() => runCommand(() => router.push(commandUrl(action)))}
                 className="flex items-center gap-3 cursor-pointer"
               >
                 <action.icon className="w-4 h-4 text-muted-foreground" />
-                <span>{action.title}</span>
+                <span>{t(action.titleKey)}</span>
                 <kbd className="me-auto text-[10px] font-mono text-muted-foreground tracking-wider">
                   G&thinsp;{action.shortcutKey.toUpperCase()}
                 </kbd>
@@ -158,7 +161,7 @@ export function CommandMenu() {
               className="flex items-center gap-3 cursor-pointer"
             >
               <SunMoon className="w-4 h-4 text-muted-foreground" />
-              <span>Toggle Theme</span>
+              <span>{t("palette.toggleTheme")}</span>
             </CommandItem>
             <CommandItem
               value="action-sign-out"
@@ -167,14 +170,14 @@ export function CommandMenu() {
               className="flex items-center gap-3 cursor-pointer"
             >
               <LogOut className="w-4 h-4 text-muted-foreground" />
-              <span>Sign out</span>
+              <span>{t("palette.signOut")}</span>
             </CommandItem>
           </CommandGroup>
 
           {projects.length > 0 && (
             <>
               <CommandSeparator />
-              <CommandGroup heading="Projects">
+              <CommandGroup heading={t("palette.headingProjects")}>
                 {projects.map((project) => (
                   <CommandItem
                     key={project._id}
