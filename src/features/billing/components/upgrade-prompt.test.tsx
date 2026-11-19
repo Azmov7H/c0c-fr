@@ -1,6 +1,9 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest';
+import { NextIntlClientProvider } from 'next-intl';
 import { cleanup, render, screen } from '@testing-library/react';
+
+import enBilling from '../../../../messages/en/billing.json';
 
 import { UpgradePrompt } from './upgrade-prompt';
 
@@ -9,6 +12,7 @@ afterEach(cleanup);
 describe('UpgradePrompt', () => {
     it('shows the exact quota, reason and upgrade action for a 429', () => {
         render(
+            <NextIntlClientProvider locale="en" messages={{ billing: enBilling }}>
             <UpgradePrompt
                 title="Generation quota reached"
                 description="You have used all 3 generations this month."
@@ -18,6 +22,7 @@ describe('UpgradePrompt', () => {
                 limit={3}
                 resetAt="2026-11-01T00:00:00.000Z"
             />
+            </NextIntlClientProvider>
         );
 
         expect(screen.getByText('Generation quota reached')).toBeTruthy();

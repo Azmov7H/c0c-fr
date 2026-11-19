@@ -1,1 +1,199 @@
-{}
+{
+  "@dynamic": [
+    "activityWidget.types.project",
+    "activityWidget.types.script",
+    "statuses.draft",
+    "statuses.processing",
+    "statuses.completed",
+    "statuses.archived",
+    "upcomingWidget.statuses.pending",
+    "upcomingWidget.statuses.in_progress",
+    "upcomingWidget.statuses.completed",
+    "upcomingWidget.statuses.cancelled",
+    "health.database.connected",
+    "health.database.connecting",
+    "health.database.disconnected",
+    "statuses.all",
+    "analytics.description",
+    "analytics.lockedTitle",
+    "widgets.stats",
+    "widgets.projects",
+    "widgets.status",
+    "widgets.platforms",
+    "widgets.trending",
+    "widgets.activity",
+    "widgets.upcoming",
+    "widgets.quickActions",
+    "widgets.analytics",
+    "widgets.health",
+    "widgets.healthDescription",
+    "quickActions.script.title",
+    "quickActions.script.sub",
+    "quickActions.trends.title",
+    "quickActions.trends.sub",
+    "quickActions.project.title",
+    "quickActions.project.sub",
+    "quickActions.team.title",
+    "quickActions.team.sub"
+  ],
+  "metadata": {
+    "title": "Dashboard",
+    "description": "Overview of your content creation workspace — projects, scripts, and performance metrics."
+  },
+  "header": {
+    "title": "Dashboard",
+    "description": "Your projects, trends and activity at a glance.",
+    "newProject": "New Project"
+  },
+  "metrics": {
+    "heading": "Key metrics",
+    "projects": "Projects",
+    "scripts": "Scripts",
+    "thumbnails": "Thumbnails",
+    "media": "Media",
+    "inProgress": "{count} in progress",
+    "generated": "Generated",
+    "designed": "Designed",
+    "inLibrary": "In your library",
+    "error": "Your key metrics could not be loaded."
+  },
+  "statuses": {
+    "all": "All",
+    "draft": "Draft",
+    "processing": "In progress",
+    "completed": "Completed",
+    "archived": "Archived"
+  },
+  "projects": {
+    "heading": "Projects",
+    "filterAria": "Filter projects by status",
+    "viewAll": "View all",
+    "continue": "Continue where you left off",
+    "resume": "Resume",
+    "error": "Your projects could not be loaded.",
+    "emptyAllTitle": "Create your first project",
+    "emptyStatusTitle": "No {status} projects",
+    "emptyAllDescription": "Projects hold your scripts, thumbnails, audio and SEO in one place.",
+    "emptyStatusDescription": "Nothing matches this status yet. Try another filter or create a project.",
+    "emptyAction": "Create your first project",
+    "listAria": "Projects"
+  },
+  "analytics": {
+    "description": "Projects created over the last seven days",
+    "lockedDescription": "Upgrade to unlock the creation-trend chart and keep this widget visible.",
+    "error": "The creation trend could not be loaded.",
+    "emptyTitle": "No creation activity yet",
+    "emptyDescription": "Create projects this week and the trend appears here.",
+    "lockedTitle": "Creation analytics is available on Pro and Studio plans."
+  },
+  "widgets": {
+    "stats": "Key metrics",
+    "projects": "Projects",
+    "status": "Project status",
+    "platforms": "Platform split",
+    "trending": "Trending for you",
+    "activity": "Recent activity",
+    "upcoming": "Upcoming content",
+    "quickActions": "Quick actions",
+    "analytics": "Creation trend",
+    "health": "System status",
+    "healthDescription": "Live dependency status"
+  },
+  "statusWidget": {
+    "error": "Project status could not be loaded."
+  },
+  "platformsWidget": {
+    "error": "Platform split could not be loaded.",
+    "emptyTitle": "No projects by platform yet",
+    "emptyDescription": "Create a project and it will appear in this breakdown."
+  },
+  "trendingWidget": {
+    "error": "Your trend feed could not be loaded.",
+    "emptyTitle": "No trends measured for you yet",
+    "emptyDescription": "Pick interests in onboarding and we can rank topics against them.",
+    "emptyAction": "Update your interests",
+    "score": "{score} score",
+    "explore": "Explore trends"
+  },
+  "activityWidget": {
+    "error": "Recent activity could not be loaded.",
+    "emptyTitle": "No activity yet",
+    "emptyDescription": "Generate a script or create a project to start the feed.",
+    "new": "new",
+    "types": {
+      "project": "project",
+      "script": "script"
+    }
+  },
+  "upcomingWidget": {
+    "error": "Upcoming content could not be loaded.",
+    "emptyTitle": "Nothing scheduled",
+    "emptyDescription": "Plan a publish date and it will show up here.",
+    "statuses": {
+      "pending": "Pending",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    }
+  },
+  "quickActions": {
+    "script": {
+      "title": "Generate Script",
+      "sub": "AI content engine"
+    },
+    "trends": {
+      "title": "Explore Trends",
+      "sub": "What is rising"
+    },
+    "project": {
+      "title": "New Project",
+      "sub": "Start from an idea"
+    },
+    "team": {
+      "title": "Team",
+      "sub": "Invite collaborators"
+    }
+  },
+  "health": {
+    "unavailable": "Status unavailable — the API could not be reached",
+    "ready": "API ready — database connected",
+    "degraded": "Degraded — database {state}",
+    "retry": "Retry",
+    "database": {
+      "connected": "connected",
+      "connecting": "connecting",
+      "disconnected": "disconnected"
+    }
+  },
+  "hidden": {
+    "preferencesError": "Your saved layout could not be loaded; showing the default layout.",
+    "title": "All widgets are hidden",
+    "description": "Bring them back from Customise — nothing is lost.",
+    "showAll": "Show all widgets"
+  },
+  "footer": {
+    "prompt": "Want a different overview?",
+    "link": "Update your interests",
+    "tail": "to personalise trending and defaults."
+  },
+  "settings": {
+    "trigger": "Customise",
+    "title": "Dashboard widgets",
+    "description": "Hidden widgets stay out of the way but remain available here. Your layout is saved to your account.",
+    "showAria": "Show {widget}",
+    "showAll": "Show all widgets"
+  },
+  "chart": {
+    "series": "Projects created",
+    "summaryEmpty": "No projects were created in the last seven days.",
+    "summary": "{count, plural, one {{value} project created} other {{value} projects created}} in the last seven days.",
+    "busiest": "Busiest day: {date} with {count}.",
+    "viewTable": "View as table",
+    "caption": "Projects created per day, last seven days",
+    "date": "Date",
+    "projects": "Projects"
+  },
+  "toast": {
+    "saveError": "Could not save your dashboard layout."
+  }
+}

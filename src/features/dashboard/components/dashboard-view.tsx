@@ -4,6 +4,7 @@ import { useUrlLocale } from '@/i18n/locale';
 import * as React from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import {
   BarChart3,
   FileText,
@@ -19,7 +20,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { DataState } from "@/components/shared/data-state"
+import { DashboardDataState } from "./dashboard-data-state"
 import { PageHeader } from "@/components/shared/page-header"
 import type { Platform, Project, ProjectStatus } from "@/types"
 
@@ -35,7 +36,9 @@ import { UpgradePrompt } from "@/features/billing/components/upgrade-prompt"
 import { DASHBOARD_PROJECTS_QUERY } from "../lib/queries"
 import {
   EMPTY_PREFERENCES,
-  WIDGET_LABELS,
+  PROJECT_STATUS_KEYS,
+  WIDGET_DESCRIPTION_KEYS,
+  WIDGET_LABEL_KEYS,
   visibleWidgets,
   widgetLock,
   type DashboardWidgetId,
@@ -64,27 +67,25 @@ const WidgetSettings = dynamic(
   () => import("./widget-settings").then((mod) => mod.WidgetSettings),
   {
     ssr: false,
-    loading: () => (
-      <Button variant="outline" size="sm" className="h-9 rounded-xl px-4" disabled>
-        <Settings2 className="me-1.5 size-3.5" aria-hidden="true" />
-        Customise
-      </Button>
-    ),
+    loading: () => <WidgetSettingsFallback />,
   }
 )
+
+function WidgetSettingsFallback() {
+  const t = useTranslations("dashboard")
+  return (
+    <Button variant="outline" size="sm" className="h-9 rounded-xl px-4" disabled>
+      <Settings2 className="me-1.5 size-3.5" aria-hidden="true" />
+      {t("settings.trigger")}
+    </Button>
+  )
+}
 
 const PLATFORM_LABEL: Record<Platform, string> = {
   youtube: "YouTube",
   tiktok: "TikTok",
   instagram: "Instagram",
   facebook: "Facebook",
-}
-
-const STATUS_LABEL: Record<ProjectStatus, string> = {
-  draft: "Draft",
-  processing: "In progress",
-  completed: "Completed",
-  archived: "Archived",
 }
 
 const STATUS_TONE: Record<ProjectStatus, string> = {
@@ -102,13 +103,16 @@ const PLATFORM_TONE: Record<Platform, string> = {
 }
 
 type StatusFilter = "all" | ProjectStatus
+type StatusFilterKey =
+  | (typeof PROJECT_STATUS_KEYS)[keyof typeof PROJECT_STATUS_KEYS]
+  | "statuses.all"
 
-const STATUS_FILTERS: Array<{ value: StatusFilter; label: string }> = [
-  { value: "all", label: "All" },
-  { value: "draft", label: "Draft" },
-  { value: "processing", label: "In progress" },
-  { value: "completed", label: "Completed" },
-  { value: "archived", label: "Archived" },
+const STATUS_FILTERS: Array<{ value: StatusFilter; labelKey: StatusFilterKey }> = [
+  { value: "all", labelKey: "statuses.all" },
+  { value: "draft", labelKey: PROJECT_STATUS_KEYS.draft },
+  { value: "processing", labelKey: PROJECT_STATUS_KEYS.processing },
+  { value: "completed", labelKey: PROJECT_STATUS_KEYS.completed },
+  { value: "archived", labelKey: PROJECT_STATUS_KEYS.archived },
 ]
 
 const WIDGET_SPAN: Record<DashboardWidgetId, string> = {
@@ -224,6 +228,7 @@ function ProjectThumb({ project }: { project: Project }) {
 }
 
 function ProjectRow({ project }: { project: Project }) {
+  const t = useTranslations("dashboard")
     const locale = useUrlLocale();
   const updated = formatRelativeTime(project.updatedAt, locale)
   return (
@@ -242,7 +247,7 @@ function ProjectRow({ project }: { project: Project }) {
         </p>
       </div>
       <Badge variant="outline" className={`text-[10px] font-semibold ${STATUS_TONE[project.status]}`}>
-        {STATUS_LABEL[project.status]}
+        {t(PROJECT_STATUS_KEYS[project.status])}
       </Badge>
     </Link>
   )
@@ -251,12 +256,13 @@ function ProjectRow({ project }: { project: Project }) {
 // ─── Widgets ────────────────────────────────────────────────────────────────
 
 function MetricsWidget({ loading }: { loading: boolean }) {
+  const t = useTranslations("dashboard")
     const locale = useUrlLocale();
   const { data, isLoading, isError, refetch } = useDashboardStats()
   return (
-    <DataState
+    <DashboardDataState
       isLoading={loading || isLoading}
-      error={isError ? new Error("Your key metrics could not be loaded.") : null}
+      error={isError ? new Error(t("metrics.error")) : null}
       onRetry={() => void refetch()}
       loadingFallback={
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -268,35 +274,37 @@ function MetricsWidget({ loading }: { loading: boolean }) {
     >
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <MetricCard
-          label="Projects"
+          label={t("metrics.projects")}
           value={data?.overview.totalProjects}
-          sub={`${formatNumber(data?.overview.activeProjects ?? 0, locale)} in progress`}
+          sub={t("metrics.inProgress", {
+            count: formatNumber(data?.overview.activeProjects ?? 0, locale),
+          })}
           icon={FileText}
           color="text-info"
         />
         <MetricCard
-          label="Scripts"
+          label={t("metrics.scripts")}
           value={data?.overview.totalScripts}
-          sub="Generated"
+          sub={t("metrics.generated")}
           icon={Zap}
           color="text-primary"
         />
         <MetricCard
-          label="Thumbnails"
+          label={t("metrics.thumbnails")}
           value={data?.overview.totalThumbnails}
-          sub="Designed"
+          sub={t("metrics.designed")}
           icon={Sparkles}
           color="text-brand-violet"
         />
         <MetricCard
-          label="Media"
+          label={t("metrics.media")}
           value={data?.overview.totalMediaItems}
-          sub="In your library"
+          sub={t("metrics.inLibrary")}
           icon={BarChart3}
           color="text-success"
         />
       </div>
-    </DataState>
+    </DashboardDataState>
   )
 }
 
@@ -307,6 +315,7 @@ function ProjectsWidget({
   status: StatusFilter
   onStatusChange: (value: StatusFilter) => void
 }) {
+  const t = useTranslations("dashboard")
     const locale = useUrlLocale();
   const { data: stats } = useDashboardStats()
   const { data, isLoading, isError, refetch } = useProjects(DASHBOARD_PROJECTS_QUERY)
@@ -327,7 +336,11 @@ function ProjectsWidget({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter projects by status">
+        <div
+          className="flex flex-wrap gap-1.5"
+          role="group"
+          aria-label={t("projects.filterAria")}
+        >
           {STATUS_FILTERS.map((filter) => (
             <Button
               key={filter.value}
@@ -338,7 +351,7 @@ function ProjectsWidget({
               onClick={() => onStatusChange(filter.value)}
               className="h-8 rounded-full px-3 text-xs"
             >
-              {filter.label}
+              {t(filter.labelKey)}
               <span className="ms-1.5 tabular-nums text-muted-foreground">
                 {isLoading ? "–" : formatNumber(counts[filter.value], locale)}
               </span>
@@ -347,7 +360,7 @@ function ProjectsWidget({
         </div>
         <Link href="/projects">
           <Button variant="ghost" size="sm" className="h-8 px-3 text-xs text-primary hover:bg-primary/10">
-            View all{' '}
+            {t("projects.viewAll")}{' '}
             <DirIcon name="ArrowRight" className="ms-1 size-3" aria-hidden="true" />
           </Button>
         </Link>
@@ -359,37 +372,39 @@ function ProjectsWidget({
             <ProjectThumb project={continueProject} />
             <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                Continue where you left off
+                {t("projects.continue")}
               </p>
               <p className="truncate text-sm font-semibold">{continueProject.title}</p>
             </div>
           </div>
           <Link href={`/projects/${continueProject._id}`}>
             <Button size="sm" className="h-8 rounded-lg px-3 text-xs">
-              Resume{' '}
+              {t("projects.resume")}{' '}
               <DirIcon name="ArrowRight" className="ms-1 size-3" aria-hidden="true" />
             </Button>
           </Link>
         </div>
       ) : null}
 
-      <DataState
+      <DashboardDataState
         isLoading={isLoading}
-        error={isError ? new Error("Your projects could not be loaded.") : null}
+        error={isError ? new Error(t("projects.error")) : null}
         isEmpty={filtered.length === 0}
         emptyTitle={
           status === "all"
-            ? "Create your first project"
-            : `No ${STATUS_LABEL[status as ProjectStatus].toLowerCase()} projects`
+            ? t("projects.emptyAllTitle")
+            : t("projects.emptyStatusTitle", {
+                status: t(PROJECT_STATUS_KEYS[status as ProjectStatus]).toLowerCase(),
+              })
         }
         emptyDescription={
           status === "all"
-            ? "Projects hold your scripts, thumbnails, audio and SEO in one place."
-            : "Nothing matches this status yet. Try another filter or create a project."
+            ? t("projects.emptyAllDescription")
+            : t("projects.emptyStatusDescription")
         }
         emptyIcon={FileText}
         emptyAction={{
-          label: "Create your first project",
+          label: t("projects.emptyAction"),
           onClick: () => {
             window.location.href = "/projects/new"
           },
@@ -404,19 +419,20 @@ function ProjectsWidget({
           </div>
         }
       >
-        <ul aria-label="Projects" className="divide-y divide-border/40">
+        <ul aria-label={t("projects.listAria")} className="divide-y divide-border/40">
           {filtered.slice(0, 8).map((project) => (
             <li key={project._id}>
               <ProjectRow project={project} />
             </li>
           ))}
         </ul>
-      </DataState>
+      </DashboardDataState>
     </div>
   )
 }
 
 function AnalyticsWidget({ lockedReason, upgradeHref }: { lockedReason?: string; upgradeHref?: string }) {
+  const t = useTranslations("dashboard")
   const { data, isLoading, isError, refetch } = useDashboardStats()
 
   // A locked widget explains itself even when there is no data to show —
@@ -425,7 +441,7 @@ function AnalyticsWidget({ lockedReason, upgradeHref }: { lockedReason?: string;
     return (
       <UpgradePrompt
         title={lockedReason}
-        description="Upgrade to unlock the creation-trend chart and keep this widget visible."
+        description={t("analytics.lockedDescription")}
         feature="analytics.advanced"
         href={upgradeHref ?? "/settings/billing"}
       />
@@ -433,24 +449,25 @@ function AnalyticsWidget({ lockedReason, upgradeHref }: { lockedReason?: string;
   }
 
   return (
-    <DataState
+    <DashboardDataState
       isLoading={isLoading}
-      error={isError ? new Error("The creation trend could not be loaded.") : null}
+      error={isError ? new Error(t("analytics.error")) : null}
       isEmpty={(data?.trendVelocity.length ?? 0) === 0}
-      emptyTitle="No creation activity yet"
-      emptyDescription="Create projects this week and the trend appears here."
+      emptyTitle={t("analytics.emptyTitle")}
+      emptyDescription={t("analytics.emptyDescription")}
       emptyIcon={BarChart3}
       onRetry={() => void refetch()}
       loadingFallback={<Skeleton className="h-48 w-full rounded-xl" />}
     >
       <CreationTrendChart data={data?.trendVelocity ?? []} />
-    </DataState>
+    </DashboardDataState>
   )
 }
 
 // ─── Main view ──────────────────────────────────────────────────────────────
 
 export function DashboardView() {
+  const t = useTranslations("dashboard")
   const [status, setStatus] = React.useState<StatusFilter>("all")
 
   const statsQuery = useDashboardStats()
@@ -460,7 +477,7 @@ export function DashboardView() {
 
   const preferences = preferencesQuery.data ?? EMPTY_PREFERENCES
   const widgets = visibleWidgets(preferences)
-  const { locked, reason, upgradeHref } = widgetLock(
+  const { locked, reasonKey, upgradeHref } = widgetLock(
     "analytics",
     hasFeature(billing.data, "analytics.advanced")
   )
@@ -491,7 +508,12 @@ export function DashboardView() {
       case "quickActions":
         return <DashboardWidget id="quickActions" />
       case "analytics":
-        return <AnalyticsWidget lockedReason={locked ? reason : undefined} upgradeHref={upgradeHref} />
+        return (
+          <AnalyticsWidget
+            lockedReason={locked && reasonKey ? t(reasonKey) : undefined}
+            upgradeHref={upgradeHref}
+          />
+        )
       case "health":
         return <DashboardWidget id="health" />
       default:
@@ -502,8 +524,8 @@ export function DashboardView() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <PageHeader
-        title="Dashboard"
-        description="Your projects, trends and activity at a glance."
+        title={t("header.title")}
+        description={t("header.description")}
         actions={
           <>
             <WidgetSettings
@@ -515,7 +537,7 @@ export function DashboardView() {
             <Link href="/projects/new">
               <Button size="sm" className="h-9 rounded-xl px-4">
                 <Plus className="me-1.5 size-3.5" aria-hidden="true" />
-                New Project
+                {t("header.newProject")}
               </Button>
             </Link>
           </>
@@ -523,21 +545,17 @@ export function DashboardView() {
       />
 
       {preferencesQuery.isError ? (
-        <p className="text-xs text-muted-foreground">
-          Your saved layout could not be loaded; showing the default layout.
-        </p>
+        <p className="text-xs text-muted-foreground">{t("hidden.preferencesError")}</p>
       ) : null}
 
       {widgets.length === 0 ? (
         <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border p-12 text-center">
           <LayoutDashboard className="size-8 text-muted-foreground" aria-hidden="true" />
           <div>
-            <h2 className="text-lg font-semibold">All widgets are hidden</h2>
-            <p className="text-sm text-muted-foreground">
-              Bring them back from Customise — nothing is lost.
-            </p>
+            <h2 className="text-lg font-semibold">{t("hidden.title")}</h2>
+            <p className="text-sm text-muted-foreground">{t("hidden.description")}</p>
           </div>
-          <Button onClick={() => updatePreferences.mutate([])}>Show all widgets</Button>
+          <Button onClick={() => updatePreferences.mutate([])}>{t("hidden.showAll")}</Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
@@ -546,20 +564,18 @@ export function DashboardView() {
               {id === "stats" || id === "projects" ? (
                 <div className="space-y-4">
                   <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                    {id === "stats" ? "Key metrics" : "Projects"}
+                    {id === "stats" ? t("metrics.heading") : t("projects.heading")}
                   </h2>
                   {renderWidget(id)}
                 </div>
               ) : (
                 <WidgetCard
                   id={id}
-                  title={WIDGET_LABELS[id]}
+                  title={t(WIDGET_LABEL_KEYS[id])}
                   description={
-                    id === "analytics"
-                      ? "Projects created over the last seven days"
-                      : id === "health"
-                        ? "Live dependency status"
-                        : undefined
+                    id === "analytics" || id === "health"
+                      ? t(WIDGET_DESCRIPTION_KEYS[id])
+                      : undefined
                   }
                 >
                   {renderWidget(id)}
@@ -571,11 +587,11 @@ export function DashboardView() {
       )}
 
       <p className="text-[11px] text-muted-foreground">
-        Want a different overview?{" "}
+        {t("footer.prompt")}{" "}
         <Link href="/onboarding?edit=1" className="font-medium text-primary hover:underline">
-          Update your interests
+          {t("footer.link")}
         </Link>{" "}
-        to personalise trending and defaults.
+        {t("footer.tail")}
       </p>
     </div>
   )

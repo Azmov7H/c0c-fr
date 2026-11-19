@@ -1,6 +1,9 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { NextIntlClientProvider } from 'next-intl';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+
+import enBilling from '../../../../../messages/en/billing.json';
 
 import { AssetsTab } from './assets-tab';
 import { ApiError } from '@/lib/api-error';
@@ -89,7 +92,11 @@ describe('AssetsTab', () => {
     });
 
     it('shows an actionable upgrade prompt when generation returns a 429 quota error', () => {
-        render(<AssetsTab projectId="p1" role="editor" />);
+        render(
+            <NextIntlClientProvider locale="en" messages={{ billing: enBilling }}>
+                <AssetsTab projectId="p1" role="editor" />
+            </NextIntlClientProvider>
+        );
 
         const generate = screen.getAllByRole('button', { name: /^generate$/i })[0]!;
         fireEvent.click(generate);
@@ -102,7 +109,11 @@ describe('AssetsTab', () => {
     });
 
     it('blocks generation for viewers', () => {
-        render(<AssetsTab projectId="p1" role="viewer" />);
+        render(
+            <NextIntlClientProvider locale="en" messages={{ billing: enBilling }}>
+                <AssetsTab projectId="p1" role="viewer" />
+            </NextIntlClientProvider>
+        );
 
         for (const button of screen.getAllByRole('button', { name: /^generate$/i })) {
             expect((button as HTMLButtonElement).disabled).toBe(true);

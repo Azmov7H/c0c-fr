@@ -1,5 +1,6 @@
 import { useUrlLocale } from '@/i18n/locale';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { LockKeyhole } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,7 @@ interface UpgradePromptProps {
 export function UpgradePrompt({
     title,
     description,
-    ctaLabel = 'See plans',
+    ctaLabel,
     href = '/settings/billing',
     feature,
     used,
@@ -29,8 +30,18 @@ export function UpgradePrompt({
     resetAt,
     className,
 }: UpgradePromptProps) {
+    const t = useTranslations('billing');
     const locale = useUrlLocale();
     const hasUsage = typeof used === 'number' && limit !== undefined;
+    const usage = hasUsage
+        ? t('upgrade.usage', {
+              used: formatCount(used, locale),
+              limit:
+                  limit === null
+                      ? t('upgrade.unlimited')
+                      : formatCount(limit, locale),
+          })
+        : '';
 
     return (
         <div
@@ -47,13 +58,13 @@ export function UpgradePrompt({
             <p className="max-w-md text-sm text-muted-foreground">{description}</p>
             {hasUsage ? (
                 <p className="text-xs text-muted-foreground">
-                    {formatCount(used, locale)} of{' '}
-                    {limit === null ? 'unlimited' : formatCount(limit, locale)} used
-                    {resetAt ? ` · resets ${formatDate(resetAt, locale)}` : ''}
+                    {resetAt
+                        ? t('upgrade.resets', { usage, date: formatDate(resetAt, locale) })
+                        : usage}
                 </p>
             ) : null}
             <Button size="sm" variant="outline" asChild>
-                <Link href={href}>{ctaLabel}</Link>
+                <Link href={href}>{ctaLabel ?? t('upgrade.seePlans')}</Link>
             </Button>
         </div>
     );

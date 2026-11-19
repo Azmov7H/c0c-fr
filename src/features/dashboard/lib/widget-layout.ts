@@ -34,18 +34,54 @@ export const EMPTY_PREFERENCES: DashboardPreferences = {
     preferredPlatforms: [],
 };
 
-export const WIDGET_LABELS: Record<DashboardWidgetId, string> = {
-    stats: 'Key metrics',
-    projects: 'Projects',
-    status: 'Project status',
-    platforms: 'Platform split',
-    trending: 'Trending for you',
-    activity: 'Recent activity',
-    upcoming: 'Upcoming content',
-    quickActions: 'Quick actions',
-    analytics: 'Creation trend',
-    health: 'System status',
-};
+/**
+ * AR-027 — the widget names are copy, so this registry holds the CATALOG KEY
+ * per widget instead of the English sentence. The components translate.
+ */
+export const WIDGET_LABEL_KEYS = {
+    stats: 'widgets.stats',
+    projects: 'widgets.projects',
+    status: 'widgets.status',
+    platforms: 'widgets.platforms',
+    trending: 'widgets.trending',
+    activity: 'widgets.activity',
+    upcoming: 'widgets.upcoming',
+    quickActions: 'widgets.quickActions',
+    analytics: 'widgets.analytics',
+    health: 'widgets.health',
+} as const satisfies Record<DashboardWidgetId, string>;
+
+/** AR-027 — enum-to-key maps. The labels are copy, the enum values are data. */
+export const PROJECT_STATUS_KEYS = {
+    draft: 'statuses.draft',
+    processing: 'statuses.processing',
+    completed: 'statuses.completed',
+    archived: 'statuses.archived',
+} as const;
+
+export const ACTIVITY_TYPE_KEYS = {
+    project: 'activityWidget.types.project',
+    script: 'activityWidget.types.script',
+} as const;
+
+export const PLANNER_STATUS_KEYS = {
+    pending: 'upcomingWidget.statuses.pending',
+    in_progress: 'upcomingWidget.statuses.in_progress',
+    completed: 'upcomingWidget.statuses.completed',
+    cancelled: 'upcomingWidget.statuses.cancelled',
+} as const;
+
+export const DATABASE_STATE_KEYS = {
+    connected: 'health.database.connected',
+    connecting: 'health.database.connecting',
+    disconnected: 'health.database.disconnected',
+} as const;
+
+/** The description under a widget heading, when it has one. */
+export const WIDGET_DESCRIPTION_KEYS = {
+    analytics: 'analytics.description',
+    health: 'widgets.healthDescription',
+} as const satisfies Partial<Record<DashboardWidgetId, string>>;
 
 /**
  * Interest-aware default order.
@@ -80,7 +116,8 @@ export function orderPlatforms(preferred: Platform[]): Platform[] {
 
 export interface WidgetLock {
     locked: boolean;
-    reason?: string;
+    /** AR-027 — the catalog key of the reason, not the sentence. */
+    reasonKey?: 'analytics.lockedTitle';
     upgradeHref?: string;
 }
 
@@ -97,7 +134,7 @@ export function widgetLock(
     if (id === 'analytics' && entitled === false) {
         return {
             locked: true,
-            reason: 'Creation analytics is available on Pro and Studio plans.',
+            reasonKey: 'analytics.lockedTitle',
             upgradeHref: '/settings/billing',
         };
     }

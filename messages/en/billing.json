@@ -13,5 +13,11 @@
     "portalDate": "the date shown in the portal"
   },
   "cancellationScheduled": "Cancellation is scheduled. You keep {plan} until {date}. <link>Choose a plan to continue</link>.",
-  "cancellationEndFallback": "the end of the period"
+  "cancellationEndFallback": "the end of the period",
+  "upgrade": {
+    "seePlans": "See plans",
+    "unlimited": "unlimited",
+    "usage": "{used} of {limit} used",
+    "resets": "{usage} · resets {date}"
+  }
 }
