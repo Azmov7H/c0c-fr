@@ -1,10 +1,12 @@
 'use client';
 
+import * as React from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useProfile, useUpdateProfile } from '../hooks/use-settings';
+import { createProfileSchema, type ProfileValues } from '../lib/profile-schema';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,17 +22,9 @@ import {
 } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DataState } from '@/components/shared/data-state';
+import { LocalizedDataState } from '@/components/shared/localized-data-state';
 import { useLogout, useLogoutAll } from '@/features/auth/hooks/use-auth';
 import { ChangePasswordForm } from '@/features/auth/components/change-password-form';
-
-const profileSchema = z.object({
-    firstName: z.string().trim().min(1, 'First name is required').max(80),
-    lastName: z.string().trim().min(1, 'Last name is required').max(80),
-    email: z.string().trim().email('Enter a valid email address').max(254),
-});
-
-type ProfileValues = z.infer<typeof profileSchema>;
 
 const VALID_TABS = ['profile', 'security'] as const;
 type SettingsTab = (typeof VALID_TABS)[number];
@@ -42,6 +36,7 @@ interface SettingsDashboardProps {
 
 export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
     const router = useRouter();
+    const t = useTranslations('settings');
     const { data: profile, isLoading } = useProfile();
     const { mutate: updateProfile, isPending: isUpdatingProfile } = useUpdateProfile();
     const { mutate: logout } = useLogout();
@@ -50,15 +45,37 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
     const initialTab: SettingsTab = (VALID_TABS as readonly string[]).includes(defaultTab ?? '')
         ? (defaultTab as SettingsTab)
         : 'profile';
-    // M2-T27: `?tab=api` (and any unknown tab) resolves to profile with a
-    // notice — never a blank panel or a crash.
-    const unknownTabNotice =
-        defaultTab && !(VALID_TABS as readonly string[]).includes(defaultTab)
-            ? 'Unknown settings tab — showing your profile.'
-            : null;
+
+    // AR-028: the zod messages are catalog copy, so the schema is built per
+    // locale instead of at module load.
+    const firstNameRequired = t('validation.firstNameRequired');
+    const lastNameRequired = t('validation.lastNameRequired');
+    const emailInvalid = t('validation.emailInvalid');
+    const firstNameTooLong = t('validation.firstNameTooLong');
+    const lastNameTooLong = t('validation.lastNameTooLong');
+    const emailTooLong = t('validation.emailTooLong');
+    const schema = React.useMemo(
+        () =>
+            createProfileSchema({
+                firstNameRequired,
+                lastNameRequired,
+                emailInvalid,
+                firstNameTooLong,
+                lastNameTooLong,
+                emailTooLong,
+            }),
+        [
+            firstNameRequired,
+            lastNameRequired,
+            emailInvalid,
+            firstNameTooLong,
+            lastNameTooLong,
+            emailTooLong,
+        ]
+    );
 
     const form = useForm<ProfileValues>({
-        resolver: zodResolver(profileSchema),
+        resolver: zodResolver(schema),
         // `values` keeps the form in sync when the profile arrives or is
         // refetched, without a setState-in-effect reset.
         values: {
@@ -73,7 +90,7 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
 
     if (isLoading) {
         return (
-            <DataState
+            <LocalizedDataState
                 isLoading
                 loadingFallback={
                     <div className="space-y-8">
@@ -86,7 +103,7 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
                 }
             >
                 {null}
-            </DataState>
+            </LocalizedDataState>
         );
     }
 
@@ -94,15 +111,15 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
         <div className="space-y-8 animate-in fade-in duration-500">
 
             <div>
-                <h1 className="text-3xl font-bold">System Settings</h1>
-                <p className="text-muted-foreground mt-2">Manage your account preferences and billing.</p>
+                <h1 className="text-3xl font-bold">{t('header.title')}</h1>
+                <p className="text-muted-foreground mt-2">{t('header.description')}</p>
             </div>
-            {unknownTabNotice && (
+            {defaultTab && !(VALID_TABS as readonly string[]).includes(defaultTab) && (
                 <Alert>
                     <Info className="h-4 w-4" />
-                    <AlertTitle>Tab not found</AlertTitle>
+                    <AlertTitle>{t('unknownTab.title')}</AlertTitle>
                     <AlertDescription>
-                        API settings were removed — C0C does not offer a public API. Showing your profile.
+                        {t('unknownTab.description')}
                     </AlertDescription>
                 </Alert>
             )}
@@ -111,14 +128,14 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
 
                 <TabsList className="flex flex-col h-auto bg-transparent gap-2 items-start lg:col-span-1 p-0">
                     <TabsTrigger value="profile" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-muted transition-all">
-                        <User className="w-4 h-4" /> My Profile
+                        <User className="w-4 h-4" /> {t('tabs.profile')}
                     </TabsTrigger>
                     <TabsTrigger value="security" className="w-full justify-start gap-3 px-4 py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 hover:bg-muted transition-all">
-                        <Shield className="w-4 h-4" /> Security
+                        <Shield className="w-4 h-4" /> {t('tabs.security')}
                     </TabsTrigger>
                     <div className="pt-4 mt-4 border-t w-full">
                         <Button variant="ghost" className="w-full justify-start gap-3 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => logout()}>
-                            <LogOut className="w-4 h-4" /> Logout Instance
+                            <LogOut className="w-4 h-4" /> {t('tabs.logout')}
                         </Button>
                     </div>
                 </TabsList>
@@ -127,8 +144,8 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
                     <TabsContent value="profile" className="mt-0 space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Personal Information</CardTitle>
-                                <CardDescription>Update your public identity on the platform.</CardDescription>
+                                <CardTitle>{t('profile.title')}</CardTitle>
+                                <CardDescription>{t('profile.description')}</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <Form {...form}>
@@ -139,7 +156,7 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
                                                 name="firstName"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>First Name</FormLabel>
+                                                        <FormLabel>{t('profile.firstName')}</FormLabel>
                                                         <FormControl>
                                                             <Input {...field} autoComplete="given-name" className="h-11" />
                                                         </FormControl>
@@ -152,7 +169,7 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
                                                 name="lastName"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Last Name</FormLabel>
+                                                        <FormLabel>{t('profile.lastName')}</FormLabel>
                                                         <FormControl>
                                                             <Input {...field} autoComplete="family-name" className="h-11" />
                                                         </FormControl>
@@ -166,7 +183,7 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
                                             name="email"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Email Address</FormLabel>
+                                                    <FormLabel>{t('profile.email')}</FormLabel>
                                                     <FormControl>
                                                         <Input {...field} type="email" autoComplete="email" className="h-11" />
                                                     </FormControl>
@@ -175,7 +192,7 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
                                             )}
                                         />
                                         <Button type="submit" className="h-11" disabled={isUpdatingProfile || !form.formState.isDirty}>
-                                            {isUpdatingProfile ? <RefreshCw className="animate-spin w-4 h-4 me-2" /> : 'Save Changes'}
+                                            {isUpdatingProfile ? <RefreshCw className="animate-spin w-4 h-4 me-2" /> : t('profile.save')}
                                         </Button>
                                     </form>
                                 </Form>
@@ -186,10 +203,9 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
                             seeding a second project (?edit=1). */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Interests &amp; personalisation</CardTitle>
+                                <CardTitle>{t('interests.title')}</CardTitle>
                                 <CardDescription>
-                                    The topics and platforms behind your dashboard, trending feed and
-                                    suggestions.
+                                    {t('interests.description')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -199,7 +215,7 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
                                     className="gap-2"
                                     onClick={() => router.push('/onboarding?edit=1')}
                                 >
-                                    <Compass className="w-4 h-4" /> Update your interests
+                                    <Compass className="w-4 h-4" /> {t('interests.action')}
                                 </Button>
                             </CardContent>
                         </Card>
@@ -208,9 +224,9 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
                     <TabsContent value="security" className="mt-0 space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Change Password</CardTitle>
+                                <CardTitle>{t('security.passwordTitle')}</CardTitle>
                                 <CardDescription>
-                                    Update your password. For security this signs you out on every device.
+                                    {t('security.passwordDescription')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -220,12 +236,12 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>Sessions</CardTitle>
-                                <CardDescription>Sign out of this device, or everywhere at once.</CardDescription>
+                                <CardTitle>{t('security.sessionsTitle')}</CardTitle>
+                                <CardDescription>{t('security.sessionsDescription')}</CardDescription>
                             </CardHeader>
                             <CardContent className="flex flex-wrap gap-3">
                                 <Button variant="outline" className="gap-2" onClick={() => logout()}>
-                                    <LogOut className="w-4 h-4" /> Sign out of this session
+                                    <LogOut className="w-4 h-4" /> {t('security.signOut')}
                                 </Button>
                                 <Button
                                     variant="outline"
@@ -233,7 +249,7 @@ export const SettingsDashboard = ({ defaultTab }: SettingsDashboardProps) => {
                                     onClick={() => logoutAll()}
                                     disabled={isLoggingOutAll}
                                 >
-                                    <LogOut className="w-4 h-4" /> Sign out everywhere
+                                    <LogOut className="w-4 h-4" /> {t('security.signOutAll')}
                                 </Button>
                             </CardContent>
                         </Card>

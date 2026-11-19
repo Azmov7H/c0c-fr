@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import type { BillingSummary } from '@/features/billing/types';
 import enBilling from '../../../../messages/en/billing.json';
 import enPricing from '../../../../messages/en/pricing.json';
+import enDataState from '../../../../messages/en/dataState.json';
 import { BillingSettings } from './billing-settings';
 
 const mocks = vi.hoisted(() => ({
@@ -77,7 +78,7 @@ function renderSettings() {
     return render(
         <NextIntlClientProvider
             locale="en"
-            messages={{ pricing: enPricing, billing: enBilling }}
+            messages={{ pricing: enPricing, billing: enBilling, dataState: enDataState }}
         >
             <BillingSettings />
         </NextIntlClientProvider>

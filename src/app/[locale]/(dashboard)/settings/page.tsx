@@ -1,9 +1,13 @@
 import type { Metadata } from "next"
+import { getTranslations } from "@/i18n/server"
 import { SettingsDashboard } from "@/features/settings/components/settings-dashboard"
 
-export const metadata: Metadata = {
-  title: "Settings",
-  description: "Manage your profile, workspace configuration, and preferences.",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("settings")
+  return {
+    title: t("metadata.title"),
+    description: t("metadata.description"),
+  }
 }
 
 export default async function SettingsPage({

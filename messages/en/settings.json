@@ -1,1 +1,72 @@
-{}
+{
+  "@dynamic": [
+    "errors.rateLimit",
+    "errors.sessionExpired",
+    "errors.forbidden",
+    "errors.notFound",
+    "errors.invalidInput",
+    "errors.offline",
+    "errors.server",
+    "errors.generic"
+  ],
+  "metadata": {
+    "title": "Settings",
+    "description": "Manage your profile, workspace configuration, and preferences."
+  },
+  "header": {
+    "title": "System Settings",
+    "description": "Manage your account preferences and billing."
+  },
+  "unknownTab": {
+    "title": "Tab not found",
+    "description": "API settings were removed — C0C does not offer a public API. Showing your profile."
+  },
+  "tabs": {
+    "profile": "My Profile",
+    "security": "Security",
+    "logout": "Logout Instance"
+  },
+  "profile": {
+    "title": "Personal Information",
+    "description": "Update your public identity on the platform.",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "save": "Save Changes"
+  },
+  "interests": {
+    "title": "Interests & personalisation",
+    "description": "The topics and platforms behind your dashboard, trending feed and suggestions.",
+    "action": "Update your interests"
+  },
+  "security": {
+    "passwordTitle": "Change Password",
+    "passwordDescription": "Update your password. For security this signs you out on every device.",
+    "sessionsTitle": "Sessions",
+    "sessionsDescription": "Sign out of this device, or everywhere at once.",
+    "signOut": "Sign out of this session",
+    "signOutAll": "Sign out everywhere"
+  },
+  "validation": {
+    "firstNameRequired": "First name is required",
+    "lastNameRequired": "Last name is required",
+    "emailInvalid": "Enter a valid email address",
+    "firstNameTooLong": "First name must be 80 characters or fewer",
+    "lastNameTooLong": "Last name must be 80 characters or fewer",
+    "emailTooLong": "Email address must be 254 characters or fewer"
+  },
+  "toast": {
+    "updated": "Profile updated successfully",
+    "updateFailed": "Failed to update profile"
+  },
+  "errors": {
+    "rateLimit": "Too many attempts. Wait a moment and try again.",
+    "sessionExpired": "Your session has expired. Sign in again.",
+    "forbidden": "You do not have permission to do that.",
+    "notFound": "We could not find what you were looking for.",
+    "invalidInput": "Some fields are invalid. Check them and try again.",
+    "offline": "You appear to be offline. Check your connection and try again.",
+    "server": "Something went wrong on our side. Try again shortly.",
+    "generic": "Failed to update profile"
+  }
+}

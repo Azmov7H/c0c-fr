@@ -1,1 +1,72 @@
-{}
+{
+  "@dynamic": [
+    "errors.rateLimit",
+    "errors.sessionExpired",
+    "errors.forbidden",
+    "errors.notFound",
+    "errors.invalidInput",
+    "errors.offline",
+    "errors.server",
+    "errors.generic"
+  ],
+  "metadata": {
+    "title": "الإعدادات",
+    "description": "أدر ملفك الشخصي وإعدادات مساحة العمل وتفضيلاتك."
+  },
+  "header": {
+    "title": "إعدادات النظام",
+    "description": "أدر تفضيلات حسابك والفوترة."
+  },
+  "unknownTab": {
+    "title": "التبويب غير موجود",
+    "description": "تمت إزالة إعدادات API — لا توفّر C0C واجهة API عامة. يتم عرض ملفك الشخصي."
+  },
+  "tabs": {
+    "profile": "ملفي الشخصي",
+    "security": "الأمان",
+    "logout": "تسجيل خروج هذه النسخة"
+  },
+  "profile": {
+    "title": "المعلومات الشخصية",
+    "description": "حدّث هويتك العامة على المنصة.",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "email": "البريد الإلكتروني",
+    "save": "حفظ التغييرات"
+  },
+  "interests": {
+    "title": "الاهتمامات والتخصيص",
+    "description": "المواضيع والمنصات التي تغذّي لوحة التحكم وموجز الاتجاهات والاقتراحات.",
+    "action": "حدّث اهتماماتك"
+  },
+  "security": {
+    "passwordTitle": "تغيير كلمة المرور",
+    "passwordDescription": "حدّث كلمة المرور. لأسباب أمنية سيؤدي ذلك إلى تسجيل خروجك من كل الأجهزة.",
+    "sessionsTitle": "الجلسات",
+    "sessionsDescription": "سجّل الخروج من هذا الجهاز، أو من كل الأجهزة دفعة واحدة.",
+    "signOut": "تسجيل الخروج من هذه الجلسة",
+    "signOutAll": "تسجيل الخروج من كل الأجهزة"
+  },
+  "validation": {
+    "firstNameRequired": "الاسم الأول مطلوب",
+    "lastNameRequired": "اسم العائلة مطلوب",
+    "emailInvalid": "أدخل بريدًا إلكترونيًا صالحًا",
+    "firstNameTooLong": "يجب ألا يتجاوز الاسم الأول 80 حرفًا",
+    "lastNameTooLong": "يجب ألا يتجاوز اسم العائلة 80 حرفًا",
+    "emailTooLong": "يجب ألا يتجاوز البريد الإلكتروني 254 حرفًا"
+  },
+  "toast": {
+    "updated": "تم تحديث الملف الشخصي بنجاح",
+    "updateFailed": "تعذّر تحديث الملف الشخصي"
+  },
+  "errors": {
+    "rateLimit": "محاولات كثيرة جدًا. انتظر قليلًا ثم حاول مرة أخرى.",
+    "sessionExpired": "انتهت جلستك. سجّل الدخول مرة أخرى.",
+    "forbidden": "لا تملك صلاحية تنفيذ هذا الإجراء.",
+    "notFound": "لم نعثر على ما تبحث عنه.",
+    "invalidInput": "بعض الحقول غير صالحة. راجعها وحاول مرة أخرى.",
+    "offline": "يبدو أنك غير متصل. تحقّق من اتصالك وحاول مرة أخرى.",
+    "server": "حدث خطأ من جانبنا. حاول مرة أخرى بعد قليل.",
+    "generic": "تعذّر تحديث الملف الشخصي"
+  }
+}

@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { useUrlLocale } from '@/i18n/locale';
 import * as React from 'react';
 import { CircleSlash, Coins, ShieldQuestion } from 'lucide-react';
@@ -14,9 +16,9 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { DataState } from '@/components/shared/data-state';
+import { LocalizedDataState } from '@/components/shared/localized-data-state';
 import { Skeleton } from '@/components/ui/skeleton';
-import { creditHistoryLabel } from '../lib/credit-history';
+import { creditHistoryLabel, creditKindKey } from '../lib/credit-history';
 import { formatCount, formatDate } from '../lib/format';
 import { useCreditHistory, useCredits } from '../hooks/use-billing';
 import type { CreditEvent } from '../types';
@@ -28,9 +30,13 @@ const HISTORY_PAGE_SIZE = 10;
  * `GET /billing/credits` — plus the immutable ledger, newest first.
  * Prices have not been recorded yet (Cost Analysis is pending), so the
  * panel never shows a cost and never invents one.
+ *
+ * AR-028 — every label is the `billing` catalog's; the numbers and the ledger
+ * notes stay data.
  */
 export function CreditsPanel() {
     const locale = useUrlLocale();
+    const t = useTranslations('billing');
     const credits = useCredits();
     const { data, isLoading, error, refetch } = credits;
 
@@ -39,23 +45,31 @@ export function CreditsPanel() {
             <CardHeader>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                        <CardDescription>Monthly credits</CardDescription>
+                        <CardDescription>{t('credits.title')}</CardDescription>
                         <CardTitle className="mt-1 flex items-center gap-2 text-2xl">
                             <Coins className="size-5 text-muted-foreground" aria-hidden />
                             {data ? (
-                                <span>{`${formatCount(data.balance, locale)} available`}</span>
+                                <span>
+                                    {t('credits.available', {
+                                        count: formatCount(data.balance, locale),
+                                    })}
+                                </span>
                             ) : (
-                                <span>Credits</span>
+                                <span>{t('credits.fallbackTitle')}</span>
                             )}
                             {data && data.held > 0 ? (
-                                <Badge variant="secondary">{formatCount(data.held, locale)} held</Badge>
+                                <Badge variant="secondary">
+                                    {t('credits.held', {
+                                        count: formatCount(data.held, locale),
+                                    })}
+                                </Badge>
                             ) : null}
                         </CardTitle>
                     </div>
                 </div>
             </CardHeader>
             <CardContent className="space-y-5">
-                <DataState
+                <LocalizedDataState
                     isLoading={isLoading}
                     error={error}
                     onRetry={() => void refetch()}
@@ -70,26 +84,40 @@ export function CreditsPanel() {
                         <>
                             <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
                                 <div>
-                                    <dt className="text-muted-foreground">Available</dt>
+                                    <dt className="text-muted-foreground">
+                                        {t('credits.availableLabel')}
+                                    </dt>
                                     <dd className="mt-1 font-medium tabular-nums">
                                         {formatCount(data.balance, locale)}
                                     </dd>
                                 </div>
                                 <div>
-                                    <dt className="text-muted-foreground">In progress</dt>
+                                    <dt className="text-muted-foreground">
+                                        {t('credits.inProgress')}
+                                    </dt>
                                     <dd className="mt-1 font-medium tabular-nums">
                                         {data.held > 0
-                                            ? `${formatCount(data.held, locale)} held`
-                                            : 'None'}
+                                            ? t('credits.held', {
+                                                  count: formatCount(data.held, locale),
+                                              })
+                                            : t('credits.none')}
                                     </dd>
                                 </div>
                                 <div>
-                                    <dt className="text-muted-foreground">Cycle</dt>
+                                    <dt className="text-muted-foreground">
+                                        {t('credits.cycle')}
+                                    </dt>
                                     <dd className="mt-1 font-medium">
-                                        {data.period}
                                         {data.resetAt
-                                            ? ` — resets ${formatDate(data.resetAt, locale)}`
-                                            : ''}
+                                            ? t('credits.resets', {
+                                                  period: data.period,
+                                                  date: formatDate(
+                                                      data.resetAt,
+                                                      locale,
+                                                      t('credits.notScheduled')
+                                                  ),
+                                              })
+                                            : data.period}
                                     </dd>
                                 </div>
                             </dl>
@@ -99,17 +127,13 @@ export function CreditsPanel() {
                                 Copy: access/entitlement language, not "api.access". */}
                             <p className="flex items-start gap-2 rounded-lg border border-border/50 px-3 py-2 text-xs text-muted-foreground">
                                 <ShieldQuestion className="mt-0.5 size-4 shrink-0" aria-hidden />
-                                <span>
-                                    Generations reserve credits before they run and settle at the
-                                    actual cost when they finish. If something fails, the reserved
-                                    credits come back to you.
-                                </span>
+                                <span>{t('credits.note')}</span>
                             </p>
 
                             <CreditHistory />
                         </>
                     ) : null}
-                </DataState>
+                </LocalizedDataState>
             </CardContent>
         </Card>
     );
@@ -117,6 +141,7 @@ export function CreditsPanel() {
 
 function CreditHistory() {
     const locale = useUrlLocale();
+    const t = useTranslations('billing');
     const [page, setPage] = React.useState(1);
     const history = useCreditHistory(page, HISTORY_PAGE_SIZE);
     const { data, isLoading, error, refetch } = history;
@@ -125,45 +150,54 @@ function CreditHistory() {
     const total = data?.total ?? 0;
     const limit = data?.limit ?? HISTORY_PAGE_SIZE;
     const totalPages = Math.max(1, Math.ceil(total / limit));
-    
 
     return (
         <div>
-            <h3 className="text-sm font-semibold">Recent activity</h3>
+            <h3 className="text-sm font-semibold">{t('credits.recent')}</h3>
 
             {isLoading ? (
-                <div className="mt-3 space-y-2" aria-label="Loading credit activity" role="status">
+                <div className="mt-3 space-y-2" aria-label={t('credits.loading')} role="status">
                     <Skeleton className="h-9 w-full rounded-lg" />
                     <Skeleton className="h-9 w-full rounded-lg" />
                     <Skeleton className="h-9 w-full rounded-lg" />
                 </div>
             ) : (
-                <DataState
+                <LocalizedDataState
                     error={error}
                     isEmpty={events !== null && events.length === 0}
-                    emptyTitle="No credit activity yet"
-                    emptyDescription="Activity appears here when a generation settles or a new cycle is granted."
+                    emptyTitle={t('credits.emptyTitle')}
+                    emptyDescription={t('credits.emptyDescription')}
                     emptyIcon={CircleSlash}
                     onRetry={() => void refetch()}
                 >
                     <ul className="mt-3 divide-y divide-border/60 rounded-lg border border-border/60">
-                        {events?.map((event, index) => (
-                            <li
-                                key={`${event.createdAt}-${event.kind}-${index}`}
-                                className="flex items-center justify-between gap-3 px-3 py-2.5 text-sm"
-                            >
-                                <div className="min-w-0">
-                                    <p className="truncate font-medium">
-                                        {creditHistoryLabel(event)}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        {formatDate(event.createdAt, locale)} · balance{' '}
-                                        {formatCount(event.balanceAfter, locale)}
-                                    </p>
-                                </div>
-                                <DeltaBadge event={event} />
-                            </li>
-                        ))}
+                        {events?.map((event, index) => {
+                            const kindKey = creditKindKey(event.kind);
+                            return (
+                                <li
+                                    key={`${event.createdAt}-${event.kind}-${index}`}
+                                    className="flex items-center justify-between gap-3 px-3 py-2.5 text-sm"
+                                >
+                                    <div className="min-w-0">
+                                        <p className="truncate font-medium">
+                                            {creditHistoryLabel(
+                                                event,
+                                                kindKey
+                                                    ? t(`creditKinds.${kindKey}`)
+                                                    : event.kind
+                                            )}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {formatDate(event.createdAt, locale)} ·{' '}
+                                            {t('credits.balance', {
+                                                count: formatCount(event.balanceAfter, locale),
+                                            })}
+                                        </p>
+                                    </div>
+                                    <DeltaBadge event={event} />
+                                </li>
+                            );
+                        })}
                     </ul>
                     {totalPages > 1 ? (
                         <div className="mt-3 flex items-center justify-between">
@@ -176,10 +210,10 @@ function CreditHistory() {
                                 disabled={page <= 1 || isLoading}
                             >
                                 <DirIcon name="ChevronLeft" className="size-4" aria-hidden />
-                                Newer
+                                {t('credits.newer')}
                             </Button>
                             <span className="text-xs tabular-nums text-muted-foreground">
-                                Page {page} of {totalPages}
+                                {t('credits.page', { page, total: totalPages })}
                             </span>
                             <Button
                                 type="button"
@@ -189,12 +223,12 @@ function CreditHistory() {
                                 onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
                                 disabled={page >= totalPages || isLoading}
                             >
-                                Older
+                                {t('credits.older')}
                                 <DirIcon name="ChevronRight" className="size-4" aria-hidden />
                             </Button>
                         </div>
                     ) : null}
-                </DataState>
+                </LocalizedDataState>
             )}
         </div>
     );
@@ -202,6 +236,7 @@ function CreditHistory() {
 
 function DeltaBadge({ event }: { event: CreditEvent }) {
     const locale = useUrlLocale();
+    const t = useTranslations('billing');
     const sign =
         event.kind === 'grant' || event.kind === 'topup'
             ? '+'
@@ -217,7 +252,7 @@ function DeltaBadge({ event }: { event: CreditEvent }) {
     return (
         <span
             className={`shrink-0 text-sm font-medium tabular-nums ${tone}`}
-            aria-label={`amount ${event.amount}`}
+            aria-label={t('credits.amount', { amount: event.amount })}
         >
             {sign}
             {formatCount(event.amount, locale)}
