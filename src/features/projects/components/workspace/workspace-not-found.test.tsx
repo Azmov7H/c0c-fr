@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { render } from '../../../../../tests/helpers/workspace-intl';
 import { WorkspaceNotFound } from './workspace-not-found';
 
 describe('WorkspaceNotFound', () => {

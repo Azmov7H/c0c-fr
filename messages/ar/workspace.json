@@ -1,1 +1,348 @@
-{}
+{
+  "shell": {
+    "loadErrorTitle": "تعذّر تحميل هذا المشروع",
+    "loadErrorFallback": "حاول مرة أخرى بعد قليل.",
+    "retry": "إعادة المحاولة"
+  },
+  "notFound": {
+    "title": "المشروع غير موجود",
+    "description": "هذا المشروع غير متاح، أو أن الرابط غير صحيح.",
+    "back": "العودة إلى المشاريع"
+  },
+  "skeleton": {
+    "loading": "جارٍ تحميل المشروع"
+  },
+  "tabs": {
+    "loading": "جارٍ تحميل التبويب",
+    "assets": "الأصول",
+    "media": "الوسائط",
+    "preview": "معاينة",
+    "members": "الأعضاء",
+    "activity": "النشاط"
+  },
+  "header": {
+    "breadcrumb": "مسار التنقل",
+    "dashboard": "لوحة التحكم",
+    "projects": "المشاريع",
+    "titleAria": "عنوان المشروع",
+    "editTitleAria": "تعديل عنوان المشروع: {title}",
+    "updated": "آخر تحديث {time}",
+    "created": "أُنشئ {time}",
+    "restore": "استعادة",
+    "archive": "أرشفة",
+    "actionsAria": "إجراءات المشروع",
+    "duplicate": "نسخ المشروع",
+    "duplicateTitle": "{title} (نسخة)",
+    "statusMarked": "تم تعليم المشروع كـ{status}.",
+    "markAs": "تعليم كـ{status}",
+    "remove": "إزالة…",
+    "idea": "فكرة المشروع",
+    "archiveTitle": "أرشفة «{title}»؟",
+    "archiveDescription": "ينتقل المشروع إلى أرشيف المشاريع ويخرج من القائمة النشطة. يمكنك استعادته إلى المسودات لاحقًا.",
+    "keepActive": "الإبقاء نشطًا",
+    "archiveProject": "أرشفة المشروع"
+  },
+  "workflow": {
+    "loading": "جارٍ تحميل مراحل سير العمل",
+    "aria": "سير عمل الإنتاج",
+    "stageAria": "{label} — {state}",
+    "states": {
+      "completed": "مكتملة",
+      "blocked": "محجوبة",
+      "current": "المرحلة الحالية",
+      "notStarted": "لم تبدأ"
+    },
+    "stages": {
+      "creation": {
+        "label": "المشروع",
+        "detail": "{title}",
+        "empty": "لا يوجد مشروع محمّل"
+      },
+      "configuration": {
+        "label": "الإعداد",
+        "detail": "{platform} · {tone}{duration}",
+        "duration": " · {seconds}ث",
+        "empty": "غير مُعدّ"
+      },
+      "script": {
+        "label": "النص",
+        "detail": "{scenes} مشهد(ًا) · الإصدار {version}",
+        "empty": "لا يوجد نص بعد"
+      },
+      "scriptEdit": {
+        "label": "تحرير النص",
+        "blocked": "أنشئ النص أولًا",
+        "edited": "مُحرَّر · الإصدار {version}",
+        "notEdited": "لم يُحرَّر بعد · الإصدار {version}",
+        "empty": "لا يوجد نص لتحريره"
+      },
+      "thumbnail": {
+        "label": "الصورة المصغّرة",
+        "ready": "الصورة المصغّرة جاهزة",
+        "empty": "لا توجد صورة مصغّرة بعد"
+      },
+      "sceneImages": {
+        "label": "صور المشاهد",
+        "detail": "{filled} من {slots} موضع صورة ممتلئ"
+      },
+      "narration": {
+        "label": "التعليق الصوتي",
+        "ready": "التعليق الصوتي جاهز",
+        "empty": "لا يوجد تعليق صوتي بعد"
+      },
+      "sfx": {
+        "label": "المؤثرات الصوتية",
+        "detail": "{count, plural, zero {لا توجد طبقات تأثيرات} one {طبقة تأثير واحدة جاهزة} two {طبقتا تأثير جاهزتان} few {# طبقات تأثير جاهزة} many {# طبقة تأثير جاهزة} other {# طبقة تأثير جاهزة}}",
+        "empty": "لا توجد مؤثرات صوتية بعد"
+      },
+      "preview": {
+        "label": "معاينة",
+        "blocked": "أكمل مراحل الأصول لمعاينة المشروع بالكامل",
+        "ready": "كل شيء جاهز",
+        "partial": "يعرض ما هو متاح حاليًا"
+      },
+      "export": {
+        "label": "تصدير",
+        "blocked": "أنشئ نصًا للتصدير",
+        "ready": "تم التصدير مرة واحدة على الأقل",
+        "empty": "لم يتم التصدير بعد"
+      }
+    }
+  },
+  "preview": {
+    "loading": "جارٍ تحميل المعاينة",
+    "emptyTitle": "لا شيء للمعاينة بعد",
+    "emptyDescription": "أنشئ نصًا وبعض الأصول — ستظهر هنا فور توفرها.",
+    "stillMissing": "ما زال ينقص: {list}. تعرض المعاينة ما هو متاح حاليًا.",
+    "thumbnailTitle": "الصورة المصغّرة",
+    "thumbnailDescription": "الصورة الغلافية للمشروع.",
+    "thumbnailAlt": "صورة المشروع المصغّرة",
+    "imagesTitle": "صور المشاهد",
+    "imageAlt": "صورة مشهد",
+    "scriptTitle": "النص",
+    "scriptVersion": "الإصدار {version}",
+    "scriptDetail": "{scenes} مشهد(ًا) · {words} كلمة",
+    "narrationTitle": "التعليق الصوتي",
+    "narrationAria": "تشغيل التعليق الصوتي",
+    "missing": {
+      "script": "النص",
+      "thumbnail": "الصورة المصغّرة",
+      "sceneImages": "صور المشاهد",
+      "narration": "التعليق الصوتي"
+    }
+  },
+  "assets": {
+    "loading": "جارٍ تحميل الأصول",
+    "projectTitle": "المشروع",
+    "generate": "إنشاء",
+    "quotaFallback": "نفدت حصة الإنشاء.",
+    "quotaTitle": "تم بلوغ حصة الإنشاء",
+    "quotaCta": "الترقية للحصول على المزيد من عمليات الإنشاء",
+    "creditTitle": "رصيد غير كافٍ",
+    "creditCta": "اشحن الرصيد أو قم بالترقية للمتابعة",
+    "viewerNote": "دورك يتيح لك عرض الأصول فقط، دون إنشاءها أو تعديلها.",
+    "scripts": {
+      "title": "النصوص",
+      "description": "نصوص منظمة لكل مشهد من مشاهد هذا المشروع.",
+      "empty": "لا توجد نصوص بعد. {hint}",
+      "emptyEditor": "أنشئ النص الأول.",
+      "emptyViewer": "يمكن للمحرر إنشاء نص.",
+      "version": "الإصدار {version} · {scenes} مشهد(ًا)",
+      "words": "{count} كلمة"
+    },
+    "thumbnails": {
+      "title": "الصور المصغّرة",
+      "description": "مفاهيم بصرية مولّدة من فكرتك.",
+      "empty": "لا توجد صور مصغّرة بعد."
+    },
+    "audio": {
+      "title": "الصوت",
+      "description": "اقتراحات للموسيقى والمؤثرات الصوتية.",
+      "empty": "لا يوجد ملف صوتي بعد.",
+      "moodLine": "{mood} · {musicType}",
+      "tracks": "{count} مقطع"
+    },
+    "seo": {
+      "title": "تحسين محركات البحث",
+      "description": "عناوين ووسوم وكلمات مفتاحية.",
+      "empty": "لا يوجد ملف تحسين لمحركات البحث بعد."
+    },
+    "media": {
+      "title": "الوسائط",
+      "description": "صور وفيديوهات ومستندات مرفقة بالمشروع.",
+      "emptyTitle": "لا توجد وسائط بعد",
+      "emptyDescription": "الرفع يحتاج إلى مزوّد تخزين لم يُضبط بعد."
+    },
+    "accessDenied": "ليس لديك صلاحية الوصول إلى وسائط هذا المشروع."
+  },
+  "members": {
+    "validationEmail": "أدخل عنوان بريد إلكتروني صحيحًا",
+    "linkCopied": "تم نسخ رابط الدعوة.",
+    "linkCopyFailed": "تعذّر النسخ تلقائيًا. حدد الرابط وانسخه يدويًا.",
+    "loading": "جارٍ تحميل الأعضاء…",
+    "loadErrorTitle": "تعذّر تحميل الأعضاء",
+    "loadErrorFallback": "حاول مرة أخرى بعد قليل.",
+    "retry": "إعادة المحاولة",
+    "title": "الأعضاء",
+    "listAria": "أعضاء المشروع",
+    "collaborators": "تمت دعوة {used} من {limit, plural, one {# متعاون} other {# متعاونين}} في هذا المشروع.",
+    "deletedAccount": "حساب محذوف",
+    "joined": "انضم {time}",
+    "owner": "مالك المشروع",
+    "you": "(أنت)",
+    "accountUnavailable": "الحساب لم يعد متاحًا",
+    "ownerRemoveTooltip": "يمكن لمالك المشروع فقط إزالة الأعضاء، ولا يمكن إزالة المالك.",
+    "ownerRemoveAria": "لا يمكن إزالة المالك",
+    "roleAria": "دور {name}",
+    "removeAria": "إزالة {name}",
+    "nonOwnerRemoveTooltip": "يمكن لمالك المشروع فقط إزالة الأعضاء.",
+    "nonOwnerRemoveAria": "لا يمكن إزالة {name}",
+    "inviteTitle": "دعوة متعاون",
+    "inviteDescription": "سيتم إضافة {email}بالدور الذي تختاره. المالك ليس خيارًا متاحًا.",
+    "limitTitle": "تم بلوغ حد الأعضاء",
+    "limitDescription": "يمكن أن يضم هذا المشروع {limit, plural, one {# متعاون} other {# متعاونين}} حسب الخطة الحالية. يتم استخدام {used} من {limit} من مقاعد المتعاونين.",
+    "limitCta": "ترقية خطتك",
+    "onlyOwnerInvite": "يمكن لمالك المشروع فقط دعوة الأعضاء.",
+    "emailLabel": "عنوان البريد الإلكتروني",
+    "emailPlaceholder": "collaborator@example.com",
+    "roleLabel": "الدور",
+    "inviteRoleAria": "دور الدعوة",
+    "createInvite": "إنشاء دعوة",
+    "inviteDisabledNote": "أدوات الدعوة معطّلة لأن المالك فقط يمكنه إدارة الأعضاء.",
+    "pendingTitle": "الدعوات المعلّقة",
+    "pendingDescription": "تُحدَّث الدعوات المنتهية تلقائيًا كل دقيقة.",
+    "invalidTitle": "بعض الدعوات لم تعد صالحة",
+    "invalidDescription": "يمكن إلغاء الدعوات المنتهية أدناه؛ وتظهر الدعوات الملغية والمقبولة للرجوع إليها.",
+    "refresh": "تحديث",
+    "pendingLoading": "جارٍ تحميل الدعوات…",
+    "pendingEmpty": "لا توجد دعوات معلّقة.",
+    "pendingAria": "الدعوات المعلّقة",
+    "invitedByOwner": "دعوات من المالك",
+    "revoke": "إلغاء",
+    "removeTitle": "إزالة هذا المتعاون؟",
+    "removeDescription": "يفقد {name} إمكانية الوصول إلى المشروع فورًا.",
+    "removeUnknown": "هذا العضو",
+    "keepMember": "الإبقاء على العضو",
+    "removeMember": "إزالة العضو",
+    "inviteReadyTitle": "الدعوة جاهزة لـ{email}",
+    "inviteReadyDescription": "نحاول أيضًا إرسال هذا الرابط بالبريد الإلكتروني. قد لا تكون خدمة البريد مُضبطة، لذا انسخ الرابط للتأكد.",
+    "inviteLinkAria": "رابط الدعوة",
+    "copy": "نسخ",
+    "inviteExpiry": "أنت فقط من يرى هذا الرابط. تنتهي صلاحيته {expiry}.",
+    "done": "تم",
+    "inviteStates": {
+      "pending": "معلّقة",
+      "accepted": "مقبولة",
+      "revoked": "ملغية",
+      "expired": "منتهية"
+    }
+  },
+  "activity": {
+    "title": "النشاط",
+    "filterAria": "تصفية النشاط حسب النوع",
+    "loading": "جارٍ تحميل النشاط",
+    "errorTitle": "تعذّر تحميل النشاط",
+    "errorFallback": "حاول مرة أخرى بعد قليل.",
+    "retry": "إعادة المحاولة",
+    "emptyTitle": "لا يوجد نشاط بعد",
+    "emptyDescription": "ستظهر الدعوات وتغييرات الأعضاء وعمليات الإنشاء هنا أثناء عمل فريقك.",
+    "filteredTitle": "لا يوجد نشاط يطابق هذا المرشّح",
+    "filteredDescription": "جرّب نوع نشاط آخر، أو اعرض كل شيء.",
+    "showAll": "عرض كل النشاطات",
+    "listAria": "نشاط المشروع",
+    "someone": "شخص ما",
+    "asRole": " كـ{role}",
+    "pageOf": "صفحة {page} من {total} · {count} حدث",
+    "previous": "السابق",
+    "next": "التالي",
+    "types": {
+      "memberAdded": "أضاف عضوًا",
+      "memberRemoved": "أزال عضوًا",
+      "roleChanged": "غيّر دورًا",
+      "inviteCreated": "أرسل دعوة",
+      "inviteAccepted": "قبل دعوة",
+      "inviteRevoked": "ألغى دعوة",
+      "scriptGenerated": "أنشأ نصًا",
+      "thumbnailGenerated": "أنشأ صورة مصغّرة",
+      "audioGenerated": "أنشأ صوتًا"
+    },
+    "filters": {
+      "all": "كل النشاطات",
+      "memberAdded": "الأعضاء المضافون",
+      "memberRemoved": "الأعضاء المزالون",
+      "roleChanged": "تغييرات الأدوار",
+      "inviteCreated": "الدعوات المرسلة",
+      "inviteAccepted": "الدعوات المقبولة",
+      "inviteRevoked": "الدعوات الملغية",
+      "scriptGenerated": "النصوص",
+      "thumbnailGenerated": "الصور المصغّرة",
+      "audioGenerated": "الصوت"
+    }
+  },
+  "export": {
+    "aria": "تصدير المشروع",
+    "scopeAria": "نطاق التصدير",
+    "preparing": "جارٍ التحضير…",
+    "preparingStatus": "جارٍ تحضير التصدير…",
+    "export": "تصدير",
+    "costPending": " · التكلفة قيد التحديد",
+    "creditCost": " · {count} رصيد",
+    "allowanceLeft": " · متبقٍ {remaining} من {limit, plural, one {# تصدير مجاني} other {# صادرات مجانية}}",
+    "history": "سجل التصدير",
+    "historyCredits": "{count} رصيد",
+    "filenameFallback": "مشروع",
+    "blockedAllowance": "لقد استخدمت {limit, plural, one {# تصدير مجاني} other {# صادرات مجانية}} لهذا المشروع.",
+    "blockedPricing": "تفتح عمليات التصدير المدفوعة بمجرد نشر سعر التصدير. تصديرك المجاني غير متأثر.",
+    "blockedNothing": "لا شيء للتصدير بعد — أنشئ نصًا أو بعض الأصول أولًا.",
+    "statusCompleted": "مكتمل",
+    "statusFailed": "فشل",
+    "statusInProgress": "قيد التنفيذ",
+    "failureCancelled": "أُلغي — لم يتم تحصيل أي رسوم.",
+    "failureAllowance": "رُفض — التصدير المجاني مستخدم بالفعل.",
+    "failureNone": "لم يتم تحصيل أي رسوم.",
+    "toastDownloaded": "تم تنزيل التصدير",
+    "toastFailed": "فشل التصدير. تحقق من وجود الأصول وأعد المحاولة.",
+    "toastAllowance": "لقد استخدمت تصديرك المجاني لهذا المشروع.",
+    "toastPricing": "تفتح عمليات التصدير المدفوعة بمجرد نشر سعر التصدير.",
+    "toastNothing": "لا شيء للتصدير بعد.",
+    "scopes": {
+      "full": "كامل (الكل)",
+      "script": "النص",
+      "images": "الصور",
+      "audio": "الصوت",
+      "media": "الوسائط + النص"
+    }
+  },
+  "collab": {
+    "roleChanged": "تم تغيير الدور إلى {role}.",
+    "roleFailed": "فشل تغيير الدور.",
+    "memberRemoved": "تمت إزالة العضو من المشروع.",
+    "memberRemoveFailed": "فشل إزالة العضو.",
+    "inviteCreated": "تم إنشاء الدعوة. شارك الرابط أدناه.",
+    "inviteFailed": "فشل إنشاء الدعوة.",
+    "inviteRevoked": "تم إلغاء الدعوة.",
+    "inviteRevokeFailed": "فشل إلغاء الدعوة."
+  },
+  "expiry": {
+    "expired": "منتهية",
+    "days": "تنتهي خلال {days} يوم",
+    "hours": "تنتهي خلال {hours, plural, one {# ساعة} other {# ساعات}}",
+    "minutes": "تنتهي خلال {minutes, plural, one {# دقيقة} other {# دقائق}}"
+  },
+  "generation": {
+    "remaining": "متبقٍ {remaining} {noun} هذا الشهر",
+    "unlimited": "{feature} غير محدود",
+    "credits": "{balance} رصيد",
+    "nouns": {
+      "generation": "عملية إنشاء"
+    }
+  },
+  "time": {
+    "unknownDate": "تاريخ غير معروف",
+    "unknownTime": "وقت غير معروف"
+  },
+  "media": {
+    "loading": "جارٍ تحميل الوسائط",
+    "playbackAria": "تشغيل {title}"
+  }
+}

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import { WorkspaceIntlProvider } from '../../../../../tests/helpers/workspace-intl';
 import type {
     ExportEstimate,
     ExportRecordView,
@@ -69,9 +70,11 @@ function renderExport() {
         defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
     });
     return render(
-        <QueryClientProvider client={client}>
-            <ProjectExport projectId="project-1" title="My Project" />
-        </QueryClientProvider>
+        <WorkspaceIntlProvider>
+            <QueryClientProvider client={client}>
+                <ProjectExport projectId="project-1" title="My Project" />
+            </QueryClientProvider>
+        </WorkspaceIntlProvider>
     );
 }
 

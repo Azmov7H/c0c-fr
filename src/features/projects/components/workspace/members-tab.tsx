@@ -2,6 +2,7 @@
 
 import { useUrlLocale } from '@/i18n/locale';
 import { useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
@@ -51,7 +52,6 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuthStore } from '@/store/auth-store';
 import { toApiError } from '@/lib/api-error';
-import { formatRelativeTime } from '@/lib/relative-time';
 
 import {
     useCreateInvite,
@@ -61,7 +61,13 @@ import {
     useRevokeInvite,
     useUpdateMemberRole,
 } from '../../hooks/use-collaboration';
-import { can, grantableRoles, ROLE_DESCRIPTION, ROLE_LABEL } from '../../lib/permissions';
+import { can, grantableRoles } from '../../lib/permissions';
+import { roleDescription, roleLabel } from '../../lib/projects-labels';
+import {
+    expiryLabel,
+    inviteStateLabel,
+    workspaceRelativeTime,
+} from '../../lib/workspace-labels';
 import type {
     CreateInviteResponse,
     ProjectMember,
@@ -69,12 +75,7 @@ import type {
     ProjectRole,
 } from '../../types';
 
-const inviteSchema = z.object({
-    email: z.string().trim().email('Enter a valid email address').max(254),
-    role: z.enum(['editor', 'commenter', 'viewer']),
-});
-
-type InviteValues = z.infer<typeof inviteSchema>;
+type InviteValues = { email: string; role: ProjectMemberRole };
 
 const ROLE_STYLE: Record<ProjectRole, string> = {
     owner: 'bg-primary/10 text-primary border-primary/20',
@@ -86,18 +87,10 @@ const ROLE_STYLE: Record<ProjectRole, string> = {
 const initials = (firstName?: string, lastName?: string) =>
     `${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase() || '?';
 
-const expiresIn = (iso: string): string => {
-    const ms = new Date(iso).getTime() - Date.now();
-    if (Number.isNaN(ms) || ms <= 0) return 'expired';
-    const hours = Math.floor(ms / 3_600_000);
-    if (hours >= 48) return `expires in ${Math.floor(hours / 24)} days`;
-    if (hours >= 1) return `expires in ${hours} hour${hours === 1 ? '' : 's'}`;
-    const minutes = Math.max(1, Math.floor(ms / 60_000));
-    return `expires in ${minutes} minute${minutes === 1 ? '' : 's'}`;
-};
-
 export function MembersTab({ projectId, role }: { projectId: string; role: ProjectRole }) {
     const locale = useUrlLocale();
+    const t = useTranslations('workspace');
+    const tp = useTranslations('projects');
     const currentUserId = useAuthStore((state) => state.user?.id ?? '');
     const { data, isLoading, error, refetch } = useProjectMembers(projectId);
     const invitesQuery = useProjectInvites(projectId);
@@ -108,6 +101,17 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
 
     const [removeTarget, setRemoveTarget] = useState<ProjectMember | null>(null);
     const [createdInvite, setCreatedInvite] = useState<CreateInviteResponse | null>(null);
+
+    // The validation message is catalog copy, so the schema is built where the
+    // translator lives; `useMemo` keeps the resolver identity stable per locale.
+    const inviteSchema = useMemo(
+        () =>
+            z.object({
+                email: z.string().trim().email(t('members.validationEmail')).max(254),
+                role: z.enum(['editor', 'commenter', 'viewer']),
+            }),
+        [t]
+    );
 
     const form = useForm<InviteValues>({
         resolver: zodResolver(inviteSchema),
@@ -149,23 +153,23 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
         if (!createdInvite) return;
         try {
             await navigator.clipboard.writeText(createdInvite.acceptUrl);
-            toast.success('Invite link copied.');
+            toast.success(t('members.linkCopied'));
         } catch {
-            toast.error('Could not copy automatically. Select the link and copy it manually.');
+            toast.error(t('members.linkCopyFailed'));
         }
     };
 
     if (isLoading) {
-        return <p className="text-sm text-muted-foreground" role="status">Loading members…</p>;
+        return <p className="text-sm text-muted-foreground" role="status">{t('members.loading')}</p>;
     }
     if (error || !data) {
         return (
             <Alert variant="destructive">
                 <ShieldAlert />
-                <AlertTitle>Could not load members</AlertTitle>
+                <AlertTitle>{t('members.loadErrorTitle')}</AlertTitle>
                 <AlertDescription className="flex items-center gap-3">
-                    {toApiError(error, 'Try again in a moment.').message}
-                    <Button variant="outline" className="h-11" onClick={() => refetch()}>Retry</Button>
+                    {toApiError(error, t('members.loadErrorFallback')).message}
+                    <Button variant="outline" className="h-11" onClick={() => refetch()}>{t('members.retry')}</Button>
                 </AlertDescription>
             </Alert>
         );
@@ -189,58 +193,62 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                     <div>
                         <CardTitle className="flex items-center gap-2">
                             <Users className="size-5" aria-hidden="true" />
-                            Members
+                            {t('members.title')}
                         </CardTitle>
                         <CardDescription>
-                            {data.usedSlots} of {data.memberLimit} collaborator
-                            {data.memberLimit === 1 ? '' : 's'} invited on this project.
+                            {t('members.collaborators', {
+                                used: data.usedSlots,
+                                limit: data.memberLimit,
+                            })}
                         </CardDescription>
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <ul className="divide-y divide-border/60" aria-label="Project members">
+                    <ul className="divide-y divide-border/60" aria-label={t('members.listAria')}>
                         {roster.map((member) => {
                             const isOwner = member.role === 'owner';
                             const displayRole = member.role as ProjectRole;
                             const name = member.user
                                 ? [member.user.firstName, member.user.lastName].filter(Boolean).join(' ') || member.user.email
-                                : 'Deleted account';
+                                : t('members.deletedAccount');
                             const joined = 'joinedAt' in member && member.joinedAt
-                                ? `Joined ${formatRelativeTime(member.joinedAt, locale).relative}`
-                                : 'Project owner';
+                                ? t('members.joined', {
+                                      time: workspaceRelativeTime(t, member.joinedAt, locale),
+                                  })
+                                : t('members.owner');
                             return (
                                 <li key={member.userId} className="flex flex-wrap items-center gap-3 py-4">
                                     <Avatar className="size-10">
                                         {member.user?.avatar && (
                                             <AvatarImage src={member.user.avatar} alt="" />
                                         )}
-                                        <AvatarFallback>{initials(member.user?.firstName, member.user?.lastName)}</AvatarFallback>
+                                        <AvatarFallback><bdi>{initials(member.user?.firstName, member.user?.lastName)}</bdi></AvatarFallback>
                                     </Avatar>
                                     <div className="min-w-0 flex-1">
                                         <p className="flex flex-wrap items-center gap-2 font-medium">
-                                            <span className="truncate">{name}</span>
+                                            <span className="truncate"><bdi>{name}</bdi></span>
                                             {member.userId === currentUserId && (
-                                                <span className="text-xs text-muted-foreground">(you)</span>
+                                                <span className="text-xs text-muted-foreground">{t('members.you')}</span>
                                             )}
                                             <Badge variant="outline" className={ROLE_STYLE[displayRole]}>
-                                                {ROLE_LABEL[displayRole]}
+                                                {roleLabel(tp, displayRole)}
                                             </Badge>
                                         </p>
                                         <p className="truncate text-xs text-muted-foreground">
-                                            {member.user?.email ?? 'Account no longer available'} · {joined}
+                                            <bdi>{member.user?.email ?? t('members.accountUnavailable')}</bdi> · {joined}
                                         </p>
                                     </div>
 
                                     {isOwner ? (
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <span tabIndex={0} className="cursor-not-allowed" title="Only the project owner can remove members, and the owner cannot be removed.">
-                                                    <Button variant="ghost" size="icon" className="size-11" disabled aria-label="Owner cannot be removed">
+                                                <span tabIndex={0} className="cursor-not-allowed" title={t('members.ownerRemoveTooltip')}>
+                                                    <Button variant="ghost" size="icon" className="size-11" disabled aria-label={t('members.ownerRemoveAria')}>
                                                         <Trash2 className="size-4" aria-hidden="true" />
                                                     </Button>
                                                 </span>
                                             </TooltipTrigger>
-                                            <TooltipContent>Only the project owner can remove members, and the owner cannot be removed.</TooltipContent>
+                                            <TooltipContent>{t('members.ownerRemoveTooltip')}</TooltipContent>
                                         </Tooltip>
                                     ) : mayManage ? (
                                         <div className="flex items-center gap-1">
@@ -254,13 +262,13 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                                                 }
                                                 disabled={updateRole.isPending}
                                             >
-                                                <SelectTrigger className="h-11 w-36" aria-label={`Role for ${name}`}>
+                                                <SelectTrigger className="h-11 w-36" aria-label={t('members.roleAria', { name })}>
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {roles.map((option) => (
                                                         <SelectItem key={option} value={option}>
-                                                            {ROLE_LABEL[option]}
+                                                            {roleLabel(tp, option)}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
@@ -269,7 +277,7 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                                                 variant="ghost"
                                                 size="icon"
                                                 className="size-11 text-destructive"
-                                                aria-label={`Remove ${name}`}
+                                                aria-label={t('members.removeAria', { name })}
                                                 onClick={() => setRemoveTarget(member)}
                                             >
                                                 <Trash2 className="size-4" aria-hidden="true" />
@@ -278,13 +286,13 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                                     ) : (
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <span tabIndex={0} className="cursor-not-allowed" title="Only the project owner can remove members.">
-                                                    <Button variant="ghost" size="icon" className="size-11" disabled aria-label={`Cannot remove ${name}`}>
+                                                <span tabIndex={0} className="cursor-not-allowed" title={t('members.nonOwnerRemoveTooltip')}>
+                                                    <Button variant="ghost" size="icon" className="size-11" disabled aria-label={t('members.nonOwnerRemoveAria', { name })}>
                                                         <Trash2 className="size-4" aria-hidden="true" />
                                                     </Button>
                                                 </span>
                                             </TooltipTrigger>
-                                            <TooltipContent>Only the project owner can remove members.</TooltipContent>
+                                            <TooltipContent>{t('members.nonOwnerRemoveTooltip')}</TooltipContent>
                                         </Tooltip>
                                     )}
                                 </li>
@@ -298,18 +306,21 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <MailPlus className="size-5" aria-hidden="true" />
-                        Invite a collaborator
+                        {t('members.inviteTitle')}
                     </CardTitle>
                     <CardDescription>
-                        They get {email ? `${email} ` : ''}added with the role you choose. Owner is never an option.
+                        {t('members.inviteDescription', { email: email ? `${email} ` : '' })}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {atLimit && (
                         <UpgradePrompt
-                            title="Member limit reached"
-                            description={`This project can have ${data.memberLimit} collaborator${data.memberLimit === 1 ? '' : 's'} on its current plan. ${data.usedSlots} of ${data.memberLimit} collaborator slots are in use.`}
-                            ctaLabel="Upgrade your plan"
+                            title={t('members.limitTitle')}
+                            description={t('members.limitDescription', {
+                                used: data.usedSlots,
+                                limit: data.memberLimit,
+                            })}
+                            ctaLabel={t('members.limitCta')}
                             feature="project.members"
                             used={data.usedSlots}
                             limit={data.memberLimit}
@@ -317,7 +328,7 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                     )}
                     {!mayManage && (
                         <p className="text-sm text-muted-foreground">
-                            Only the project owner can invite members.
+                            {t('members.onlyOwnerInvite')}
                         </p>
                     )}
 
@@ -328,13 +339,13 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                                 name="email"
                                 render={({ field }) => (
                                     <FormItem className="flex-1">
-                                        <FormLabel>Email address</FormLabel>
+                                        <FormLabel>{t('members.emailLabel')}</FormLabel>
                                         <FormControl>
                                             <Input
                                                 {...field}
                                                 type="email"
                                                 autoComplete="email"
-                                                placeholder="collaborator@example.com"
+                                                placeholder={t('members.emailPlaceholder')}
                                                 className="h-11"
                                                 disabled={!mayManage || atLimit}
                                             />
@@ -348,21 +359,21 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                                 name="role"
                                 render={({ field }) => (
                                     <FormItem className="sm:w-40">
-                                        <FormLabel>Role</FormLabel>
+                                        <FormLabel>{t('members.roleLabel')}</FormLabel>
                                         <Select
                                             value={field.value}
                                             onValueChange={field.onChange}
                                             disabled={!mayManage || atLimit}
                                         >
                                             <FormControl>
-                                                <SelectTrigger className="h-11" aria-label="Role for the invite">
+                                                <SelectTrigger className="h-11" aria-label={t('members.inviteRoleAria')}>
                                                     <SelectValue />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
                                                 {roles.map((option) => (
                                                     <SelectItem key={option} value={option}>
-                                                        {ROLE_LABEL[option]}
+                                                        {roleLabel(tp, option)}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -379,16 +390,16 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                                 {createInvite.isPending ? (
                                     <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />
                                 ) : null}
-                                Create invite
+                                {t('members.createInvite')}
                             </Button>
                         </form>
                     </Form>
                     <p className="text-xs text-muted-foreground">
-                        {ROLE_DESCRIPTION[inviteRole]}
+                        {roleDescription(tp, inviteRole)}
                     </p>
                     {!mayManage && (
                         <p className="text-xs text-muted-foreground">
-                            Invite controls are disabled because only the owner can manage members.
+                            {t('members.inviteDisabledNote')}
                         </p>
                     )}
                 </CardContent>
@@ -398,36 +409,36 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Clock className="size-5" aria-hidden="true" />
-                        Pending invites
+                        {t('members.pendingTitle')}
                     </CardTitle>
-                    <CardDescription>Expired invites refresh automatically every minute.</CardDescription>
+                    <CardDescription>{t('members.pendingDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     {expiredInvites.length > 0 && (
                         <Alert className="mb-4">
                             <Clock />
-                            <AlertTitle>Some invites are no longer valid</AlertTitle>
+                            <AlertTitle>{t('members.invalidTitle')}</AlertTitle>
                             <AlertDescription className="flex items-center justify-between gap-3">
-                                Expired invites can still be revoked below; revoked and accepted invites are shown for reference.
+                                {t('members.invalidDescription')}
                                 <Button variant="outline" className="h-11" onClick={() => invitesQuery.refetch()}>
-                                    Refresh
+                                    {t('members.refresh')}
                                 </Button>
                             </AlertDescription>
                         </Alert>
                     )}
                     {invitesQuery.isLoading ? (
-                        <p className="text-sm text-muted-foreground" role="status">Loading invites…</p>
+                        <p className="text-sm text-muted-foreground" role="status">{t('members.pendingLoading')}</p>
                     ) : (invitesQuery.data ?? []).length === 0 ? (
-                        <p className="text-sm text-muted-foreground">No pending invites.</p>
+                        <p className="text-sm text-muted-foreground">{t('members.pendingEmpty')}</p>
                     ) : (
-                        <ul className="divide-y divide-border/60" aria-label="Pending invites">
+                        <ul className="divide-y divide-border/60" aria-label={t('members.pendingAria')}>
                             {(invitesQuery.data ?? []).map((invite) => (
                                 <li key={invite.id} className="flex flex-wrap items-center gap-3 py-3">
                                     <div className="min-w-0 flex-1">
-                                        <p className="truncate text-sm font-medium">{invite.email}</p>
+                                        <p className="truncate text-sm font-medium"><bdi>{invite.email}</bdi></p>
                                         <p className="text-xs text-muted-foreground">
-                                            {ROLE_LABEL[invite.role]} · invites by owner · {expiresIn(invite.expiresAt)}
-                                            {invite.state !== 'pending' ? ` · ${invite.state}` : ''}
+                                            {roleLabel(tp, invite.role)} · {t('members.invitedByOwner')} · {expiryLabel(t, invite.expiresAt)}
+                                            {invite.state !== 'pending' ? ` · ${inviteStateLabel(t, invite.state)}` : ''}
                                         </p>
                                     </div>
                                     <Button
@@ -437,7 +448,7 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                                         onClick={() => revokeInvite.mutate(invite.id)}
                                     >
                                         <X className="me-2 size-4" aria-hidden="true" />
-                                        Revoke
+                                        {t('members.revoke')}
                                     </Button>
                                 </li>
                             ))}
@@ -449,14 +460,16 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
             <Dialog open={!!removeTarget} onOpenChange={(open) => !open && setRemoveTarget(null)}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Remove this collaborator?</DialogTitle>
+                        <DialogTitle>{t('members.removeTitle')}</DialogTitle>
                         <DialogDescription>
-                            {removeTarget?.user?.email ?? 'This member'} immediately loses access to the project.
+                            {t('members.removeDescription', {
+                                name: removeTarget?.user?.email ?? t('members.removeUnknown'),
+                            })}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                         <Button variant="outline" className="h-11" onClick={() => setRemoveTarget(null)}>
-                            Keep member
+                            {t('members.keepMember')}
                         </Button>
                         <Button
                             variant="destructive"
@@ -470,7 +483,7 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
                             }}
                         >
                             {removeMember.isPending && <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />}
-                            Remove member
+                            {t('members.removeMember')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -479,25 +492,27 @@ export function MembersTab({ projectId, role }: { projectId: string; role: Proje
             <Dialog open={!!createdInvite} onOpenChange={(open) => !open && setCreatedInvite(null)}>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>Invite ready for {createdInvite?.email}</DialogTitle>
+                        <DialogTitle>{t('members.inviteReadyTitle', { email: createdInvite?.email ?? '' })}</DialogTitle>
                         <DialogDescription>
-                            We also try to email this link. Email delivery may not be configured yet, so copy the link to be sure.
+                            {t('members.inviteReadyDescription')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex items-center gap-2">
-                        <Input readOnly value={createdInvite?.acceptUrl ?? ''} aria-label="Invite link" className="h-11 font-mono text-xs" />
+                        <Input readOnly dir="ltr" value={createdInvite?.acceptUrl ?? ''} aria-label={t('members.inviteLinkAria')} className="h-11 font-mono text-xs" />
                         <Button type="button" className="h-11" onClick={copyUrl}>
                             <Copy className="me-2 size-4" aria-hidden="true" />
-                            Copy
+                            {t('members.copy')}
                         </Button>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                        Only you can see this link. It expires {createdInvite ? expiresIn(createdInvite.expiresAt) : ''}.
+                        {t('members.inviteExpiry', {
+                            expiry: createdInvite ? expiryLabel(t, createdInvite.expiresAt) : '',
+                        })}
                     </p>
                     <DialogFooter>
                         <Button variant="outline" className="h-11" onClick={() => setCreatedInvite(null)}>
                             <Check className="me-2 size-4" aria-hidden="true" />
-                            Done
+                            {t('members.done')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
