@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import { ProjectsIntlProvider } from '../../../../tests/helpers/projects-intl';
 import { InviteLanding } from './invite-landing';
 import { projectInvitesService } from '../services/collaboration.service';
 
@@ -30,9 +31,11 @@ const renderLanding = () => {
         defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
     });
     return render(
-        <QueryClientProvider client={client}>
-            <InviteLanding token="tok_test" />
-        </QueryClientProvider>
+        <ProjectsIntlProvider>
+            <QueryClientProvider client={client}>
+                <InviteLanding token="tok_test" />
+            </QueryClientProvider>
+        </ProjectsIntlProvider>
     );
 };
 

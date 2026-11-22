@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { CheckCircle2, Loader2, MailX, Users } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -11,11 +12,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/store/auth-store';
 import { projectInvitesService } from '../services/collaboration.service';
-import { ROLE_DESCRIPTION, ROLE_LABEL } from '../lib/permissions';
-
-const invalidCopy = 'This invite link is not valid. It may have expired, been revoked, or already used.';
+import { roleDescription, roleLabel } from '../lib/projects-labels';
 
 export function InviteLanding({ token }: { token: string }) {
+    const t = useTranslations('projects');
     const router = useRouter();
     const authenticated = useAuthStore((state) => state.isAuthenticated);
     const preview = useQuery({
@@ -59,15 +59,15 @@ export function InviteLanding({ token }: { token: string }) {
             <Card className="w-full max-w-md">
                 <CardHeader className="items-center text-center">
                     <MailX className="mb-2 size-10 text-muted-foreground" aria-hidden="true" />
-                    <CardTitle>Invite unavailable</CardTitle>
-                    <CardDescription>{invalidCopy}</CardDescription>
+                    <CardTitle>{t('invite.unavailableTitle')}</CardTitle>
+                    <CardDescription>{t('invite.invalidCopy')}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-2">
                     <Button asChild className="h-11">
-                        <Link href="/login">Sign in</Link>
+                        <Link href="/login">{t('invite.signIn')}</Link>
                     </Button>
                     <Button asChild variant="outline" className="h-11">
-                        <Link href="/projects">Go to projects</Link>
+                        <Link href="/projects">{t('invite.goToProjects')}</Link>
                     </Button>
                 </CardContent>
             </Card>
@@ -86,9 +86,12 @@ export function InviteLanding({ token }: { token: string }) {
             <Card className="w-full max-w-md">
                 <CardHeader className="items-center text-center">
                     <CheckCircle2 className="mb-2 size-10 text-success" aria-hidden="true" />
-                    <CardTitle>You are in</CardTitle>
+                    <CardTitle>{t('invite.youAreInTitle')}</CardTitle>
                     <CardDescription>
-                        You joined “{invite.projectName}” as {ROLE_LABEL[invite.role].toLowerCase()}.
+                        {t('invite.joinedDescription', {
+                            project: `“${invite.projectName}”`,
+                            role: roleLabel(t, invite.role).toLowerCase(),
+                        })}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -96,7 +99,7 @@ export function InviteLanding({ token }: { token: string }) {
                         className="h-11 w-full"
                         onClick={() => router.push(`/projects/${accept.data.projectId}`)}
                     >
-                        Open project
+                        {t('invite.openProject')}
                     </Button>
                 </CardContent>
             </Card>
@@ -108,14 +111,16 @@ export function InviteLanding({ token }: { token: string }) {
             <Card className="w-full max-w-md">
                 <CardHeader className="items-center text-center">
                     <Users className="mb-2 size-10 text-primary" aria-hidden="true" />
-                    <CardTitle>You already have access</CardTitle>
+                    <CardTitle>{t('invite.alreadyMemberTitle')}</CardTitle>
                     <CardDescription>
-                        You are already a member of “{invite.projectName}”.
+                        {t('invite.alreadyMemberDescription', {
+                            project: `“${invite.projectName}”`,
+                        })}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Button asChild className="h-11 w-full">
-                        <Link href="/projects">Open your projects</Link>
+                        <Link href="/projects">{t('invite.openYourProjects')}</Link>
                     </Button>
                 </CardContent>
             </Card>
@@ -125,20 +130,23 @@ export function InviteLanding({ token }: { token: string }) {
     return (
         <Card className="w-full max-w-md">
             <CardHeader>
-                <CardTitle>Join “{invite.projectName}”</CardTitle>
+                <CardTitle>{t('invite.joinTitle', { project: `“${invite.projectName}”` })}</CardTitle>
                 <CardDescription>
-                    {invite.inviterName} invited you as {ROLE_LABEL[invite.role].toLowerCase()}.{' '}
-                    {ROLE_DESCRIPTION[invite.role]}
+                    {t('invite.joinDescription', {
+                        inviter: invite.inviterName,
+                        role: roleLabel(t, invite.role).toLowerCase(),
+                        description: roleDescription(t, invite.role),
+                    })}
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                    This invite expires in {days} day{days === 1 ? '' : 's'}.
+                    {t('invite.expiresIn', { count: days })}
                 </p>
 
                 {accept.isError && !alreadyMember && (
                     <p className="text-sm text-destructive" role="alert">
-                        {invalidCopy}
+                        {t('invite.invalidCopy')}
                     </p>
                 )}
 
@@ -149,18 +157,18 @@ export function InviteLanding({ token }: { token: string }) {
                         onClick={() => accept.mutate()}
                     >
                         {accept.isPending && <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />}
-                        Accept invite
+                        {t('invite.accept')}
                     </Button>
                 ) : (
                     <div className="space-y-2">
                         <Button asChild className="h-11 w-full">
                             <Link href={`/login?callbackUrl=${encodeURIComponent(`/invites/${token}`)}`}>
-                                Sign in to accept
+                                {t('invite.signInToAccept')}
                             </Link>
                         </Button>
                         <Button asChild variant="outline" className="h-11 w-full">
                             <Link href={`/signup?callbackUrl=${encodeURIComponent(`/invites/${token}`)}`}>
-                                Create an account
+                                {t('invite.createAccount')}
                             </Link>
                         </Button>
                     </div>

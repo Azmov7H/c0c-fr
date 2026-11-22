@@ -3,7 +3,10 @@ import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 
+import { ProjectsIntlProvider } from '../../../../tests/helpers/projects-intl';
 import { ProjectsView } from './projects-view';
+
+const renderView = () => render(<ProjectsIntlProvider><ProjectsView /></ProjectsIntlProvider>);
 
 const mocks = vi.hoisted(() => ({
     query: '',
@@ -41,7 +44,7 @@ describe('ProjectsView empty states', () => {
     });
 
     it('offers creation when the account has no projects at all', () => {
-        render(<ProjectsView />);
+        renderView();
 
         expect(screen.getByText('No projects yet')).toBeTruthy();
         expect(screen.queryByText('No projects match these filters')).toBeNull();
@@ -52,7 +55,7 @@ describe('ProjectsView empty states', () => {
 
     it('offers to clear filters when a search matches nothing', () => {
         mocks.query = 'q=nothing-matches';
-        render(<ProjectsView />);
+        renderView();
 
         expect(screen.getByText('No projects match these filters')).toBeTruthy();
         expect(screen.queryByText('No projects yet')).toBeNull();
@@ -64,7 +67,7 @@ describe('ProjectsView empty states', () => {
 
     it('shows the archive as its own view with a way back', () => {
         mocks.query = 'status=archived';
-        render(<ProjectsView />);
+        renderView();
 
         expect(screen.getByText('Project archive')).toBeTruthy();
         expect(screen.getByText('No archived projects')).toBeTruthy();

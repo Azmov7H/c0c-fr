@@ -1,17 +1,11 @@
-import { Facebook, Instagram, PlaySquare, Youtube } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { Platform, ProjectStatus } from '@/types';
 
-import { PLATFORM_LABEL, STATUS_LABEL } from '../lib/project-constants';
-
-const PLATFORM_ICON: Record<Platform, typeof Youtube> = {
-    youtube: Youtube,
-    tiktok: PlaySquare,
-    instagram: Instagram,
-    facebook: Facebook,
-};
+import { PLATFORM_ICON } from '../lib/project-constants';
+import { platformLabel, statusLabel } from '../lib/projects-labels';
 
 const STATUS_STYLE: Record<ProjectStatus, string> = {
     draft: 'bg-warning/10 text-warning border-warning/20',
@@ -29,18 +23,20 @@ const PLATFORM_STYLE: Record<Platform, string> = {
 
 export function PlatformBadge({ platform }: { platform: Platform }) {
     const Icon = PLATFORM_ICON[platform];
+    const t = useTranslations('projects');
     return (
         <Badge variant="outline" className={cn('gap-1.5 font-medium', PLATFORM_STYLE[platform])}>
             <Icon className="size-3" aria-hidden="true" />
-            {PLATFORM_LABEL[platform]}
+            {platformLabel(t, platform)}
         </Badge>
     );
 }
 
 export function StatusBadge({ status }: { status: ProjectStatus }) {
+    const t = useTranslations('projects');
     return (
         <Badge variant="outline" className={cn('font-medium', STATUS_STYLE[status])}>
-            {STATUS_LABEL[status]}
+            {statusLabel(t, status)}
         </Badge>
     );
 }

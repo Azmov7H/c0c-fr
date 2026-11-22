@@ -4,8 +4,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { ApiError } from '@/lib/api-error';
+import { ProjectsIntlProvider } from '../../../../tests/helpers/projects-intl';
 import { writeProjectDraft } from '../lib/project-draft';
 import { NewProjectWizard } from './new-project-wizard';
+
+const renderWizard = (ui: React.ReactElement) =>
+    render(<ProjectsIntlProvider>{ui}</ProjectsIntlProvider>);
 
 interface CreateCallbacks {
     onSuccess: (project: { _id: string }) => void;
@@ -74,7 +78,7 @@ afterEach(() => {
 
 describe('NewProjectWizard', () => {
     it('cannot submit twice while the first request is in flight', async () => {
-        render(<NewProjectWizard />);
+        renderWizard(<NewProjectWizard />);
         await goToReview();
 
         const submit = screen.getByRole('button', { name: /^Create/ });
@@ -95,7 +99,7 @@ describe('NewProjectWizard', () => {
             );
         });
 
-        render(<NewProjectWizard />);
+        renderWizard(<NewProjectWizard />);
         await goToReview();
         fireEvent.click(screen.getByRole('button', { name: /^Create/ }));
 
@@ -114,7 +118,7 @@ describe('NewProjectWizard', () => {
             2
         );
 
-        render(<NewProjectWizard />);
+        renderWizard(<NewProjectWizard />);
 
         expect(await screen.findByText(/draft restored from/i)).toBeTruthy();
         // The draft was saved on step 2, so step 1 is one Back away.
@@ -136,7 +140,7 @@ describe('NewProjectWizard', () => {
             options.onSuccess({ _id: 'new-project-id' });
         });
 
-        render(<NewProjectWizard />);
+        renderWizard(<NewProjectWizard />);
 
         await waitFor(() =>
             expect((screen.getByLabelText('The idea') as HTMLTextAreaElement).value).toContain(
@@ -167,7 +171,7 @@ describe('NewProjectWizard', () => {
             options.onSuccess({ _id: 'from-palette' });
         });
 
-        render(<NewProjectWizard returnTo="projects" />);
+        renderWizard(<NewProjectWizard returnTo="projects" />);
         await goToReview();
         fireEvent.click(screen.getByRole('button', { name: /^Create/ }));
 

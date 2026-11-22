@@ -1,6 +1,7 @@
 'use client';
 
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -33,15 +34,15 @@ export function DeleteProjectDialog({
     onOpenChange,
     onConfirm,
 }: DeleteProjectDialogProps) {
+    const t = useTranslations('projects');
     return (
         <Dialog open={open} onOpenChange={(next) => !isPending && onOpenChange(next)}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Remove {project ? `“${project.title}”` : 'this project'}?</DialogTitle>
-                    <DialogDescription>
-                        It disappears from your workspace. The server keeps an archived record, but
-                        this app cannot restore it yet.
-                    </DialogDescription>
+                    <DialogTitle>
+                        {project ? t('deleteDialog.titleWithProject', { title: project.title }) : t('deleteDialog.fallbackTitle')}
+                    </DialogTitle>
+                    <DialogDescription>{t('deleteDialog.description')}</DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
                     <Button
@@ -51,7 +52,7 @@ export function DeleteProjectDialog({
                         onClick={() => onOpenChange(false)}
                         disabled={isPending}
                     >
-                        Keep project
+                        {t('deleteDialog.keep')}
                     </Button>
                     <Button
                         type="button"
@@ -63,10 +64,10 @@ export function DeleteProjectDialog({
                         {isPending ? (
                             <>
                                 <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />
-                                Removing…
+                                {t('deleteDialog.removing')}
                             </>
                         ) : (
-                            'Remove project'
+                            t('deleteDialog.remove')
                         )}
                     </Button>
                 </DialogFooter>
