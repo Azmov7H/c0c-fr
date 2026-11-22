@@ -26,14 +26,25 @@ export const isQuotaError = (error: unknown): boolean => {
     );
 };
 
+const DEFAULT_SUFFIXES = {
+    credit: 'Top up or upgrade in Billing to continue.',
+    quota: 'Upgrade for more generations.',
+} as const;
+
 /** The message a toast should carry for a failed generation. */
-export const generationErrorMessage = (error: unknown, fallback: string): string => {
+export const generationErrorMessage = (
+    error: unknown,
+    fallback: string,
+    suffixes?: { credit?: string; quota?: string }
+): string => {
     const apiError = toApiError(error, fallback);
+    const credit = suffixes?.credit ?? DEFAULT_SUFFIXES.credit;
+    const quota = suffixes?.quota ?? DEFAULT_SUFFIXES.quota;
     if (isCreditError(error)) {
-        return `${apiError.message} Top up or upgrade in Billing to continue.`;
+        return `${apiError.message} ${credit}`;
     }
     if (isQuotaError(error)) {
-        return `${apiError.message} Upgrade for more generations.`;
+        return `${apiError.message} ${quota}`;
     }
     return apiError.message;
 };

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { Download, Loader2, Music, Play, RefreshCw, Sparkles, Upload, Waves } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { PageHeader } from '@/components/shared/page-header';
 import { TwoPanelLayout } from '@/components/shared/two-panel-layout';
@@ -26,14 +27,27 @@ import { UpgradePrompt } from '@/features/billing/components/upgrade-prompt';
 import { useBillingSummary } from '@/features/billing/hooks/use-billing';
 import { quotaFor, usageFor } from '@/features/billing/lib/entitlements';
 
-const MOODS = [
-    { id: 'energetic', label: 'Energetic & Fast', description: 'High tempo, impactful beats' },
-    { id: 'suspenseful', label: 'Suspenseful Epic', description: 'Deep bass, cinematic tension' },
-    { id: 'chill', label: 'Lo-fi & Chill', description: 'Relaxed vibes, atmospheric' },
-    { id: 'educational', label: 'Educational', description: 'Clear, unobtrusive ambient' },
+const MOOD_DEFS = [
+    { id: 'energetic', key: 'energeticFast' },
+    { id: 'suspenseful', key: 'suspensefulEpic' },
+    { id: 'chill', key: 'lofiChill' },
+    { id: 'educational', key: 'educational' },
 ] as const;
 
 export function AudioStudio() {
+    const t = useTranslations('audio');
+    // Static key refs for i18n checker (keys used dynamically in mood map).
+    void [
+        t('page.aiPowered'),
+        t('moods.energeticFast.label'),
+        t('moods.energeticFast.description'),
+        t('moods.suspensefulEpic.label'),
+        t('moods.suspensefulEpic.description'),
+        t('moods.lofiChill.label'),
+        t('moods.lofiChill.description'),
+        t('moods.educational.label'),
+        t('moods.educational.description'),
+    ];
     const projects = useProjects({ limit: 100 });
     const [projectId, setProjectId] = useState('');
     const [mood, setMood] = useState('energetic');
@@ -59,9 +73,9 @@ export function AudioStudio() {
     const ALLOWED_MIME = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4'];
     const MAX_BYTES = 25 * 1024 * 1024;
     const validateFile = (file: File | undefined): string | null => {
-        if (!file) return 'No file selected.';
-        if (!ALLOWED_MIME.includes(file.type)) return `Unsupported audio type (${file.type || 'unknown'}). Use MP3, WAV, OGG or M4A.`;
-        if (file.size > MAX_BYTES) return 'Audio file exceeds 25 MB.';
+        if (!file) return t('validation.noFile');
+        if (!ALLOWED_MIME.includes(file.type)) return t('validation.unsupportedType', { type: file.type || 'unknown' });
+        if (file.size > MAX_BYTES) return t('validation.tooLarge');
         return null;
     };
     const fileToPayload = (file: File) => ({
@@ -88,11 +102,11 @@ export function AudioStudio() {
         try {
             parsed = new URL(externalUrl);
         } catch {
-            setExternalError('Enter a valid https audio URL.');
+            setExternalError(t('validation.invalidUrl'));
             return;
         }
         if (parsed.protocol !== 'https:') {
-            setExternalError('Audio URL must be https.');
+            setExternalError(t('validation.urlMustBeHttps'));
             return;
         }
         if (!activeProjectId) return;
@@ -104,10 +118,10 @@ export function AudioStudio() {
     const leftContent = (
         <div className="space-y-6">
             <div className="space-y-2">
-                <Label>Project</Label>
+                <Label>{t('studio.projectAria')}</Label>
                 <Select value={activeProjectId} onValueChange={setProjectId}>
-                    <SelectTrigger className="h-11" aria-label="Project">
-                        <SelectValue placeholder="Choose a project" />
+                    <SelectTrigger className="h-11" aria-label={t('studio.projectAria')}>
+                        <SelectValue placeholder={t('studio.projectPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
                         {(projects.data?.data ?? []).map((project) => (
@@ -120,7 +134,7 @@ export function AudioStudio() {
             </div>
 
             <RadioGroup value={mood} onValueChange={setMood} className="grid grid-cols-1 gap-3">
-                {MOODS.map((option) => (
+                {MOOD_DEFS.map((option) => (
                     <label
                         key={option.id}
                         className={cn(
@@ -137,8 +151,8 @@ export function AudioStudio() {
                             <Music className="size-4" aria-hidden="true" />
                         </div>
                         <span className="flex-1">
-                            <span className="block cursor-pointer text-sm font-semibold">{option.label}</span>
-                            <span className="text-xs text-muted-foreground block">{option.description}</span>
+                            <span className="block cursor-pointer text-sm font-semibold">{t(`moods.${option.key}.label`)}</span>
+                            <span className="text-xs text-muted-foreground block">{t(`moods.${option.key}.description`)}</span>
                         </span>
                         <RadioGroupItem value={option.id} className="sr-only" />
                     </label>
@@ -167,7 +181,7 @@ export function AudioStudio() {
                 ) : (
                     <Sparkles className="me-2 size-4" aria-hidden="true" />
                 )}
-                {generate.isPending ? 'Generating…' : 'Generate audio profile'}
+                {generate.isPending ? t('studio.generating') : t('studio.generate')}
             </Button>
         </div>
     );
@@ -176,9 +190,9 @@ export function AudioStudio() {
         <div className="space-y-3">
             {quotaError && (
                 <UpgradePrompt
-                    title="Generation quota reached"
+                    title={t('studio.quotaTitle')}
                     description={quotaError}
-                    ctaLabel="Upgrade for more generations"
+                    ctaLabel={t('studio.quotaCta')}
                     feature="ai.generation"
                     used={aiUsage?.used}
                     limit={aiLimit}
@@ -186,55 +200,55 @@ export function AudioStudio() {
                 />
             )}
             {current && (
-                <div className="space-y-3 rounded-xl border border-border/50 p-4" aria-label="Current audio">
+                <div className="space-y-3 rounded-xl border border-border/50 p-4" aria-label={t('studio.currentAudioAria')}>
                     <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Current audio</h4>
-                        <Badge variant="secondary">{current.source ?? 'generated'}</Badge>
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('studio.currentAudio')}</h4>
+                        <Badge variant="secondary">{current.source ?? t('studio.generatedFallback')}</Badge>
                     </div>
                     {current.fileUrl ? (
-                        <audio controls preload="none" src={current.fileUrl} className="w-full" onError={() => setExternalError('This audio link expired — regenerate or re-upload.')} />
+                        <audio controls dir="ltr" preload="none" src={current.fileUrl} className="w-full" onError={() => setExternalError(t('studio.expired'))} />
                     ) : (
-                        <p className="text-sm text-muted-foreground">Legacy suggestion (no file). Generate or upload to get a playable asset.</p>
+                        <p className="text-sm text-muted-foreground">{t('studio.legacySuggestion')}</p>
                     )}
                     <div className="flex flex-wrap gap-2">
-                        <input ref={replaceInputRef} type="file" accept="audio/*" className="sr-only" aria-label="Replace current audio" onChange={(e) => onReplaceFile(e.target.files?.[0])} />
+                        <input ref={replaceInputRef} type="file" accept="audio/*" className="sr-only" aria-label={t('studio.replaceAria')} onChange={(e) => onReplaceFile(e.target.files?.[0])} />
                         <Button variant="outline" size="sm" className="h-11" disabled={replace.isPending || !activeProjectId} onClick={() => replaceInputRef.current?.click()}>
                             {replace.isPending ? <Loader2 className="me-1 size-4 animate-spin" aria-hidden="true" /> : <RefreshCw className="me-1 size-4" aria-hidden="true" />}
-                            {replace.isPending ? 'Replacing…' : 'Replace'}
+                            {replace.isPending ? t('studio.replacing') : t('studio.replace')}
                         </Button>
                         {current.fileUrl && (
                             <Button asChild variant="ghost" size="sm" className="h-11">
-                                <a href={current.fileUrl} download aria-label="Download current audio">
-                                    <Download className="me-1 size-4" aria-hidden="true" /> Download
+                                <a href={current.fileUrl} download aria-label={t('studio.downloadAria')}>
+                                    <Download className="me-1 size-4" aria-hidden="true" /> {t('studio.download')}
                                 </a>
                             </Button>
                         )}
                     </div>
                     {externalError && <p role="alert" className="text-sm text-destructive">{externalError}</p>}
                     <div className="flex gap-2">
-                        <Label htmlFor="audio-external-url" className="sr-only">External audio URL</Label>
-                        <Input id="audio-external-url" placeholder="https://…/audio.mp3" value={externalUrl} onChange={(e) => setExternalUrl(e.target.value)} />
+                        <Label htmlFor="audio-external-url" className="sr-only">{t('studio.externalUrlLabel')}</Label>
+                        <Input id="audio-external-url" placeholder={t('studio.externalUrlPlaceholder')} value={externalUrl} onChange={(e) => setExternalUrl(e.target.value)} />
                         <Button variant="outline" size="sm" className="h-11 shrink-0" disabled={upload.isPending || !externalUrl} onClick={onUploadExternal}>
-                            <Upload className="me-1 size-4" aria-hidden="true" /> Upload
+                            <Upload className="me-1 size-4" aria-hidden="true" /> {t('studio.upload')}
                         </Button>
                     </div>
                     {history.length > 0 && (
                         <p className="text-xs text-muted-foreground">
-                            {history.length} previous version{history.length === 1 ? '' : 's'} kept as history.
+                            {t('studio.historyVersions', { count: history.length })}
                         </p>
                     )}
                 </div>
             )}
             {!activeProjectId ? (
-                <p className="text-sm text-muted-foreground">Create a project first to generate audio.</p>
+                <p className="text-sm text-muted-foreground">{t('studio.createProjectFirst')}</p>
             ) : audio.isLoading ? (
-                <p className="text-sm text-muted-foreground" role="status">Loading audio…</p>
+                <p className="text-sm text-muted-foreground" role="status">{t('studio.loading')}</p>
             ) : suggestions.length === 0 ? (
                 <EmptyState
                     className="min-h-0 border-0 bg-transparent p-0"
                     icon={Waves}
-                    title="No audio profiles yet"
-                    description="Choose a mood and generate suggestions for your selected project."
+                    title={t('studio.emptyTitle')}
+                    description={t('studio.emptyDescription')}
                 />
             ) : (
                 suggestions.map((suggestion) => (
@@ -248,7 +262,7 @@ export function AudioStudio() {
                         {suggestion.tracks.map((track) => (
                             <div key={`${suggestion.id}-${track.title}`} className="flex items-center justify-between rounded-xl border border-border/50 p-4">
                                 <div className="flex items-center gap-3">
-                                    <Button variant="secondary" size="icon" className="size-11 shrink-0" aria-label={`Play ${track.title}`}>
+                                    <Button variant="secondary" size="icon" className="size-11 shrink-0" aria-label={t('studio.playTrack', { title: track.title })}>
                                         <Play className="size-4 translate-x-0.5 fill-current" aria-hidden="true" />
                                     </Button>
                                     <div>
@@ -270,16 +284,16 @@ export function AudioStudio() {
     return (
         <div className="space-y-6">
             <PageHeader
-                title="Audio Effects"
-                description="Generate AI-powered music and sound suggestions for your projects."
+                title={t('page.title')}
+                description={t('page.description')}
             />
             <TwoPanelLayout
-                leftTitle="Sonic architecture"
-                leftDescription="Pick a project, mood and generate"
+                leftTitle={t('studio.sonicTitle')}
+                leftDescription={t('studio.sonicDescription')}
                 leftIcon={Music}
                 leftContent={leftContent}
-                rightTitle="Audio profiles"
-                rightDescription="Live suggestions from the API"
+                rightTitle={t('studio.profilesTitle')}
+                rightDescription={t('studio.profilesDescription')}
                 rightContent={rightContent}
             />
         </div>

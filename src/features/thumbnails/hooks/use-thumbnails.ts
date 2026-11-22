@@ -1,9 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
+
+import { generationErrorMessage } from '@/features/billing/lib/generation-error';
+import { toast } from '@/lib/toast';
+import type { UnsplashPhoto } from '@/features/images/types';
 import { thumbnailsService } from '../services/thumbnails.service';
 import { CreateThumbnailDTO, UpdateThumbnailDTO } from '../types';
-import { toast } from '@/lib/toast';
-import { generationErrorMessage } from '@/features/billing/lib/generation-error';
-import type { UnsplashPhoto } from '@/features/images/types';
 
 export const thumbnailsKeys = {
     all: ['thumbnails'] as const,
@@ -12,6 +14,17 @@ export const thumbnailsKeys = {
     details: () => [...thumbnailsKeys.all, 'detail'] as const,
     detail: (id: string) => [...thumbnailsKeys.details(), id] as const,
 };
+
+// Backward-compatible alias for callers using singular name.
+export const thumbnailKeys = thumbnailsKeys;
+
+function useGenerationSuffixes() {
+    const tb = useTranslations('billing');
+    return {
+        credit: tb('generation.creditSuffix'),
+        quota: tb('generation.quotaSuffix'),
+    };
+}
 
 export const useProjectThumbnails = (projectId: string) => {
     return useQuery({
@@ -31,32 +44,36 @@ export const useThumbnail = (id: string) => {
 
 export const useCreateThumbnail = () => {
     const queryClient = useQueryClient();
+    const t = useTranslations('thumbnails');
+    const suffixes = useGenerationSuffixes();
 
     return useMutation({
         mutationFn: (data: CreateThumbnailDTO) => thumbnailsService.createThumbnail(data),
         onSuccess: (data) => {
-            toast.success('Thumbnail prompt submitted');
+            toast.success(t('toasts.submitted'));
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(data.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(generationErrorMessage(error, 'Failed to submit thumbnail prompt'));
+            toast.error(generationErrorMessage(error, t('toasts.submitFailed'), suffixes));
         },
     });
 };
 
 export const useUpdateThumbnail = () => {
     const queryClient = useQueryClient();
+    const t = useTranslations('thumbnails');
+    const suffixes = useGenerationSuffixes();
 
     return useMutation({
         mutationFn: ({ id, data }: { id: string; data: UpdateThumbnailDTO }) =>
             thumbnailsService.updateThumbnail(id, data),
         onSuccess: (data) => {
-            toast.success('Thumbnail updated');
+            toast.success(t('toasts.updated'));
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.detail(data.id) });
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(data.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(generationErrorMessage(error, 'Failed to update thumbnail'));
+            toast.error(generationErrorMessage(error, t('toasts.updateFailed'), suffixes));
         },
     });
 };
@@ -64,6 +81,8 @@ export const useUpdateThumbnail = () => {
 /** P07.4: in-place regeneration — no new asset, no quota consume. */
 export const useRegenerateThumbnail = () => {
     const queryClient = useQueryClient();
+    const t = useTranslations('thumbnails');
+    const suffixes = useGenerationSuffixes();
 
     return useMutation({
         mutationFn: ({
@@ -79,28 +98,30 @@ export const useRegenerateThumbnail = () => {
             image?: UnsplashPhoto;
         }) => thumbnailsService.regenerateThumbnail(id, { prompt, stylePreset, image }),
         onSuccess: (data) => {
-            toast.success('Thumbnail regenerated');
+            toast.success(t('toasts.regenerated'));
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.detail(data.id) });
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(data.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(generationErrorMessage(error, 'Failed to regenerate thumbnail'));
+            toast.error(generationErrorMessage(error, t('toasts.regenerateFailed'), suffixes));
         },
     });
 };
 
 export const useDeleteThumbnail = () => {
     const queryClient = useQueryClient();
+    const t = useTranslations('thumbnails');
+    const suffixes = useGenerationSuffixes();
 
     return useMutation({
         mutationFn: ({ id }: { id: string; projectId: string }) =>
             thumbnailsService.deleteThumbnail(id),
         onSuccess: (_, variables) => {
-            toast.success('Thumbnail deleted');
+            toast.success(t('toasts.deleted'));
             queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(variables.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(generationErrorMessage(error, 'Failed to delete thumbnail'));
+            toast.error(generationErrorMessage(error, t('toasts.deleteFailed'), suffixes));
         },
     });
 };

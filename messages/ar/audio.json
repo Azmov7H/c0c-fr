@@ -1,1 +1,77 @@
-{}
+{
+  "page": {
+    "title": "المؤثرات الصوتية",
+    "description": "ولّد اقتراحات موسيقى وصوت مدعومة بالذكاء الاصطناعي لمشاريعك.",
+    "aiPowered": "مدعوم بالذكاء الاصطناعي"
+  },
+  "studio": {
+    "projectAria": "المشروع",
+    "projectPlaceholder": "اختر مشروعًا",
+    "sonicTitle": "البنية الصوتية",
+    "sonicDescription": "اختر مشروعًا ومزاجًا ثم ولّد",
+    "profilesTitle": "الملفات الصوتية",
+    "profilesDescription": "اقتراحات مباشرة من واجهة API",
+    "generating": "جارٍ التوليد…",
+    "generate": "توليد ملف صوتي",
+    "loading": "جارٍ تحميل الصوت…",
+    "quotaTitle": "تم بلوغ حصة التوليد",
+    "quotaCta": "قم بالترقية للحصول على مزيد من التوليدات",
+    "currentAudio": "الصوت الحالي",
+    "currentAudioAria": "الصوت الحالي",
+    "generatedFallback": "مولّد",
+    "expired": "انتهت صلاحية رابط الصوت هذا — أعد التوليد أو أعد الرفع.",
+    "legacySuggestion": "اقتراح قديم (بدون ملف). ولّد أو ارفع للحصول على ملف قابل للتشغيل.",
+    "replaceAria": "استبدال الصوت الحالي",
+    "replacing": "جارٍ الاستبدال…",
+    "replace": "استبدال",
+    "downloadAria": "تنزيل الصوت الحالي",
+    "download": "تنزيل",
+    "externalUrlLabel": "رابط صوت خارجي",
+    "externalUrlPlaceholder": "https://…/audio.mp3",
+    "upload": "رفع",
+    "historyVersions": "{count, plural, one {تم الاحتفاظ بنسخة سابقة واحدة في السجل.} two {تم الاحتفاظ بنسختين سابقتين في السجل.} few {تم الاحتفاظ بـ # نسخ سابقة في السجل.} many {تم الاحتفاظ بـ # نسخة سابقة في السجل.} other {تم الاحتفاظ بـ # نسخة سابقة في السجل.}}",
+    "createProjectFirst": "أنشئ مشروعًا أولًا لتوليد الصوت.",
+    "emptyTitle": "لا توجد ملفات صوتية بعد",
+    "emptyDescription": "اختر مزاجًا وولّد اقتراحات للمشروع المحدد.",
+    "playTrack": "تشغيل {title}"
+  },
+  "moods": {
+    "energeticFast": {
+      "label": "نشي وسريع",
+      "description": "إيقاع مرتفع ونبضات مؤثرة"
+    },
+    "suspensefulEpic": {
+      "label": "ملحمي مشوّق",
+      "description": "جهير عميق وتوتر سينمائي"
+    },
+    "lofiChill": {
+      "label": "Lo-fi هادئ",
+      "description": "أجواء مريحة ومحيطة"
+    },
+    "educational": {
+      "label": "تعليمي",
+      "description": "أجواء واضحة وغير مزعجة"
+    }
+  },
+  "validation": {
+    "noFile": "لم يتم تحديد ملف.",
+    "unsupportedType": "نوع الصوت غير مدعوم ({type}). استخدم MP3 أو WAV أو OGG أو M4A.",
+    "tooLarge": "يتجاوز ملف الصوت 25 ميغابايت.",
+    "invalidUrl": "أدخل رابط صوت https صالحًا.",
+    "urlMustBeHttps": "يجب أن يكون رابط الصوت https."
+  },
+  "toasts": {
+    "analysisStarted": "بدأ تحليل الصوت",
+    "analysisFailed": "فشل بدء تحليل الصوت",
+    "generated": "تم توليد الملف الصوتي بالذكاء الاصطناعي! 🎵",
+    "generateFailed": "فشل توليد الصوت بالذكاء الاصطناعي",
+    "updated": "تم تحديث الملف الصوتي",
+    "updateFailed": "فشل تحديث الملف الصوتي",
+    "uploaded": "تم رفع الصوت",
+    "uploadFailed": "فشل رفع الصوت",
+    "replaced": "تم استبدال الصوت",
+    "replaceFailed": "فشل الاستبدال — تم الاحتفاظ بالصوت السابق",
+    "deleted": "تم حذف الملف الصوتي",
+    "deleteFailed": "فشل حذف الملف الصوتي"
+  }
+}

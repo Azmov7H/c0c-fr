@@ -99,6 +99,7 @@ function LayerCard({
                             <>
                                 <audio
                                     controls
+                                    dir="ltr"
                                     preload="none"
                                     src={current.fileUrl}
                                     className="w-full"
