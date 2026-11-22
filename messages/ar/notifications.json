@@ -1,1 +1,84 @@
-{}
+{
+  "@dynamic": [
+    "templates.project_created.title",
+    "templates.project_created.message",
+    "templates.script_generated.title",
+    "templates.script_generated.message",
+    "templates.team_invite.title",
+    "templates.team_invite.message",
+    "templates.thumbnail_generated.title",
+    "templates.thumbnail_generated.message",
+    "templates.audio_generated.title",
+    "templates.audio_generated.message",
+    "templates.analytics_ready.title",
+    "templates.analytics_ready.message",
+    "templates.trends_ready.title",
+    "templates.trends_ready.message",
+    "templates.seo_ready.title",
+    "templates.seo_ready.message",
+    "templates.error.title",
+    "templates.error.message",
+    "templates.system.title",
+    "templates.system.message",
+    "templates.info.title",
+    "templates.info.message"
+  ],
+  "bell": {
+    "ariaLabel": "الإشعارات",
+    "title": "الإشعارات",
+    "markAllRead": "تحديد الكل كمقروء",
+    "loading": "جارٍ التحميل...",
+    "empty": "لا توجد إشعارات بعد"
+  },
+  "toasts": {
+    "markedAllRead": "تم تحديد كل الإشعارات كمقروءة",
+    "markAllReadFailed": "فشل تحديد الإشعارات كمقروءة",
+    "deleted": "تم حذف الإشعار"
+  },
+  "templates": {
+    "project_created": {
+      "title": "تم إنشاء المشروع",
+      "message": "مشروعك جاهز."
+    },
+    "script_generated": {
+      "title": "تم إنشاء النص",
+      "message": "نصك جاهز للمراجعة."
+    },
+    "team_invite": {
+      "title": "دعوة إلى فريق",
+      "message": "تمت دعوتك إلى مساحة عمل فريق."
+    },
+    "thumbnail_generated": {
+      "title": "تم إنشاء الصورة المصغّرة",
+      "message": "صورتك المصغّرة جاهزة."
+    },
+    "audio_generated": {
+      "title": "تم إنشاء الصوت",
+      "message": "اقتراح الصوت جاهز."
+    },
+    "analytics_ready": {
+      "title": "التحليلات جاهزة",
+      "message": "تقرير التحليلات جاهز."
+    },
+    "trends_ready": {
+      "title": "الاتجاهات جاهزة",
+      "message": "تتوفر بيانات اتجاهات جديدة."
+    },
+    "seo_ready": {
+      "title": "SEO جاهز",
+      "message": "تحليل SEO جاهز."
+    },
+    "error": {
+      "title": "حدث خطأ",
+      "message": "حدث خطأ. يرجى التحقق من التفاصيل."
+    },
+    "system": {
+      "title": "إشعار نظام",
+      "message": "لديك تحديث من النظام."
+    },
+    "info": {
+      "title": "معلومة",
+      "message": "لديك إشعار جديد."
+    }
+  }
+}

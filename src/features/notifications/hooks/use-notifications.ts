@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { notificationsService } from '../services/notifications.service';
 import { useRealtimeStatus } from '@/hooks/use-realtime-status';
 import { useAuthStore } from '@/store/auth-store';
@@ -59,15 +60,16 @@ export function useMarkAsRead() {
  */
 export function useMarkAllAsRead() {
     const queryClient = useQueryClient();
+    const t = useTranslations('notifications');
 
     return useMutation({
         mutationFn: () => notificationsService.markAllAsRead(),
         onSuccess: () => {
-            toast.success('All notifications marked as read');
+            toast.success(t('toasts.markedAllRead'));
             queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
         },
         onError: () => {
-            toast.error('Failed to mark notifications as read');
+            toast.error(t('toasts.markAllReadFailed'));
         },
     });
 }
@@ -77,11 +79,12 @@ export function useMarkAllAsRead() {
  */
 export function useDeleteNotification() {
     const queryClient = useQueryClient();
+    const t = useTranslations('notifications');
 
     return useMutation({
         mutationFn: (id: string) => notificationsService.delete(id),
         onSuccess: () => {
-            toast.success('Notification deleted');
+            toast.success(t('toasts.deleted'));
             queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
         },
     });
