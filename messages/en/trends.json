@@ -1,1 +1,93 @@
-{}
+{
+  "page": {
+    "title": "Ideas & Trends",
+    "description": "What creators are actually working on — measured demand."
+  },
+  "controls": {
+    "platform": "Platform",
+    "timeWindow": "Time window",
+    "category": "Category",
+    "allCategories": "All categories",
+    "gridView": "Grid view",
+    "listView": "List view"
+  },
+  "scopes": {
+    "global": "All platforms",
+    "youtube": "YouTube",
+    "tiktok": "TikTok",
+    "instagram": "Instagram"
+  },
+  "windows": {
+    "7": "Last 7 days",
+    "30": "Last 30 days"
+  },
+  "categories": {
+    "tech": "tech",
+    "gaming": "gaming",
+    "finance": "finance",
+    "health-fitness": "health-fitness",
+    "food": "food",
+    "education": "education",
+    "entertainment": "entertainment",
+    "lifestyle": "lifestyle",
+    "business": "business",
+    "science": "science",
+    "diy": "diy",
+    "sports": "sports",
+    "uncategorised": "uncategorised"
+  },
+  "badges": {
+    "measured": "Measured",
+    "measuredProvider": "Measured · {provider}",
+    "staleSnapshot": "Stale snapshot"
+  },
+  "freshness": {
+    "fresh": "Up to date",
+    "stale": "Stale snapshot (shown, not live)",
+    "cold": "Just computed",
+    "measuredAt": "measured {date}",
+    "providerUnavailable": "provider unavailable"
+  },
+  "topic": {
+    "inWindow": "in window",
+    "meta": "{projects} projects · {creators} creators · {demand} demand"
+  },
+  "empty": {
+    "title": "No trends for this window",
+    "description": "No measured demand in this category yet — try another category or window."
+  },
+  "unavailable": {
+    "title": "Provider unavailable",
+    "description": "No measured snapshot exists yet for this scope and the trends provider could not be reached. Trends are currently unavailable — nothing is shown in their place."
+  },
+  "error": {
+    "loadFailed": "Trends could not be loaded."
+  },
+  "list": {
+    "topic": "Topic",
+    "score": "Score",
+    "growth": "Growth",
+    "allPlatforms": "all platforms"
+  },
+  "disclaimer": "AI-generated reports (under {path}) are projections and are never shown as live trends.",
+  "disclaimerPath": "/trends/reports",
+  "@dynamic": [
+    "categories.business",
+    "categories.diy",
+    "categories.education",
+    "categories.entertainment",
+    "categories.finance",
+    "categories.food",
+    "categories.gaming",
+    "categories.health-fitness",
+    "categories.lifestyle",
+    "categories.science",
+    "categories.sports",
+    "categories.tech",
+    "categories.uncategorised",
+    "scopes.global",
+    "scopes.instagram",
+    "scopes.tiktok",
+    "scopes.youtube"
+  ]
+}

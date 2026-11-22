@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useProjectSEO, useGenerateSEO } from '../hooks/use-seo';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,7 +22,6 @@ import {
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/lib/toast';
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface SEOAnalyzerProps {
@@ -28,6 +29,7 @@ interface SEOAnalyzerProps {
 }
 
 export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
+    const t = useTranslations('seo');
     const { data: analysis, isLoading } = useProjectSEO(projectId);
     const { mutate: generateSEO, isPending: isGenerating } = useGenerateSEO();
     const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -39,7 +41,7 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
     const copyToClipboard = (text: string, id: string) => {
         navigator.clipboard.writeText(text);
         setCopiedId(id);
-        toast.success('System: Context copied to buffer');
+        toast.success(t('toasts.copied'));
         setTimeout(() => setCopiedId(null), 2000);
     };
 
@@ -58,9 +60,9 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                 <div className="w-24 h-24 bg-primary ring-8 ring-primary/10 rounded-[32px] flex items-center justify-center mb-10 shadow-glow animate-bounce-slow">
                     <Search className="w-12 h-12 text-primary-foreground" />
                 </div>
-                <h3 className="text-3xl font-extrabold text-foreground mb-4">SEO Signal: Offline</h3>
+                <h3 className="text-3xl font-extrabold text-foreground mb-4">{t('empty.title')}</h3>
                 <p className="text-muted-foreground mb-10 max-w-lg text-lg font-medium leading-relaxed">
-                    Your project is missing its algorithmic signature. Let the engine architect optimized metadata for maximum reach.
+                    {t('empty.description')}
                 </p>
                 <Button
                     onClick={handleGenerate}
@@ -71,12 +73,12 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                     {isGenerating ? (
                         <>
                             <Loader2 className="w-6 h-6 me-3 animate-spin" />
-                            Analyzing Niches...
+                            {t('empty.analyzing')}
                         </>
                     ) : (
                         <>
                             <Sparkles className="w-6 h-6 me-3 group-hover:rotate-12 transition-transform" />
-                            Initialize Growth Engine
+                            {t('empty.cta')}
                         </>
                     )}
                 </Button>
@@ -87,7 +89,6 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
-            {/* Title & Description Column */}
             <div className="space-y-8">
                 <Card className="glass border-border/50 rounded-[32px] shadow-premium overflow-hidden">
                     <CardHeader className="bg-muted/30 pb-6 border-b border-border/50 px-8">
@@ -95,9 +96,9 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                             <div className="p-2 bg-primary/10 rounded-lg text-primary">
                                 <Target className="w-5 h-5" />
                             </div>
-                            High-CTR Variants
+                            {t('titles.title')}
                         </CardTitle>
-                        <CardDescription className="font-medium">Optimized for algorithmic trigger points and user curiosity</CardDescription>
+                        <CardDescription className="font-medium">{t('titles.description')}</CardDescription>
                     </CardHeader>
                     <CardContent className="p-8 space-y-4">
                         {analysis.suggestedTitles.map((title, i) => (
@@ -106,7 +107,7 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                                 type="button"
                                 className="group relative w-full text-start p-5 rounded-2xl border border-border/50 bg-muted/20 hover:border-primary/40 hover:bg-muted/40 transition-all cursor-pointer shadow-sm hover:shadow-premium"
                                 onClick={() => copyToClipboard(title, `title-${i}`)}
-                                aria-label={`Copy title suggestion: ${title}`}
+                                aria-label={t('titles.copyAria', { title })}
                             >
                                 <span className="text-base font-bold text-foreground pe-12 leading-relaxed tracking-tight block">{title}</span>
                                 <span className="absolute top-1/2 -translate-y-1/2 end-4">
@@ -128,13 +129,13 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                             <div className="p-2 bg-primary/10 rounded-lg text-primary">
                                 <Layout className="w-5 h-5" />
                             </div>
-                            Narrative Meta
+                            {t('description.title')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 flex-1 relative">
                         <Textarea
                             value={analysis.description}
-                            aria-label="Generated description"
+                            aria-label={t('description.aria')}
                             className="min-h-[220px] glass bg-muted/10 border-border/50 rounded-2xl p-6 text-sm font-medium leading-relaxed resize-none focus-visible:ring-primary/20 pointer-events-none opacity-80"
                             readOnly
                         />
@@ -146,14 +147,13 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                                 onClick={() => copyToClipboard(analysis.description, 'desc')}
                             >
                                 {copiedId === 'desc' ? <CheckCircle2 className="w-4 h-4 me-2" /> : <Copy className="w-4 h-4 me-2" />}
-                                {copiedId === 'desc' ? 'Copied' : 'Sync Description'}
+                                {copiedId === 'desc' ? t('description.copied') : t('description.copy')}
                             </Button>
                         </div>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Tags & Performance Column */}
             <div className="space-y-8">
                 <Card className="glass border-border/50 rounded-[32px] shadow-premium overflow-hidden">
                     <CardHeader className="bg-muted/30 pb-6 border-b border-border/50 px-8">
@@ -161,9 +161,9 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                             <div className="p-2 bg-primary/10 rounded-lg text-primary">
                                 <TrendingUp className="w-5 h-5" />
                             </div>
-                            Algorithmic Hooks
+                            {t('hooks.title')}
                         </CardTitle>
-                        <CardDescription className="font-medium">Trending keywords with high-intent semantic weight</CardDescription>
+                        <CardDescription className="font-medium">{t('hooks.description')}</CardDescription>
                     </CardHeader>
                     <CardContent className="p-8">
                         <div className="flex flex-wrap gap-3">
@@ -174,7 +174,7 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                                     onClick={() => copyToClipboard(tag, `tag-${i}`)}
                                     role="button"
                                     tabIndex={0}
-                                    aria-label={`Copy keyword: ${tag}`}
+                                    aria-label={t('hooks.copyAria', { tag })}
                                     onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); copyToClipboard(tag, `tag-${i}`) } }}
                                 >
                                     {tag}
@@ -188,15 +188,15 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                     <div className="h-1.5 w-full bg-gradient-to-r from-primary via-info to-primary shadow-glow" />
                     <CardHeader className="bg-muted/10 pt-8 px-8">
                         <CardTitle className="text-xl font-extrabold flex items-center justify-between">
-                            Growth Projection
+                            {t('projection.title')}
                             <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                                 <Zap className="w-4 h-4 fill-current" />
                             </div>
                         </CardTitle>
-                        <CardDescription className="font-medium">Estimated visibility score across target platforms</CardDescription>
+                        <CardDescription className="font-medium">{t('projection.description')}</CardDescription>
                     </CardHeader>
                     <CardContent className="p-10 flex flex-col items-center justify-center text-center">
-                        <div className="relative w-48 h-48 mb-8 group-hover/potential:scale-105 transition-transform duration-700">
+                        <div dir="ltr" className="relative w-48 h-48 mb-8 group-hover/potential:scale-105 transition-transform duration-700">
                             <svg className="w-full h-full filter drop-shadow-glow-sm" viewBox="0 0 100 100">
                                 <circle
                                     className="text-muted/10 stroke-current"
@@ -216,13 +216,13 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
                                 <span className="text-6xl font-black text-foreground tracking-tighter">{analysis.platformScore}</span>
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60">Points</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60">{t('projection.points')}</span>
                             </div>
                         </div>
                         <div className="space-y-3">
-                            <h4 className="text-2xl font-black text-foreground tracking-tight underline decoration-primary decoration-4 underline-offset-8">&quot;SUPREME CANDIDATE&quot;</h4>
+                            <h4 className="text-2xl font-black text-foreground tracking-tight underline decoration-primary decoration-4 underline-offset-8">{t('projection.verdict')}</h4>
                             <p className="text-sm text-muted-foreground font-medium max-w-[280px] leading-relaxed mx-auto italic mt-4">
-                                Exceptional coherence detected between narrative hooks and exponential trend clusters.
+                                {t('projection.verdictDescription')}
                             </p>
                         </div>
                     </CardContent>
@@ -236,7 +236,7 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                         onClick={handleGenerate}
                     >
                         <RefreshCw className="w-4 h-4 me-2 group-hover:rotate-180 transition-transform duration-700" />
-                        Re-Architect Logic
+                        {t('actions.reArchitect')}
                     </Button>
                 </div>
             </div>

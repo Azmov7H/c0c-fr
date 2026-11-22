@@ -1,10 +1,9 @@
 // @vitest-environment jsdom
-// P02.6 — calendar and list render the SAME event from ONE hook; empty
-// state; reminders carry the explicit not-dispatched note. P02.5
-// backend-side parity is covered in bake's planner.http.test.ts.
 import { expect, it, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
+import { NextIntlClientProvider } from 'next-intl';
 
+import enPlanner from '../../../../messages/en/planner.json';
 import { ContentPlanner } from './content-planner';
 
 const event = {
@@ -37,36 +36,43 @@ vi.mock('@/features/projects/hooks/use-projects', () => ({
 vi.mock('@/features/planner/hooks/use-planner', () => ({
     usePlannerEvents: () => mocks.events,
 }));
+vi.mock('@/i18n/locale', () => ({
+    useUrlLocale: () => 'en',
+}));
+
+function renderUi() {
+    return render(
+        <NextIntlClientProvider locale="en" messages={{ planner: enPlanner }}>
+            <ContentPlanner />
+        </NextIntlClientProvider>
+    );
+}
 
 it('calendar cell and mobile list show the same scheduledDay for one event', () => {
     mocks.events.data = { data: [event], meta: {} };
-    render(<ContentPlanner />);
+    renderUi();
 
-    // Mobile list row carries the scheduled day + stored zone (not a
-    // client-recomputed one).
     const list = document.querySelector('[data-testid="planner-list"]') as HTMLElement;
     expect(within(list).getByText('Publish episode 7')).toBeTruthy();
     expect(list.textContent).toContain('2026-11-11');
     expect(list.textContent).toContain('Asia/Dubai');
 
-    // Desktop grid: the event chip lands on the Dubai day cell.
     const cell = document.querySelector('[data-day="2026-11-11"]') as HTMLElement;
     expect(cell).not.toBeNull();
     expect(within(cell).getByText('Publish episode 7')).toBeTruthy();
 
-    // The reminder note is an explicit not-dispatched statement.
     expect(list.textContent).toContain('not dispatched yet');
 });
 
 it('renders the empty state through DataState when the month has no events', () => {
     mocks.events.data = { data: [], meta: {} };
-    render(<ContentPlanner />);
+    renderUi();
     expect(screen.getByText('Nothing scheduled this month')).toBeTruthy();
 });
 
 it('exposes a retry affordance when the query fails', () => {
     mocks.events.error = new Error('planner down');
-    render(<ContentPlanner />);
+    renderUi();
     const retry = screen.getAllByRole('button').find((b) => /try again/i.test(b.textContent || ''));
     expect(retry).toBeTruthy();
     mocks.events.error = undefined;

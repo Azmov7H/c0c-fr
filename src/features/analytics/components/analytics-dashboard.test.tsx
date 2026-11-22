@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { NextIntlClientProvider } from 'next-intl';
 
+import enAnalytics from '../../../../messages/en/analytics.json';
 import { AnalyticsDashboard } from './analytics-dashboard';
 
 const mocks = vi.hoisted(() => ({
@@ -39,6 +41,17 @@ vi.mock('@/features/dashboard/hooks/use-dashboard', () => ({
 vi.mock('next/dynamic', () => ({
     default: () => () => null,
 }));
+vi.mock('@/i18n/locale', () => ({
+    useUrlLocale: () => 'en',
+}));
+
+function renderUi() {
+    return render(
+        <NextIntlClientProvider locale="en" messages={{ analytics: enAnalytics }}>
+            <AnalyticsDashboard />
+        </NextIntlClientProvider>
+    );
+}
 
 const stats = (overrides: object = {}) => ({
     overview: {
@@ -68,12 +81,11 @@ describe('AnalyticsDashboard (P01)', () => {
         mocks.stats.data = stats() as never;
         mocks.stats.isLoading = false;
         mocks.stats.isError = false;
-        render(<AnalyticsDashboard />);
+        renderUi();
         expect(screen.getByText('Projects')).toBeTruthy();
         expect(screen.getByText('Creation activity (last 7 days)')).toBeTruthy();
         expect(screen.getByText('Measured')).toBeTruthy();
         expect(screen.getByText(/measured, not views/)).toBeTruthy();
-        // Fake surface is gone.
         expect(screen.queryByText('Total Views')).toBeNull();
         expect(screen.queryByText('2.4M')).toBeNull();
         expect(screen.queryByText('Engagement Funnel')).toBeNull();
@@ -87,7 +99,7 @@ describe('AnalyticsDashboard (P01)', () => {
             weeklyActivity: [],
             recentProjects: [],
         }) as never;
-        render(<AnalyticsDashboard />);
+        renderUi();
         expect(screen.getByText('No generation activity yet')).toBeTruthy();
         expect(screen.getByText(/Create your first project/)).toBeTruthy();
     });
@@ -96,7 +108,7 @@ describe('AnalyticsDashboard (P01)', () => {
         mocks.stats.data = undefined;
         mocks.stats.isLoading = true;
         mocks.stats.isError = false;
-        render(<AnalyticsDashboard />);
+        renderUi();
         expect(screen.queryByText('2.4M')).toBeNull();
     });
 
@@ -104,7 +116,7 @@ describe('AnalyticsDashboard (P01)', () => {
         mocks.stats.data = undefined;
         mocks.stats.isLoading = false;
         mocks.stats.isError = true;
-        render(<AnalyticsDashboard />);
+        renderUi();
         expect(screen.queryByText('2.4M')).toBeNull();
     });
 });
