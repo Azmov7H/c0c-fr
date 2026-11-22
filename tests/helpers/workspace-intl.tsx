@@ -28,6 +28,8 @@ import enDataState from '../../messages/en/dataState.json';
 import arDataState from '../../messages/ar/dataState.json';
 import enMedia from '../../messages/en/media.json';
 import arMedia from '../../messages/ar/media.json';
+import enScripts from '../../messages/en/scripts.json';
+import arScripts from '../../messages/ar/scripts.json';
 
 const EN = {
     workspace: enWorkspace,
@@ -35,6 +37,7 @@ const EN = {
     billing: enBilling,
     dataState: enDataState,
     media: enMedia,
+    scripts: enScripts,
 };
 const AR = {
     workspace: arWorkspace,
@@ -42,6 +45,7 @@ const AR = {
     billing: arBilling,
     dataState: arDataState,
     media: arMedia,
+    scripts: arScripts,
 };
 
 export function WorkspaceIntlProvider({

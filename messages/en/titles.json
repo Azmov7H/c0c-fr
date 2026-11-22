@@ -1,1 +1,14 @@
-{}
+{
+  "pageTitle": "Title Generator",
+  "pageDescription": "Generate high-CTR titles optimized for your platform.",
+  "topicSectionTitle": "Your Topic",
+  "topicLabel": "Topic / Subject",
+  "topicPlaceholder": "e.g., AI video editing, content strategy, thumbnail design...",
+  "platform": "Platform",
+  "generating": "Generating...",
+  "generate": "Generate Titles",
+  "outputTitle": "Generated Titles",
+  "emptyTitle": "No Titles Yet",
+  "emptyDescription": "Enter your topic and generate optimized titles.",
+  "copied": "Title copied to clipboard"
+}

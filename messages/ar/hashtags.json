@@ -1,1 +1,26 @@
-{}
+{
+  "pageTitle": "مولّد الوسوم",
+  "pageDescription": "أنشئ وسومًا رائجة محسّنة لأقصى وصول.",
+  "configureTitle": "الإعداد",
+  "topicLabel": "الموضوع",
+  "topicPlaceholder": "عن ماذا يتحدث محتواك؟",
+  "category": "الفئة",
+  "generating": "جارٍ التوليد...",
+  "generate": "توليد الوسوم",
+  "outputTitle": "الوسوم المُولّدة",
+  "copyAll": "نسخ الكل",
+  "emptyTitle": "لا توجد وسوم بعد",
+  "emptyDescription": "أدخل موضوعًا وأنشئ وسومًا رائجة.",
+  "copiedAll": "تم نسخ جميع الوسوم!",
+  "copiedOne": "تم نسخ الوسم!",
+  "copyHashtagAria": "نسخ الوسم {tag}",
+  "categories": {
+    "tech": "تقنية",
+    "gaming": "ألعاب",
+    "finance": "مالية",
+    "lifestyle": "نمط حياة",
+    "education": "تعليم",
+    "fitness": "لياقة",
+    "food": "طعام"
+  }
+}

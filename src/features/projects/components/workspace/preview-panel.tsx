@@ -16,6 +16,7 @@ import { FileText, Image as ImageIcon, Music, PackageOpen } from 'lucide-react';
 
 import { useProject } from '../../hooks/use-projects';
 import { missingAssetLabel } from '../../lib/workspace-labels';
+import { scriptSceneLabel } from '@/features/scripts/lib/script-labels';
 
 /**
  * P11.3 — the Preview stage.
@@ -29,6 +30,7 @@ import { missingAssetLabel } from '../../lib/workspace-labels';
  */
 export function PreviewPanel({ projectId }: { projectId: string }) {
     const t = useTranslations('workspace');
+    const ts = useTranslations('scripts');
     const project = useProject(projectId);
     const scripts = useProjectScripts(projectId);
     const thumbnails = useProjectThumbnails(projectId);
@@ -168,8 +170,8 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
                         <ol className="space-y-3">
                             {script.sections.map((section) => (
                                 <li key={section.order}>
-                                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                        {section.label}
+                                    <p dir="auto" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                        <bdi>{scriptSceneLabel(ts, section.label)}</bdi>
                                     </p>
                                     <p dir="auto" className="mt-1 whitespace-pre-wrap text-sm leading-6">
                                         {section.content}

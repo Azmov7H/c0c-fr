@@ -1,1 +1,66 @@
-{}
+{
+  "editor": {
+    "title": "مشاهد النص (الإصدار {version})",
+    "summary": "{scenes, plural, one {# مشهد} two {# مشهدان} few {# مشاهد} many {# مشهدًا} other {# مشهد}} · {words} كلمة · {seconds}ث تقديريًا",
+    "refine": "تحسين بالذكاء الاصطناعي",
+    "thinking": "الذكاء الاصطناعي يفكّر…",
+    "save": "حفظ النص",
+    "saving": "جارٍ الحفظ…",
+    "sceneHeading": "المشهد {number} · {label}",
+    "untitled": "بلا عنوان",
+    "sectionTitle": "عنوان المقطع",
+    "duration": "المدة (بالثواني)",
+    "sectionText": "نص المقطع",
+    "narration": "التعليق الصوتي",
+    "visualDirection": "التوجيه البصري",
+    "transition": "الانتقال",
+    "linkedAssets": "الأصول المرتبطة",
+    "noLinkedAssets": "لا يوجد بعد — ستُفتح روابط المشاهد مع P06/P07."
+  },
+  "sceneLabels": {
+    "Hook": "الافتتاحية",
+    "Introduction": "المقدمة",
+    "MainContent": "المحتوى الرئيسي",
+    "Conclusion": "الخاتمة",
+    "CTA": "دعوة لاتخاذ إجراء",
+    "MainMessage": "الرسالة الرئيسية",
+    "SupportingInformation": "معلومات داعمة"
+  },
+  "generator": {
+    "pageTitle": "مولّد النصوص",
+    "pageDescription": "توليد نصوص بالذكاء الاصطناعي مع تنسيق خاص بالمنصة والتحكم بالنبرة.",
+    "canvasTitle": "لوحة النص",
+    "canvasDescription": "حدّد فكرتك والمنصة والنبرة",
+    "outputTitle": "الناتج المُولّد",
+    "outputDescription": "نص الفيديو المصنوع بالذكاء الاصطناعي",
+    "ideaLabel": "فكرتك / الموجز",
+    "ideaPlaceholder": "صف مفهوم الفيديو أو الموضوع أو الرسالة الأساسية...",
+    "platform": "المنصة",
+    "tone": "النبرة",
+    "toneAria": "النبرة: {tone}",
+    "generating": "جارٍ التوليد...",
+    "generate": "توليد النص",
+    "generatedBadge": "تم توليد النص",
+    "regenerate": "إعادة التوليد",
+    "copy": "نسخ",
+    "export": "تصدير",
+    "emptyTitle": "لا يوجد نص بعد",
+    "emptyDescription": "أدخل فكرتك على اليسار واضغط توليد لإنشاء نص فيديو بالذكاء الاصطناعي.",
+    "tones": {
+      "Educational": "تعليمي",
+      "Hype": "حماسي",
+      "Storytelling": "سردي",
+      "Conversational": "حواري"
+    }
+  },
+  "toasts": {
+    "created": "تم إنشاء النص بنجاح",
+    "createFailed": "فشل إنشاء النص",
+    "generated": "تم توليد النص بالذكاء الاصطناعي بنجاح! ✨",
+    "generateFailed": "فشل التوليد بالذكاء الاصطناعي",
+    "saved": "تم حفظ النص",
+    "saveFailed": "فشل حفظ تغييرات النص",
+    "deleted": "تم حذف النص",
+    "deleteFailed": "فشل حذف النص"
+  }
+}
