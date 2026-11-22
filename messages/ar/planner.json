@@ -1,1 +1,46 @@
-{}
+{
+  "page": {
+    "title": "مخطط المحتوى",
+    "description": "العمل المجدول لمشاريعك، مباشرة من واجهة API."
+  },
+  "controls": {
+    "filterProject": "تصفية حسب المشروع",
+    "allProjects": "كل المشاريع",
+    "previousMonth": "الشهر السابق",
+    "nextMonth": "الشهر التالي"
+  },
+  "calendar": {
+    "monthGridAria": "شبكة شهر التقويم",
+    "weekdays": [
+      "الاثنين",
+      "الثلاثاء",
+      "الأربعاء",
+      "الخميس",
+      "الجمعة",
+      "السبت",
+      "الأحد"
+    ]
+  },
+  "empty": {
+    "title": "لا يوجد شيء مجدول هذا الشهر",
+    "description": "خطط الأحداث من مساحة عمل المشروع أو أنشئ واحدًا عند توفر تدفق المخطط."
+  },
+  "reminder": {
+    "notDispatched": "التذكير محفوظ كبيانات وصفية — لم يُرسل بعد (لا يوجد مجدول)."
+  },
+  "event": {
+    "openProject": "فتح المشروع",
+    "status": {
+      "pending": "قيد الانتظار",
+      "in_progress": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "cancelled": "ملغى"
+    }
+  },
+  "@dynamic": [
+    "event.status.cancelled",
+    "event.status.completed",
+    "event.status.in_progress",
+    "event.status.pending"
+  ]
+}

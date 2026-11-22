@@ -1,1 +1,41 @@
-{}
+{
+  "empty": {
+    "title": "SEO Signal: Offline",
+    "description": "Your project is missing its algorithmic signature. Let the engine architect optimized metadata for maximum reach.",
+    "analyzing": "Analyzing Niches...",
+    "cta": "Initialize Growth Engine"
+  },
+  "titles": {
+    "title": "High-CTR Variants",
+    "description": "Optimized for algorithmic trigger points and user curiosity",
+    "copyAria": "Copy title suggestion: {title}"
+  },
+  "description": {
+    "title": "Narrative Meta",
+    "aria": "Generated description",
+    "copied": "Copied",
+    "copy": "Sync Description"
+  },
+  "hooks": {
+    "title": "Algorithmic Hooks",
+    "description": "Trending keywords with high-intent semantic weight",
+    "copyAria": "Copy keyword: {tag}"
+  },
+  "projection": {
+    "title": "Growth Projection",
+    "description": "Estimated visibility score across target platforms",
+    "points": "Points",
+    "verdict": "\"SUPREME CANDIDATE\"",
+    "verdictDescription": "Exceptional coherence detected between narrative hooks and exponential trend clusters."
+  },
+  "actions": {
+    "reArchitect": "Re-Architect Logic"
+  },
+  "toasts": {
+    "copied": "System: Context copied to buffer",
+    "generated": "SEO and Hashtags generated",
+    "generateFailed": "Failed to generate SEO metrics",
+    "updated": "SEO profile updated",
+    "updateFailed": "Failed to update SEO profile"
+  }
+}

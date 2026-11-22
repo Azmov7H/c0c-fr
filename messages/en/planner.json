@@ -1,1 +1,46 @@
-{}
+{
+  "page": {
+    "title": "Content planner",
+    "description": "Scheduled work for your projects, straight from the API."
+  },
+  "controls": {
+    "filterProject": "Filter by project",
+    "allProjects": "All projects",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month"
+  },
+  "calendar": {
+    "monthGridAria": "Calendar month grid",
+    "weekdays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ]
+  },
+  "empty": {
+    "title": "Nothing scheduled this month",
+    "description": "Plan events from a project workspace or create one when the planner flow ships."
+  },
+  "reminder": {
+    "notDispatched": "Reminder stored as metadata — not dispatched yet (no scheduler)."
+  },
+  "event": {
+    "openProject": "Open project",
+    "status": {
+      "pending": "pending",
+      "in_progress": "in progress",
+      "completed": "completed",
+      "cancelled": "cancelled"
+    }
+  },
+  "@dynamic": [
+    "event.status.cancelled",
+    "event.status.completed",
+    "event.status.in_progress",
+    "event.status.pending"
+  ]
+}

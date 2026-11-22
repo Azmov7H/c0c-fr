@@ -1,1 +1,51 @@
-{}
+{
+  "page": {
+    "title": "Analytics",
+    "description": "Measured creation activity across your projects. Projections are always labelled."
+  },
+  "metrics": {
+    "projects": "Projects",
+    "scripts": "Scripts",
+    "thumbnails": "Thumbnails",
+    "mediaAudio": "Media & audio",
+    "projectsSub": "{count} completed",
+    "scriptsSub": "{count} in progress",
+    "thumbnailsSub": "{count} drafts",
+    "mediaAudioSub": "{count} archived · by platform below"
+  },
+  "activity": {
+    "title": "Creation activity (last 7 days)",
+    "description": "Projects + scripts created per day — measured, not views",
+    "measured": "Measured",
+    "aria": "Creation activity by day"
+  },
+  "completion": {
+    "title": "Project completion",
+    "description": "Measured counts by status",
+    "draft": "Draft",
+    "inProgress": "In progress",
+    "completed": "Completed",
+    "archived": "Archived"
+  },
+  "platforms": {
+    "title": "Projects by platform",
+    "description": "Measured project counts",
+    "youtube": "YouTube",
+    "tiktok": "TikTok",
+    "instagram": "Instagram",
+    "facebook": "Facebook"
+  },
+  "recent": {
+    "title": "Recent projects",
+    "allProjects": "All projects"
+  },
+  "empty": {
+    "title": "No generation activity yet",
+    "description": "Create your first project — analytics appear once you start generating."
+  },
+  "error": {
+    "loadFailed": "Analytics could not be loaded."
+  },
+  "disclaimer": "Views, watch time, and predicted performance are not measured by C0C and are never shown as real data. Per-project AI reports, when generated, carry a {projection} label.",
+  "disclaimerProjection": "projection"
+}
