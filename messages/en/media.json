@@ -65,5 +65,31 @@
     "selected": "Selected photo",
     "selectedAlt": "The selected photo",
     "clear": "Clear"
+  },
+  "attribution": {
+    "photoBy": "Photo by",
+    "on": "on"
+  },
+  "library": {
+    "title": "Media library",
+    "description": "Every generated or attached asset for the selected project.",
+    "uploadDisabledTitle": "Uploads need a storage provider, which is not configured yet.",
+    "upload": "Upload",
+    "projectAria": "Project",
+    "projectPlaceholder": "Choose a project",
+    "uploadsDisabled": "Uploads are disabled until a storage provider is connected.",
+    "searchPlaceholder": "Search assets...",
+    "tabs": {
+      "all": "All",
+      "images": "Images",
+      "videos": "Videos",
+      "audio": "Audio",
+      "documents": "Documents"
+    },
+    "loading": "Loading media",
+    "emptyFoundTitle": "No assets found",
+    "emptyFoundDescription": "Try adjusting your search or filters.",
+    "emptyTitle": "No media yet",
+    "emptyDescription": "Generated media from your projects will appear here."
   }
 }

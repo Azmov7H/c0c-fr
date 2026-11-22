@@ -139,5 +139,9 @@
     "unlimited": "unlimited",
     "usage": "{used} of {limit} used",
     "resets": "{usage} · resets {date}"
+  },
+  "generation": {
+    "creditSuffix": "Top up or upgrade in Billing to continue.",
+    "quotaSuffix": "Upgrade for more generations."
   }
 }

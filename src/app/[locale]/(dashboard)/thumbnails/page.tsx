@@ -1,11 +1,16 @@
-import type { Metadata } from "next"
-import { ThumbnailStudio } from "@/features/thumbnails/components/thumbnail-studio"
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
-export const metadata: Metadata = {
-  title: "Thumbnail Studio",
-  description: "Create eye-catching thumbnails and cover images with AI-powered design tools.",
+import { ThumbnailStudio } from '@/features/thumbnails/components/thumbnail-studio';
+
+export async function generateMetadata(): Promise<Metadata> {
+    const t = await getTranslations('thumbnails');
+    return {
+        title: t('page.title'),
+        description: t('page.description'),
+    };
 }
 
 export default function ThumbnailsPage() {
-  return <ThumbnailStudio />
+    return <ThumbnailStudio />;
 }

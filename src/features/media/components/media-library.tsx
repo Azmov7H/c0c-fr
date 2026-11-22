@@ -1,6 +1,7 @@
 'use client';
 
-import { useUrlLocale } from '@/i18n/locale';
+import { useLocale, useTranslations } from 'next-intl';
+import type { AppLocale } from '@/i18n/routing';
 import { useMemo, useState } from 'react';
 import { FileAudio, Image as ImageIcon, Search, Upload, Video } from 'lucide-react';
 
@@ -25,51 +26,45 @@ import { UnsplashAttribution } from '@/features/images/components/unsplash-attri
 import { unsplashMetadataOf } from '@/features/images/types';
 import { formatRelativeTime } from '@/lib/relative-time';
 
-const ICONS = {
-    image: ImageIcon,
-    video: Video,
-    audio: FileAudio,
-    document: Search,
-} as const;
-
 export function MediaLibrary() {
-    const locale = useUrlLocale();
-    const projects = useProjects({ limit: 100 });
+    const t = useTranslations('media');
+    const locale = useLocale();
+    const projects = useProjects();
     const [projectId, setProjectId] = useState('');
     const [search, setSearch] = useState('');
     const [tab, setTab] = useState('all');
+    const { data, isLoading } = useProjectMedia(projectId);
 
-    const activeProjectId = projectId || projects.data?.data[0]?._id || '';
-    const media = useProjectMedia(activeProjectId);
-
+    const items = useMemo(() => data?.data ?? [], [data]);
     const filtered = useMemo(() => {
-        const term = search.trim().toLowerCase();
-        return (media.data?.data ?? []).filter((item) => {
-            const matchesSearch =
-                !term ||
-                item.title.toLowerCase().includes(term) ||
-                item.tags?.some((tag) => tag.toLowerCase().includes(term));
-            return matchesSearch && (tab === 'all' || item.category === tab);
+        const query = search.trim().toLowerCase();
+        return items.filter((item) => {
+            const tabMatch = tab === 'all' || item.category === tab;
+            const queryMatch =
+                !query ||
+                item.title.toLowerCase().includes(query) ||
+                (item.tags ?? []).some((tag) => tag.toLowerCase().includes(query));
+            return tabMatch && queryMatch;
         });
-    }, [media.data, search, tab]);
+    }, [items, search, tab]);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in duration-500">
             <PageHeader
-                title="Media library"
-                description="Every generated or attached asset for the selected project."
+                title={t('library.title')}
+                description={t('library.description')}
                 actions={
-                    <Button className="h-11" disabled title="Uploads need a storage provider, which is not configured yet.">
-                        <Upload className="me-2 size-4" aria-hidden="true" />
-                        Upload
+                    <Button disabled title={t('library.uploadDisabledTitle')}>
+                        <Upload className="me-2 h-4 w-4" />
+                        {t('library.upload')}
                     </Button>
                 }
             />
 
-            <div className="max-w-sm space-y-2">
-                <Select value={activeProjectId} onValueChange={setProjectId}>
-                    <SelectTrigger className="h-11" aria-label="Project">
-                        <SelectValue placeholder="Choose a project" />
+            <div className="flex flex-col gap-3 md:flex-row md:items-center">
+                <Select value={projectId} onValueChange={setProjectId}>
+                    <SelectTrigger className="w-full md:w-[260px]" aria-label={t('library.projectAria')}>
+                        <SelectValue placeholder={t('library.projectPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
                         {(projects.data?.data ?? []).map((project) => (
@@ -80,74 +75,74 @@ export function MediaLibrary() {
                     </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                    Uploads are disabled until a storage provider is connected.
+                    {t('library.uploadsDisabled')}
                 </p>
             </div>
 
             <FilterBar
                 searchValue={search}
                 onSearchChange={setSearch}
-                searchPlaceholder="Search assets..."
+                searchPlaceholder={t('library.searchPlaceholder')}
                 filters={[]}
-                onClear={() => {
-                    setSearch('');
-                    setTab('all');
-                }}
             />
 
             <Tabs value={tab} onValueChange={setTab}>
                 <TabsList>
-                    <TabsTrigger value="all">All</TabsTrigger>
-                    <TabsTrigger value="image">Images</TabsTrigger>
-                    <TabsTrigger value="video">Videos</TabsTrigger>
-                    <TabsTrigger value="audio">Audio</TabsTrigger>
-                    <TabsTrigger value="document">Documents</TabsTrigger>
+                    <TabsTrigger value="all">{t('library.tabs.all')}</TabsTrigger>
+                    <TabsTrigger value="images">{t('library.tabs.images')}</TabsTrigger>
+                    <TabsTrigger value="videos">{t('library.tabs.videos')}</TabsTrigger>
+                    <TabsTrigger value="audio">{t('library.tabs.audio')}</TabsTrigger>
+                    <TabsTrigger value="documents">{t('library.tabs.documents')}</TabsTrigger>
                 </TabsList>
-
-                <TabsContent value={tab} className="mt-6">
-                    {media.isLoading ? (
-                        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-6" role="status" aria-label="Loading media">
-                            {Array.from({ length: 6 }).map((_, index) => (
-                                <Skeleton key={index} className="aspect-square rounded-xl" />
+                <TabsContent value={tab} className="mt-4">
+                    {isLoading ? (
+                        <div
+                            className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
+                            aria-busy="true"
+                            aria-label={t('library.loading')}
+                        >
+                            {Array.from({ length: 8 }).map((_, i) => (
+                                <Skeleton key={i} className="h-52 rounded-xl" />
                             ))}
                         </div>
                     ) : filtered.length === 0 ? (
                         <EmptyState
-                            icon={search || tab !== 'all' ? Search : Upload}
-                            title={search || tab !== 'all' ? 'No assets found' : 'No media yet'}
+                            icon={Search}
+                            title={search ? t('library.emptyFoundTitle') : t('library.emptyTitle')}
                             description={
-                                search || tab !== 'all'
-                                    ? 'Try adjusting your search or filters.'
-                                    : 'Generated media from your projects will appear here.'
+                                search
+                                    ? t('library.emptyFoundDescription')
+                                    : t('library.emptyDescription')
                             }
                         />
                     ) : (
-                        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-6">
+                        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                             {filtered.map((item) => {
-                                const Icon = ICONS[item.category] ?? ImageIcon;
-                                const unsplash = unsplashMetadataOf(item.metadata);
+                                const Icon =
+                                    item.category === 'image'
+                                        ? ImageIcon
+                                        : item.category === 'video'
+                                            ? Video
+                                            : item.category === 'audio'
+                                                ? FileAudio
+                                                : Search;
                                 return (
                                     <Card key={item._id} className="overflow-hidden">
-                                        <CardContent className="p-0">
-                                            <div className="flex aspect-square items-center justify-center bg-muted/40">
-                                                {item.thumbnailUrl ? (
-                                                    // eslint-disable-next-line @next/next/no-img-element
-                                                    <img src={item.thumbnailUrl} alt="" className="size-full object-cover" />
-                                                ) : (
-                                                    <Icon className="size-10 text-muted-foreground/50" aria-hidden="true" />
-                                                )}
+                                        <div className="flex h-28 items-center justify-center bg-muted/40">
+                                            <Icon className="h-8 w-8 text-muted-foreground" />
+                                        </div>
+                                        <CardContent className="space-y-2 p-3">
+                                            <p className="truncate text-sm font-medium">{item.title}</p>
+                                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                                <Badge variant="outline" className="text-[10px] capitalize">
+                                                    {item.category}
+                                                </Badge>
+                                                <span>{formatRelativeTime(item.createdAt, locale as AppLocale).relative}</span>
                                             </div>
-                                            <div className="space-y-1 p-3">
-                                                <p className="truncate text-xs font-medium">{item.title}</p>
-                                                <div className="flex items-center justify-between">
-                                                    <Badge variant="secondary" className="text-[10px]">{item.category}</Badge>
-                                                    <span className="text-[10px] text-muted-foreground">
-                                                        {formatRelativeTime(item.createdAt, locale).relative}
-                                                    </span>
-                                                </div>
-                                                {/* The credit the Unsplash guidelines require. */}
-                                                {unsplash && <UnsplashAttribution photo={unsplash} />}
-                                            </div>
+                                            {(() => {
+                                                const u = unsplashMetadataOf(item.metadata as Record<string, unknown> | undefined);
+                                                return u ? <UnsplashAttribution photo={u} /> : null;
+                                            })()}
                                         </CardContent>
                                     </Card>
                                 );

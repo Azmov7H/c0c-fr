@@ -1,4 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
+
 import { audioService } from '../services/audio.service';
 import { CreateAudioSuggestionDTO, UpdateAudioSuggestionDTO, UploadAudioDTO, ReplaceAudioDTO } from '../types';
 import { toast } from '@/lib/toast';
@@ -11,6 +13,14 @@ export const audioKeys = {
     details: () => [...audioKeys.all, 'detail'] as const,
     detail: (id: string) => [...audioKeys.details(), id] as const,
 };
+
+function useGenerationSuffixes() {
+    const tb = useTranslations('billing');
+    return {
+        credit: tb('generation.creditSuffix'),
+        quota: tb('generation.quotaSuffix'),
+    };
+}
 
 export const useProjectAudio = (projectId: string) => {
     return useQuery({
@@ -39,49 +49,55 @@ export const useAudioSuggestion = (id: string) => {
 
 export const useCreateAudioSuggestion = () => {
     const queryClient = useQueryClient();
+    const t = useTranslations('audio');
+    const suffixes = useGenerationSuffixes();
 
     return useMutation({
         mutationFn: (data: CreateAudioSuggestionDTO) => audioService.createSuggestion(data),
         onSuccess: (data) => {
-            toast.success('Audio analysis started');
+            toast.success(t('toasts.analysisStarted'));
             queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(generationErrorMessage(error, 'Failed to start audio analysis'));
+            toast.error(generationErrorMessage(error, t('toasts.analysisFailed'), suffixes));
         },
     });
 };
 
 export const useGenerateAudio = () => {
     const queryClient = useQueryClient();
+    const t = useTranslations('audio');
+    const suffixes = useGenerationSuffixes();
 
     return useMutation({
         mutationFn: ({ projectId, scriptId }: { projectId: string, scriptId?: string }) =>
             audioService.generateAudio(projectId, scriptId),
         onSuccess: (data) => {
-            toast.success('AI Audio profile generated! 🎵');
+            toast.success(t('toasts.generated'));
             queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
             queryClient.setQueryData(audioKeys.detail(data.id), data);
         },
         onError: (error: unknown) => {
-            toast.error(generationErrorMessage(error, 'AI Audio generation failed'));
+            toast.error(generationErrorMessage(error, t('toasts.generateFailed'), suffixes));
         },
     });
 };
 
 export const useUpdateAudioSuggestion = () => {
     const queryClient = useQueryClient();
+    const t = useTranslations('audio');
+    const suffixes = useGenerationSuffixes();
 
     return useMutation({
         mutationFn: ({ id, data }: { id: string; data: UpdateAudioSuggestionDTO }) =>
             audioService.updateSuggestion(id, data),
         onSuccess: (data) => {
-            toast.success('Audio profile updated');
+            toast.success(t('toasts.updated'));
             queryClient.invalidateQueries({ queryKey: audioKeys.detail(data.id) });
             queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(generationErrorMessage(error, 'Failed to update audio profile'));
+            toast.error(generationErrorMessage(error, t('toasts.updateFailed'), suffixes));
         },
     });
 };
@@ -89,14 +105,16 @@ export const useUpdateAudioSuggestion = () => {
 /** T24: upload external audio. No optimistic UI — invalidation only. */
 export const useUploadAudio = () => {
     const queryClient = useQueryClient();
+    const t = useTranslations('audio');
+    const suffixes = useGenerationSuffixes();
     return useMutation({
         mutationFn: (data: UploadAudioDTO) => audioService.uploadAudio(data),
         onSuccess: (data) => {
-            toast.success('Audio uploaded');
+            toast.success(t('toasts.uploaded'));
             queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(generationErrorMessage(error, 'Failed to upload audio'));
+            toast.error(generationErrorMessage(error, t('toasts.uploadFailed'), suffixes));
         },
     });
 };
@@ -106,32 +124,36 @@ export const useUploadAudio = () => {
  * the real file state). */
 export const useReplaceAudio = () => {
     const queryClient = useQueryClient();
+    const t = useTranslations('audio');
+    const suffixes = useGenerationSuffixes();
     return useMutation({
         mutationFn: ({ id, data }: { id: string; data: ReplaceAudioDTO }) =>
             audioService.replaceAudio(id, data),
         onSuccess: (data) => {
-            toast.success('Audio replaced');
+            toast.success(t('toasts.replaced'));
             queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
             queryClient.setQueryData(audioKeys.detail(data.id), data);
         },
         onError: (error: unknown) => {
-            toast.error(generationErrorMessage(error, 'Replacement failed — previous audio kept'));
+            toast.error(generationErrorMessage(error, t('toasts.replaceFailed'), suffixes));
         },
     });
 };
 
 export const useDeleteAudioSuggestion = () => {
     const queryClient = useQueryClient();
+    const t = useTranslations('audio');
+    const suffixes = useGenerationSuffixes();
 
     return useMutation({
         mutationFn: ({ id }: { id: string; projectId: string }) =>
             audioService.deleteSuggestion(id),
         onSuccess: (_, variables) => {
-            toast.success('Audio profile deleted');
+            toast.success(t('toasts.deleted'));
             queryClient.invalidateQueries({ queryKey: audioKeys.list(variables.projectId) });
         },
         onError: (error: unknown) => {
-            toast.error(generationErrorMessage(error, 'Failed to delete audio profile'));
+            toast.error(generationErrorMessage(error, t('toasts.deleteFailed'), suffixes));
         },
     });
 };

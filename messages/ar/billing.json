@@ -139,5 +139,9 @@
     "unlimited": "غير محدود",
     "usage": "{used} من {limit} مستخدم",
     "resets": "{usage} · يُتجدّد {date}"
+  },
+  "generation": {
+    "creditSuffix": "اشحن الرصيد أو قم بالترقية في الفوترة للمتابعة.",
+    "quotaSuffix": "قم بالترقية للحصول على مزيد من التوليدات."
   }
 }

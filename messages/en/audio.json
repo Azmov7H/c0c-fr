@@ -1,1 +1,77 @@
-{}
+{
+  "page": {
+    "title": "Audio Effects",
+    "description": "Generate AI-powered music and sound suggestions for your projects.",
+    "aiPowered": "AI Powered"
+  },
+  "studio": {
+    "projectAria": "Project",
+    "projectPlaceholder": "Choose a project",
+    "sonicTitle": "Sonic architecture",
+    "sonicDescription": "Pick a project, mood and generate",
+    "profilesTitle": "Audio profiles",
+    "profilesDescription": "Live suggestions from the API",
+    "generating": "Generating…",
+    "generate": "Generate audio profile",
+    "loading": "Loading audio…",
+    "quotaTitle": "Generation quota reached",
+    "quotaCta": "Upgrade for more generations",
+    "currentAudio": "Current audio",
+    "currentAudioAria": "Current audio",
+    "generatedFallback": "generated",
+    "expired": "This audio link expired — regenerate or re-upload.",
+    "legacySuggestion": "Legacy suggestion (no file). Generate or upload to get a playable asset.",
+    "replaceAria": "Replace current audio",
+    "replacing": "Replacing…",
+    "replace": "Replace",
+    "downloadAria": "Download current audio",
+    "download": "Download",
+    "externalUrlLabel": "External audio URL",
+    "externalUrlPlaceholder": "https://…/audio.mp3",
+    "upload": "Upload",
+    "historyVersions": "{count, plural, one {# previous version kept as history.} other {# previous versions kept as history.}}",
+    "createProjectFirst": "Create a project first to generate audio.",
+    "emptyTitle": "No audio profiles yet",
+    "emptyDescription": "Choose a mood and generate suggestions for your selected project.",
+    "playTrack": "Play {title}"
+  },
+  "moods": {
+    "energeticFast": {
+      "label": "Energetic & Fast",
+      "description": "High tempo, impactful beats"
+    },
+    "suspensefulEpic": {
+      "label": "Suspenseful Epic",
+      "description": "Deep bass, cinematic tension"
+    },
+    "lofiChill": {
+      "label": "Lo-fi & Chill",
+      "description": "Relaxed vibes, atmospheric"
+    },
+    "educational": {
+      "label": "Educational",
+      "description": "Clear, unobtrusive ambient"
+    }
+  },
+  "validation": {
+    "noFile": "No file selected.",
+    "unsupportedType": "Unsupported audio type ({type}). Use MP3, WAV, OGG or M4A.",
+    "tooLarge": "Audio file exceeds 25 MB.",
+    "invalidUrl": "Enter a valid https audio URL.",
+    "urlMustBeHttps": "Audio URL must be https."
+  },
+  "toasts": {
+    "analysisStarted": "Audio analysis started",
+    "analysisFailed": "Failed to start audio analysis",
+    "generated": "AI Audio profile generated! 🎵",
+    "generateFailed": "AI Audio generation failed",
+    "updated": "Audio profile updated",
+    "updateFailed": "Failed to update audio profile",
+    "uploaded": "Audio uploaded",
+    "uploadFailed": "Failed to upload audio",
+    "replaced": "Audio replaced",
+    "replaceFailed": "Replacement failed — previous audio kept",
+    "deleted": "Audio profile deleted",
+    "deleteFailed": "Failed to delete audio profile"
+  }
+}
