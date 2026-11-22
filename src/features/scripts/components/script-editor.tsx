@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useEffect, useMemo } from 'react';
+import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Clock, FileText, Link2, Save, Sparkles } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useScript, useUpdateScript, useGenerateScript } from '../hooks/use-scripts';
 import type { ScriptSection } from '../types';
+import { scriptSceneLabel } from '../lib/script-labels';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,20 +22,19 @@ import { cn } from '@/lib/utils';
 
 const TRANSITIONS = ['cut', 'fade', 'dissolve', 'slide', 'zoom', 'none'] as const;
 
-const sectionSchema = z.object({
-    label: z.string().min(1).max(100),
-    content: z.string().max(5000),
-    narration: z.string().max(5000).optional(),
-    visualDirection: z.string().max(2000).optional(),
-    transition: z.enum(TRANSITIONS).optional(),
-    durationSeconds: z.number().int().min(0).max(3600).optional(),
-    assetIds: z.array(z.string()).max(20).optional(),
-});
+type SectionForm = {
+    label: string;
+    content: string;
+    narration?: string;
+    visualDirection?: string;
+    transition?: (typeof TRANSITIONS)[number];
+    durationSeconds?: number;
+    assetIds?: string[];
+};
 
-const formSchema = z.object({ sections: z.array(sectionSchema).min(1) });
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = { sections: SectionForm[] };
 
-const toFormSection = (section: ScriptSection): FormValues['sections'][number] => ({
+const toFormSection = (section: ScriptSection): SectionForm => ({
     label: section.label,
     content: section.content,
     narration: section.narration ?? '',
@@ -49,11 +50,31 @@ const toFormSection = (section: ScriptSection): FormValues['sections'][number] =
  * P06/P07 wire them); saving replaces the list verbatim so untouched
  * scenes are preserved byte-for-byte (P05.6). RHF + Zod, no raw state
  * per field.
+ *
+ * AR-032: UI chrome reads the `scripts` catalog; scene labels are rendered
+ * through a label→key map while the stored label value is never rewritten.
+ * Content fields use `dir="auto"` so Arabic drafts shape correctly.
  */
 export const ScriptEditor = ({ scriptId }: { scriptId: string }) => {
+    const t = useTranslations('scripts');
     const { data: script, isLoading } = useScript(scriptId);
     const { mutate: updateScript, isPending: isUpdating } = useUpdateScript();
     const { mutate: generateScript, isPending: isGenerating } = useGenerateScript();
+
+    const sectionSchema = useMemo(
+        () =>
+            z.object({
+                label: z.string().min(1).max(100),
+                content: z.string().max(5000),
+                narration: z.string().max(5000).optional(),
+                visualDirection: z.string().max(2000).optional(),
+                transition: z.enum(TRANSITIONS).optional(),
+                durationSeconds: z.number().int().min(0).max(3600).optional(),
+                assetIds: z.array(z.string()).max(20).optional(),
+            }),
+        []
+    );
+    const formSchema = useMemo(() => z.object({ sections: z.array(sectionSchema).min(1) }), [sectionSchema]);
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -67,12 +88,9 @@ export const ScriptEditor = ({ scriptId }: { scriptId: string }) => {
         }
     }, [script, replace]);
 
-    const totalDuration = form
-        .watch('sections')
-        .reduce((sum, s) => sum + (s.durationSeconds ?? 0), 0);
-    const wordCount = form
-        .watch('sections')
-        .reduce((sum, s) => sum + s.content.split(/\s+/).filter(Boolean).length, 0);
+    const sections = useWatch({ control: form.control, name: 'sections' }) ?? [];
+    const totalDuration = sections.reduce((sum, s) => sum + (s.durationSeconds ?? 0), 0);
+    const wordCount = sections.reduce((sum, s) => sum + s.content.split(/\s+/).filter(Boolean).length, 0);
 
     const handleSave = (values: FormValues) => {
         if (!script) return;
@@ -112,10 +130,14 @@ export const ScriptEditor = ({ scriptId }: { scriptId: string }) => {
                 <div>
                     <CardTitle className="flex items-center gap-2 text-xl font-bold">
                         <FileText className="h-5 w-5 text-primary" aria-hidden="true" />
-                        Script scenes (v{script.version})
+                        {t('editor.title', { version: script.version })}
                     </CardTitle>
                     <CardDescription className="mt-1">
-                        {fields.length} scene(s) · {wordCount} words · {totalDuration}s estimated
+                        {t('editor.summary', {
+                            scenes: fields.length,
+                            words: wordCount,
+                            seconds: totalDuration,
+                        })}
                     </CardDescription>
                 </div>
                 <div className="flex items-center gap-3">
@@ -126,7 +148,7 @@ export const ScriptEditor = ({ scriptId }: { scriptId: string }) => {
                         onClick={() => generateScript(script.projectId)}
                     >
                         <Sparkles className={cn('me-2 h-4 w-4', isGenerating && 'animate-spin')} aria-hidden="true" />
-                        {isGenerating ? 'AI thinking…' : 'Refine with AI'}
+                        {isGenerating ? t('editor.thinking') : t('editor.refine')}
                     </Button>
                     <Button
                         className="h-11 rounded-xl"
@@ -134,7 +156,7 @@ export const ScriptEditor = ({ scriptId }: { scriptId: string }) => {
                         onClick={form.handleSubmit(handleSave)}
                     >
                         <Save className="me-2 h-4 w-4" aria-hidden="true" />
-                        {isUpdating ? 'Saving…' : 'Save script'}
+                        {isUpdating ? t('editor.saving') : t('editor.save')}
                     </Button>
                 </div>
             </div>
@@ -147,11 +169,17 @@ export const ScriptEditor = ({ scriptId }: { scriptId: string }) => {
 
             {fields.map((field, index) => {
                 const errors = form.formState.errors.sections?.[index];
+                const sceneLabel = field.label ? scriptSceneLabel(t, field.label) : t('editor.untitled');
                 return (
                     <Card key={field.id} className="rounded-2xl border-border/60">
                         <CardHeader className="pb-3">
                             <CardTitle className="flex items-center gap-2 text-base">
-                                Scene {index + 1} · {field.label || 'Untitled'}
+                                <span dir="auto">
+                                    {t('editor.sceneHeading', {
+                                        number: index + 1,
+                                        label: sceneLabel,
+                                    })}
+                                </span>
                                 <Badge variant="outline">{field.transition ?? 'cut'}</Badge>
                             </CardTitle>
                         </CardHeader>
@@ -159,11 +187,12 @@ export const ScriptEditor = ({ scriptId }: { scriptId: string }) => {
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Labeled
                                     id={`scene-${index}-label`}
-                                    label="Section title"
+                                    label={t('editor.sectionTitle')}
                                     error={errors?.label?.message}
                                 >
                                     <Input
                                         id={`scene-${index}-label`}
+                                        dir="auto"
                                         value={field.label}
                                         onChange={(e) => form.setValue(`sections.${index}.label`, e.target.value, { shouldDirty: true })}
                                         className="h-11 text-base"
@@ -171,7 +200,7 @@ export const ScriptEditor = ({ scriptId }: { scriptId: string }) => {
                                 </Labeled>
                                 <div>
                                     <Label htmlFor={`scene-${index}-duration`}>
-                                        Duration (seconds)
+                                        {t('editor.duration')}
                                     </Label>
                                     <div className="mt-2 flex items-center gap-2">
                                         <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
@@ -189,27 +218,30 @@ export const ScriptEditor = ({ scriptId }: { scriptId: string }) => {
                                     <FormHint error={errors?.durationSeconds?.message} />
                                 </div>
                             </div>
-                            <Labeled id={`scene-${index}-content`} label="Section text" error={errors?.content?.message}>
+                            <Labeled id={`scene-${index}-content`} label={t('editor.sectionText')} error={errors?.content?.message}>
                                 <Textarea
                                     id={`scene-${index}-content`}
+                                    dir="auto"
                                     value={field.content}
                                     onChange={(e) => form.setValue(`sections.${index}.content`, e.target.value, { shouldDirty: true })}
                                     rows={4}
                                     className="text-base"
                                 />
                             </Labeled>
-                            <Labeled id={`scene-${index}-narration`} label="Narration (voiceover)" error={errors?.narration?.message}>
+                            <Labeled id={`scene-${index}-narration`} label={t('editor.narration')} error={errors?.narration?.message}>
                                 <Textarea
                                     id={`scene-${index}-narration`}
+                                    dir="auto"
                                     value={field.narration ?? ''}
                                     onChange={(e) => form.setValue(`sections.${index}.narration`, e.target.value, { shouldDirty: true })}
                                     rows={3}
                                     className="text-base"
                                 />
                             </Labeled>
-                            <Labeled id={`scene-${index}-visual`} label="Visual direction" error={errors?.visualDirection?.message}>
+                            <Labeled id={`scene-${index}-visual`} label={t('editor.visualDirection')} error={errors?.visualDirection?.message}>
                                 <Textarea
                                     id={`scene-${index}-visual`}
+                                    dir="auto"
                                     value={field.visualDirection ?? ''}
                                     onChange={(e) => form.setValue(`sections.${index}.visualDirection`, e.target.value, { shouldDirty: true })}
                                     rows={2}
@@ -218,7 +250,7 @@ export const ScriptEditor = ({ scriptId }: { scriptId: string }) => {
                             </Labeled>
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div>
-                                    <Label htmlFor={`scene-${index}-transition`}>Transition</Label>
+                                    <Label htmlFor={`scene-${index}-transition`}>{t('editor.transition')}</Label>
                                     <Select
                                         value={field.transition ?? 'cut'}
                                         onValueChange={(v) =>
@@ -229,19 +261,19 @@ export const ScriptEditor = ({ scriptId }: { scriptId: string }) => {
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {TRANSITIONS.map((t) => (
-                                                <SelectItem key={t} value={t}>{t}</SelectItem>
+                                            {TRANSITIONS.map((tr) => (
+                                                <SelectItem key={tr} value={tr}>{tr}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                     <FormHint error={errors?.transition?.message} />
                                 </div>
                                 <div>
-                                    <Label>Linked assets</Label>
+                                    <Label>{t('editor.linkedAssets')}</Label>
                                     <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
                                         <Link2 className="h-4 w-4" aria-hidden="true" />
                                         {(field.assetIds ?? []).length === 0
-                                            ? 'None yet — scene links open with P06/P07.'
+                                            ? t('editor.noLinkedAssets')
                                             : (field.assetIds ?? []).join(', ')}
                                     </p>
                                     <FormHint error={errors?.assetIds?.message} />
