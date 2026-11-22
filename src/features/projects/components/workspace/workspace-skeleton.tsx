@@ -1,6 +1,10 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function WorkspaceSkeleton() {
+    const t = useTranslations('workspace');
     return (
         <div className="space-y-6" data-state="loading">
             <div className="rounded-2xl border border-border/60 bg-card/60 p-6">
@@ -15,7 +19,7 @@ export function WorkspaceSkeleton() {
             </div>
             <Skeleton className="h-11 w-80 max-w-full" />
             <Skeleton className="h-72 w-full rounded-2xl" />
-            <span className="sr-only" role="status">Loading project</span>
+            <span className="sr-only" role="status">{t('skeleton.loading')}</span>
         </div>
     );
 }

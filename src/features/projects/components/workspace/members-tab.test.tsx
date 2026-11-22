@@ -1,11 +1,9 @@
 // @vitest-environment jsdom
 import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { NextIntlClientProvider } from 'next-intl';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, screen } from '@testing-library/react';
 
-import enBilling from '../../../../../messages/en/billing.json';
-
+import { render, WorkspaceIntlProvider } from '../../../../../tests/helpers/workspace-intl';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { MembersTab } from './members-tab';
 
@@ -55,11 +53,11 @@ vi.mock('../../hooks/use-collaboration', () => {
 
 const renderTab = (role: 'owner' | 'editor' | 'viewer' = 'owner') =>
     render(
-        <NextIntlClientProvider locale="en" messages={{ billing: enBilling }}>
+        <WorkspaceIntlProvider>
             <TooltipProvider>
                 <MembersTab projectId="p1" role={role} />
             </TooltipProvider>
-        </NextIntlClientProvider>
+        </WorkspaceIntlProvider>
     );
 
 describe('MembersTab', () => {

@@ -3,6 +3,7 @@
 import { useUrlLocale } from '@/i18n/locale';
 import { formatDate } from '@/lib/format';
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2, PackageOpen } from 'lucide-react';
 
@@ -20,15 +21,16 @@ import {
     type ExportScope,
 } from '../../services/export.service';
 import { exportKeys } from '../../hooks/use-export-history';
+import {
+    exportFailureNote,
+    exportScopeLabel,
+    exportStatusLabel,
+    type WorkspaceTranslator,
+} from '../../lib/workspace-labels';
 
 type Scope = ExportScope;
-const SCOPES: Array<{ value: Scope; label: string }> = [
-    { value: 'full', label: 'Complete (all)' },
-    { value: 'script', label: 'Script' },
-    { value: 'images', label: 'Images' },
-    { value: 'audio', label: 'Audio' },
-    { value: 'media', label: 'Media + script' },
-];
+/** Stable wire values — the visible labels come from the catalog. */
+const SCOPES: readonly Scope[] = ['full', 'script', 'images', 'audio', 'media'];
 
 const newIdempotencyKey = () =>
     typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -36,36 +38,32 @@ const newIdempotencyKey = () =>
         : `export-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 /** Why the export is refused, in the user's words (never a raw code). */
-function blockedMessage(estimate: ExportEstimate | undefined): string | null {
+function blockedMessage(
+    estimate: ExportEstimate | undefined,
+    t: WorkspaceTranslator
+): string | null {
     if (!estimate) return null;
     if (estimate.blockedReason === 'allowance_reached') {
-        const limit = estimate.allowance.limit ?? 1;
-        return `You have used your ${limit} free export${limit === 1 ? '' : 's'} for this project.`;
+        return t('export.blockedAllowance', { limit: estimate.allowance.limit ?? 1 });
     }
     if (estimate.blockedReason === 'pricing_pending') {
-        return 'Paid exports open once the export price is published. Your free export is unaffected.';
+        return t('export.blockedPricing');
     }
     if (estimate.nothingToExport) {
-        return 'There is nothing to export yet — generate a script or some assets first.';
+        return t('export.blockedNothing');
     }
     return null;
 }
 
-function statusBadge(record: ExportRecordView) {
+function statusBadge(t: WorkspaceTranslator, record: ExportRecordView) {
+    const label = exportStatusLabel(t, record.status);
     if (record.status === 'completed') {
-        return <Badge variant="success">Completed</Badge>;
+        return <Badge variant="success">{label}</Badge>;
     }
     if (record.status === 'failed') {
-        return <Badge variant="destructive">Failed</Badge>;
+        return <Badge variant="destructive">{label}</Badge>;
     }
-    return <Badge variant="secondary">In progress</Badge>;
-}
-
-function failureNote(record: ExportRecordView): string | null {
-    if (record.status !== 'failed') return null;
-    if (record.reason === 'cancelled') return 'Cancelled — nothing was charged.';
-    if (record.reason === 'allowance_reached') return 'Refused — the free export was already used.';
-    return 'Nothing was charged.';
+    return <Badge variant="secondary">{label}</Badge>;
 }
 
 /**
@@ -81,6 +79,7 @@ function failureNote(record: ExportRecordView): string | null {
  */
 export function ProjectExport({ projectId, title }: { projectId: string; title: string }) {
     const locale = useUrlLocale();
+    const t = useTranslations('workspace');
     const [scope, setScope] = React.useState<Scope>('full');
     const [pending, setPending] = React.useState(false);
     const [idempotencyKey, setIdempotencyKey] = React.useState(newIdempotencyKey);
@@ -101,7 +100,7 @@ export function ProjectExport({ projectId, title }: { projectId: string; title: 
     });
 
     const estimate = estimateQuery.data;
-    const blocked = blockedMessage(estimate);
+    const blocked = blockedMessage(estimate, t);
     const canExport = Boolean(estimate?.canExport) && !pending;
 
     const onExport = async () => {
@@ -112,23 +111,23 @@ export function ProjectExport({ projectId, title }: { projectId: string; title: 
             const a = document.createElement('a');
             a.href = url;
             const date = new Date().toISOString().slice(0, 10);
-            a.download = `c0c-${title.replace(/[^\w-]+/g, '-').slice(0, 40) || 'project'}-${date}.zip`;
+            a.download = `c0c-${title.replace(/[^\w-]+/g, '-').slice(0, 40) || t('export.filenameFallback')}-${date}.zip`;
             a.click();
             URL.revokeObjectURL(url);
             // A new key for the NEXT export: this one is spent.
             setIdempotencyKey(newIdempotencyKey());
-            toast.success('Export downloaded');
+            toast.success(t('export.toastDownloaded'));
             void queryClient.invalidateQueries({ queryKey: ['export'] });
         } catch (error) {
-            const apiError = toApiError(error, 'Export failed. Check that assets exist and retry.');
+            const apiError = toApiError(error, t('export.toastFailed'));
             if (apiError.code === 'EXPORT_ALLOWANCE_REACHED') {
-                toast.error('You have used your free export for this project.');
+                toast.error(t('export.toastAllowance'));
             } else if (apiError.code === 'PRICING_PENDING') {
-                toast.error('Paid exports open once the export price is published.');
+                toast.error(t('export.toastPricing'));
             } else if (apiError.status === 402) {
                 toast.error(apiError.message);
             } else if (apiError.code === 'NOTHING_TO_EXPORT') {
-                toast.error('There is nothing to export yet.');
+                toast.error(t('export.toastNothing'));
             } else {
                 toast.error(apiError.message);
             }
@@ -141,10 +140,10 @@ export function ProjectExport({ projectId, title }: { projectId: string; title: 
     const records = historyQuery.data?.records ?? [];
 
     return (
-        <div className="space-y-3" aria-label="Export project">
+        <div className="space-y-3" aria-label={t('export.aria')}>
             <div className="flex flex-wrap items-center gap-2">
                 <Label htmlFor="export-scope" className="sr-only">
-                    Export scope
+                    {t('export.scopeAria')}
                 </Label>
                 <select
                     id="export-scope"
@@ -152,9 +151,9 @@ export function ProjectExport({ projectId, title }: { projectId: string; title: 
                     onChange={(e) => setScope(e.target.value as Scope)}
                     className="h-11 rounded-md border border-input bg-background px-3 text-sm"
                 >
-                    {SCOPES.map((s) => (
-                        <option key={s.value} value={s.value}>
-                            {s.label}
+                    {SCOPES.map((value) => (
+                        <option key={value} value={value}>
+                            {exportScopeLabel(t, value)}
                         </option>
                     ))}
                 </select>
@@ -164,11 +163,11 @@ export function ProjectExport({ projectId, title }: { projectId: string; title: 
                     ) : (
                         <PackageOpen className="me-1 size-4" aria-hidden="true" />
                     )}
-                    {pending ? 'Preparing…' : 'Export'}
+                    {pending ? t('export.preparing') : t('export.export')}
                 </Button>
                 {pending && (
                     <span role="status" className="text-xs text-muted-foreground">
-                        Preparing export…
+                        {t('export.preparingStatus')}
                     </span>
                 )}
             </div>
@@ -178,16 +177,17 @@ export function ProjectExport({ projectId, title }: { projectId: string; title: 
                 <Skeleton className="h-4 w-56 rounded" />
             ) : estimate ? (
                 <p className="text-xs text-muted-foreground">
-                    {formatBytes(estimate.estimateBytes)}
+                    <bdi dir="ltr">{formatBytes(estimate.estimateBytes)}</bdi>
                     {estimate.pricePending
-                        ? ' · cost pending'
+                        ? t('export.costPending')
                         : estimate.creditCost > 0
-                          ? ` · ${estimate.creditCost} credits`
+                          ? t('export.creditCost', { count: estimate.creditCost })
                           : ''}
                     {estimate.allowance.remaining !== null
-                        ? ` · ${estimate.allowance.remaining} of ${estimate.allowance.limit} free export${
-                              (estimate.allowance.limit ?? 1) === 1 ? '' : 's'
-                          } left`
+                        ? t('export.allowanceLeft', {
+                              remaining: estimate.allowance.remaining,
+                              limit: estimate.allowance.limit ?? 1,
+                          })
                         : ''}
                 </p>
             ) : null}
@@ -201,7 +201,7 @@ export function ProjectExport({ projectId, title }: { projectId: string; title: 
             {records.length > 0 ? (
                 <div>
                     <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Export history
+                        {t('export.history')}
                     </h3>
                     <ul className="mt-2 space-y-1">
                         {records.map((record) => (
@@ -210,25 +210,25 @@ export function ProjectExport({ projectId, title }: { projectId: string; title: 
                                 className="flex flex-wrap items-center justify-between gap-2 text-xs"
                             >
                                 <span className="text-muted-foreground">
-                                    {formatDate(new Date(record.startedAt), locale, {
+                                    <bdi dir="ltr">{formatDate(new Date(record.startedAt), locale, {
                                         month: 'numeric',
                                         day: 'numeric',
                                         year: 'numeric',
-                                    })} ·{' '}
-                                    {record.scope}
+                                    })}</bdi> ·{' '}
+                                    <bdi dir="ltr">{record.scope}</bdi>
                                 </span>
                                 <span className="flex items-center gap-2">
-                                    {failureNote(record) ? (
+                                    {exportFailureNote(t, record) ? (
                                         <span className="text-muted-foreground">
-                                            {failureNote(record)}
+                                            {exportFailureNote(t, record)}
                                         </span>
                                     ) : null}
                                     {record.creditCost > 0 ? (
                                         <span className="tabular-nums">
-                                            {record.creditCost} credits
+                                            {t('export.historyCredits', { count: record.creditCost })}
                                         </span>
                                     ) : null}
-                                    {statusBadge(record)}
+                                    {statusBadge(t, record)}
                                 </span>
                             </li>
                         ))}

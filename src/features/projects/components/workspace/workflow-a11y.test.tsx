@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
-import { render } from '@testing-library/react';
 import * as axe from 'axe-core';
 
+import { render } from '../../../../../tests/helpers/workspace-intl';
 import type { StageState } from '../../lib/stages';
 import { WorkflowStepper } from './workflow-stepper';
 import { PreviewPanel } from './preview-panel';

@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ const isMissingProject = (error: unknown): boolean =>
     (error.status === 404 || (error.status === 400 && error.code === 'INVALID_ID'));
 
 export function ProjectWorkspace() {
+    const t = useTranslations('workspace');
     const params = useParams<{ id: string }>();
     const projectId = params?.id ?? '';
     const searchParams = useSearchParams();
@@ -65,11 +67,11 @@ export function ProjectWorkspace() {
         if (isMissingProject(project.error)) return <WorkspaceNotFound />;
         return (
             <Alert variant="destructive">
-                <AlertTitle>Could not load this project</AlertTitle>
+                <AlertTitle>{t('shell.loadErrorTitle')}</AlertTitle>
                 <AlertDescription className="flex flex-wrap items-center gap-3">
-                    {toApiError(project.error, 'Try again in a moment.').message}
+                    {toApiError(project.error, t('shell.loadErrorFallback')).message}
                     <Button variant="outline" className="h-11" onClick={() => project.refetch()}>
-                        Retry
+                        {t('shell.retry')}
                     </Button>
                 </AlertDescription>
             </Alert>

@@ -1,1 +1,348 @@
-{}
+{
+  "shell": {
+    "loadErrorTitle": "Could not load this project",
+    "loadErrorFallback": "Try again in a moment.",
+    "retry": "Retry"
+  },
+  "notFound": {
+    "title": "Project not found",
+    "description": "This project is unavailable, or the link may be incorrect.",
+    "back": "Back to projects"
+  },
+  "skeleton": {
+    "loading": "Loading project"
+  },
+  "tabs": {
+    "loading": "Loading tab",
+    "assets": "Assets",
+    "media": "Media",
+    "preview": "Preview",
+    "members": "Members",
+    "activity": "Activity"
+  },
+  "header": {
+    "breadcrumb": "Breadcrumb",
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "titleAria": "Project title",
+    "editTitleAria": "Edit project title: {title}",
+    "updated": "Updated {time}",
+    "created": "Created {time}",
+    "restore": "Restore",
+    "archive": "Archive",
+    "actionsAria": "Project actions",
+    "duplicate": "Duplicate project",
+    "duplicateTitle": "{title} (copy)",
+    "statusMarked": "Project marked {status}.",
+    "markAs": "Mark as {status}",
+    "remove": "Remove…",
+    "idea": "Project idea",
+    "archiveTitle": "Archive “{title}”?",
+    "archiveDescription": "It moves to the project archive and leaves the active list. You can restore it to drafts later.",
+    "keepActive": "Keep active",
+    "archiveProject": "Archive project"
+  },
+  "workflow": {
+    "loading": "Loading workflow stages",
+    "aria": "Production workflow",
+    "stageAria": "{label} — {state}",
+    "states": {
+      "completed": "completed",
+      "blocked": "blocked",
+      "current": "current step",
+      "notStarted": "not started"
+    },
+    "stages": {
+      "creation": {
+        "label": "Project",
+        "detail": "{title}",
+        "empty": "No project loaded"
+      },
+      "configuration": {
+        "label": "Configuration",
+        "detail": "{platform} · {tone}{duration}",
+        "duration": " · {seconds}s",
+        "empty": "Not configured"
+      },
+      "script": {
+        "label": "Script",
+        "detail": "{scenes} scene(s) · version {version}",
+        "empty": "No script yet"
+      },
+      "scriptEdit": {
+        "label": "Script edit",
+        "blocked": "Generate the script first",
+        "edited": "Edited · version {version}",
+        "notEdited": "Not edited yet · version {version}",
+        "empty": "No script to edit"
+      },
+      "thumbnail": {
+        "label": "Thumbnail",
+        "ready": "Thumbnail ready",
+        "empty": "No thumbnail yet"
+      },
+      "sceneImages": {
+        "label": "Scene images",
+        "detail": "{filled} of {slots} image slot(s) filled"
+      },
+      "narration": {
+        "label": "Narration",
+        "ready": "Narration ready",
+        "empty": "No narration yet"
+      },
+      "sfx": {
+        "label": "Sound effects",
+        "detail": "{count} effect layer(s) ready",
+        "empty": "No sound effects yet"
+      },
+      "preview": {
+        "label": "Preview",
+        "blocked": "Finish the asset stages to preview the whole project",
+        "ready": "Everything is in place",
+        "partial": "Shows what exists so far"
+      },
+      "export": {
+        "label": "Export",
+        "blocked": "Generate a script to export",
+        "ready": "Exported at least once",
+        "empty": "Not exported yet"
+      }
+    }
+  },
+  "preview": {
+    "loading": "Loading preview",
+    "emptyTitle": "Nothing to preview yet",
+    "emptyDescription": "Generate a script and some assets — they appear here as they land.",
+    "stillMissing": "Still missing: {list}. The preview shows what exists so far.",
+    "thumbnailTitle": "Thumbnail",
+    "thumbnailDescription": "The project's cover image.",
+    "thumbnailAlt": "Project thumbnail",
+    "imagesTitle": "Scene images",
+    "imageAlt": "Scene image",
+    "scriptTitle": "Script",
+    "scriptVersion": "v{version}",
+    "scriptDetail": "{scenes} scene(s) · {words} words",
+    "narrationTitle": "Narration",
+    "narrationAria": "Narration playback",
+    "missing": {
+      "script": "script",
+      "thumbnail": "thumbnail",
+      "sceneImages": "scene images",
+      "narration": "narration"
+    }
+  },
+  "assets": {
+    "loading": "Loading assets",
+    "projectTitle": "Project",
+    "generate": "Generate",
+    "quotaFallback": "Generation quota exhausted.",
+    "quotaTitle": "Generation quota reached",
+    "quotaCta": "Upgrade for more generations",
+    "creditTitle": "Not enough credits",
+    "creditCta": "Top up or upgrade to continue",
+    "viewerNote": "Your role can view assets but not generate or change them.",
+    "scripts": {
+      "title": "Scripts",
+      "description": "Structured per-scene scripts for this project.",
+      "empty": "No scripts yet. {hint}",
+      "emptyEditor": "Generate the first one.",
+      "emptyViewer": "An editor can generate one.",
+      "version": "Version {version} · {scenes} scene(s)",
+      "words": "{count} words"
+    },
+    "thumbnails": {
+      "title": "Thumbnails",
+      "description": "Visual concepts generated from your idea.",
+      "empty": "No thumbnails yet."
+    },
+    "audio": {
+      "title": "Audio",
+      "description": "Music and sound-effect suggestions.",
+      "empty": "No audio profile yet.",
+      "moodLine": "{mood} · {musicType}",
+      "tracks": "{count} tracks"
+    },
+    "seo": {
+      "title": "SEO",
+      "description": "Titles, hashtags and keywords.",
+      "empty": "No SEO profile yet."
+    },
+    "media": {
+      "title": "Media",
+      "description": "Images, video and documents attached to the project.",
+      "emptyTitle": "No media yet",
+      "emptyDescription": "Uploads need a storage provider, which is not configured yet."
+    },
+    "accessDenied": "You do not have access to this project's media."
+  },
+  "members": {
+    "validationEmail": "Enter a valid email address",
+    "linkCopied": "Invite link copied.",
+    "linkCopyFailed": "Could not copy automatically. Select the link and copy it manually.",
+    "loading": "Loading members…",
+    "loadErrorTitle": "Could not load members",
+    "loadErrorFallback": "Try again in a moment.",
+    "retry": "Retry",
+    "title": "Members",
+    "listAria": "Project members",
+    "collaborators": "{used} of {limit, plural, one {# collaborator} other {# collaborators}} invited on this project.",
+    "deletedAccount": "Deleted account",
+    "joined": "Joined {time}",
+    "owner": "Project owner",
+    "you": "(you)",
+    "accountUnavailable": "Account no longer available",
+    "ownerRemoveTooltip": "Only the project owner can remove members, and the owner cannot be removed.",
+    "ownerRemoveAria": "Owner cannot be removed",
+    "roleAria": "Role for {name}",
+    "removeAria": "Remove {name}",
+    "nonOwnerRemoveTooltip": "Only the project owner can remove members.",
+    "nonOwnerRemoveAria": "Cannot remove {name}",
+    "inviteTitle": "Invite a collaborator",
+    "inviteDescription": "They get {email}added with the role you choose. Owner is never an option.",
+    "limitTitle": "Member limit reached",
+    "limitDescription": "This project can have {limit, plural, one {# collaborator} other {# collaborators}} on its current plan. {used} of {limit} collaborator slots are in use.",
+    "limitCta": "Upgrade your plan",
+    "onlyOwnerInvite": "Only the project owner can invite members.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "collaborator@example.com",
+    "roleLabel": "Role",
+    "inviteRoleAria": "Role for the invite",
+    "createInvite": "Create invite",
+    "inviteDisabledNote": "Invite controls are disabled because only the owner can manage members.",
+    "pendingTitle": "Pending invites",
+    "pendingDescription": "Expired invites refresh automatically every minute.",
+    "invalidTitle": "Some invites are no longer valid",
+    "invalidDescription": "Expired invites can still be revoked below; revoked and accepted invites are shown for reference.",
+    "refresh": "Refresh",
+    "pendingLoading": "Loading invites…",
+    "pendingEmpty": "No pending invites.",
+    "pendingAria": "Pending invites",
+    "invitedByOwner": "invites by owner",
+    "revoke": "Revoke",
+    "removeTitle": "Remove this collaborator?",
+    "removeDescription": "{name} immediately loses access to the project.",
+    "removeUnknown": "This member",
+    "keepMember": "Keep member",
+    "removeMember": "Remove member",
+    "inviteReadyTitle": "Invite ready for {email}",
+    "inviteReadyDescription": "We also try to email this link. Email delivery may not be configured yet, so copy the link to be sure.",
+    "inviteLinkAria": "Invite link",
+    "copy": "Copy",
+    "inviteExpiry": "Only you can see this link. It expires {expiry}.",
+    "done": "Done",
+    "inviteStates": {
+      "pending": "pending",
+      "accepted": "accepted",
+      "revoked": "revoked",
+      "expired": "expired"
+    }
+  },
+  "activity": {
+    "title": "Activity",
+    "filterAria": "Filter activity by type",
+    "loading": "Loading activity",
+    "errorTitle": "Could not load activity",
+    "errorFallback": "Try again in a moment.",
+    "retry": "Retry",
+    "emptyTitle": "No activity yet",
+    "emptyDescription": "Invites, member changes and generations will appear here as your team works.",
+    "filteredTitle": "No activity matches this filter",
+    "filteredDescription": "Try a different activity type, or show everything.",
+    "showAll": "Show all activity",
+    "listAria": "Project activity",
+    "someone": "Someone",
+    "asRole": " as {role}",
+    "pageOf": "Page {page} of {total} · {count} events",
+    "previous": "Previous",
+    "next": "Next",
+    "types": {
+      "memberAdded": "added a member",
+      "memberRemoved": "removed a member",
+      "roleChanged": "changed a role",
+      "inviteCreated": "invited someone",
+      "inviteAccepted": "accepted an invite",
+      "inviteRevoked": "revoked an invite",
+      "scriptGenerated": "generated a script",
+      "thumbnailGenerated": "generated a thumbnail",
+      "audioGenerated": "generated audio"
+    },
+    "filters": {
+      "all": "All activity",
+      "memberAdded": "Members added",
+      "memberRemoved": "Members removed",
+      "roleChanged": "Role changes",
+      "inviteCreated": "Invites sent",
+      "inviteAccepted": "Invites accepted",
+      "inviteRevoked": "Invites revoked",
+      "scriptGenerated": "Scripts",
+      "thumbnailGenerated": "Thumbnails",
+      "audioGenerated": "Audio"
+    }
+  },
+  "export": {
+    "aria": "Export project",
+    "scopeAria": "Export scope",
+    "preparing": "Preparing…",
+    "preparingStatus": "Preparing export…",
+    "export": "Export",
+    "costPending": " · cost pending",
+    "creditCost": " · {count} credits",
+    "allowanceLeft": " · {remaining} of {limit} {limit, plural, one {free export} other {free exports}} left",
+    "history": "Export history",
+    "historyCredits": "{count} credits",
+    "filenameFallback": "project",
+    "blockedAllowance": "You have used your {limit} {limit, plural, one {free export} other {free exports}} for this project.",
+    "blockedPricing": "Paid exports open once the export price is published. Your free export is unaffected.",
+    "blockedNothing": "There is nothing to export yet — generate a script or some assets first.",
+    "statusCompleted": "Completed",
+    "statusFailed": "Failed",
+    "statusInProgress": "In progress",
+    "failureCancelled": "Cancelled — nothing was charged.",
+    "failureAllowance": "Refused — the free export was already used.",
+    "failureNone": "Nothing was charged.",
+    "toastDownloaded": "Export downloaded",
+    "toastFailed": "Export failed. Check that assets exist and retry.",
+    "toastAllowance": "You have used your free export for this project.",
+    "toastPricing": "Paid exports open once the export price is published.",
+    "toastNothing": "There is nothing to export yet.",
+    "scopes": {
+      "full": "Complete (all)",
+      "script": "Script",
+      "images": "Images",
+      "audio": "Audio",
+      "media": "Media + script"
+    }
+  },
+  "collab": {
+    "roleChanged": "Role changed to {role}.",
+    "roleFailed": "Failed to change role.",
+    "memberRemoved": "Member removed from the project.",
+    "memberRemoveFailed": "Failed to remove member.",
+    "inviteCreated": "Invite created. Share the link below.",
+    "inviteFailed": "Failed to create invite.",
+    "inviteRevoked": "Invite revoked.",
+    "inviteRevokeFailed": "Failed to revoke invite."
+  },
+  "expiry": {
+    "expired": "expired",
+    "days": "expires in {days} days",
+    "hours": "expires in {hours, plural, one {# hour} other {# hours}}",
+    "minutes": "expires in {minutes, plural, one {# minute} other {# minutes}}"
+  },
+  "generation": {
+    "remaining": "{remaining} {noun} left this month",
+    "unlimited": "{feature} is unlimited",
+    "credits": "{balance} credits",
+    "nouns": {
+      "generation": "generation"
+    }
+  },
+  "time": {
+    "unknownDate": "Unknown date",
+    "unknownTime": "Unknown time"
+  },
+  "media": {
+    "loading": "Loading media",
+    "playbackAria": "{title} playback"
+  }
+}

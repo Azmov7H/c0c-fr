@@ -13,14 +13,22 @@ import { formatDateTime, formatRelativeTime as formatRelative } from '@/lib/form
  * that owns them (AR-028); until then they are the English the product has
  * always shown.
  */
-export function formatAbsoluteTime(value: string | Date, locale: AppLocale): string {
-    return formatDateTime(value, locale, 'Unknown date');
+export function formatAbsoluteTime(
+    value: string | Date,
+    locale: AppLocale,
+    unknownDate = 'Unknown date'
+): string {
+    return formatDateTime(value, locale, unknownDate);
 }
 
 export function formatRelativeTime(
     value: string | Date,
     locale: AppLocale,
-    now: Date = new Date()
+    now: Date = new Date(),
+    fallback: { relative: string; absolute: string } = {
+        relative: 'Unknown time',
+        absolute: '',
+    }
 ): { relative: string; absolute: string } {
-    return formatRelative(value, locale, now, { relative: 'Unknown time', absolute: '' });
+    return formatRelative(value, locale, now, fallback);
 }

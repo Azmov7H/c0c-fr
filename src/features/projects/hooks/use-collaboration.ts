@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { toast } from '@/lib/toast';
 
 import { toApiError } from '@/lib/api-error';
@@ -33,6 +34,7 @@ export function useProjectMembers(projectId: string) {
 
 export function useUpdateMemberRole(projectId: string) {
     const queryClient = useQueryClient();
+    const t = useTranslations('workspace');
 
     return useMutation({
         mutationFn: ({ userId, role }: { userId: string; role: ProjectMemberRole }) =>
@@ -57,13 +59,13 @@ export function useUpdateMemberRole(projectId: string) {
             return { previous };
         },
         onSuccess: (_data, variables) => {
-            toast.success(`Role changed to ${variables.role}.`);
+            toast.success(t('collab.roleChanged', { role: variables.role }));
         },
         onError: (error, _variables, context) => {
             if (context?.previous) {
                 queryClient.setQueryData(projectKeys.members(projectId), context.previous);
             }
-            toast.error(toApiError(error, 'Failed to change role.').message);
+            toast.error(toApiError(error, t('collab.roleFailed')).message);
         },
         onSettled: () => invalidateCollaboration(queryClient, projectId),
     });
@@ -71,14 +73,15 @@ export function useUpdateMemberRole(projectId: string) {
 
 export function useRemoveMember(projectId: string) {
     const queryClient = useQueryClient();
+    const t = useTranslations('workspace');
 
     return useMutation({
         mutationFn: (userId: string) => projectMembersService.remove(projectId, userId),
         onSuccess: () => {
-            toast.success('Member removed from the project.');
+            toast.success(t('collab.memberRemoved'));
         },
         onError: (error) => {
-            toast.error(toApiError(error, 'Failed to remove member.').message);
+            toast.error(toApiError(error, t('collab.memberRemoveFailed')).message);
         },
         onSettled: () => invalidateCollaboration(queryClient, projectId),
     });
@@ -97,15 +100,16 @@ export function useProjectInvites(projectId: string) {
 
 export function useCreateInvite(projectId: string) {
     const queryClient = useQueryClient();
+    const t = useTranslations('workspace');
 
     return useMutation({
         mutationFn: (data: { email: string; role: ProjectMemberRole }) =>
             projectInvitesService.create(projectId, data),
         onSuccess: () => {
-            toast.success('Invite created. Share the link below.');
+            toast.success(t('collab.inviteCreated'));
         },
         onError: (error) => {
-            toast.error(toApiError(error, 'Failed to create invite.').message);
+            toast.error(toApiError(error, t('collab.inviteFailed')).message);
         },
         onSettled: () => {
             void queryClient.invalidateQueries({ queryKey: projectKeys.invites(projectId) });
@@ -116,14 +120,15 @@ export function useCreateInvite(projectId: string) {
 
 export function useRevokeInvite(projectId: string) {
     const queryClient = useQueryClient();
+    const t = useTranslations('workspace');
 
     return useMutation({
         mutationFn: (inviteId: string) => projectInvitesService.revoke(projectId, inviteId),
         onSuccess: () => {
-            toast.success('Invite revoked.');
+            toast.success(t('collab.inviteRevoked'));
         },
         onError: (error) => {
-            toast.error(toApiError(error, 'Failed to revoke invite.').message);
+            toast.error(toApiError(error, t('collab.inviteRevokeFailed')).message);
         },
         onSettled: () => {
             void queryClient.invalidateQueries({ queryKey: projectKeys.invites(projectId) });

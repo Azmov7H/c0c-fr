@@ -1,11 +1,13 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 import { Activity, Eye, FileImage as ImageIcon, FolderKanban, Users } from 'lucide-react';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { ProjectRole } from '../../types';
+import { workspaceTabLabel } from '../../lib/workspace-labels';
 import { AssetsTab } from './assets-tab';
 import { PreviewPanel } from './preview-panel';
 
@@ -33,8 +35,9 @@ const MediaTab = dynamic(
 );
 
 function TabSkeleton() {
+    const t = useTranslations('workspace');
     return (
-        <div className="space-y-3" role="status" aria-label="Loading tab">
+        <div className="space-y-3" role="status" aria-label={t('tabs.loading')}>
             <Skeleton className="h-10 w-64 rounded-lg" />
             <Skeleton className="h-32 w-full rounded-xl" />
         </div>
@@ -72,30 +75,31 @@ export function WorkspaceTabs({
     tab: WorkspaceTab;
     onTabChange: (tab: WorkspaceTab) => void;
 }) {
+    const t = useTranslations('workspace');
     return (
         <Tabs value={tab} onValueChange={(value) => isWorkspaceTab(value) && onTabChange(value)}>
             <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto bg-transparent p-0">
                 <TabsTrigger value="assets" className="h-11 gap-2 px-4">
                     <FolderKanban className="size-4" aria-hidden="true" />
-                    Assets
+                    {workspaceTabLabel(t, 'assets')}
                 </TabsTrigger>
                 <TabsTrigger value="media" className="h-11 gap-2 px-4">
                     <ImageIcon className="size-4" aria-hidden="true" />
-                    Media
+                    {workspaceTabLabel(t, 'media')}
                 </TabsTrigger>
                 {/* P11.3: the Preview stage — a read-only assembly of what the
                     project has. The other tabs stay exactly as they were. */}
                 <TabsTrigger value="preview" className="h-11 gap-2 px-4">
                     <Eye className="size-4" aria-hidden="true" />
-                    Preview
+                    {workspaceTabLabel(t, 'preview')}
                 </TabsTrigger>
                 <TabsTrigger value="members" className="h-11 gap-2 px-4">
                     <Users className="size-4" aria-hidden="true" />
-                    Members
+                    {workspaceTabLabel(t, 'members')}
                 </TabsTrigger>
                 <TabsTrigger value="activity" className="h-11 gap-2 px-4">
                     <Activity className="size-4" aria-hidden="true" />
-                    Activity
+                    {workspaceTabLabel(t, 'activity')}
                 </TabsTrigger>
             </TabsList>
 
