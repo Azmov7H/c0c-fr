@@ -1,1 +1,60 @@
-{}
+{
+  "@dynamic": [
+    "roles.owner",
+    "roles.admin",
+    "roles.editor",
+    "roles.viewer"
+  ],
+  "metadata": {
+    "title": "Team",
+    "description": "Manage your team members, workspaces, and collaboration settings."
+  },
+  "page": {
+    "title": "Workspace Teams",
+    "description": "Manage collaborators and permissions for your AI projects"
+  },
+  "actions": {
+    "newWorkspace": "New Workspace",
+    "createWorkspace": "Create Workspace",
+    "creating": "Creating...",
+    "createFirstTeam": "Create Your First Team",
+    "sendInvitation": "Send Invitation",
+    "teamSettings": "Team Settings"
+  },
+  "create": {
+    "title": "Create New Team Workspace",
+    "description": "Workspaces allow you to group projects and collaborators together.",
+    "nameLabel": "Workspace Name",
+    "namePlaceholder": "e.g. Marketing House",
+    "nameMin": "Name must be at least 2 characters"
+  },
+  "empty": {
+    "title": "You don't belong to any teams yet",
+    "description": "Create your first workspace to start collaborating with other AI content creators."
+  },
+  "workspaces": {
+    "title": "Your Workspaces"
+  },
+  "invite": {
+    "title": "Invite Collaborator",
+    "emailLabel": "User Email",
+    "emailPlaceholder": "colleague@agency.com",
+    "emailInvalid": "Enter a valid email address",
+    "roleLabel": "Assign Role",
+    "roleAria": "Assign role"
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Administrator",
+    "editor": "Content Editor",
+    "viewer": "Viewer Only"
+  },
+  "members": {
+    "title": "Members & Permissions",
+    "count": "{count} active users in this workspace",
+    "columnMember": "Member",
+    "columnRole": "Role",
+    "removeAria": "Remove member from team",
+    "empty": "No members yet."
+  }
+}

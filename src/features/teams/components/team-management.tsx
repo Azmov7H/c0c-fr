@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { ColumnDef } from '@tanstack/react-table';
+import { useTranslations } from 'next-intl';
 import { useTeams, useCreateTeam, useInviteMember, useRemoveMember } from '../hooks/use-teams';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -54,19 +55,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-const createTeamSchema = z.object({
-    name: z.string().trim().min(2, 'Name must be at least 2 characters').max(80),
-});
-
-const inviteSchema = z.object({
-    email: z.string().trim().email('Enter a valid email address').max(254),
-    role: z.enum(['admin', 'editor', 'viewer']),
-});
-
-type CreateTeamValues = z.infer<typeof createTeamSchema>;
-type InviteValues = z.infer<typeof inviteSchema>;
-
 export const TeamManagement = () => {
+    const t = useTranslations('team');
     const { data: teams, isLoading, error } = useTeams();
     const { mutate: createTeam, isPending: isCreatingTeam } = useCreateTeam();
     const { mutate: inviteMember, isPending: isInviting } = useInviteMember();
@@ -74,6 +64,18 @@ export const TeamManagement = () => {
 
     const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
     const [createOpen, setCreateOpen] = useState(false);
+
+    const createTeamSchema = useMemo(() => z.object({
+        name: z.string().trim().min(2, t('create.nameMin')).max(80),
+    }), [t]);
+
+    const inviteSchema = useMemo(() => z.object({
+        email: z.string().trim().email(t('invite.emailInvalid')).max(254),
+        role: z.enum(['admin', 'editor', 'viewer']),
+    }), [t]);
+
+    type CreateTeamValues = z.infer<typeof createTeamSchema>;
+    type InviteValues = z.infer<typeof inviteSchema>;
 
     const createForm = useForm<CreateTeamValues>({
         resolver: zodResolver(createTeamSchema),
@@ -140,20 +142,20 @@ export const TeamManagement = () => {
         <div className="space-y-8 animate-in fade-in duration-500">
 
             <PageHeader
-                title="Workspace Teams"
-                description="Manage collaborators and permissions for your AI projects"
+                title={t('page.title')}
+                description={t('page.description')}
                 actions={
                     <Dialog open={createOpen} onOpenChange={setCreateOpen}>
                     <DialogTrigger asChild>
                         <Button>
                             <Plus className="w-4 h-4 me-2" />
-                            New Workspace
+                            {t('actions.newWorkspace')}
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Create New Team Workspace</DialogTitle>
-                            <DialogDescription>Workspaces allow you to group projects and collaborators together.</DialogDescription>
+                            <DialogTitle>{t('create.title')}</DialogTitle>
+                            <DialogDescription>{t('create.description')}</DialogDescription>
                         </DialogHeader>
                         <Form {...createForm}>
                             <form onSubmit={handleCreateTeam} className="py-4" noValidate>
@@ -162,9 +164,9 @@ export const TeamManagement = () => {
                                     name="name"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Workspace Name</FormLabel>
+                                            <FormLabel>{t('create.nameLabel')}</FormLabel>
                                             <FormControl>
-                                                <Input {...field} placeholder="e.g. Marketing House" className="h-11" />
+                                                <Input {...field} placeholder={t('create.namePlaceholder')} className="h-11" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -172,7 +174,7 @@ export const TeamManagement = () => {
                                 />
                                 <DialogFooter className="mt-6">
                                     <Button type="submit" className="h-11" disabled={isCreatingTeam}>
-                                        {isCreatingTeam ? 'Creating...' : 'Create Workspace'}
+                                        {isCreatingTeam ? t('actions.creating') : t('actions.createWorkspace')}
                                     </Button>
                                 </DialogFooter>
                             </form>
@@ -186,9 +188,9 @@ export const TeamManagement = () => {
                 <DataState
                     isEmpty
                     emptyIcon={Users}
-                    emptyTitle="You don't belong to any teams yet"
-                    emptyDescription="Create your first workspace to start collaborating with other AI content creators."
-                    emptyAction={{ label: "Create Your First Team", onClick: () => setCreateOpen(true) }}
+                    emptyTitle={t('empty.title')}
+                    emptyDescription={t('empty.description')}
+                    emptyAction={{ label: t('actions.createFirstTeam'), onClick: () => setCreateOpen(true) }}
                 >
                     {null}
                 </DataState>
@@ -199,26 +201,26 @@ export const TeamManagement = () => {
                     <div className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-sm font-medium">Your Workspaces</CardTitle>
+                                <CardTitle className="text-sm font-medium">{t('workspaces.title')}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2">
-                                {teams?.map(t => (
+                                {teams?.map(team => (
                                     <button
-                                        key={t.id}
+                                        key={team.id}
                                         type="button"
-                                        onClick={() => setSelectedTeamId(t.id)}
-                                        aria-pressed={activeTeam.id === t.id}
-                                        aria-current={activeTeam.id === t.id ? 'true' : undefined}
-                                        className={`flex w-full items-center justify-between p-3 rounded-lg cursor-pointer transition-all border text-start ${activeTeam.id === t.id ? 'bg-primary/10 border-primary/30 text-primary' : 'hover:bg-muted text-muted-foreground'
+                                        onClick={() => setSelectedTeamId(team.id)}
+                                        aria-pressed={activeTeam.id === team.id}
+                                        aria-current={activeTeam.id === team.id ? 'true' : undefined}
+                                        className={`flex w-full items-center justify-between p-3 rounded-lg cursor-pointer transition-all border text-start ${activeTeam.id === team.id ? 'bg-primary/10 border-primary/30 text-primary' : 'hover:bg-muted text-muted-foreground'
                                             }`}
                                     >
                                         <span className="flex items-center gap-3">
-                                            <span className={`w-8 h-8 rounded-md flex items-center justify-center font-bold text-xs ${activeTeam.id === t.id ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                                                {t.name.slice(0, 2).toUpperCase()}
+                                            <span className={`w-8 h-8 rounded-md flex items-center justify-center font-bold text-xs ${activeTeam.id === team.id ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                                                {team.name.slice(0, 2).toUpperCase()}
                                             </span>
-                                            <span className="text-sm font-medium">{t.name}</span>
+                                            <span className="text-sm font-medium">{team.name}</span>
                                         </span>
-                                        {activeTeam.id === t.id && <CheckCircle2 className="w-4 h-4" />}
+                                        {activeTeam.id === team.id && <CheckCircle2 className="w-4 h-4" />}
                                     </button>
                                 ))}
                             </CardContent>
@@ -227,7 +229,7 @@ export const TeamManagement = () => {
                         <Card>
                             <CardHeader>
                                 <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                    <UserPlus className="w-4 h-4 text-primary" /> Invite Collaborator
+                                    <UserPlus className="w-4 h-4 text-primary" /> {t('invite.title')}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -238,9 +240,9 @@ export const TeamManagement = () => {
                                             name="email"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>User Email</FormLabel>
+                                                    <FormLabel>{t('invite.emailLabel')}</FormLabel>
                                                     <FormControl>
-                                                        <Input {...field} type="email" placeholder="colleague@agency.com" className="h-11" />
+                                                        <Input {...field} type="email" placeholder={t('invite.emailPlaceholder')} className="h-11" />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -251,17 +253,17 @@ export const TeamManagement = () => {
                                             name="role"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Assign Role</FormLabel>
+                                                    <FormLabel>{t('invite.roleLabel')}</FormLabel>
                                                     <Select value={field.value} onValueChange={field.onChange}>
                                                         <FormControl>
-                                                            <SelectTrigger className="h-11" aria-label="Assign role">
+                                                            <SelectTrigger className="h-11" aria-label={t('invite.roleAria')}>
                                                                 <SelectValue />
                                                             </SelectTrigger>
                                                         </FormControl>
                                                         <SelectContent>
-                                                            <SelectItem value="admin">Administrator</SelectItem>
-                                                            <SelectItem value="editor">Content Editor</SelectItem>
-                                                            <SelectItem value="viewer">Viewer Only</SelectItem>
+                                                            <SelectItem value="admin">{t('roles.admin')}</SelectItem>
+                                                            <SelectItem value="editor">{t('roles.editor')}</SelectItem>
+                                                            <SelectItem value="viewer">{t('roles.viewer')}</SelectItem>
                                                         </SelectContent>
                                                     </Select>
                                                     <FormMessage />
@@ -270,7 +272,7 @@ export const TeamManagement = () => {
                                         />
                                         <Button type="submit" className="mt-2 h-11 w-full" disabled={isInviting}>
                                             {isInviting ? <RefreshCw className="animate-spin w-4 h-4 me-2" /> : <UserPlus className="w-4 h-4 me-2" />}
-                                            Send Invitation
+                                            {t('actions.sendInvitation')}
                                         </Button>
                                     </form>
                                 </Form>
@@ -282,12 +284,12 @@ export const TeamManagement = () => {
                     <Card className="lg:col-span-2">
                         <CardHeader className="flex flex-row items-center justify-between border-b">
                             <div>
-                                <CardTitle className="text-lg">Members & Permissions</CardTitle>
-                                <CardDescription>{activeTeam.members.length} active users in this workspace</CardDescription>
+                                <CardTitle className="text-lg">{t('members.title')}</CardTitle>
+                                <CardDescription>{t('members.count', { count: activeTeam.members.length })}</CardDescription>
                             </div>
                             <Button variant="outline" size="sm">
                                 <Settings className="w-4 h-4 me-2" />
-                                Team Settings
+                                {t('actions.teamSettings')}
                             </Button>
                         </CardHeader>
                         <CardContent className="p-0">
@@ -296,7 +298,7 @@ export const TeamManagement = () => {
                                     {
                                         id: 'member',
                                         accessorFn: (m) => `${m.user.firstName} ${m.user.lastName}`,
-                                        header: 'Member',
+                                        header: t('members.columnMember'),
                                         cell: ({ row }) => (
                                             <div className="flex items-center gap-4">
                                                 <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/20">
@@ -314,10 +316,10 @@ export const TeamManagement = () => {
                                     },
                                     {
                                         accessorKey: 'role',
-                                        header: 'Role',
+                                        header: t('members.columnRole'),
                                         cell: ({ row }) => (
                                             <Badge variant="outline" className={`capitalize font-mono text-[10px] ${roleColors[row.original.role]}`}>
-                                                {row.original.role}
+                                                {t(`roles.${row.original.role}` as never)}
                                             </Badge>
                                         ),
                                     },
@@ -332,7 +334,7 @@ export const TeamManagement = () => {
                                                     size="icon"
                                                     className="h-8 w-8 text-destructive hover:bg-destructive/10"
                                                     onClick={() => removeMember({ teamId: activeTeam.id, userId: row.original.user.id })}
-                                                    aria-label="Remove member from team"
+                                                    aria-label={t('members.removeAria')}
                                                 >
                                                     <UserMinus className="w-4 h-4" />
                                                 </Button>
@@ -340,7 +342,7 @@ export const TeamManagement = () => {
                                     },
                                 ] satisfies ColumnDef<TeamMember>[]}
                                 data={activeTeam.members}
-                                emptyMessage="No members yet."
+                                emptyMessage={t('members.empty')}
                                 className="rounded-none border-0 border-t"
                             />
                         </CardContent>
