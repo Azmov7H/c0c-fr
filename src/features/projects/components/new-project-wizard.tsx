@@ -3,6 +3,7 @@
 import { useUrlLocale } from '@/i18n/locale';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { toast } from '@/lib/toast';
@@ -35,9 +36,10 @@ import {
     type ProjectDraft,
 } from '../lib/project-draft';
 import { projectFormSchema, type ProjectFormValues } from '../lib/project-schemas';
+import { projectsValidationMessages } from '../lib/projects-validation-messages';
+import { stepDescription, stepLabel } from '../lib/projects-labels';
 import { StepDetails, StepPlatformTone, StepConfiguration, StepReview } from './new-project-steps';
 
-const STEP_LABELS = ['Details', 'Platform & tone', 'Configuration', 'Review'] as const;
 const BLANK_VALUES: ProjectFormValues = {
     title: '',
     description: '',
@@ -83,14 +85,15 @@ function useRestoredDraft(): ProjectDraft | null {
 }
 
 function StepIndicator({ current }: { current: 1 | 2 | 3 | 4 }) {
+    const t = useTranslations('projects');
     return (
-        <ol className="flex items-center justify-center gap-2 sm:gap-3" aria-label="Progress">
-            {STEP_LABELS.map((label, index) => {
-                const step = (index + 1) as 1 | 2 | 3 | 4;
+        <ol className="flex items-center justify-center gap-2 sm:gap-3" aria-label={t('wizard.progressAria')}>
+            {([1, 2, 3, 4] as const).map((step) => {
+                const label = stepLabel(t, step);
                 const complete = step < current;
                 const active = step === current;
                 return (
-                    <li key={label} className="flex items-center gap-2 sm:gap-3">
+                    <li key={step} className="flex items-center gap-2 sm:gap-3">
                         <div
                             className={cn(
                                 'flex size-9 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors',
@@ -110,7 +113,7 @@ function StepIndicator({ current }: { current: 1 | 2 | 3 | 4 }) {
                         >
                             {label}
                         </span>
-                        {index < STEP_LABELS.length - 1 ? (
+                        {step < 4 ? (
                             <span
                                 aria-hidden="true"
                                 className={cn(
@@ -133,6 +136,7 @@ function WizardForm({
     initialDraft: ProjectDraft | null;
     returnTo?: 'projects';
 }) {
+    const t = useTranslations('projects');
     const locale = useUrlLocale();
     const router = useRouter();
     const create = useCreateProject();
@@ -148,8 +152,9 @@ function WizardForm({
     const submitted = useRef(false);
     const prefsApplied = useRef(false);
 
+    const formSchema = useMemo(() => projectFormSchema(projectsValidationMessages(t)), [t]);
     const form = useForm<ProjectFormValues>({
-        resolver: zodResolver(projectFormSchema),
+        resolver: zodResolver(formSchema),
         defaultValues: { ...BLANK_VALUES, ...initialDraft?.values },
         mode: 'onChange',
     });
@@ -171,11 +176,11 @@ function WizardForm({
                 interests.length === 1
                     ? interests[0]
                     : `${interests.slice(0, -1).join(', ')} and ${interests[interests.length - 1]}`;
-            form.setValue('idea', `I want to create content about ${list}.`, {
+            form.setValue('idea', t('wizard.prefillIdea', { list }), {
                 shouldDirty: false,
             });
         }
-    }, [form, initialDraft, onboarding.data]);
+    }, [form, initialDraft, onboarding.data, t]);
 
     const watchedValues = useWatch({ control: form.control });
 
@@ -235,7 +240,7 @@ function WizardForm({
             onSuccess: (project) => {
                 setCompleted(true);
                 clearProjectDraft(window.sessionStorage);
-                toast.success('Project created.');
+                toast.success(t('wizard.toast.created'));
                 const destination =
                     returnTo === 'projects'
                         ? `/projects?created=${project._id}`
@@ -244,9 +249,9 @@ function WizardForm({
             },
             onError: (error) => {
                 submitted.current = false;
-                const apiError = toApiError(error, 'Could not create the project.');
+                const apiError = toApiError(error, t('wizard.toast.createFailed'));
                 if (apiError.code === 'ONBOARDING_INCOMPLETE') {
-                    toast.error('Finish onboarding before creating a project.');
+                    toast.error(t('wizard.toast.onboardingIncomplete'));
                     router.push('/onboarding?from=create-project');
                 }
             },
@@ -286,8 +291,10 @@ function WizardForm({
     const title = (useWatch({ control: form.control, name: 'title' }) ?? '').trim();
     const primaryLabel =
         step === 4
-            ? `Create “${title && title.length > 40 ? `${title.slice(0, 40)}…` : title || 'project'}”`
-            : 'Continue';
+            ? t('wizard.createWithTitle', {
+                  title: title && title.length > 40 ? `${title.slice(0, 40)}…` : title || t('wizard.untitledProject'),
+              })
+            : t('wizard.continue');
 
     return (
         <div className="mx-auto max-w-3xl space-y-6 pb-8">
@@ -299,7 +306,7 @@ function WizardForm({
                     onClick={requestCancel}
                 >
                     <DirIcon name="ArrowLeft" className="size-4" aria-hidden="true" />
-                    Projects
+                    {t('wizard.backToProjects')}
                 </Button>
                 <StepIndicator current={step} />
             </div>
@@ -311,7 +318,9 @@ function WizardForm({
                 >
                     <p className="text-sm">
                         <Sparkles className="me-2 inline size-4 text-primary" aria-hidden="true" />
-                        Draft restored from {formatRelativeTime(restored.savedAt, locale).relative}.
+                        {t('wizard.draftRestored', {
+                            time: formatRelativeTime(restored.savedAt, locale).relative,
+                        })}
                     </p>
                     <div className="flex gap-2">
                         <Button
@@ -321,7 +330,7 @@ function WizardForm({
                             className="h-10"
                             onClick={startOver}
                         >
-                            Start over
+                            {t('wizard.startOver')}
                         </Button>
                         <Button
                             type="button"
@@ -330,7 +339,7 @@ function WizardForm({
                             className="h-10"
                             onClick={() => setRestored(null)}
                         >
-                            Dismiss
+                            {t('wizard.dismiss')}
                         </Button>
                     </div>
                 </div>
@@ -338,16 +347,10 @@ function WizardForm({
 
             <div>
                 <h1 className="font-display text-3xl font-extrabold tracking-tight">
-                    Create a project
+                    {t('wizard.title')}
                 </h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                    {step === 1
-                        ? 'Define the idea. This becomes the seed for your scripts.'
-                        : step === 2
-                          ? 'Choose where it will live and how it should sound.'
-                          : step === 3
-                            ? 'Choose the format and target duration.'
-                            : 'Check everything before we create the workspace.'}
+                    {stepDescription(t, step)}
                 </p>
             </div>
 
@@ -377,7 +380,7 @@ function WizardForm({
                             disabled={step === 1 || create.isPending}
                         >
                             <DirIcon name="ArrowLeft" className="me-2 size-4" aria-hidden="true" />
-                            Back
+                            {t('wizard.back')}
                         </Button>
 
                         {step < 4 ? (
@@ -414,7 +417,7 @@ function WizardForm({
                                             className="me-2 size-4 animate-spin"
                                             aria-hidden="true"
                                         />
-                                        Creating…
+                                        {t('wizard.creating')}
                                     </>
                                 ) : (
                                     <span className="truncate">{primaryLabel}</span>
@@ -428,10 +431,9 @@ function WizardForm({
             <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Discard this draft?</DialogTitle>
+                        <DialogTitle>{t('wizard.cancel.title')}</DialogTitle>
                         <DialogDescription>
-                            Your title, idea and platform choices have been autosaved in this tab.
-                            Leaving now discards them.
+                            {t('wizard.cancel.description')}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -440,10 +442,10 @@ function WizardForm({
                             className="h-11"
                             onClick={() => setCancelOpen(false)}
                         >
-                            Keep editing
+                            {t('wizard.cancel.keepEditing')}
                         </Button>
                         <Button variant="destructive" className="h-11" onClick={discardAndLeave}>
-                            Discard and leave
+                            {t('wizard.cancel.discardAndLeave')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

@@ -1,6 +1,7 @@
-import { useUrlLocale } from '@/i18n/locale';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
+import { useUrlLocale } from '@/i18n/locale';
 import {
     Table,
     TableBody,
@@ -16,18 +17,19 @@ import { ProjectActions } from './project-actions';
 import { PlatformBadge, StatusBadge } from './project-badges';
 
 export function ProjectsTable({ projects }: { projects: Project[] }) {
+    const t = useTranslations('projects');
     const locale = useUrlLocale();
     return (
         <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="min-w-[240px]">Project</TableHead>
-                        <TableHead>Platform</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Updated</TableHead>
+                        <TableHead className="min-w-[240px]">{t('view.tableHeaders.project')}</TableHead>
+                        <TableHead>{t('view.tableHeaders.platform')}</TableHead>
+                        <TableHead>{t('view.tableHeaders.status')}</TableHead>
+                        <TableHead>{t('view.tableHeaders.updated')}</TableHead>
                         <TableHead className="w-12">
-                            <span className="sr-only">Actions</span>
+                            <span className="sr-only">{t('view.tableHeaders.actions')}</span>
                         </TableHead>
                     </TableRow>
                 </TableHeader>

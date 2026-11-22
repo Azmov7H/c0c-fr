@@ -5,6 +5,7 @@ import { useForm, type UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { Form } from '@/components/ui/form';
+import { ProjectsIntlProvider } from '../../../../tests/helpers/projects-intl';
 import { StepConfiguration, StepReview, StepPlatformTone } from './new-project-steps';
 import { projectFormSchema, type ProjectFormValues } from '../lib/project-schemas';
 import { readProjectDraft, writeProjectDraft } from '../lib/project-draft';
@@ -13,10 +14,14 @@ const BLANK: ProjectFormValues = { title: 'T', description: '', idea: 'I', platf
 
 function Harness({ children }: { children: (form: UseFormReturn<ProjectFormValues>) => React.ReactNode }) {
     const form = useForm<ProjectFormValues>({
-        resolver: zodResolver(projectFormSchema),
+        resolver: zodResolver(projectFormSchema()),
         defaultValues: { ...BLANK, contentFormat: 'short' },
     });
-    return <Form {...form}>{children(form)}</Form>;
+    return (
+        <ProjectsIntlProvider>
+            <Form {...form}>{children(form)}</Form>
+        </ProjectsIntlProvider>
+    );
 }
 
 describe('StepConfiguration (P04.3)', () => {
