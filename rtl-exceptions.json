@@ -22,19 +22,6 @@
       "left-0",
       "right-0"
     ],
-    "src/components/ui/sidebar.tsx": [
-      "after:left-1/2",
-      "group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]",
-      "group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
-      "group-data-[side=left]:-right-4",
-      "group-data-[side=left]:border-r",
-      "group-data-[side=right]:border-l",
-      "group-data-[side=right]:left-0",
-      "left-0",
-      "right-0",
-      "[[data-side=left][data-collapsible=offcanvas]_&]:-right-2",
-      "[[data-side=right][data-collapsible=offcanvas]_&]:-left-2"
-    ],
     "src/components/ui/tooltip.tsx": [
       "data-[side=left]:slide-in-from-right-2",
       "data-[side=right]:slide-in-from-left-2"
@@ -61,7 +48,6 @@
     "src/components/ui/popover.tsx": "the overlay SLIDES IN from the side Radix placed it on (`data-side`) — the placement is Radix's decision, and the animation follows the placement it decided",
     "src/components/ui/select.tsx": "the overlay SLIDES IN from the side Radix placed it on (`data-side`) — the placement is Radix's decision, and the animation follows the placement it decided",
     "src/components/ui/sheet.tsx": "the sheet's SIDE is chosen by the caller (`side=\"right\" | \"left\"`), not by the direction; the panel and its inner border follow that choice",
-    "src/components/ui/sidebar.tsx": "the off-canvas rail is keyed to `data-side` — it slides out from the side the sidebar is docked to, which the shell decides",
     "src/components/ui/tooltip.tsx": "the overlay SLIDES IN from the side Radix placed it on (`data-side`) — the placement is Radix's decision, and the animation follows the placement it decided",
     "src/features/analytics/components/analytics-dashboard.tsx": "a NUMERIC column: the value is right-aligned and tabular in both directions, so the column reads the same way",
     "src/features/auth/components/auth-form-layout.tsx": "the decorative glow is CENTRED (`left-1/2 -translate-x-1/2`)",
