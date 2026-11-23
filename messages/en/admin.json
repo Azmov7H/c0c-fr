@@ -1,0 +1,73 @@
+{
+  "@unused": [
+    "groups.overview",
+    "groups.customers",
+    "groups.ai",
+    "groups.content",
+    "groups.platform",
+    "groups.admin",
+    "items.overview",
+    "items.users",
+    "items.subscriptions",
+    "items.credits",
+    "items.payments",
+    "items.aiOperations",
+    "items.aiProviders",
+    "items.projects",
+    "items.systemHealth",
+    "items.auditLogs",
+    "items.settings",
+    "items.rolesPermissions"
+  ],
+  "shell": {
+    "brand": "C0C Admin",
+    "nav": {
+      "title": "Admin navigation",
+      "collapse": "Collapse sidebar",
+      "openMenu": "Open admin navigation"
+    },
+    "breadcrumb": {
+      "admin": "Admin",
+      "label": "Breadcrumb"
+    },
+    "environment": {
+      "production": "Production",
+      "preview": "Preview",
+      "development": "Development"
+    },
+    "role": {
+      "superAdmin": "Super Admin",
+      "financeManager": "Finance",
+      "admin": "Admin",
+      "supportAgent": "Support",
+      "default": "—"
+    },
+    "account": {
+      "reAuthenticate": "Re-authenticate",
+      "signOut": "Sign out",
+      "signOutEverywhere": "Sign out everywhere"
+    }
+  },
+  "groups": {
+    "overview": "Overview",
+    "customers": "Customers",
+    "ai": "AI",
+    "content": "Content",
+    "platform": "Platform",
+    "admin": "Admin"
+  },
+  "items": {
+    "overview": "Overview",
+    "users": "Users",
+    "subscriptions": "Subscriptions",
+    "credits": "Credits",
+    "payments": "Payments",
+    "aiOperations": "AI Operations",
+    "aiProviders": "AI Providers",
+    "projects": "Projects",
+    "systemHealth": "System Health",
+    "auditLogs": "Audit Logs",
+    "settings": "Settings",
+    "rolesPermissions": "Roles & Permissions"
+  }
+}

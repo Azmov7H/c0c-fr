@@ -1,0 +1,73 @@
+{
+  "@unused": [
+    "groups.overview",
+    "groups.customers",
+    "groups.ai",
+    "groups.content",
+    "groups.platform",
+    "groups.admin",
+    "items.overview",
+    "items.users",
+    "items.subscriptions",
+    "items.credits",
+    "items.payments",
+    "items.aiOperations",
+    "items.aiProviders",
+    "items.projects",
+    "items.systemHealth",
+    "items.auditLogs",
+    "items.settings",
+    "items.rolesPermissions"
+  ],
+  "shell": {
+    "brand": "لوحة المسؤولين",
+    "nav": {
+      "title": "قائمة المسؤولين",
+      "collapse": "طي الشريط الجانبي",
+      "openMenu": "فتح قائمة المسؤولين"
+    },
+    "breadcrumb": {
+      "admin": "المسؤولين",
+      "label": "قائمة التنقل"
+    },
+    "environment": {
+      "production": "إنتاجي",
+      "preview": "معاينة",
+      "development": "تطوير"
+    },
+    "role": {
+      "superAdmin": "مدير أعلى",
+      "financeManager": "مالي",
+      "admin": "مسؤول",
+      "supportAgent": "دعم فني",
+      "default": "—"
+    },
+    "account": {
+      "reAuthenticate": "إعادة المصادقة",
+      "signOut": "تسجيل الخروج",
+      "signOutEverywhere": "تسجيل الخروج في كل الأماكن"
+    }
+  },
+  "groups": {
+    "overview": "نظرة عامة",
+    "customers": "العملاء",
+    "ai": "الذكاء الاصطناعي",
+    "content": "المحتوى",
+    "platform": "المنصة",
+    "admin": "الإدارة"
+  },
+  "items": {
+    "overview": "نظرة عامة",
+    "users": "المستخدمون",
+    "subscriptions": "الاشتراكات",
+    "credits": "الأرصدة",
+    "payments": "المدفوعات",
+    "aiOperations": "عمليات الذكاء الاصطناعي",
+    "aiProviders": "مزوّدو الذكاء الاصطناعي",
+    "projects": "المشاريع",
+    "systemHealth": "صحة النظام",
+    "auditLogs": "سجلات التدقيق",
+    "settings": "الإعدادات",
+    "rolesPermissions": "الأدوار والصلاحيات"
+  }
+}

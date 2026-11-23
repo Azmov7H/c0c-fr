@@ -44,6 +44,8 @@ export const NAMESPACES = [
     'dataState',
     'notifications',
     'errors',
+    // Admin Panel (AP-016) — the operations-console catalog.
+    'admin',
 ] as const;
 
 export type Namespace = (typeof NAMESPACES)[number];
@@ -79,6 +81,7 @@ const CATALOGS: Record<AppLocale, Record<Namespace, CatalogLoader>> = {
         dataState: () => import('../../messages/en/dataState.json'),
         notifications: () => import('../../messages/en/notifications.json'),
         errors: () => import('../../messages/en/errors.json'),
+        admin: () => import('../../messages/en/admin.json'),
     },
     ar: {
         common: () => import('../../messages/ar/common.json'),
@@ -107,6 +110,7 @@ const CATALOGS: Record<AppLocale, Record<Namespace, CatalogLoader>> = {
         dataState: () => import('../../messages/ar/dataState.json'),
         notifications: () => import('../../messages/ar/notifications.json'),
         errors: () => import('../../messages/ar/errors.json'),
+        admin: () => import('../../messages/ar/admin.json'),
     },
 };
 

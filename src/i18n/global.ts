@@ -25,6 +25,8 @@ import onboarding from '../../messages/en/onboarding.json';
 import dataState from '../../messages/en/dataState.json';
 import notifications from '../../messages/en/notifications.json';
 import errors from '../../messages/en/errors.json';
+// Admin Panel (AP-016) — the operations-console catalog.
+import admin from '../../messages/en/admin.json';
 
 /**
  * AR-003/AR-010 — type augmentation for the i18n surface.
@@ -73,6 +75,7 @@ declare module 'next-intl' {
             dataState: typeof dataState;
             notifications: typeof notifications;
             errors: typeof errors;
+            admin: typeof admin;
         };
     }
 }
