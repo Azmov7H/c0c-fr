@@ -88,5 +88,13 @@
       "typeLabel": "Type the target value to confirm",
       "mismatch": "Type exactly what you typed above — no match yet"
     }
+  },
+  "pages": {
+    "forbidden": {
+      "title": "Forbidden",
+      "message": "You don't have access to the admin panel — the backend denies this route to non-admins.",
+      "goToDashboard": "Back to your dashboard",
+      "mutation403Toast": "You do not have permission for this action"
+    }
   }
 }

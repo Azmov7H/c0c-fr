@@ -38,13 +38,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const user = useAuthStore((state) => state.user);
-    const { data: me } = useAdminMe();
     const logout = useLogout();
     const logoutAll = useLogoutAll();
 
     const activeUrl = getActiveAdminNavUrl(pathname);
     const environment = detectAdminEnvironment();
     const displayName = user ? [user.firstName, user.lastName].filter(Boolean).join(' ') : '';
+    const me = useAdminMe();
     // Role labels — literal keys so the i18n usage gate can see them (A2,
     // spec §2.3: Super Admin / Finance / Admin / Support).
     const roleLabel =

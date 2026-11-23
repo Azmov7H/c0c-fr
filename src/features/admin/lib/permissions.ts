@@ -8,6 +8,8 @@
  * nav filtering, `PermissionGate` and read-only UX.
  */
 
+import type { AdminRole } from '../types';
+
 export const ADMIN_PERMISSIONS = {
     // Overview
     'overview.read': 'overview.read',
@@ -65,6 +67,16 @@ export function hasAdminPermission(
     permission: string,
 ): boolean {
     return permissions.includes(permission);
+}
+
+/**
+ * Every role that may use any admin surface (backend `ADMIN_ROLES`,
+ * c0c-bake `admin.permissions.ts`). 'user' is not here — the backend 403s it.
+ */
+export const ADMIN_ROLES = ['super_admin', 'finance_manager', 'admin', 'support_agent'] as const;
+
+export function isAdminRole(role: string): role is AdminRole {
+    return (ADMIN_ROLES as readonly string[]).includes(role);
 }
 
 /**
