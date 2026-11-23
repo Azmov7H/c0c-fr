@@ -69,5 +69,24 @@
     "auditLogs": "سجلات التدقيق",
     "settings": "الإعدادات",
     "rolesPermissions": "الأدوار والصلاحيات"
+  },
+  "components": {
+    "idCell": { "copy": "انسخ المعرّف", "copied": "تم النسخ" },
+    "maskedValue": { "hidden": "القيمة مخفية — تتطلب صلاحية" },
+    "anomalyCard": { "link": "عرض المستخدم", "balance": "الرصيد" },
+    "instanceMetricsNote": { "label": "منذ بدء الحدث · {since}" },
+    "auditDiff": { "field": "الحقل", "before": "قبل", "after": "بعد" },
+    "stepUpPrompt": {
+      "password": "كلمة المرور",
+      "confirm": "تأكيد",
+      "invalid": "كلمة المرور غير صحيحة — حاول مرة أخرى",
+      "hint": "أكد بكلمة مرورك. هذا يؤكد الإجراء الحساس."
+    },
+    "reasonField": { "label": "السبب", "placeholder": "لماذا تقوم بذلك؟" },
+    "adminActionDialog": { "cancel": "إلغاء", "submitting": "جارٍ التنفيذ…" },
+    "dangerConfirmDialog": {
+      "typeLabel": "اكتب القيمة المستهدفة للتأكيد",
+      "mismatch": "اكتب بدقة ما كتبته أعلاه — لا تطابق بعد"
+    }
   }
 }
