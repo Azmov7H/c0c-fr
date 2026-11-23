@@ -95,6 +95,32 @@
       "message": "You don't have access to the admin panel — the backend denies this route to non-admins.",
       "goToDashboard": "Back to your dashboard",
       "mutation403Toast": "You do not have permission for this action"
+    },
+    "overview": {
+      "title": "Overview",
+      "ranges": {
+        "24h": "Last 24 hours",
+        "7d": "Last 7 days",
+        "30d": "Last 30 days",
+        "90d": "Last 90 days"
+      },
+      "refresh": "Refresh",
+      "lastUpdated": "Last updated {time}",
+      "kpi": {
+        "creditBalance": "Credit balance",
+        "pendingHolds": "Pending holds",
+        "users": "Users",
+        "aiRequests": "AI requests"
+      },
+      "charts": {
+        "creditMovements": "Credit movements",
+        "aiRequests": "AI requests",
+        "signups": "Signups"
+      },
+      "attention": "Needs attention",
+      "audit": "Recent audit",
+      "empty": "No activity in this range",
+      "emptyDescription": "Start moving credits or generating AI work to see activity here."
     }
   }
 }
