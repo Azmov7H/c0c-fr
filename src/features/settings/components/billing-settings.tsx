@@ -16,10 +16,14 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { DataState } from '@/components/shared/data-state';
+import { LocalizedDataState } from '@/components/shared/localized-data-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toApiError } from '@/lib/api-error';
+import {
+    accountErrorMessage,
+    mapAccountError,
+} from '@/lib/account-error-map';
 import {
     useBillingSummary,
     useCheckout,
@@ -38,32 +42,31 @@ import { formatDate } from '@/features/billing/lib/format';
 import { buildPricingCopy } from '@/features/billing/lib/pricing-copy';
 import type { BillingSummary, PlanId, SubscriptionStatus } from '@/features/billing/types';
 
-function statusBadge(status: SubscriptionStatus | null) {
+type BillingTranslator = ReturnType<typeof useTranslations<'billing'>>;
+
+function statusBadge(status: SubscriptionStatus | null, t: BillingTranslator) {
     switch (status) {
         case 'active':
-            return <Badge variant="success">Active</Badge>;
+            return <Badge variant="success">{t('status.active')}</Badge>;
         case 'trialing':
-            return <Badge variant="warning">Trial</Badge>;
+            return <Badge variant="warning">{t('status.trialing')}</Badge>;
         case 'past_due':
-            return <Badge variant="destructive">Payment failed</Badge>;
+            return <Badge variant="destructive">{t('status.past_due')}</Badge>;
         case 'canceled':
-            return <Badge variant="outline">Canceled</Badge>;
+            return <Badge variant="outline">{t('status.canceled')}</Badge>;
         case 'incomplete':
-            return <Badge variant="destructive">Setup incomplete</Badge>;
+            return <Badge variant="destructive">{t('status.incomplete')}</Badge>;
         default:
-            return <Badge variant="secondary">Free plan</Badge>;
+            return <Badge variant="secondary">{t('status.free')}</Badge>;
     }
 }
 
-function actionError(error: unknown): string {
-    const apiError = toApiError(error, 'Billing could not be started.');
-    if (apiError.status === 503) {
-        return 'Billing is not configured on this deployment yet. No payment was started.';
-    }
-    if (apiError.status === 0) {
-        return 'You appear to be offline. Check your connection and try again.';
-    }
-    return apiError.message;
+function actionError(error: unknown, t: BillingTranslator): string {
+    const apiError = toApiError(error, t('errors.generic'));
+    return accountErrorMessage(
+        t,
+        mapAccountError(apiError, { serviceUnavailableKey: 'notConfigured' })
+    );
 }
 
 function CurrentPlan({ summary, onPortal, portalPending }: {
@@ -76,17 +79,19 @@ function CurrentPlan({ summary, onPortal, portalPending }: {
     const t = useTranslations('pricing');
     const billingT = useTranslations('billing');
     const copy = buildPricingCopy(t);
-    const renewalLabel = summary.cancelAtPeriodEnd ? 'Access ends' : 'Renews';
+    const renewalLabel = summary.cancelAtPeriodEnd
+        ? billingT('currentPlan.ends')
+        : billingT('currentPlan.renews');
 
     return (
         <Card>
             <CardHeader>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                        <CardDescription>Current plan</CardDescription>
+                        <CardDescription>{billingT('currentPlan.label')}</CardDescription>
                         <CardTitle className="mt-1 flex items-center gap-2 text-2xl">
                             {copy.planName(summary.plan)}
-                            {statusBadge(summary.status)}
+                            {statusBadge(summary.status, billingT)}
                         </CardTitle>
                     </div>
                     <CreditCard className="size-8 text-muted-foreground" aria-hidden />
@@ -95,7 +100,7 @@ function CurrentPlan({ summary, onPortal, portalPending }: {
             <CardContent className="space-y-5">
                 <dl className="grid gap-4 text-sm sm:grid-cols-3">
                     <div>
-                        <dt className="text-muted-foreground">Price</dt>
+                        <dt className="text-muted-foreground">{billingT('currentPlan.price')}</dt>
                         <dd className="mt-1 font-medium">
                             {copy.monthlyPrice(summary.plan, locale)}
                         </dd>
@@ -104,14 +109,20 @@ function CurrentPlan({ summary, onPortal, portalPending }: {
                         <dt className="text-muted-foreground">{renewalLabel}</dt>
                         <dd className="mt-1 font-medium">
                             {summary.plan === 'starter' && !summary.renewalDate
-                                ? 'No billing period'
-                                : formatDate(summary.renewalDate, locale, 'Not scheduled')}
+                                ? billingT('currentPlan.noPeriod')
+                                : formatDate(
+                                      summary.renewalDate,
+                                      locale,
+                                      billingT('currentPlan.notScheduled')
+                                  )}
                         </dd>
                     </div>
                     <div>
-                        <dt className="text-muted-foreground">Billing</dt>
+                        <dt className="text-muted-foreground">{billingT('currentPlan.billing')}</dt>
                         <dd className="mt-1 font-medium">
-                            {summary.managedByStripe ? 'Managed by Stripe' : 'Granted manually'}
+                            {summary.managedByStripe
+                                ? billingT('currentPlan.managedByStripe')
+                                : billingT('currentPlan.grantedManually')}
                         </dd>
                     </div>
                 </dl>
@@ -126,18 +137,20 @@ function CurrentPlan({ summary, onPortal, portalPending }: {
                             disabled={portalPending}
                         >
                             <ExternalLink className="size-4" aria-hidden />
-                            {portalPending ? 'Opening portal…' : 'Manage subscription'}
+                            {portalPending
+                                ? billingT('currentPlan.openingPortal')
+                                : billingT('currentPlan.manage')}
                         </Button>
                     ) : (
                         <p className="text-sm text-muted-foreground">
                             {summary.plan === 'starter'
-                                ? 'Choose a paid plan below to start a subscription.'
-                                : 'This plan has no Stripe subscription, so there is nothing to manage in the portal.'}
+                                ? billingT('currentPlan.starterHint')
+                                : billingT('currentPlan.manualHint')}
                         </p>
                     )}
                     {summary.plan === 'starter' ? (
                         <Button asChild>
-                            <a href="#choose-plan">Compare paid plans</a>
+                            <a href="#choose-plan">{billingT('currentPlan.compare')}</a>
                         </Button>
                     ) : null}
                 </div>
@@ -191,14 +204,14 @@ export function BillingSettings() {
     const onPortal = () => {
         setMutationError(null);
         portal.mutate(undefined, {
-            onError: (error) => setMutationError(actionError(error)),
+            onError: (error) => setMutationError(actionError(error, billingT)),
         });
     };
 
     const onCheckout = (plan: PlanId) => {
         setMutationError(null);
         checkout.mutate(plan, {
-            onError: (error) => setMutationError(actionError(error)),
+            onError: (error) => setMutationError(actionError(error, billingT)),
         });
     };
 
@@ -212,12 +225,12 @@ export function BillingSettings() {
 
             {mutationError ? (
                 <Alert variant="destructive">
-                    <AlertTitle>Billing action failed</AlertTitle>
+                    <AlertTitle>{billingT('actions.failedTitle')}</AlertTitle>
                     <AlertDescription>{mutationError}</AlertDescription>
                 </Alert>
             ) : null}
 
-            <DataState
+            <LocalizedDataState
                 isLoading={isLoading}
                 error={error}
                 onRetry={() => void refetch()}
@@ -255,18 +268,17 @@ export function BillingSettings() {
                         />
                         {data.plan === 'starter' ? (
                             <p className="text-sm text-muted-foreground">
-                                You are within the free limits. Paid plans are optional;
-                                upgrade only when a limit is actually in your way.
+                                {billingT('freeNote')}
                             </p>
                         ) : null}
                         {pending ? (
                             <p className="sr-only" role="status">
-                                Billing action in progress
+                                {billingT('actions.inProgress')}
                             </p>
                         ) : null}
                     </>
                 ) : null}
-            </DataState>
+            </LocalizedDataState>
         </div>
     );
 }

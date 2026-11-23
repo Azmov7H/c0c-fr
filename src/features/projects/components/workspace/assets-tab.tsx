@@ -2,6 +2,7 @@
 
 import { useUrlLocale } from '@/i18n/locale';
 import { useState, type ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
 import {
     FileText,
     Image as ImageIcon,
@@ -27,9 +28,9 @@ import { useProjectSEO, useGenerateSEO } from '@/features/seo/hooks/use-seo';
 import { useProjectThumbnails } from '@/features/thumbnails/hooks/use-thumbnails';
 import { toApiError } from '@/lib/api-error';
 import { isCreditError, isQuotaError } from '@/features/billing/lib/generation-error';
-import { formatRelativeTime } from '@/lib/relative-time';
 import type { ProjectRole } from '../../types';
 import { can } from '../../lib/permissions';
+import { workspaceRelativeTime } from '../../lib/workspace-labels';
 import { ThumbnailGenerator } from '@/features/thumbnails/components/thumbnail-generator';
 import { UpgradePrompt } from '@/features/billing/components/upgrade-prompt';
 import { GenerationIndicator } from '@/features/billing/components/generation-indicator';
@@ -61,6 +62,7 @@ function AssetRow({
     imageUrl?: string;
 }) {
     const locale = useUrlLocale();
+    const t = useTranslations('workspace');
     return (
         <li className="flex items-center gap-3 py-3">
             {imageUrl ? (
@@ -74,7 +76,7 @@ function AssetRow({
             <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{title}</p>
                 <p className="text-xs text-muted-foreground">
-                    {[subtitle, createdAt ? formatRelativeTime(createdAt, locale).relative : null]
+                    {[subtitle, createdAt ? workspaceRelativeTime(t, createdAt, locale) : null]
                         .filter(Boolean)
                         .join(' · ')}
                 </p>
@@ -121,6 +123,7 @@ function GroupCard({
 }
 
 export function AssetsTab({ projectId, role }: { projectId: string; role: ProjectRole }) {
+    const t = useTranslations('workspace');
     const mayEdit = can(role, 'edit');
     const [quotaError, setQuotaError] = useState<string | null>(null);
     // P11.6: a 402 is money (credits), a 429 is time (quota) — they get
@@ -148,7 +151,7 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
             return;
         }
         if (isQuotaError(error)) {
-            setQuotaError(toApiError(error, 'Generation quota exhausted.').message);
+            setQuotaError(toApiError(error, t('assets.quotaFallback')).message);
             setCreditError(null);
             return;
         }
@@ -161,7 +164,7 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
 
     if (loading) {
         return (
-            <div className="grid gap-6 md:grid-cols-2" role="status" aria-label="Loading assets">
+            <div className="grid gap-6 md:grid-cols-2" role="status" aria-label={t('assets.loading')}>
                 {Array.from({ length: 4 }).map((_, index) => (
                     <Skeleton key={index} className="h-64 rounded-2xl" />
                 ))}
@@ -173,13 +176,13 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
         <div className="space-y-6">
             {/* P11.2: the export stage's panel anchor. */}
             <div id="export">
-                <ProjectExport projectId={projectId} title="Project" />
+                <ProjectExport projectId={projectId} title={t('assets.projectTitle')} />
             </div>
             {quotaError && (
                 <UpgradePrompt
-                    title="Generation quota reached"
+                    title={t('assets.quotaTitle')}
                     description={quotaError}
-                    ctaLabel="Upgrade for more generations"
+                    ctaLabel={t('assets.quotaCta')}
                     feature="ai.generation"
                     used={aiUsage?.used}
                     limit={aiLimit}
@@ -190,9 +193,9 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
             {/* P11.6: 402 — the operation needs credits, not time. */}
             {creditError && (
                 <UpgradePrompt
-                    title="Not enough credits"
+                    title={t('assets.creditTitle')}
                     description={creditError}
-                    ctaLabel="Top up or upgrade to continue"
+                    ctaLabel={t('assets.creditCta')}
                     feature="ai.generation"
                     className="items-start text-start"
                 />
@@ -200,10 +203,10 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
 
             <div className="grid gap-6 md:grid-cols-2">
                 <GroupCard
-                    title="Scripts"
+                    title={t('assets.scripts.title')}
                     icon={FileText}
                     count={scripts.data?.length ?? 0}
-                    description="Structured per-scene scripts for this project."
+                    description={t('assets.scripts.description')}
                     anchor="scripts"
                     action={
                         <div className="flex flex-col items-end gap-1">
@@ -219,7 +222,7 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                                 ) : (
                                     <Sparkles className="me-2 size-4" aria-hidden="true" />
                                 )}
-                                Generate
+                                {t('assets.generate')}
                             </Button>
                             {/* P11.4: the server's remaining allowance on the control. */}
                             <GenerationIndicator />
@@ -228,15 +231,22 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                 >
                     {(scripts.data ?? []).length === 0 ? (
                         <p className="text-sm text-muted-foreground">
-                            No scripts yet. {mayEdit ? 'Generate the first one.' : 'An editor can generate one.'}
+                            {t('assets.scripts.empty', {
+                                hint: mayEdit
+                                    ? t('assets.scripts.emptyEditor')
+                                    : t('assets.scripts.emptyViewer'),
+                            })}
                         </p>
                     ) : (
                         <>
                             <ul>{(scripts.data ?? []).slice(0, 5).map((script) => (
                                 <AssetRow
                                     key={script.id}
-                                    title={`Version ${script.version} · ${script.sections.length} scene(s)`}
-                                    subtitle={`${script.wordCount} words`}
+                                    title={t('assets.scripts.version', {
+                                        version: script.version,
+                                        scenes: script.sections.length,
+                                    })}
+                                    subtitle={t('assets.scripts.words', { count: script.wordCount })}
                                     status={script.status}
                                     createdAt={script.createdAt}
                                 />
@@ -251,16 +261,16 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                 </GroupCard>
 
                 <GroupCard
-                    title="Thumbnails"
+                    title={t('assets.thumbnails.title')}
                     icon={ImageIcon}
                     count={thumbnails.data?.length ?? 0}
-                    description="Visual concepts generated from your idea."
+                    description={t('assets.thumbnails.description')}
                 >
                     {(thumbnails.data ?? []).length === 0 ? (
                         mayEdit ? (
                             <ThumbnailGenerator projectId={projectId} />
                         ) : (
-                            <p className="text-sm text-muted-foreground">No thumbnails yet.</p>
+                            <p className="text-sm text-muted-foreground">{t('assets.thumbnails.empty')}</p>
                         )
                     ) : (
                         <ul>{(thumbnails.data ?? []).slice(0, 5).map((thumbnail) => (
@@ -277,10 +287,10 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                 </GroupCard>
 
                 <GroupCard
-                    title="Audio"
+                    title={t('assets.audio.title')}
                     icon={Music}
                     count={audio.data?.length ?? 0}
-                    description="Music and sound-effect suggestions."
+                    description={t('assets.audio.description')}
                     action={
                         <div className="flex flex-col items-end gap-1">
                             <Button
@@ -298,20 +308,23 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                                 ) : (
                                     <Sparkles className="me-2 size-4" aria-hidden="true" />
                                 )}
-                                Generate
+                                {t('assets.generate')}
                             </Button>
                             <GenerationIndicator />
                         </div>
                     }
                 >
                     {(audio.data ?? []).length === 0 ? (
-                        <p className="text-sm text-muted-foreground">No audio profile yet.</p>
+                        <p className="text-sm text-muted-foreground">{t('assets.audio.empty')}</p>
                     ) : (
                         <ul>{(audio.data ?? []).slice(0, 5).map((suggestion) => (
                             <AssetRow
                                 key={suggestion.id}
-                                title={`${suggestion.mood} · ${suggestion.musicType}`}
-                                subtitle={`${suggestion.tracks.length} tracks`}
+                                title={t('assets.audio.moodLine', {
+                                    mood: suggestion.mood,
+                                    musicType: suggestion.musicType,
+                                })}
+                                subtitle={t('assets.audio.tracks', { count: suggestion.tracks.length })}
                                 status={suggestion.status}
                                 createdAt={suggestion.createdAt}
                             />
@@ -320,10 +333,10 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                 </GroupCard>
 
                 <GroupCard
-                    title="SEO"
+                    title={t('assets.seo.title')}
                     icon={Search}
                     count={seo.data ? 1 : 0}
-                    description="Titles, hashtags and keywords."
+                    description={t('assets.seo.description')}
                     action={
                         <div className="flex flex-col items-end gap-1">
                             <Button
@@ -338,7 +351,7 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                                 ) : (
                                     <Sparkles className="me-2 size-4" aria-hidden="true" />
                                 )}
-                                Generate
+                                {t('assets.generate')}
                             </Button>
                             <GenerationIndicator />
                         </div>
@@ -354,22 +367,22 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
                             </div>
                         </div>
                     ) : (
-                        <p className="text-sm text-muted-foreground">No SEO profile yet.</p>
+                        <p className="text-sm text-muted-foreground">{t('assets.seo.empty')}</p>
                     )}
                 </GroupCard>
 
                 <GroupCard
-                    title="Media"
+                    title={t('assets.media.title')}
                     icon={Upload}
                     count={media.data?.meta?.total ?? media.data?.data.length ?? 0}
-                    description="Images, video and documents attached to the project."
+                    description={t('assets.media.description')}
                 >
                     {(media.data?.data ?? []).length === 0 ? (
                         <EmptyState
                             className="min-h-0 border-0 bg-transparent p-0"
                             icon={Upload}
-                            title="No media yet"
-                            description="Uploads need a storage provider, which is not configured yet."
+                            title={t('assets.media.emptyTitle')}
+                            description={t('assets.media.emptyDescription')}
                         />
                     ) : (
                         <ul>{(media.data?.data ?? []).slice(0, 5).map((item) => (
@@ -387,7 +400,7 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
 
             {!mayEdit && (
                 <p className="text-sm text-muted-foreground">
-                    Your role can view assets but not generate or change them.
+                    {t('assets.viewerNote')}
                 </p>
             )}
         </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { LayoutGrid, List, Search, SlidersHorizontal, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -40,11 +41,9 @@ import {
     type ProjectFilters,
     type ProjectView,
 } from '../lib/project-filters';
-import {
-    PLATFORM_LABEL,
-    PROJECT_PLATFORMS,
-    STATUS_LABEL,
-} from '../lib/project-constants';
+import { platformLabel, projectNoun, sortLabel, statusLabel } from '../lib/projects-labels';
+import type { ProjectsTranslator } from '../lib/projects-labels';
+import { PROJECT_PLATFORMS } from '../lib/project-constants';
 
 const LIST_STATUSES: ProjectStatus[] = ['draft', 'processing', 'completed'];
 
@@ -69,17 +68,19 @@ function FilterChecklist({
     onToggleStatus,
     onTogglePlatform,
     onToggleArchived,
+    t,
 }: {
     filters: ProjectFilters;
     onToggleStatus: (status: ProjectStatus) => void;
     onTogglePlatform: (platform: Platform) => void;
     onToggleArchived: () => void;
+    t: ProjectsTranslator;
 }) {
     return (
         <div className="space-y-6">
             <fieldset>
                 <legend className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Status
+                    {t('toolbar.statusLegend')}
                 </legend>
                 <div className="flex flex-wrap gap-2">
                     {LIST_STATUSES.map((status) => (
@@ -92,7 +93,7 @@ function FilterChecklist({
                             className="h-11"
                             onClick={() => onToggleStatus(status)}
                         >
-                            {STATUS_LABEL[status]}
+                            {statusLabel(t, status)}
                         </Button>
                     ))}
                     <Button
@@ -103,14 +104,14 @@ function FilterChecklist({
                         className="h-11"
                         onClick={onToggleArchived}
                     >
-                        {STATUS_LABEL.archived}
+                        {statusLabel(t, 'archived')}
                     </Button>
                 </div>
             </fieldset>
 
             <fieldset>
                 <legend className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Platform
+                    {t('toolbar.platformLegend')}
                 </legend>
                 <div className="flex flex-wrap gap-2">
                     {PROJECT_PLATFORMS.map((platform) => (
@@ -123,7 +124,7 @@ function FilterChecklist({
                             className="h-11"
                             onClick={() => onTogglePlatform(platform)}
                         >
-                            {PLATFORM_LABEL[platform]}
+                            {platformLabel(t, platform)}
                         </Button>
                     ))}
                 </div>
@@ -140,6 +141,7 @@ export function ProjectsToolbar({
     onViewChange,
     resultCount,
 }: ProjectsToolbarProps) {
+    const t = useTranslations('projects');
     const [search, setSearch] = useState(filters.q);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -202,8 +204,8 @@ export function ProjectsToolbar({
                     <Input
                         id="projects-search"
                         type="search"
-                        aria-label="Search projects"
-                        placeholder="Search projects..."
+                        aria-label={t('toolbar.searchAria')}
+                        placeholder={t('toolbar.searchPlaceholder')}
                         value={search}
                         onChange={(event) => onSearchChange(event.target.value)}
                         className="h-11 ps-9 pe-9"
@@ -211,7 +213,7 @@ export function ProjectsToolbar({
                     {search ? (
                         <button
                             type="button"
-                            aria-label="Clear search"
+                            aria-label={t('toolbar.clearSearch')}
                             className="absolute end-1 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             onClick={() => {
                                 if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -230,32 +232,32 @@ export function ProjectsToolbar({
                             <Button
                                 variant="outline"
                                 className="hidden h-11 gap-2 md:inline-flex"
-                                aria-label="Filter by status and platform"
+                                aria-label={t('toolbar.filterAria')}
                             >
                                 <SlidersHorizontal className="size-4" aria-hidden="true" />
-                                Filters
+                                {t('toolbar.filterText')}
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" className="w-56">
-                            <DropdownMenuLabel>Status</DropdownMenuLabel>
+                            <DropdownMenuLabel>{t('toolbar.statusLegend')}</DropdownMenuLabel>
                             {LIST_STATUSES.map((status) => (
                                 <DropdownMenuCheckboxItem
                                     key={status}
                                     checked={filters.statuses.includes(status)}
                                     onCheckedChange={() => toggleStatus(status)}
                                 >
-                                    {STATUS_LABEL[status]}
+                                    {statusLabel(t, status)}
                                 </DropdownMenuCheckboxItem>
                             ))}
                             <DropdownMenuSeparator />
-                            <DropdownMenuLabel>Platform</DropdownMenuLabel>
+                            <DropdownMenuLabel>{t('toolbar.platformLegend')}</DropdownMenuLabel>
                             {PROJECT_PLATFORMS.map((platform) => (
                                 <DropdownMenuCheckboxItem
                                     key={platform}
                                     checked={filters.platforms.includes(platform)}
                                     onCheckedChange={() => togglePlatform(platform)}
                                 >
-                                    {PLATFORM_LABEL[platform]}
+                                    {platformLabel(t, platform)}
                                 </DropdownMenuCheckboxItem>
                             ))}
                         </DropdownMenuContent>
@@ -266,16 +268,18 @@ export function ProjectsToolbar({
                             <Button
                                 variant="outline"
                                 className="h-11 gap-2 md:hidden"
-                                aria-label="Filter projects"
+                                aria-label={t('toolbar.filterAriaMobile')}
                             >
                                 <SlidersHorizontal className="size-4" aria-hidden="true" />
-                                Filters
+                                {t('toolbar.filterText')}
                             </Button>
                         </SheetTrigger>
                         <SheetContent side="right" className="w-full sm:max-w-sm">
                             <SheetHeader>
-                                <SheetTitle>Filters</SheetTitle>
-                                <SheetDescription>Status, platform and sort order.</SheetDescription>
+                                <SheetTitle>{t('toolbar.filtersTitle')}</SheetTitle>
+                                <SheetDescription>
+                                    {t('toolbar.filtersDescription')}
+                                </SheetDescription>
                             </SheetHeader>
                             <div className="space-y-6 px-4">
                                 <FilterChecklist
@@ -283,10 +287,11 @@ export function ProjectsToolbar({
                                     onToggleStatus={toggleStatus}
                                     onTogglePlatform={togglePlatform}
                                     onToggleArchived={toggleArchived}
+                                    t={t}
                                 />
                                 <div className="space-y-2">
                                     <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                                        Sort
+                                        {t('toolbar.sortLabel')}
                                     </p>
                                     <Select
                                         value={filters.sort}
@@ -304,7 +309,7 @@ export function ProjectsToolbar({
                                         <SelectContent>
                                             {PROJECT_SORTS.map((option) => (
                                                 <SelectItem key={option.value} value={option.value}>
-                                                    {option.label}
+                                                    {sortLabel(t, option.value)}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -313,11 +318,11 @@ export function ProjectsToolbar({
                             </div>
                             <SheetFooter>
                                 <Button variant="outline" className="h-11" onClick={onClear}>
-                                    Clear filters
+                                    {t('toolbar.footerClear')}
                                 </Button>
                                 <SheetClose asChild>
                                     <Button className="h-11">
-                                        Show {resultCount ?? 0} result{resultCount === 1 ? '' : 's'}
+                                        {t('toolbar.footerShow', { count: resultCount ?? 0 })}
                                     </Button>
                                 </SheetClose>
                             </SheetFooter>
@@ -334,13 +339,13 @@ export function ProjectsToolbar({
                             })
                         }
                     >
-                        <SelectTrigger className="hidden h-11 w-[190px] md:flex" aria-label="Sort projects">
+                        <SelectTrigger className="hidden h-11 w-[190px] md:flex" aria-label={t('toolbar.sortAria')}>
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                             {PROJECT_SORTS.map((option) => (
                                 <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
+                                    {sortLabel(t, option.value)}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -352,7 +357,7 @@ export function ProjectsToolbar({
                             size="icon"
                             variant={view === 'grid' ? 'secondary' : 'ghost'}
                             className="size-10"
-                            aria-label="Grid view"
+                            aria-label={t('toolbar.viewGridAria')}
                             aria-pressed={view === 'grid'}
                             onClick={() => onViewChange('grid')}
                         >
@@ -363,7 +368,7 @@ export function ProjectsToolbar({
                             size="icon"
                             variant={view === 'table' ? 'secondary' : 'ghost'}
                             className="size-10"
-                            aria-label="Table view"
+                            aria-label={t('toolbar.viewTableAria')}
                             aria-pressed={view === 'table'}
                             onClick={() => onViewChange('table')}
                         >
@@ -378,7 +383,7 @@ export function ProjectsToolbar({
                             className="h-11 px-3 text-muted-foreground hover:text-foreground"
                             onClick={onClear}
                         >
-                            Clear
+                            {t('toolbar.clear')}
                         </Button>
                     ) : null}
                 </div>
@@ -393,14 +398,16 @@ export function ProjectsToolbar({
                     className={cn('h-9', statusMatches(filters, 'archived') && 'shadow-sm')}
                     onClick={toggleArchived}
                 >
-                    {statusMatches(filters, 'archived') ? 'Viewing archive' : 'View archive'}
+                    {statusMatches(filters, 'archived')
+                        ? t('toolbar.archiveOn')
+                        : t('toolbar.archiveOff')}
                 </Button>
                 <p className="text-xs text-muted-foreground" aria-live="polite">
                     {typeof resultCount === 'number' ? (
                         <>
                             <span className="font-semibold text-foreground">{resultCount}</span>{' '}
-                            {activeFilters ? 'matching' : 'total'}{' '}
-                            {resultCount === 1 ? 'project' : 'projects'}
+                            {activeFilters ? t('toolbar.resultsMatch') : t('toolbar.resultsTotal')}{' '}
+                            {projectNoun(t, resultCount)}
                         </>
                     ) : null}
                 </p>

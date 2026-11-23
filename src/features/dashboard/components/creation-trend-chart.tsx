@@ -2,6 +2,7 @@
 
 import { useUrlLocale } from '@/i18n/locale';
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
 import {
@@ -11,10 +12,6 @@ import {
     type ChartConfig,
 } from '@/components/ui/chart';
 import { formatNumber, formatShortMonthDay } from '../lib/format';
-
-const config = {
-    count: { label: 'Projects created', color: 'var(--chart-1)' },
-} satisfies ChartConfig;
 
 export interface CreationTrendPoint {
     date: string;
@@ -51,7 +48,11 @@ function usePrefersReducedMotion(): boolean {
  * table are always in the DOM, and the table is reachable without hover.
  */
 export default function CreationTrendChart({ data }: { data: CreationTrendPoint[] }) {
+    const t = useTranslations('dashboard');
     const locale = useUrlLocale();
+    const config = {
+        count: { label: t('chart.series'), color: 'var(--chart-1)' },
+    } satisfies ChartConfig;
     const reducedMotion = usePrefersReducedMotion();
     const total = data.reduce((sum, point) => sum + point.count, 0);
     const peak = data.reduce<CreationTrendPoint | null>(
@@ -61,9 +62,14 @@ export default function CreationTrendChart({ data }: { data: CreationTrendPoint[
 
     const summary =
         data.length === 0
-            ? 'No projects were created in the last seven days.'
-            : `${formatNumber(total, locale)} project${total === 1 ? '' : 's'} created in the last seven days.` +
-              (peak ? ` Busiest day: ${formatShortMonthDay(peak.date, locale)} with ${formatNumber(peak.count, locale)}.` : '');
+            ? t('chart.summaryEmpty')
+            : t('chart.summary', { count: total, value: formatNumber(total, locale) }) +
+              (peak
+                  ? ` ${t('chart.busiest', {
+                        date: formatShortMonthDay(peak.date, locale),
+                        count: formatNumber(peak.count, locale),
+                    })}`
+                  : '');
 
     return (
         <figure className="space-y-3">
@@ -103,14 +109,16 @@ export default function CreationTrendChart({ data }: { data: CreationTrendPoint[
 
             <details className="text-xs">
                 <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
-                    View as table
+                    {t('chart.viewTable')}
                 </summary>
                 <table className="mt-2 w-full border-collapse text-start">
-                    <caption className="sr-only">Projects created per day, last seven days</caption>
+                    <caption className="sr-only">{t('chart.caption')}</caption>
                     <thead>
                         <tr className="border-b border-border/60">
-                            <th scope="col" className="py-1 font-medium">Date</th>
-                            <th scope="col" className="py-1 text-right font-medium">Projects</th>
+                            <th scope="col" className="py-1 font-medium">{t('chart.date')}</th>
+                            <th scope="col" className="py-1 text-right font-medium">
+                                {t('chart.projects')}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>

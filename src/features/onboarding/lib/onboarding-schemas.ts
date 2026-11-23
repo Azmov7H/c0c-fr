@@ -2,6 +2,14 @@ import { z } from 'zod';
 import { Platform } from '@/types';
 import type { OnboardingOptions } from '../services/onboarding.service';
 import type { OnboardingDraft } from './onboarding-draft';
+import { ONBOARDING_LIMITS } from './onboarding-limits';
+import {
+    EN_VALIDATION_MESSAGES,
+    type OnboardingValidationMessages,
+} from './onboarding-validation-messages';
+
+/** AR-029 — the limits live in their own module so the copy can import them. */
+export { ONBOARDING_LIMITS } from './onboarding-limits';
 
 /**
  * Client-side mirrors of T04's validation (onboarding.validation.ts).
@@ -12,13 +20,6 @@ import type { OnboardingDraft } from './onboarding-draft';
  * card forbids; it is checked at runtime against `GET /users/onboarding/options`
  * in `validateStepAnswer`, and the server stays authoritative.
  */
-
-export const ONBOARDING_LIMITS = {
-    minSubtopics: 3,
-    maxSubtopics: 8,
-    maxInterests: 12,
-    maxPlatforms: 3,
-} as const;
 
 export const STEP_KEYS = ['niche', 'subtopics', 'platforms', 'experience', 'goals', 'review'] as const;
 export const REVIEW_STEP = 5;
@@ -73,47 +74,46 @@ export function subtopicsFor(
 export function validateStepAnswer(
     step: number,
     draft: OnboardingDraft,
-    options: OnboardingOptions
+    options: OnboardingOptions,
+    messages: OnboardingValidationMessages = EN_VALIDATION_MESSAGES
 ): string | null {
     switch (step) {
         case 0: {
             const parsed = nicheFieldSchema.safeParse(draft.niche ?? '');
-            if (!parsed.success) return 'Choose one niche to continue.';
+            if (!parsed.success) return messages.chooseOneNiche;
             if (!options.niches.some((entry) => entry.slug === draft.niche)) {
-                return 'Choose one of the listed niches.';
+                return messages.chooseListedNiche;
             }
             return null;
         }
         case 1: {
             const parsed = subtopicsFieldSchema.safeParse(draft.subtopics);
-            if (!parsed.success) {
-                return `Choose between ${ONBOARDING_LIMITS.minSubtopics} and ${ONBOARDING_LIMITS.maxSubtopics} subtopics.`;
-            }
+            if (!parsed.success) return messages.chooseSubtopics;
             const known = new Set(subtopicsFor(options, null).map((entry) => entry.value));
             if (!draft.subtopics.every((topic) => known.has(topic))) {
-                return 'Every subtopic must come from the list.';
+                return messages.subtopicFromList;
             }
             return null;
         }
         case 2: {
             const parsed = platformsFieldSchema.safeParse(draft.platforms);
-            if (!parsed.success) return 'Choose between 1 and 3 platforms.';
+            if (!parsed.success) return messages.choosePlatforms;
             return null;
         }
         case 3: {
             const parsed = experienceFieldSchema.safeParse(draft.experience ?? '');
-            if (!parsed.success) return 'Pick your experience level.';
+            if (!parsed.success) return messages.pickExperience;
             if (!options.experienceLevels.some((entry) => entry.value === draft.experience)) {
-                return 'Pick one of the listed experience levels.';
+                return messages.pickListedExperience;
             }
             return null;
         }
         case 4: {
             const parsed = goalsFieldSchema.safeParse(draft.goals);
-            if (!parsed.success) return 'Pick at least one goal.';
+            if (!parsed.success) return messages.pickAtLeastOneGoal;
             const known = new Set(options.goals.map((entry) => entry.value));
             if (!draft.goals.every((goal) => known.has(goal))) {
-                return 'Every goal must come from the list.';
+                return messages.goalFromList;
             }
             return null;
         }
@@ -125,16 +125,17 @@ export function validateStepAnswer(
 /** Reasons the Complete action is unavailable, in user-facing words. */
 export function missingForCompletion(
     draft: OnboardingDraft,
-    options: OnboardingOptions
+    options: OnboardingOptions,
+    messages: OnboardingValidationMessages = EN_VALIDATION_MESSAGES
 ): string[] {
     const missing: string[] = [];
-    if (validateStepAnswer(0, draft, options)) missing.push('a niche');
-    if (validateStepAnswer(1, draft, options)) {
-        missing.push(`${ONBOARDING_LIMITS.minSubtopics}–${ONBOARDING_LIMITS.maxSubtopics} subtopics`);
+    if (validateStepAnswer(0, draft, options, messages)) missing.push(messages.missingNiche);
+    if (validateStepAnswer(1, draft, options, messages)) {
+        missing.push(messages.missingSubtopics);
     }
-    if (validateStepAnswer(2, draft, options)) missing.push('at least one platform');
-    if (validateStepAnswer(3, draft, options)) missing.push('your experience level');
-    if (validateStepAnswer(4, draft, options)) missing.push('at least one goal');
+    if (validateStepAnswer(2, draft, options, messages)) missing.push(messages.missingPlatform);
+    if (validateStepAnswer(3, draft, options, messages)) missing.push(messages.missingExperience);
+    if (validateStepAnswer(4, draft, options, messages)) missing.push(messages.missingGoal);
     return missing;
 }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/shared/page-header';
 import { TwoPanelLayout } from '@/components/shared/two-panel-layout';
 import { Button } from '@/components/ui/button';
@@ -10,120 +11,136 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import {
-  Image as ImageIcon, Palette, Sparkles, Download, Loader2, Box, Film, Minimize2,
+  Image as ImageIcon, Sparkles, Download, Loader2, Box, Film, Minimize2,
 } from 'lucide-react';
 
-const STYLES = [
-  { id: '3d-render', label: '3D Render', icon: Box, description: 'Soft shadows, clay-like depth' },
-  { id: 'cinematic', label: 'Cinematic', icon: Film, description: 'High contrast, dramatic lighting' },
-  { id: 'minimalist', label: 'Minimalist', icon: Minimize2, description: 'Flat vector, clean lines' },
-];
+const STYLE_IDS = ['3d-render', 'cinematic', 'minimalist'] as const;
+const STYLE_ICONS = { '3d-render': Box, cinematic: Film, minimalist: Minimize2 } as const;
 
 export function ThumbnailStudio() {
+  const t = useTranslations('thumbnails');
+  void [
+    t('styles.3d-render.label'),
+    t('styles.3d-render.description'),
+    t('styles.cinematic.label'),
+    t('styles.cinematic.description'),
+    t('styles.minimalist.label'),
+    t('styles.minimalist.description'),
+  ];
   const [prompt, setPrompt] = useState('');
-  const [stylePreset, setStylePreset] = useState('3d-render');
+  const [stylePreset, setStylePreset] = useState<(typeof STYLE_IDS)[number]>('3d-render');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
+  const [result, setResult] = useState<string | null>(null);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
     setIsGenerating(true);
+    setResult(null);
     await new Promise((r) => setTimeout(r, 2500));
-    setGeneratedUrl('/placeholder.png'); // Placeholder — replace with real generation
+    setResult('/placeholder.png');
     setIsGenerating(false);
   };
 
-  const leftContent = (
+  const renderConfig = () => (
     <div className="space-y-6">
-      <div className="space-y-3">
-        <Label htmlFor="thumb-prompt">Prompt</Label>
+      <div className="space-y-2">
+        <Label>{t('studio.prompt')}</Label>
         <Textarea
-          id="thumb-prompt"
-          placeholder="A cybernetic detective in a neon-lit alleyway..."
+          placeholder={t('studio.promptPlaceholder')}
+          className="min-h-[120px] resize-none"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          className="min-h-[120px] resize-none"
         />
-        <p className="text-[10px] text-muted-foreground text-end">{prompt.length} chars</p>
+        <p className="text-[10px] text-muted-foreground text-end">{t('studio.chars', { count: prompt.length })}</p>
       </div>
 
       <div className="space-y-3">
-        <Label>Style Preset</Label>
-        <RadioGroup value={stylePreset} onValueChange={setStylePreset} className="grid grid-cols-1 gap-3">
-          {STYLES.map((style) => (
-            <label
-              key={style.id}
-              className={cn(
-                'flex items-center space-x-3 border rounded-xl p-3 cursor-pointer transition-all',
-                stylePreset === style.id
-                  ? 'border-primary bg-primary/5 shadow-glow'
-                  : 'border-border/50 hover:border-primary/30 hover:bg-muted/30'
-              )}
-            >
-              <div className={cn(
-                'p-2 rounded-lg shrink-0 transition-colors',
-                stylePreset === style.id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-              )}>
-                <style.icon className="w-4 h-4" />
-              </div>
-              <span className="flex-1">
-                <span className="cursor-pointer font-semibold text-sm block">{style.label}</span>
-                <span className="text-[10px] text-muted-foreground block">{style.description}</span>
-              </span>
-              <RadioGroupItem value={style.id} className="sr-only" />
-            </label>
-          ))}
+        <Label>{t('studio.stylePreset')}</Label>
+        <RadioGroup value={stylePreset} onValueChange={(v) => setStylePreset(v as (typeof STYLE_IDS)[number])} className="gap-3">
+          {STYLE_IDS.map((styleId) => {
+            const Icon = STYLE_ICONS[styleId];
+            const selected = stylePreset === styleId;
+            return (
+              <label
+                key={styleId}
+                htmlFor={`style-${styleId}`}
+                className={cn(
+                  'flex items-center gap-3 rounded-xl border p-3.5 cursor-pointer transition-all',
+                  selected ? 'border-primary bg-primary/5 shadow-sm' : 'border-border hover:border-primary/40 hover:bg-accent/30'
+                )}
+              >
+                <RadioGroupItem value={styleId} id={`style-${styleId}`} />
+                <Icon className={cn('h-4 w-4 shrink-0', selected ? 'text-primary' : 'text-muted-foreground')} />
+                <div>
+                  <p className="text-sm font-medium">{t(`styles.${styleId}.label`)}</p>
+                  <p className="text-[11px] text-muted-foreground">{t(`styles.${styleId}.description`)}</p>
+                </div>
+              </label>
+            );
+          })}
         </RadioGroup>
       </div>
 
-      <Button onClick={handleGenerate} disabled={isGenerating || !prompt.trim()} className="w-full">
-        {isGenerating ? <Loader2 className="w-4 h-4 me-2 animate-spin" /> : <Sparkles className="w-4 h-4 me-2" />}
-        {isGenerating ? 'Rendering...' : 'Generate Thumbnail'}
+      <Button onClick={handleGenerate} disabled={!prompt.trim() || isGenerating} className="w-full gap-2">
+        {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+        {isGenerating ? t('studio.rendering') : t('studio.generate')}
       </Button>
     </div>
   );
 
-  const rightContent = generatedUrl ? (
+  const renderOutput = () => (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Badge variant="outline">{stylePreset}</Badge>
-        <Button variant="outline" size="sm">
-          <Download className="w-3.5 h-3.5 me-1" /> Download
-        </Button>
-      </div>
-      <div className="aspect-video rounded-xl bg-muted/40 flex items-center justify-center overflow-hidden">
-        <div className="w-full h-full bg-gradient-to-br from-primary/20 via-muted to-brand-violet/20 flex items-center justify-center">
-          <ImageIcon className="w-16 h-16 text-muted-foreground/30" />
+      {isGenerating ? (
+        <div className="aspect-video rounded-xl border bg-muted/30 flex flex-col items-center justify-center gap-4 animate-pulse">
+          <Loader2 className="h-10 w-10 animate-spin text-primary/60" />
+          <p className="text-sm text-muted-foreground">{t('generator.neuralAssembly')}</p>
         </div>
-      </div>
-      <p className="text-xs text-muted-foreground italic">&quot;{prompt}&quot;</p>
-    </div>
-  ) : (
-    <div className="flex flex-col items-center justify-center h-full text-center p-12">
-      <div className="w-16 h-16 bg-muted/30 rounded-2xl flex items-center justify-center mb-4">
-        <ImageIcon className="w-8 h-8 text-muted-foreground/30" />
-      </div>
-      <h3 className="text-xl font-semibold mb-2">No Thumbnail Yet</h3>
-      <p className="text-muted-foreground text-sm max-w-sm">
-        Describe your thumbnail vision and let AI bring it to life.
-      </p>
+      ) : result ? (
+        <div className="space-y-3">
+          <div className="relative aspect-video rounded-xl overflow-hidden border shadow-lg group">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={result} alt={t('studio.resultAlt')} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+              <Button size="sm" variant="secondary" className="gap-2">
+                <Download className="h-4 w-4" /> {t('studio.download')}
+              </Button>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-[10px] capitalize">{t(`styles.${stylePreset}.label`)}</Badge>
+            <p className="text-xs text-muted-foreground truncate">&quot;{prompt}&quot;</p>
+          </div>
+        </div>
+      ) : (
+        <div className="aspect-video rounded-xl border border-dashed bg-muted/20 flex flex-col items-center justify-center gap-3">
+          <ImageIcon className="h-12 w-12 text-muted-foreground/25" />
+          <div className="text-center">
+            <p className="text-sm font-medium">{t('studio.emptyTitle')}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('studio.emptyDescription')}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 
   return (
-    <div className="space-y-6">
+    <div className="animate-in fade-in duration-500 space-y-6">
       <PageHeader
-        title="Thumbnail Studio"
-        description="Create eye-catching thumbnails with AI-powered generation."
+        title={t('page.title')}
+        description={t('page.description')}
+        actions={
+          <Badge variant="outline" className="gap-1.5 px-3 py-1 border-primary/20 bg-primary/5 text-primary">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary" /> {t('page.aiPowered')}
+          </Badge>
+        }
       />
       <TwoPanelLayout
-        leftTitle="Visual Core"
-        leftDescription="Define your thumbnail directive"
-        leftIcon={Palette}
-        leftContent={leftContent}
-        rightTitle="The Render"
-        rightDescription="3840 x 2160 (Lossless)"
-        rightContent={rightContent}
+        leftContent={renderConfig()}
+        rightContent={renderOutput()}
+        leftTitle={t('studio.visualCore')}
+        leftDescription={t('studio.visualCoreDescription')}
+        rightTitle={t('studio.theRender')}
+        rightDescription={t('studio.renderMeta')}
       />
     </div>
   );

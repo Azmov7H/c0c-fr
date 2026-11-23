@@ -4,28 +4,46 @@ import type { CreditEvent } from '../types';
  * Human rows for the ledger. The kind carries direction; `amount` is a
  * positive magnitude. Keep this list in lockstep with the backend
  * `CreditKind` vocabulary.
+ *
+ * AR-028 — the labels are catalog keys, not sentences: the panel translates
+ * them. The ledger NOTE stays data (an operation id and a backend sentence),
+ * exactly as it arrived, and is appended to the translated kind.
  */
-const KIND_LABELS: Record<CreditEvent['kind'], string> = {
-    grant: 'Monthly credit grant',
-    topup: 'Top-up pack',
-    reserve: 'Reserved for a generation',
-    settle: 'Generation charged',
-    release: 'Reservation returned',
-    refund: 'Refund',
-    expiry: 'Unused credits expired',
+
+export type CreditKindKey =
+    | 'grant'
+    | 'topup'
+    | 'reserve'
+    | 'settle'
+    | 'release'
+    | 'refund'
+    | 'expiry';
+
+const KIND_KEYS: Record<CreditEvent['kind'], CreditKindKey> = {
+    grant: 'grant',
+    topup: 'topup',
+    reserve: 'reserve',
+    settle: 'settle',
+    release: 'release',
+    refund: 'refund',
+    expiry: 'expiry',
 };
+
+export function creditKindKey(kind: CreditEvent['kind']): CreditKindKey | null {
+    return KIND_KEYS[kind] ?? null;
+}
 
 /**
  * A reserve is not visible spending yet; the op it was for (from the note)
  * is the only part worth surfacing. "Settled at estimate" adds nothing.
  */
-export function creditHistoryLabel(event: CreditEvent): string {
-    const base = KIND_LABELS[event.kind] ?? event.kind;
+export function creditHistoryNote(event: CreditEvent): string {
     const { note } = event;
-    if (!note) return base;
-    // Ledger notes carry the operation: "estimate for scripts.generate",
-    // "Settled at estimate", "Operation failed or was cancelled".
-    const trimmed =
-        note === 'Settled at estimate' ? '' : note.replace(/^estimate for /, '');
+    if (!note) return '';
+    return note === 'Settled at estimate' ? '' : note.replace(/^estimate for /, '');
+}
+
+export function creditHistoryLabel(event: CreditEvent, base: string): string {
+    const trimmed = creditHistoryNote(event);
     return trimmed ? `${base} — ${trimmed}` : base;
 }

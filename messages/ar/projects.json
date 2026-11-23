@@ -1,1 +1,271 @@
-{}
+{
+  "metadata": {
+    "title": "المشاريع",
+    "description": "أدر مشاريع المحتوى والنصوص وسير العمل بالذكاء الاصطناعي.",
+    "newTitle": "مشروع جديد",
+    "newDescription": "أنشئ مشروعًا وابدأه بالفكرة التي ستنمو منها نصوصك."
+  },
+  "pageHeader": {
+    "title": "المشاريع",
+    "description": "مشاريع المحتوى والنصوص وسير العمل الخاصة بك في مكان واحد.",
+    "archiveTitle": "أرشيف المشاريع",
+    "archiveDescription": "المشاريع التي أرشفتها. استعد أحدها لإعادته إلى القائمة النشطة.",
+    "newProject": "مشروع جديد"
+  },
+  "toolbar": {
+    "searchAria": "ابحث في المشاريع",
+    "searchPlaceholder": "ابحث في المشاريع...",
+    "clearSearch": "مسح البحث",
+    "filterAria": "تصفية حسب الحالة والمنصة",
+    "filterAriaMobile": "تصفية المشاريع",
+    "filterText": "عوامل التصفية",
+    "statusLegend": "الحالة",
+    "platformLegend": "المنصة",
+    "filtersTitle": "عوامل التصفية",
+    "filtersDescription": "الحالة والمنصة وترتيب النتائج.",
+    "sortLabel": "الترتيب",
+    "sortAria": "ترتيب المشاريع",
+    "footerClear": "مسح عوامل التصفية",
+    "footerShow": "إظهار {count, plural, one {# نتيجة} other {# نتائج}}",
+    "viewGridAria": "عرض الشبكة",
+    "viewTableAria": "عرض الجدول",
+    "clear": "مسح",
+    "archiveOn": "عرض الأرشيف",
+    "archiveOff": "عرض الأرشيف",
+    "resultsMatch": "مطابقة من",
+    "resultsTotal": "من أصل"
+  },
+  "list": {
+    "activeFilters": "عوامل التصفية النشطة",
+    "chipRemove": "إزالة عامل التصفية {label}",
+    "searchChip": "بحث: {q}",
+    "clearAll": "مسح الكل",
+    "emptyTitle": "لا توجد مشاريع بعد",
+    "emptyDescription": "أنشئ مشروعك الأول لتبدأ في توليد محتوى مدعوم بالذكاء الاصطناعي.",
+    "emptyAction": "أنشئ مشروعك الأول",
+    "filtersEmptyTitle": "لا توجد مشاريع تطابق عوامل التصفية هذه",
+    "filtersEmptyDescription": "جرّب كلمة بحث مختلفة، أو امسح عوامل التصفية لعرض كل شيء.",
+    "filtersEmptyAction": "مسح عوامل التصفية",
+    "archiveEmptyTitle": "لا توجد مشاريع مؤرشفة",
+    "archiveEmptyDescription": "أرشف مشروعًا لإبعاده عن القائمة النشطة دون حذفه.",
+    "archiveEmptyAction": "العودة إلى المشاريع",
+    "paginationAria": "صفحات المشاريع",
+    "pageOf": "صفحة {page} من {totalPages} · {total} {noun}",
+    "previous": "السابق",
+    "next": "التالي",
+    "ariaLive": "تم العثور على {total} {noun}",
+    "ariaLiveLoading": "جارٍ تحميل المشاريع"
+  },
+  "view": {
+    "tableHeaders": {
+      "project": "المشروع",
+      "platform": "المنصة",
+      "status": "الحالة",
+      "updated": "آخر تحديث",
+      "actions": "الإجراءات"
+    }
+  },
+  "card": {
+    "openLabel": "فتح {title}",
+    "platformSr": "{label} · ",
+    "thumbnailAlt": "صورة مصغرة لـ {title}"
+  },
+  "actions": {
+    "triggerAria": "إجراءات لـ {title}",
+    "openProject": "فتح المشروع",
+    "changeStatus": "تغيير الحالة",
+    "statusMarked": "تم تعليم المشروع كـ {status}.",
+    "movedToArchive": "تم نقل المشروع إلى الأرشيف.",
+    "restoreToDrafts": "الاستعادة إلى المسودات",
+    "archive": "أرشفة",
+    "remove": "إزالة…"
+  },
+  "deleteDialog": {
+    "titleWithProject": "إزالة «{title}»؟",
+    "fallbackTitle": "إزالة هذا المشروع؟",
+    "description": "سيختفي من مساحة العمل. يحتفظ الخادم بسجل مؤرشف، لكن هذا التطبيق لا يمكنه استعادته بعد.",
+    "keep": "الاحتفاظ بالمشروع",
+    "remove": "إزالة المشروع",
+    "removing": "جارٍ الإزالة…"
+  },
+  "toast": {
+    "updated": "تم تحديث المشروع.",
+    "updateFailed": "تعذّر تحديث المشروع.",
+    "removed": "تمت إزالة المشروع من مساحة العمل.",
+    "removeFailed": "تعذّرت إزالة المشروع."
+  },
+  "vocab": {
+    "projectNoun": {
+      "one": "مشروع",
+      "other": "مشاريع"
+    },
+    "platforms": {
+      "youtube": {
+        "label": "يوتيوب",
+        "summary": "فيديوهات طويلة وShorts",
+        "affects": "صور مصغرة 16:9، نصوص من 8 إلى 12 دقيقة، من 3 إلى 5 وسوم عامة."
+      },
+      "tiktok": {
+        "label": "تيك توك",
+        "summary": "فيديو قصير وسريع الإيقاع",
+        "affects": "صور مصغرة 9:16، نصوص من 30 إلى 60 ثانية، افتتاحيات مدفوعة بالأصوات الرائجة."
+      },
+      "instagram": {
+        "label": "إنستغرام",
+        "summary": "Reels والمنشورات الدوّارة",
+        "affects": "مرئيات 4:5 / 9:16، نصوص من 30 إلى 90 ثانية، حتى 30 وسمًا متخصصًا."
+      },
+      "facebook": {
+        "label": "فيسبوك",
+        "summary": "مقاطع ريلز",
+        "affects": "مرئيات 9:16، نصوص قصيرة، افتتاحيات تحفّز المشاركة."
+      }
+    },
+    "tones": {
+      "educational": "تعليمي",
+      "dramatic": "درامي",
+      "viral": "فيروسي",
+      "storytelling": "سردي",
+      "casual": "غير رسمي",
+      "professional": "احترافي"
+    },
+    "tonesDescriptions": {
+      "educational": "علّم فكرة واضحة واحدة مع خلاصة يستفيد منها المشاهد.",
+      "dramatic": "ابنِ التوتر ثم كشف النهاية المثيرة.",
+      "viral": "قصير وقوي ومبني على افتتاحية تجذب الانتباه.",
+      "storytelling": "قصة ذات شخصية ومخاطر واضحة.",
+      "casual": "حديثي، كأنك تشرح لصديق.",
+      "professional": "مصقول وموثوق ودقيق."
+    },
+    "statuses": {
+      "draft": "مسودة",
+      "processing": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "archived": "مؤرشف"
+    },
+    "sorts": {
+      "updatedAt": "آخر نشاط",
+      "createdAt": "الأحدث إنشاءً",
+      "title": "العنوان أ–ي",
+      "status": "الحالة"
+    },
+    "formats": {
+      "long": {
+        "label": "طويل",
+        "description": "فيديو يوتيوب طويل."
+      },
+      "short": {
+        "label": "قصير",
+        "description": "Reels وShorts وغيرها من الفيديوهات الرأسية."
+      }
+    },
+    "roles": {
+      "owner": "المالك",
+      "editor": "محرر",
+      "commenter": "معلّق",
+      "viewer": "مشاهد"
+    },
+    "roleDescriptions": {
+      "editor": "يمكنه تحرير المشروع وتوليد الأصول.",
+      "commenter": "يمكنه التعليق دون تعديل المشروع.",
+      "viewer": "يمكنه عرض المشروع وأصوله."
+    }
+  },
+  "steps": {
+    "details": {
+      "titleLabel": "عنوان المشروع",
+      "titlePlaceholder": "مثال: مستقبل الذكاء الاصطناعي فيSaaS",
+      "titleHint": "اسم ستتعرف عليه بسهولة في القائمة.",
+      "descriptionLabel": "وصف قصير (اختياري)",
+      "descriptionPlaceholder": "سطران أو سطران يظهران على بطاقة المشروع.",
+      "ideaLabel": "الفكرة",
+      "ideaPlaceholder": "ما موضوع الفيديو؟ لمن هو، وما الذي يجب أن يستفيده المشاهد؟",
+      "ideaHint": "هذه هي بذرة توليد النص — كلما زادت التفاصيل كانت المسودة الأولى أفضل.",
+      "promptButton": "ابدأ من قالب",
+      "promptSeed": "أريد عمل فيديو يشرح "
+    },
+    "platformTone": {
+      "platformLabel": "المنصة",
+      "toneLabel": "النبرة"
+    },
+    "configuration": {
+      "formatLabel": "شكل المحتوى",
+      "durationLabel": "المدة المستهدفة (بالثوانٍ، اختياري)",
+      "durationPlaceholder": "مثال: 60",
+      "durationHint": "من 15 إلى 3600 ثانية. يستهدف النص هذه المدة.",
+      "unavailableNote": "خيارات اللغة والصوت واللهجة غير متاحة إلى أن يتم التحقق من مزوّد تحويل النص إلى كلام. ستظهر هنا عند توفرها."
+    },
+    "review": {
+      "edit": "تعديل",
+      "titleLabel": "العنوان",
+      "descriptionLabel": "الوصف",
+      "ideaLabel": "الفكرة",
+      "platformToneLabel": "المنصة والنبرة",
+      "formatDurationLabel": "الشكل والمدة",
+      "noDescription": "لا يوجد وصف",
+      "noDuration": "لا توجد مدة مستهدفة"
+    }
+  },
+  "wizard": {
+    "progressAria": "التقدم",
+    "stepLabels": {
+      "details": "التفاصيل",
+      "platformTone": "المنصة والنبرة",
+      "configuration": "الإعدادات",
+      "review": "المراجعة"
+    },
+    "stepDescriptions": {
+      "details": "عرّف الفكرة. ستكون بذرة نصوصك.",
+      "platformTone": "اختر مكان نشرها والطريقة التي يجب أن تبدو عليها.",
+      "configuration": "اختر الشكل والمدة المستهدفة.",
+      "review": "تحقق من كل شيء قبل إنشاء مساحة العمل."
+    },
+    "backToProjects": "المشاريع",
+    "draftRestored": "تمت استعادة مسودة محفوظة منذ {time}.",
+    "startOver": "البدء من جديد",
+    "dismiss": "تجاهل",
+    "title": "إنشاء مشروع",
+    "back": "رجوع",
+    "continue": "متابعة",
+    "createWithTitle": "إنشاء «{title}»",
+    "untitledProject": "مشروع",
+    "creating": "جارٍ الإنشاء…",
+    "prefillIdea": "أريد إنشاء محتوى عن {list}.",
+    "toast": {
+      "created": "تم إنشاء المشروع.",
+      "createFailed": "تعذّر إنشاء المشروع.",
+      "onboardingIncomplete": "أكمل التوجيه الأولي قبل إنشاء مشروع."
+    },
+    "cancel": {
+      "title": "هل تريد تجاهل هذه المسودة؟",
+      "description": "تم حفظ عنوانك وفكرتك واختيارات المنصة تلقائيًا في هذا التبويب. المغادرة الآن ستتجاهلها.",
+      "keepEditing": "متابعة التحرير",
+      "discardAndLeave": "تجاهل والمغادرة"
+    }
+  },
+  "invite": {
+    "unavailableTitle": "الدعوة غير متاحة",
+    "invalidCopy": "رابط الدعوة هذا غير صالح. ربما انتهت صلاحيته أو أُلغي أو استُخدم بالفعل.",
+    "signIn": "تسجيل الدخول",
+    "goToProjects": "الذهاب إلى المشاريع",
+    "youAreInTitle": "لقد انضممت",
+    "joinedDescription": "انضممت إلى {project} بصفة {role}.",
+    "openProject": "فتح المشروع",
+    "alreadyMemberTitle": "لديك صلاحية الوصول بالفعل",
+    "alreadyMemberDescription": "أنت عضو بالفعل في {project}.",
+    "openYourProjects": "فتح مشاريعك",
+    "joinTitle": "الانضمام إلى {project}",
+    "joinDescription": "دعاك {inviter} للانضمام بصفة {role}. {description}",
+    "expiresIn": "تنتهي صلاحية هذه الدعوة خلال {count, plural, one {# يوم} other {# أيام}}.",
+    "accept": "قبول الدعوة",
+    "signInToAccept": "سجّل الدخول للقبول",
+    "createAccount": "إنشاء حساب"
+  },
+  "validation": {
+    "titleRequired": "العنوان مطلوب",
+    "titleTooLong": "يجب ألا يتجاوز العنوان {limit} حرفًا",
+    "descriptionTooLong": "يجب ألا يتجاوز الوصف {limit} حرفًا",
+    "ideaRequired": "فكرة المحتوى مطلوبة",
+    "ideaTooLong": "يجب ألا تتجاوز الفكرة {limit} حرفًا"
+  }
+}

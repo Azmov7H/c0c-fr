@@ -3,6 +3,7 @@
 import { formatIsoDate, formatMonthYear } from '@/lib/format';
 import type { AppLocale } from '@/i18n/routing';
 import { useUrlLocale } from '@/i18n/locale';
+import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Bell, Calendar, Clock } from 'lucide-react';
@@ -33,17 +34,11 @@ const STATUS_STYLE: Record<PlannerEvent['status'], string> = {
     cancelled: 'bg-negative/10 text-negative',
 };
 
-/**
- * AR-014: the month label is display (the locale's month name) and the day
- * key is MACHINE (the ISO key of the browser's wall calendar — it never
- * changes shape with the locale).
- */
 const monthLabelWith = (date: Date, locale: AppLocale) => formatMonthYear(date, locale);
 
 const cellKey = (year: number, monthIndex: number, day: number) =>
     formatIsoDate(new Date(year, monthIndex, day));
 
-// Stable render anchors so the memoised grid doesn't rebuild on every render.
 const useMonthWindow = (monthOffset: number) =>
     useMemo(() => {
         const now = new Date();
@@ -51,17 +46,13 @@ const useMonthWindow = (monthOffset: number) =>
         return { now, month };
     }, [monthOffset]);
 
-/**
- * P02.2: reminders are stored metadata — no dispatch worker exists, so
- * the UI carries an explicit "not dispatched" note instead of a silent
- * no-op or a fake promise.
- */
 function ReminderNote({ event }: { event: PlannerEvent }) {
+    const t = useTranslations('planner');
     if (!event.reminders?.length) return null;
     return (
         <p className="mt-1 flex items-start gap-1 text-xs text-muted-foreground" role="note">
             <Bell className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
-            Reminder stored as metadata — not dispatched yet (no scheduler).
+            {t('reminder.notDispatched')}
         </p>
     );
 }
@@ -90,20 +81,13 @@ function EventRow({
     );
 }
 
-/**
- * P02.6 — calendar and list are two renders of ONE hook's data and ONE
- * server-computed day key (`scheduledDay`), so the two views can never
- * disagree on an event's day: neither view computes anything itself.
- * Layout is responsive by CSS (list on mobile, grid on desktop — the
- * mobile list chip is generated from the same array).
- */
 export function ContentPlanner() {
+    const t = useTranslations('planner');
     const locale = useUrlLocale();
     const projects = useProjects({ limit: 100 });
     const [projectId, setProjectId] = useState('all');
     const [monthOffset, setMonthOffset] = useState(0);
 
-    // P02.6: the window is derived once per offset change (hook hygiene).
     const { now, month } = useMonthWindow(monthOffset);
     const year = now.getFullYear();
     const monthIndex = now.getMonth() + monthOffset;
@@ -128,7 +112,6 @@ export function ContentPlanner() {
         [eventsAll]
     );
 
-    // Calendar grid (desktop): events settle on cells by scheduledDay.
     const byDay = useMemo(() => {
         const map = new Map<string, PlannerEvent[]>();
         for (const event of list) {
@@ -165,20 +148,22 @@ export function ContentPlanner() {
         return Array.from({ length: total / 7 }, (_, w) => cells.slice(w * 7, w * 7 + 7));
     }, [month, year, monthIndex, now]);
 
+    const weekdays = t.raw('calendar.weekdays') as string[];
+
     return (
         <div className="space-y-6">
             <PageHeader
-                title="Content planner"
-                description="Scheduled work for your projects, straight from the API."
+                title={t('page.title')}
+                description={t('page.description')}
             />
 
             <div className="flex flex-wrap items-center gap-3">
                 <Select value={projectId} onValueChange={setProjectId}>
-                    <SelectTrigger className="h-11 w-64" aria-label="Filter by project">
+                    <SelectTrigger className="h-11 w-64" aria-label={t('controls.filterProject')}>
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All projects</SelectItem>
+                        <SelectItem value="all">{t('controls.allProjects')}</SelectItem>
                         {(projects.data?.data ?? []).map((project) => (
                             <SelectItem key={project._id} value={project._id}>
                                 {project.title}
@@ -187,11 +172,11 @@ export function ContentPlanner() {
                     </SelectContent>
                 </Select>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" className="size-11" aria-label="Previous month" onClick={() => setMonthOffset((value) => value - 1)}>
+                    <Button variant="outline" size="icon" className="size-11" aria-label={t('controls.previousMonth')} onClick={() => setMonthOffset((value) => value - 1)}>
                         <DirIcon name="ChevronLeft" className="size-4" aria-hidden="true" />
                     </Button>
                     <span className="min-w-40 text-center text-sm font-medium">{monthLabelWith(month, locale)}</span>
-                    <Button variant="outline" size="icon" className="size-11" aria-label="Next month" onClick={() => setMonthOffset((value) => value + 1)}>
+                    <Button variant="outline" size="icon" className="size-11" aria-label={t('controls.nextMonth')} onClick={() => setMonthOffset((value) => value + 1)}>
                         <DirIcon name="ChevronRight" className="size-4" aria-hidden="true" />
                     </Button>
                 </div>
@@ -211,15 +196,14 @@ export function ContentPlanner() {
                     onRetry={() => events.refetch()}
                     isEmpty={!events.isLoading && !events.error && list.length === 0}
                     emptyIcon={Calendar}
-                    emptyTitle="Nothing scheduled this month"
-                    emptyDescription="Plan events from a project workspace or create one when the planner flow ships."
+                    emptyTitle={t('empty.title')}
+                    emptyDescription={t('empty.description')}
                     skeletonRows={4}
                     className="min-h-0"
                 >
-                    {/* Desktop: month grid reading scheduledDay (P02.3 parity key). */}
                     <div className="hidden md:block" data-testid="planner-calendar">
-                        <div className="grid grid-cols-7 gap-px overflow-hidden rounded-lg border border-border/50 bg-border/50" role="grid" aria-label="Calendar month grid">
-                            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                        <div dir="ltr" className="grid grid-cols-7 gap-px overflow-hidden rounded-lg border border-border/50 bg-border/50" role="grid" aria-label={t('calendar.monthGridAria')}>
+                            {weekdays.map((day) => (
                                 <div key={day} className="bg-card px-2 py-1 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                                     {day}
                                 </div>
@@ -250,18 +234,17 @@ export function ContentPlanner() {
                         </div>
                     </div>
 
-                    {/* Mobile: the SAME events, grouped by the SAME scheduledDay. */}
                     <ul className="divide-y divide-border/60 md:hidden" data-testid="planner-list">
                         {list.map((event) => (
                             <li key={event._id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                                 <EventRow event={event} showDay />
                                 <div className="flex items-center gap-2">
                                     <Badge variant="outline" className={STATUS_STYLE[event.status]}>
-                                        {event.status.replace('_', ' ')}
+                                        {t(`event.status.${event.status}`)}
                                     </Badge>
                                     {event.projectId && (
                                         <Button asChild variant="ghost" className="h-11">
-                                            <Link href={`/projects/${event.projectId}`}>Open project</Link>
+                                            <Link href={`/projects/${event.projectId}`}>{t('event.openProject')}</Link>
                                         </Button>
                                     )}
                                 </div>

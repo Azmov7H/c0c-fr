@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { AlertTriangle, Home, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { reportClientError } from "@/lib/report-error"
@@ -19,6 +20,8 @@ export default function DashboardError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const t = useTranslations("errors")
+
   useEffect(() => {
     console.error("Dashboard route error:", error)
     // Lazy Sentry reporter (T21) — no client SDK on a healthy page load.
@@ -33,13 +36,11 @@ export default function DashboardError({
         </div>
 
         <div className="space-y-1.5">
-          <h1 className="text-lg font-semibold">Something went wrong</h1>
-          <p className="text-sm text-muted-foreground">
-            This page hit an unexpected error. Trying again usually clears it.
-          </p>
+          <h1 className="text-lg font-semibold">{t("route.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("route.description")}</p>
           {error.digest ? (
             <p className="text-xs text-muted-foreground">
-              Support reference:{" "}
+              {t("route.supportReference")}{" "}
               <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
                 {error.digest}
               </code>
@@ -50,12 +51,12 @@ export default function DashboardError({
         <div className="flex flex-wrap items-center justify-center gap-2">
           <Button onClick={reset} className="gap-2">
             <RotateCcw className="size-4" aria-hidden="true" />
-            Try again
+            {t("route.retry")}
           </Button>
           <Button variant="outline" asChild className="gap-2">
             <Link href="/dashboard">
               <Home className="size-4" aria-hidden="true" />
-              Back to dashboard
+              {t("route.backToDashboard")}
             </Link>
           </Button>
         </div>

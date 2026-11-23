@@ -6,6 +6,7 @@ import {
     type QueryKey,
 } from '@tanstack/react-query';
 import { toast } from '@/lib/toast';
+import { useTranslations } from 'next-intl';
 
 import type { PaginatedResponse, Project } from '@/types';
 import { toApiError } from '@/lib/api-error';
@@ -172,6 +173,7 @@ export interface UpdateProjectVariables {
 
 export function useUpdateProject() {
     const queryClient = useQueryClient();
+    const t = useTranslations('projects');
 
     return useMutation({
         mutationFn: ({ id, data }: UpdateProjectVariables) =>
@@ -189,14 +191,14 @@ export function useUpdateProject() {
             if (context?.previousDetail) {
                 patchCachedProject(queryClient, updated._id, () => updated);
             }
-            toast.success(variables.successMessage ?? 'Project updated.');
+            toast.success(variables.successMessage ?? t('toast.updated'));
         },
         onError: (error, variables, context) => {
             restoreLists(queryClient, context?.previous);
             if (context?.previousDetail) {
                 queryClient.setQueryData(projectKeys.detail(variables.id), context.previousDetail);
             }
-            toast.error(toApiError(error, 'Failed to update project.').message);
+            toast.error(toApiError(error, t('toast.updateFailed')).message);
         },
         onSettled: () => {
             void queryClient.invalidateQueries({ queryKey: projectKeys.all });
@@ -211,6 +213,7 @@ export function useUpdateProject() {
  */
 export function useDeleteProject() {
     const queryClient = useQueryClient();
+    const t = useTranslations('projects');
 
     return useMutation({
         mutationFn: (id: string) => projectsService.delete(id),
@@ -237,14 +240,14 @@ export function useDeleteProject() {
             return { previous, previousDetail };
         },
         onSuccess: () => {
-            toast.success('Project removed from your workspace.');
+            toast.success(t('toast.removed'));
         },
         onError: (error, id, context) => {
             restoreLists(queryClient, context?.previous);
             if (context?.previousDetail) {
                 queryClient.setQueryData(projectKeys.detail(id), context.previousDetail);
             }
-            toast.error(toApiError(error, 'Failed to remove project.').message);
+            toast.error(toApiError(error, t('toast.removeFailed')).message);
         },
         onSettled: () => {
             void queryClient.invalidateQueries({ queryKey: projectKeys.all });

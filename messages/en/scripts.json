@@ -1,1 +1,66 @@
-{}
+{
+  "editor": {
+    "title": "Script scenes (v{version})",
+    "summary": "{scenes} scene(s) · {words} words · {seconds}s estimated",
+    "refine": "Refine with AI",
+    "thinking": "AI thinking…",
+    "save": "Save script",
+    "saving": "Saving…",
+    "sceneHeading": "Scene {number} · {label}",
+    "untitled": "Untitled",
+    "sectionTitle": "Section title",
+    "duration": "Duration (seconds)",
+    "sectionText": "Section text",
+    "narration": "Narration (voiceover)",
+    "visualDirection": "Visual direction",
+    "transition": "Transition",
+    "linkedAssets": "Linked assets",
+    "noLinkedAssets": "None yet — scene links open with P06/P07."
+  },
+  "sceneLabels": {
+    "Hook": "Hook",
+    "Introduction": "Introduction",
+    "MainContent": "Main Content",
+    "Conclusion": "Conclusion",
+    "CTA": "CTA",
+    "MainMessage": "Main Message",
+    "SupportingInformation": "Supporting Information"
+  },
+  "generator": {
+    "pageTitle": "Script Generator",
+    "pageDescription": "AI-powered script generation with platform-specific formatting and tone control.",
+    "canvasTitle": "Script Canvas",
+    "canvasDescription": "Define your idea, platform, and tone",
+    "outputTitle": "Generated Output",
+    "outputDescription": "Your AI-crafted video script",
+    "ideaLabel": "Your Idea / Brief",
+    "ideaPlaceholder": "Describe your video concept, topic, or key message...",
+    "platform": "Platform",
+    "tone": "Tone",
+    "toneAria": "Tone: {tone}",
+    "generating": "Generating...",
+    "generate": "Generate Script",
+    "generatedBadge": "Script Generated",
+    "regenerate": "Regenerate",
+    "copy": "Copy",
+    "export": "Export",
+    "emptyTitle": "No Script Yet",
+    "emptyDescription": "Enter your idea on the left and hit Generate to create an AI-powered video script.",
+    "tones": {
+      "Educational": "Educational",
+      "Hype": "Hype",
+      "Storytelling": "Storytelling",
+      "Conversational": "Conversational"
+    }
+  },
+  "toasts": {
+    "created": "Script created successfully",
+    "createFailed": "Failed to create script",
+    "generated": "AI Script generated successfully! ✨",
+    "generateFailed": "AI Generation failed",
+    "saved": "Script saved",
+    "saveFailed": "Failed to save script changes",
+    "deleted": "Script deleted",
+    "deleteFailed": "Failed to delete script"
+  }
+}

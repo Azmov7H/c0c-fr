@@ -1,15 +1,17 @@
-import { useUrlLocale } from '@/i18n/locale';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
+import { useUrlLocale } from '@/i18n/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatRelativeTime } from '@/lib/relative-time';
 import type { Project } from '@/types';
 
-import { PLATFORM_LABEL } from '../lib/project-constants';
+import { platformLabel } from '../lib/projects-labels';
 import { ProjectActions } from './project-actions';
 import { PlatformBadge, StatusBadge } from './project-badges';
 
 function ProjectThumbnail({ project }: { project: Project }) {
+    const t = useTranslations('projects');
     const sameOrigin = project.thumbnailUrl?.startsWith('/');
 
     return (
@@ -18,7 +20,7 @@ function ProjectThumbnail({ project }: { project: Project }) {
                 // eslint-disable-next-line @next/next/no-img-element -- CSP permits same-origin only; uploads are proxied by the BFF.
                 <img
                     src={project.thumbnailUrl}
-                    alt={`Thumbnail for ${project.title}`}
+                    alt={t('card.thumbnailAlt', { title: project.title })}
                     className="size-full object-cover"
                     loading="lazy"
                 />
@@ -37,6 +39,7 @@ function ProjectThumbnail({ project }: { project: Project }) {
 }
 
 export function ProjectCard({ project }: { project: Project }) {
+    const t = useTranslations('projects');
     const locale = useUrlLocale();
     const updated = formatRelativeTime(project.updatedAt, locale);
     const excerpt = project.description?.trim() || project.idea;
@@ -49,7 +52,7 @@ export function ProjectCard({ project }: { project: Project }) {
             <Link
                 href={`/projects/${project._id}`}
                 className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                aria-label={`Open ${project.title}`}
+                aria-label={t('card.openLabel', { title: project.title })}
             >
                 <ProjectThumbnail project={project} />
             </Link>
@@ -72,7 +75,9 @@ export function ProjectCard({ project }: { project: Project }) {
             <CardContent className="mt-auto flex items-center justify-between gap-2 pt-2">
                 <StatusBadge status={project.status} />
                 <span className="text-xs text-muted-foreground">
-                    <span className="sr-only">{PLATFORM_LABEL[project.platform]} · </span>
+                    <span className="sr-only">
+                        {t('card.platformSr', { label: platformLabel(t, project.platform) })}
+                    </span>
                     <time dateTime={project.updatedAt} title={updated.absolute}>
                         {updated.relative}
                     </time>

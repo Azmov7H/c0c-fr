@@ -1,1 +1,26 @@
-{}
+{
+  "pageTitle": "Hashtag Generator",
+  "pageDescription": "Generate trending hashtags optimized for maximum reach.",
+  "configureTitle": "Configure",
+  "topicLabel": "Topic",
+  "topicPlaceholder": "What's your content about?",
+  "category": "Category",
+  "generating": "Generating...",
+  "generate": "Generate Hashtags",
+  "outputTitle": "Generated Hashtags",
+  "copyAll": "Copy All",
+  "emptyTitle": "No Hashtags Yet",
+  "emptyDescription": "Enter a topic and generate trending hashtags.",
+  "copiedAll": "All hashtags copied!",
+  "copiedOne": "Hashtag copied!",
+  "copyHashtagAria": "Copy hashtag {tag}",
+  "categories": {
+    "tech": "tech",
+    "gaming": "gaming",
+    "finance": "finance",
+    "lifestyle": "lifestyle",
+    "education": "education",
+    "fitness": "fitness",
+    "food": "food"
+  }
+}

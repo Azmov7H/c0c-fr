@@ -5,6 +5,7 @@ import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import type { PaginatedResponse, Project } from '@/types';
+import { ProjectsIntlProvider } from '../../../../tests/helpers/projects-intl';
 import { projectKeys } from '../lib/query-keys';
 import { useCreateProject, useDeleteProject, useUpdateProject } from './use-projects';
 
@@ -64,7 +65,9 @@ const seed = (projects: Project[]) => {
 const read = () => queryClient.getQueryData<PaginatedResponse<Project>>(listKey);
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <ProjectsIntlProvider>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </ProjectsIntlProvider>
 );
 
 beforeEach(() => {

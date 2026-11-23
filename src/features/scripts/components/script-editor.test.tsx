@@ -1,9 +1,20 @@
 // @vitest-environment jsdom
+import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { NextIntlClientProvider } from 'next-intl';
 
 import { ScriptEditor } from './script-editor';
 import type { Script } from '../types';
+import enScripts from '../../../../messages/en/scripts.json';
+
+function renderEditor(ui: ReactElement) {
+    return render(
+        <NextIntlClientProvider locale="en" messages={{ scripts: enScripts }}>
+            {ui}
+        </NextIntlClientProvider>
+    );
+}
 
 const mocks = vi.hoisted(() => ({
     script: undefined as
@@ -35,7 +46,7 @@ describe('ScriptEditor (P05.7)', () => {
             { order: 1, label: 'Hook', content: 'hook text', narration: 'hook narration', visualDirection: 'face cam', transition: 'fade', durationSeconds: 5, assetIds: [] },
             { order: 2, label: 'CTA', content: 'cta text', narration: 'cta narration', transition: 'cut', durationSeconds: 5 },
         ]) as never;
-        render(<ScriptEditor scriptId="s1" />);
+        renderEditor(<ScriptEditor scriptId="s1" />);
         expect(screen.getByText('Scene 1 · Hook')).toBeTruthy();
         expect(screen.getByText('Scene 2 · CTA')).toBeTruthy();
         expect(screen.getAllByLabelText('Narration (voiceover)').length).toBe(2);
@@ -52,7 +63,7 @@ describe('ScriptEditor (P05.7)', () => {
             { order: 1, label: 'Hook', content: 'h', narration: 'h', transition: 'fade', durationSeconds: 5, assetIds: [] },
             { order: 2, label: 'CTA', content: 'c', narration: 'c', transition: 'cut', durationSeconds: 5, assetIds: [] },
         ]) as never;
-        render(<ScriptEditor scriptId="s1" />);
+        renderEditor(<ScriptEditor scriptId="s1" />);
         // Edit only the second narration field.
         const narrationFields = screen.getAllByLabelText('Narration (voiceover)');
         fireEvent.change(narrationFields[1]!, { target: { value: 'c edited' } });

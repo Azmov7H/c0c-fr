@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
 
+import { render } from '../../../../../tests/helpers/workspace-intl';
 import { AssetsTab } from './assets-tab';
 import { ApiError } from '@/lib/api-error';
 

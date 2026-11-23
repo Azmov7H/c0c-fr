@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { cn } from '@/lib/utils';
 import type { UnsplashAssetMetadata } from '../types';
 
@@ -18,6 +20,7 @@ interface UnsplashAttributionProps {
  * normalises the photo, so they cannot be forgotten here.
  */
 export function UnsplashAttribution({ photo, className }: UnsplashAttributionProps) {
+    const t = useTranslations('media');
     const name = photo.photographerName || photo.photographerUsername;
     if (!name) return null;
 
@@ -25,6 +28,7 @@ export function UnsplashAttribution({ photo, className }: UnsplashAttributionPro
 
     return (
         <p className={cn('text-xs text-muted-foreground', className)}>
+            {t('attribution.photoBy')}{' '}
             {photo.photographerProfileUrl ? (
                 <a
                     href={photo.photographerProfileUrl}
@@ -36,8 +40,8 @@ export function UnsplashAttribution({ photo, className }: UnsplashAttributionPro
                 </a>
             ) : (
                 <span>{name}</span>
-            )}
-            {' on '}
+            )}{' '}
+            {t('attribution.on')}{' '}
             {photo.photoPageUrl ? (
                 <a
                     href={photo.photoPageUrl}

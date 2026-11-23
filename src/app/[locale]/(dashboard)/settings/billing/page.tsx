@@ -4,18 +4,24 @@ import type { Metadata } from 'next';
 import { PageHeader } from '@/components/shared/page-header';
 import { BillingSettings } from '@/features/settings/components/billing-settings';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getTranslations } from '@/i18n/server';
 
-export const metadata: Metadata = {
-    title: 'Billing & Plan',
-    description: 'Your current plan, usage and available upgrades.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const t = await getTranslations('billing');
+    return {
+        title: t('page.metadataTitle'),
+        description: t('page.metadataDescription'),
+    };
+}
 
-export default function BillingPage() {
+export default async function BillingPage() {
+    const t = await getTranslations('billing');
+
     return (
         <div className="space-y-8">
             <PageHeader
-                title="Billing & Plan"
-                description="See what your plan includes and what you have used this period. Upgrades and cancellations are handled by Stripe."
+                title={t('page.title')}
+                description={t('page.description')}
             />
             <Suspense fallback={<Skeleton className="h-96 w-full rounded-xl" />}>
                 <BillingSettings />

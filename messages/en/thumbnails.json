@@ -1,1 +1,67 @@
-{}
+{
+  "page": {
+    "title": "Thumbnail Studio",
+    "description": "Create eye-catching thumbnails with AI-powered generation.",
+    "aiPowered": "AI Powered"
+  },
+  "generator": {
+    "visualCore": "Visual Core",
+    "visualCoreDescription": "Direct the AI vision for your masterpiece",
+    "directive": "The Directive",
+    "directivePlaceholder": "A cybernetic detective in a neon-lit alleyway, hyper-detailed, synthwave color palette...",
+    "chars": "{count} chars",
+    "visualFrequency": "Visual Frequency",
+    "thePhotograph": "The Photograph",
+    "changePhoto": "Change photo",
+    "choosePhoto": "Choose a photo",
+    "rendering": "Rendering...",
+    "breatheLife": "Breathe Life",
+    "theRender": "The Render",
+    "renderDescription": "Stock photograph · Unsplash",
+    "fetchArtifact": "Fetch Artifact",
+    "neuralAssembly": "Neural Assembly",
+    "neuralAssemblyDescription": "Our visual processing units are weaving your directive into reality. Perfection takes a moment.",
+    "voidTitle": "The Void Awaits",
+    "voidDescription": "Inject a visual directive in the architect panel to materialize your project's identity."
+  },
+  "studio": {
+    "visualCore": "Visual Core",
+    "visualCoreDescription": "Define your thumbnail directive.",
+    "prompt": "Prompt",
+    "promptPlaceholder": "A cybernetic detective in a neon-lit alleyway...",
+    "chars": "{count} chars",
+    "stylePreset": "Style Preset",
+    "rendering": "Rendering...",
+    "generate": "Generate Thumbnail",
+    "download": "Download",
+    "theRender": "The Render",
+    "renderMeta": "3840 x 2160 (Lossless)",
+    "emptyTitle": "No Thumbnail Yet",
+    "emptyDescription": "Describe your thumbnail vision and let AI bring it to life.",
+    "resultAlt": "Generated thumbnail"
+  },
+  "styles": {
+    "3d-render": {
+      "label": "3D Render",
+      "description": "Soft shadows, clay-like depth"
+    },
+    "cinematic": {
+      "label": "Cinematic",
+      "description": "High contrast, dramatic lighting"
+    },
+    "minimalist": {
+      "label": "Minimalist",
+      "description": "Flat vector, clean lines"
+    }
+  },
+  "toasts": {
+    "submitted": "Thumbnail prompt submitted",
+    "submitFailed": "Failed to submit thumbnail prompt",
+    "updated": "Thumbnail updated",
+    "updateFailed": "Failed to update thumbnail",
+    "regenerated": "Thumbnail regenerated",
+    "regenerateFailed": "Failed to regenerate thumbnail",
+    "deleted": "Thumbnail deleted",
+    "deleteFailed": "Failed to delete thumbnail"
+  }
+}

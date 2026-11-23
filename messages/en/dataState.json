@@ -1,1 +1,8 @@
-{}
+{
+  "loading": "Loading",
+  "errorTitle": "Something went wrong",
+  "errorFallback": "The data could not be loaded. Try again in a moment.",
+  "retry": "Try again",
+  "emptyTitle": "Nothing here yet",
+  "emptyDescription": "There is no data to show for this view."
+}

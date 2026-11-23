@@ -3,6 +3,7 @@
 import { useUrlLocale } from '@/i18n/locale';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import {
     Archive,
     ChevronDown,
@@ -32,12 +33,12 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { Project, ProjectStatus } from '@/types';
-import { formatAbsoluteTime, formatRelativeTime } from '@/lib/relative-time';
 
 import { useCreateProject, useDeleteProject, useUpdateProject } from '../../hooks/use-projects';
 import { can } from '../../lib/permissions';
 import { nextStatuses } from '../../lib/status';
-import { STATUS_LABEL } from '../../lib/project-constants';
+import { statusLabel } from '../../lib/projects-labels';
+import { workspaceAbsoluteTime, workspaceRelativeTime } from '../../lib/workspace-labels';
 import { PlatformBadge, StatusBadge } from '../project-badges';
 import { DeleteProjectDialog } from '../delete-project-dialog';
 import { WorkflowStepper } from './workflow-stepper';
@@ -51,6 +52,8 @@ interface WorkspaceHeaderProps {
 
 export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
     const locale = useUrlLocale();
+    const t = useTranslations('workspace');
+    const tp = useTranslations('projects');
     const [editing, setEditing] = useState(false);
     const [confirmArchive, setConfirmArchive] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -86,14 +89,16 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
         update.mutate({
             id: project._id,
             data: { status },
-            successMessage: `Project marked ${STATUS_LABEL[status].toLowerCase()}.`,
+            successMessage: t('header.statusMarked', {
+                status: statusLabel(tp, status).toLowerCase(),
+            }),
         });
     };
 
     const duplicate = () => {
         create.mutate(
             {
-                title: `${project.title} (copy)`,
+                title: t('header.duplicateTitle', { title: project.title }),
                 description: project.description,
                 idea: project.idea,
                 platform: project.platform,
@@ -107,18 +112,19 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
         <header className="rounded-2xl border border-border/60 bg-card/60 p-4 md:p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                    <nav aria-label="Breadcrumb" className="mb-2 text-xs text-muted-foreground">
-                        <Link href="/dashboard" className="hover:text-foreground">Dashboard</Link>
+                    <nav aria-label={t('header.breadcrumb')} className="mb-2 text-xs text-muted-foreground">
+                        <Link href="/dashboard" className="hover:text-foreground">{t('header.dashboard')}</Link>
                         <span aria-hidden="true"> / </span>
-                        <Link href="/projects" className="hover:text-foreground">Projects</Link>
+                        <Link href="/projects" className="hover:text-foreground">{t('header.projects')}</Link>
                         <span aria-hidden="true"> / </span>
-                        <span className="text-foreground">{project.title}</span>
+                        <span className="text-foreground"><bdi>{project.title}</bdi></span>
                     </nav>
 
                     {editing ? (
                         <Input
                             ref={inputRef}
                             key={project.title}
+                            dir="auto"
                             defaultValue={project.title}
                             onBlur={saveTitle}
                             onKeyDown={(event) => {
@@ -128,7 +134,7 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
                                     setEditing(false);
                                 }
                             }}
-                            aria-label="Project title"
+                            aria-label={t('header.titleAria')}
                             maxLength={200}
                             className="h-11 max-w-xl text-xl font-bold"
                         />
@@ -137,22 +143,22 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
                             type="button"
                             onClick={() => setEditing(true)}
                             className="max-w-full truncate rounded text-start text-2xl font-bold hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            aria-label={`Edit project title: ${project.title}`}
+                            aria-label={t('header.editTitleAria', { title: project.title })}
                         >
-                            {project.title}
+                            <bdi>{project.title}</bdi>
                         </button>
                     ) : (
-                        <h1 className="truncate text-2xl font-bold">{project.title}</h1>
+                        <h1 className="truncate text-2xl font-bold"><bdi>{project.title}</bdi></h1>
                     )}
 
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                         <PlatformBadge platform={project.platform} />
                         <StatusBadge status={project.status} />
-                        <span className="text-xs text-muted-foreground" title={formatAbsoluteTime(project.updatedAt, locale)}>
-                            Updated {formatRelativeTime(project.updatedAt, locale).relative}
+                        <span className="text-xs text-muted-foreground" title={workspaceAbsoluteTime(t, project.updatedAt, locale)}>
+                            {t('header.updated', { time: workspaceRelativeTime(t, project.updatedAt, locale) })}
                         </span>
-                        <span className="text-xs text-muted-foreground" title={formatAbsoluteTime(project.createdAt, locale)}>
-                            Created {formatRelativeTime(project.createdAt, locale).relative}
+                        <span className="text-xs text-muted-foreground" title={workspaceAbsoluteTime(t, project.createdAt, locale)}>
+                            {t('header.created', { time: workspaceRelativeTime(t, project.createdAt, locale) })}
                         </span>
                     </div>
                 </div>
@@ -165,31 +171,31 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
                             onClick={() => changeStatus(project.status === 'archived' ? 'draft' : 'archived')}
                         >
                             {project.status === 'archived' ? (
-                                <><RotateCcw className="me-2 size-4" aria-hidden="true" />Restore</>
+                                <><RotateCcw className="me-2 size-4" aria-hidden="true" />{t('header.restore')}</>
                             ) : (
-                                <><Archive className="me-2 size-4" aria-hidden="true" />Archive</>
+                                <><Archive className="me-2 size-4" aria-hidden="true" />{t('header.archive')}</>
                             )}
                         </Button>
                     )}
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="size-11" aria-label="Project actions">
+                            <Button variant="ghost" size="icon" className="size-11" aria-label={t('header.actionsAria')}>
                                 <MoreHorizontal className="size-4" aria-hidden="true" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-56">
-                            <DropdownMenuLabel className="truncate">{project.title}</DropdownMenuLabel>
+                            <DropdownMenuLabel className="truncate"><bdi>{project.title}</bdi></DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             {mayEdit && (
                                 <DropdownMenuItem onSelect={duplicate} disabled={create.isPending}>
                                     <Copy className="size-4" aria-hidden="true" />
-                                    Duplicate project
+                                    {t('header.duplicate')}
                                 </DropdownMenuItem>
                             )}
                             {mayEdit && nextStatuses(project.status).map((status) => (
                                 <DropdownMenuItem key={status} onSelect={() => changeStatus(status)}>
-                                    Mark as {STATUS_LABEL[status].toLowerCase()}
+                                    {t('header.markAs', { status: statusLabel(tp, status).toLowerCase() })}
                                 </DropdownMenuItem>
                             ))}
                             {mayManage && (
@@ -203,7 +209,7 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
                                         }}
                                     >
                                         <Trash2 className="size-4" aria-hidden="true" />
-                                        Remove…
+                                        {t('header.remove')}
                                     </DropdownMenuItem>
                                 </>
                             )}
@@ -225,7 +231,7 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
                 className="mt-4 flex min-h-11 items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
                 <ChevronDown className={`size-4 transition-transform ${ideaOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
-                Project idea
+                {t('header.idea')}
             </button>
             {ideaOpen && (
                 <p className="mt-2 max-w-3xl whitespace-pre-wrap text-sm leading-6 text-foreground/90">
@@ -236,14 +242,14 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
             <Dialog open={confirmArchive} onOpenChange={setConfirmArchive}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Archive “{project.title}”?</DialogTitle>
+                        <DialogTitle>{t('header.archiveTitle', { title: project.title })}</DialogTitle>
                         <DialogDescription>
-                            It moves to the project archive and leaves the active list. You can restore it to drafts later.
+                            {t('header.archiveDescription')}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                         <Button variant="outline" className="h-11" onClick={() => setConfirmArchive(false)}>
-                            Keep active
+                            {t('header.keepActive')}
                         </Button>
                         <Button
                             className="h-11"
@@ -254,7 +260,7 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
                             }}
                         >
                             {update.isPending && <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />}
-                            Archive project
+                            {t('header.archiveProject')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

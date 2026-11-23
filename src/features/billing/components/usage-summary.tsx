@@ -37,6 +37,7 @@ export function UsageSummary({ summary }: UsageSummaryProps) {
     // AR-023: the quota labels and the "Unlimited" word are the catalogue's
     // copy; the counters are the code's.
     const t = useTranslations('pricing');
+    const billingT = useTranslations('billing');
     const copy = buildPricingCopy(t);
     const rows = usageRows(summary, copy.quotaOrder());
     const limitRows = Object.entries(summary.quota).filter(
@@ -47,11 +48,10 @@ export function UsageSummary({ summary }: UsageSummaryProps) {
         <section className="space-y-6" aria-labelledby="usage-heading">
             <div>
                 <h2 id="usage-heading" className="text-lg font-semibold">
-                    Usage this period
+                    {billingT('usage.title')}
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                    Counters reset automatically at the date shown. Existing work is
-                    never deleted when a quota runs out.
+                    {billingT('usage.description')}
                 </p>
             </div>
 
@@ -74,27 +74,36 @@ export function UsageSummary({ summary }: UsageSummaryProps) {
                             </div>
                             {limit === null ? (
                                 <p className="mt-2 text-xs text-muted-foreground">
-                                    No cap on this resource.
+                                    {billingT('usage.noCap')}
                                 </p>
                             ) : (
                                 <>
                                     <Progress
                                         className="mt-3"
                                         value={percent}
-                                        aria-label={`${label}: ${percent}% used`}
+                                        aria-label={billingT('usage.progressLabel', {
+                                            label,
+                                            percent,
+                                        })}
                                     />
                                     <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-                                        <span>{percent}% used</span>
                                         <span>
-                                            Resets{' '}
-                                            {formatDate(row.resetAt || summary.renewalDate, locale, 'at the end of the period')}
+                                            {billingT('usage.used', { percent })}
+                                        </span>
+                                        <span>
+                                            {billingT('usage.resets', {
+                                                date: formatDate(
+                                                    row.resetAt || summary.renewalDate,
+                                                    locale,
+                                                    billingT('usage.endOfPeriod')
+                                                ),
+                                            })}
                                         </span>
                                     </div>
                                     {exhausted ? (
                                         <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-warning">
                                             <AlertTriangle className="size-3.5" aria-hidden />
-                                            Quota reached — generation is paused until reset or
-                                            upgrade.
+                                            {billingT('usage.exhausted')}
                                         </p>
                                     ) : null}
                                 </>
@@ -106,7 +115,7 @@ export function UsageSummary({ summary }: UsageSummaryProps) {
 
             {limitRows.length > 0 ? (
                 <div>
-                    <h3 className="text-sm font-semibold">Included limits</h3>
+                    <h3 className="text-sm font-semibold">{billingT('usage.included')}</h3>
                     <dl className="mt-3 grid gap-3 sm:grid-cols-3">
                         {limitRows.map(([key, value]) => (
                             <div key={key} className="rounded-lg border border-border/50 px-3 py-2">
@@ -120,7 +129,7 @@ export function UsageSummary({ summary }: UsageSummaryProps) {
                         ))}
                         <div className="rounded-lg border border-border/50 px-3 py-2">
                             <dt className="text-xs text-muted-foreground">
-                                Concurrent generations
+                                {billingT('usage.concurrent')}
                             </dt>
                             <dd className="mt-0.5 text-sm font-medium">
                                 {summary.concurrentGenerations}

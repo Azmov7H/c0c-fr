@@ -1,1 +1,93 @@
-{}
+{
+  "page": {
+    "title": "الأفكار والاتجاهات",
+    "description": "ما يعمل عليه المنشئون فعليًا — طلب مقاس."
+  },
+  "controls": {
+    "platform": "المنصة",
+    "timeWindow": "الفترة الزمنية",
+    "category": "الفئة",
+    "allCategories": "كل الفئات",
+    "gridView": "عرض شبكي",
+    "listView": "عرض قائمة"
+  },
+  "scopes": {
+    "global": "كل المنصات",
+    "youtube": "YouTube",
+    "tiktok": "TikTok",
+    "instagram": "Instagram"
+  },
+  "windows": {
+    "7": "آخر 7 أيام",
+    "30": "آخر 30 يومًا"
+  },
+  "categories": {
+    "tech": "تقنية",
+    "gaming": "ألعاب",
+    "finance": "مال",
+    "health-fitness": "صحة ولياقة",
+    "food": "طعام",
+    "education": "تعليم",
+    "entertainment": "ترفيه",
+    "lifestyle": "نمط حياة",
+    "business": "أعمال",
+    "science": "علوم",
+    "diy": "اصنعها بنفسك",
+    "sports": "رياضة",
+    "uncategorised": "غير مصنّف"
+  },
+  "badges": {
+    "measured": "مقاس",
+    "measuredProvider": "مقاس · {provider}",
+    "staleSnapshot": "لقطة قديمة"
+  },
+  "freshness": {
+    "fresh": "محدّث",
+    "stale": "لقطة قديمة (معروضة، وليست مباشرة)",
+    "cold": "محسوب للتو",
+    "measuredAt": "قيس {date}",
+    "providerUnavailable": "المزوّد غير متاح"
+  },
+  "topic": {
+    "inWindow": "خلال الفترة",
+    "meta": "{projects} مشاريع · {creators} منشئون · {demand} طلب"
+  },
+  "empty": {
+    "title": "لا توجد اتجاهات لهذه الفترة",
+    "description": "لا يوجد طلب مقاس في هذه الفئة بعد — جرّب فئة أو فترة أخرى."
+  },
+  "unavailable": {
+    "title": "المزوّد غير متاح",
+    "description": "لا توجد لقطة مقاسة لهذه النطاق بعد، ولم يمكن الوصول إلى مزوّد الاتجاهات. الاتجاهات غير متاحة حاليًا — لا يُعرض شيء بدلًا منها."
+  },
+  "error": {
+    "loadFailed": "تعذر تحميل الاتجاهات."
+  },
+  "list": {
+    "topic": "الموضوع",
+    "score": "الدرجة",
+    "growth": "النمو",
+    "allPlatforms": "كل المنصات"
+  },
+  "disclaimer": "التقارير المولّدة بالذكاء الاصطناعي (ضمن {path}) هي توقّعات ولا تُعرض أبدًا كاتجاهات مباشرة.",
+  "disclaimerPath": "/trends/reports",
+  "@dynamic": [
+    "categories.business",
+    "categories.diy",
+    "categories.education",
+    "categories.entertainment",
+    "categories.finance",
+    "categories.food",
+    "categories.gaming",
+    "categories.health-fitness",
+    "categories.lifestyle",
+    "categories.science",
+    "categories.sports",
+    "categories.tech",
+    "categories.uncategorised",
+    "scopes.global",
+    "scopes.instagram",
+    "scopes.tiktok",
+    "scopes.youtube"
+  ]
+}

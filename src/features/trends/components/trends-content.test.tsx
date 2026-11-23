@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { NextIntlClientProvider } from 'next-intl';
 
+import enTrends from '../../../../messages/en/trends.json';
 import { TrendsContent } from './trends-content';
 import type { TrendFeed } from '../types';
 
@@ -19,6 +21,14 @@ vi.mock('../hooks/use-trends', () => ({
 }));
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
+
+function renderUi() {
+    return render(
+        <NextIntlClientProvider locale="en" messages={{ trends: enTrends }}>
+            <TrendsContent />
+        </NextIntlClientProvider>
+    );
+}
 
 const measuredFeed = (overrides: object = {}): TrendFeed =>
     ({
@@ -56,32 +66,31 @@ describe('TrendsContent (P03)', () => {
         mocks.feed.data = measuredFeed();
         mocks.feed.isLoading = false;
         mocks.feed.isError = false;
-        render(<TrendsContent />);
+        renderUi();
         expect(screen.getByText('Ideas & Trends')).toBeTruthy();
         expect(screen.getByText('AI & ML')).toBeTruthy();
         expect(screen.getByText(/measured demand/)).toBeTruthy();
         expect(screen.getByText(/Measured · internal-db/)).toBeTruthy();
-        // Fake mock showcase is gone (dev mock fallback removed).
         expect(screen.queryByText('AI Video Generation')).toBeNull();
         expect(screen.queryByText(/24h/)).toBeNull();
     });
 
     it('shows a stale snapshot banner, not a live claim', () => {
         mocks.feed.data = measuredFeed({ freshness: 'stale', providerStatus: 'stale' });
-        render(<TrendsContent />);
+        renderUi();
         expect(screen.getAllByText(/Stale snapshot/).length).toBeGreaterThan(0);
     });
 
     it('provider unavailable is a visible empty state, never invented topics', () => {
         mocks.feed.data = measuredFeed({ topics: [], providerStatus: 'unavailable', computedAt: null, fetchedAt: null });
-        render(<TrendsContent />);
+        renderUi();
         expect(screen.getByText('Provider unavailable')).toBeTruthy();
         expect(screen.queryByText('AI & ML')).toBeNull();
     });
 
     it('empty window shows a reason, not a blank page', () => {
         mocks.feed.data = measuredFeed({ topics: [] });
-        render(<TrendsContent />);
+        renderUi();
         expect(screen.getByText('No trends for this window')).toBeTruthy();
     });
 });

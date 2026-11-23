@@ -7,10 +7,16 @@
  * whole control set.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
 
-import { DASHBOARD_WIDGET_IDS, WIDGET_LABELS, type DashboardPreferences, type DashboardWidgetId } from '../lib/widget-layout';
+import { DASHBOARD_WIDGET_IDS, type DashboardPreferences, type DashboardWidgetId } from '../lib/widget-layout';
+import { DASHBOARD_EN, render } from '../test-utils';
 import { WidgetSettings } from './widget-settings';
+
+/** The English label for a widget id, straight from the catalog the UI reads. */
+function label(id: DashboardWidgetId): string {
+    return DASHBOARD_EN.widgets[id];
+}
 
 function prefs(hidden: string[]): DashboardPreferences {
     return {
@@ -32,7 +38,7 @@ describe('WidgetSettings', () => {
         expect(screen.getByRole('dialog').textContent).toContain('Dashboard widgets');
 
         for (const id of DASHBOARD_WIDGET_IDS) {
-            expect(screen.getByText(WIDGET_LABELS[id])).toBeTruthy();
+            expect(screen.getByText(label(id))).toBeTruthy();
         }
     });
 
@@ -42,7 +48,7 @@ describe('WidgetSettings', () => {
         fireEvent.click(screen.getByRole('button', { name: /customise/i }));
 
         for (const id of DASHBOARD_WIDGET_IDS) {
-            const box = screen.getByRole('checkbox', { name: `Show ${WIDGET_LABELS[id]}` }) as HTMLInputElement;
+            const box = screen.getByRole('checkbox', { name: `Show ${label(id)}` }) as HTMLInputElement;
             expect(box.checked).toBe(!['health', 'trending'].includes(id));
         }
     });
@@ -55,14 +61,14 @@ describe('WidgetSettings', () => {
 
         // All visible — unchecking a box hides that widget.
         const id = DASHBOARD_WIDGET_IDS[0];
-        fireEvent.click(screen.getByRole('checkbox', { name: `Show ${WIDGET_LABELS[id]}` }));
+        fireEvent.click(screen.getByRole('checkbox', { name: `Show ${label(id)}` }));
         expect(onToggle).toHaveBeenCalledWith(id, true);
 
         // Now hide it for real and uncheck→check hides→shows again.
         cleanup();
         render(<WidgetSettings preferences={prefs([id])} pending={false} onToggle={onToggle} onShowAll={vi.fn()} />);
         fireEvent.click(screen.getByRole('button', { name: /customise/i }));
-        fireEvent.click(screen.getByRole('checkbox', { name: `Show ${WIDGET_LABELS[id]}` }));
+        fireEvent.click(screen.getByRole('checkbox', { name: `Show ${label(id)}` }));
         expect(onToggle).toHaveBeenLastCalledWith(id, false);
     });
 
@@ -82,7 +88,7 @@ describe('WidgetSettings', () => {
         fireEvent.click(screen.getByRole('button', { name: /customise/i }));
 
         const id = DASHBOARD_WIDGET_IDS[0];
-        expect(screen.getByRole('checkbox', { name: `Show ${WIDGET_LABELS[id]}` })).toHaveProperty('disabled', true);
+        expect(screen.getByRole('checkbox', { name: `Show ${label(id)}` })).toHaveProperty('disabled', true);
         expect(screen.getByRole('button', { name: /show all widgets/i })).toHaveProperty('disabled', true);
     });
 });

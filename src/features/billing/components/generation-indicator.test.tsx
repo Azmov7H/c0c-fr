@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, screen } from '@testing-library/react';
 
+import { render } from '../../../../tests/helpers/workspace-intl';
 import { GenerationIndicator } from './generation-indicator';
 
 const mocks = vi.hoisted(() => ({

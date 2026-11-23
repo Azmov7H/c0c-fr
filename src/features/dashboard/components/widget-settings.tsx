@@ -1,6 +1,7 @@
 'use client';
 
 import { Settings2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -13,7 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import {
     DASHBOARD_WIDGET_IDS,
-    WIDGET_LABELS,
+    WIDGET_LABEL_KEYS,
     type DashboardPreferences,
     type DashboardWidgetId,
 } from '../lib/widget-layout';
@@ -36,6 +37,7 @@ export function WidgetSettings({
     onToggle: (id: DashboardWidgetId, hidden: boolean) => void;
     onShowAll: () => void;
 }) {
+    const t = useTranslations('dashboard');
     const hidden = new Set(preferences.hiddenWidgets);
 
     return (
@@ -43,30 +45,29 @@ export function WidgetSettings({
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="h-9 rounded-xl px-4">
                     <Settings2 className="me-1.5 size-3.5" aria-hidden="true" />
-                    Customise
+                    {t('settings.trigger')}
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Dashboard widgets</DialogTitle>
-                    <DialogDescription>
-                        Hidden widgets stay out of the way but remain available here. Your layout is
-                        saved to your account.
-                    </DialogDescription>
+                    <DialogTitle>{t('settings.title')}</DialogTitle>
+                    <DialogDescription>{t('settings.description')}</DialogDescription>
                 </DialogHeader>
 
                 <ul className="space-y-1">
                     {DASHBOARD_WIDGET_IDS.map((id) => (
                         <li key={id}>
                             <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 text-sm hover:bg-muted/50">
-                                <span>{WIDGET_LABELS[id]}</span>
+                                <span>{t(WIDGET_LABEL_KEYS[id])}</span>
                                 <input
                                     type="checkbox"
                                     className="size-4 accent-primary"
                                     checked={!hidden.has(id)}
                                     disabled={pending}
                                     onChange={(event) => onToggle(id, !event.target.checked)}
-                                    aria-label={`Show ${WIDGET_LABELS[id]}`}
+                                    aria-label={t('settings.showAria', {
+                                        widget: t(WIDGET_LABEL_KEYS[id]),
+                                    })}
                                 />
                             </label>
                         </li>
@@ -74,7 +75,7 @@ export function WidgetSettings({
                 </ul>
 
                 <Button variant="ghost" size="sm" onClick={onShowAll} disabled={pending}>
-                    Show all widgets
+                    {t('settings.showAll')}
                 </Button>
             </DialogContent>
         </Dialog>

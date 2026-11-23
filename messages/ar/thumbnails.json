@@ -1,1 +1,67 @@
-{}
+{
+  "page": {
+    "title": "استوديو الصور المصغّرة",
+    "description": "أنشئ صورًا مصغّرة لافتة بتوليد مدعوم بالذكاء الاصطناعي.",
+    "aiPowered": "مدعوم بالذكاء الاصطناعي"
+  },
+  "generator": {
+    "visualCore": "النواة البصرية",
+    "visualCoreDescription": "وجّه رؤية الذكاء الاصطناعي لتحفتك",
+    "directive": "التوجيه",
+    "directivePlaceholder": "محقق سايبورغ في زقاق مضاء بالنيون، شديد التفاصيل، لوحة ألوان سينثويف...",
+    "chars": "{count} حرفًا",
+    "visualFrequency": "النمط البصري",
+    "thePhotograph": "الصورة الفوتوغرافية",
+    "changePhoto": "تغيير الصورة",
+    "choosePhoto": "اختر صورة",
+    "rendering": "جارٍ التصيير...",
+    "breatheLife": "أضف الحياة",
+    "theRender": "النتيجة",
+    "renderDescription": "صورة فوتوغرافية · Unsplash",
+    "fetchArtifact": "جلب النسخة",
+    "neuralAssembly": "التجميع العصبي",
+    "neuralAssemblyDescription": "وحدات المعالجة البصرية لدينا تنسج توجيهك وتحوله إلى واقع. الكمال يحتاج لحظة.",
+    "voidTitle": "الفراغ ينتظر",
+    "voidDescription": "أضف توجيهًا بصريًا في لوحة التصميم لتجسيد هوية مشروعك."
+  },
+  "studio": {
+    "visualCore": "النواة البصرية",
+    "visualCoreDescription": "حدّد توجيه الصورة المصغّرة.",
+    "prompt": "الموجّه",
+    "promptPlaceholder": "محقق سايبورغ في زقاق مضاء بالنيون...",
+    "chars": "{count} حرفًا",
+    "stylePreset": "النمط المحدد مسبقًا",
+    "rendering": "جارٍ التصيير...",
+    "generate": "توليد صورة مصغّرة",
+    "download": "تنزيل",
+    "theRender": "النتيجة",
+    "renderMeta": "3840 × 2160 (بدون فقدان)",
+    "emptyTitle": "لا توجد صورة مصغّرة بعد",
+    "emptyDescription": "صف رؤيتك للصورة المصغّرة ودع الذكاء الاصطناعي يحييها.",
+    "resultAlt": "الصورة المصغّرة المُولَّدة"
+  },
+  "styles": {
+    "3d-render": {
+      "label": "تصيير ثلاثي الأبعاد",
+      "description": "ظلال ناعمة وعمق يشبه الصلصال"
+    },
+    "cinematic": {
+      "label": "سينمائي",
+      "description": "تباين عالٍ وإضاءة درامية"
+    },
+    "minimalist": {
+      "label": "بسيط",
+      "description": "متجهات مسطحة وخطوط نظيفة"
+    }
+  },
+  "toasts": {
+    "submitted": "تم إرسال موجّه الصورة المصغّرة",
+    "submitFailed": "فشل إرسال موجّه الصورة المصغّرة",
+    "updated": "تم تحديث الصورة المصغّرة",
+    "updateFailed": "فشل تحديث الصورة المصغّرة",
+    "regenerated": "تمت إعادة توليد الصورة المصغّرة",
+    "regenerateFailed": "فشلت إعادة توليد الصورة المصغّرة",
+    "deleted": "تم حذف الصورة المصغّرة",
+    "deleteFailed": "فشل حذف الصورة المصغّرة"
+  }
+}

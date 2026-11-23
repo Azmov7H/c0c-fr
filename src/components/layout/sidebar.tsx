@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 import { stripLocaleFromPath } from "@/i18n/routing"
 
@@ -34,6 +35,10 @@ function NavItem({
   active: boolean
   collapsed: boolean
 }) {
+  // AR-029 — the label is catalog copy; the English `item.title` is only the
+  // data key's fallback and the test floor.
+  const t = useTranslations("navigation")
+  const label = t(item.titleKey)
   // T20: collapsed labels use the native title attribute. The Radix tooltip
   // here put Popper on every authenticated route's first-load path; the
   // browser tooltip needs no JavaScript and is announced as the accessible
@@ -54,11 +59,11 @@ function NavItem({
       <Link
         href={item.url}
         aria-current={active ? "page" : undefined}
-        title={collapsed ? item.title : undefined}
+        title={collapsed ? label : undefined}
         className="flex items-center gap-3 px-3"
       >
         <item.icon size={17} className="shrink-0" />
-        <span className="text-sm truncate">{item.title}</span>
+        <span className="text-sm truncate">{label}</span>
       </Link>
     </SidebarMenuButton>
   )
@@ -66,6 +71,8 @@ function NavItem({
 
 export function AppSidebar() {
   const { user } = useAuthStore()
+  // AR-029 — the shell's nav labels come from the `navigation` catalog.
+  const t = useTranslations("navigation")
   // AR-004: the active-nav lookup works on the locale-less route.
   const pathname = stripLocaleFromPath(usePathname())
   const { state } = useSidebar()
@@ -82,7 +89,7 @@ export function AppSidebar() {
 
       {/* Navigation */}
       <SidebarContent className="px-2 py-3 gap-0">
-        <nav aria-label="Primary" className="flex flex-col">
+        <nav aria-label={t("sidebar.primary")} className="flex flex-col">
           {NAV_GROUPS.map((group, groupIdx) => (
             <div key={group.label}>
               {groupIdx > 0 && (
@@ -91,7 +98,7 @@ export function AppSidebar() {
               <SidebarGroup className="py-0">
                 {!collapsed && (
                   <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-3 py-2 h-auto">
-                    {group.label}
+                    {t(group.labelKey)}
                   </SidebarGroupLabel>
                 )}
                 <SidebarMenu className="gap-0.5">
@@ -119,7 +126,7 @@ export function AppSidebar() {
               <span className="text-sm font-medium truncate text-foreground/80">
                 {user?.firstName
                   ? `${user.firstName}${user.lastName ? " " + user.lastName : ""}`
-                  : user?.email || "Account"}
+                  : user?.email || t("items.account")}
               </span>
             )}
           </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useUrlLocale } from '@/i18n/locale';
+import { useTranslations } from 'next-intl';
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { useNotifications, useUnreadCount, useMarkAsRead, useMarkAllAsRead } from '@/features/notifications/hooks/use-notifications';
 import { formatRelativeTime } from '@/lib/relative-time';
 import { cn } from '@/lib/utils';
+import type { Notification } from '../types';
 
 const notificationIcons: Record<string, string> = {
     project_created: '📁',
@@ -30,7 +32,22 @@ const notificationIcons: Record<string, string> = {
     info: 'ℹ️',
 };
 
+function resolveNotificationText(
+    notification: Notification,
+    t: ReturnType<typeof useTranslations<'notifications'>>
+) {
+    const type = notification.type;
+    const titleKey = `templates.${type}.title` as never;
+    const messageKey = `templates.${type}.message` as never;
+    if (t.has(titleKey) && t.has(messageKey)) {
+        return { title: t(titleKey), message: t(messageKey) };
+    }
+    // Legacy/unknown rows fall back to stored server text.
+    return { title: notification.title, message: notification.message };
+}
+
 export function NotificationBell() {
+    const t = useTranslations('notifications');
     const locale = useUrlLocale();
     const { data: unreadCount } = useUnreadCount();
     const { data, isLoading } = useNotifications({ page: 1, limit: 10 });
@@ -47,7 +64,7 @@ export function NotificationBell() {
                     variant="ghost"
                     size="icon"
                     className="relative max-md:size-11"
-                    aria-label="Notifications"
+                    aria-label={t('bell.ariaLabel')}
                 >
                     <Bell className="size-5" />
                     {unread > 0 && (
@@ -62,7 +79,7 @@ export function NotificationBell() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
                 <DropdownMenuLabel className="flex items-center justify-between px-4 py-3">
-                    <h3 className="font-semibold">Notifications</h3>
+                    <h3 className="font-semibold">{t('bell.title')}</h3>
                     {unread > 0 && (
                         <Button
                             variant="ghost"
@@ -71,25 +88,27 @@ export function NotificationBell() {
                             onClick={() => markAllAsRead.mutate()}
                             disabled={markAllAsRead.isPending}
                         >
-                            Mark all read
+                            {t('bell.markAllRead')}
                         </Button>
                     )}
                 </DropdownMenuLabel>
                 <ScrollArea className="h-80">
                     {isLoading ? (
                         <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
-                            Loading...
+                            {t('bell.loading')}
                         </div>
                     ) : notifications.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
                             <Bell className="mb-2 size-8 text-muted-foreground opacity-50" />
                             <p className="text-sm text-muted-foreground">
-                                No notifications yet
+                                {t('bell.empty')}
                             </p>
                         </div>
                     ) : (
                         <div className="divide-y">
-                            {notifications.map((notification) => (
+                            {notifications.map((notification) => {
+                                const text = resolveNotificationText(notification, t);
+                                return (
                                 <DropdownMenuItem
                                     key={notification._id}
                                     className={cn(
@@ -111,10 +130,10 @@ export function NotificationBell() {
                                         </span>
                                         <div className="flex-1 space-y-1">
                                             <p className="text-sm font-medium leading-none">
-                                                {notification.title}
+                                                {text.title}
                                             </p>
                                             <p className="text-xs text-muted-foreground line-clamp-2">
-                                                {notification.message}
+                                                {text.message}
                                             </p>
                                         </div>
                                         {!notification.isRead && (
@@ -125,7 +144,8 @@ export function NotificationBell() {
                                         {formatRelativeTime(notification.createdAt, locale).relative}
                                     </span>
                                 </DropdownMenuItem>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </ScrollArea>

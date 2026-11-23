@@ -1,1 +1,9 @@
-{}
+{
+  "route": {
+    "title": "Something went wrong",
+    "description": "This page hit an unexpected error. Trying again usually clears it.",
+    "supportReference": "Support reference:",
+    "retry": "Try again",
+    "backToDashboard": "Back to dashboard"
+  }
+}

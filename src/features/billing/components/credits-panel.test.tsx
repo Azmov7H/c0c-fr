@@ -3,9 +3,12 @@ import * as React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { NextIntlClientProvider } from 'next-intl';
 
 import { ApiError } from '@/lib/api-error';
 import type { CreditBalance, CreditEvent, CreditHistoryPage } from '@/features/billing/types';
+import enBilling from '../../../../messages/en/billing.json';
+import enDataState from '../../../../messages/en/dataState.json';
 import { CreditsPanel } from './credits-panel';
 
 const mocks = vi.hoisted(() => ({
@@ -52,9 +55,14 @@ function renderPanel() {
         defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
     });
     return render(
-        <QueryClientProvider client={client}>
-            <CreditsPanel />
-        </QueryClientProvider>
+        <NextIntlClientProvider
+            locale="en"
+            messages={{ billing: enBilling, dataState: enDataState }}
+        >
+            <QueryClientProvider client={client}>
+                <CreditsPanel />
+            </QueryClientProvider>
+        </NextIntlClientProvider>
     );
 }
 

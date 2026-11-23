@@ -1,1 +1,84 @@
-{}
+{
+  "@dynamic": [
+    "templates.project_created.title",
+    "templates.project_created.message",
+    "templates.script_generated.title",
+    "templates.script_generated.message",
+    "templates.team_invite.title",
+    "templates.team_invite.message",
+    "templates.thumbnail_generated.title",
+    "templates.thumbnail_generated.message",
+    "templates.audio_generated.title",
+    "templates.audio_generated.message",
+    "templates.analytics_ready.title",
+    "templates.analytics_ready.message",
+    "templates.trends_ready.title",
+    "templates.trends_ready.message",
+    "templates.seo_ready.title",
+    "templates.seo_ready.message",
+    "templates.error.title",
+    "templates.error.message",
+    "templates.system.title",
+    "templates.system.message",
+    "templates.info.title",
+    "templates.info.message"
+  ],
+  "bell": {
+    "ariaLabel": "Notifications",
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "loading": "Loading...",
+    "empty": "No notifications yet"
+  },
+  "toasts": {
+    "markedAllRead": "All notifications marked as read",
+    "markAllReadFailed": "Failed to mark notifications as read",
+    "deleted": "Notification deleted"
+  },
+  "templates": {
+    "project_created": {
+      "title": "Project created",
+      "message": "Your project is ready."
+    },
+    "script_generated": {
+      "title": "Script generated",
+      "message": "Your script is ready to review."
+    },
+    "team_invite": {
+      "title": "Team invitation",
+      "message": "You have been invited to a team workspace."
+    },
+    "thumbnail_generated": {
+      "title": "Thumbnail generated",
+      "message": "Your thumbnail is ready."
+    },
+    "audio_generated": {
+      "title": "Audio generated",
+      "message": "Your audio suggestion is ready."
+    },
+    "analytics_ready": {
+      "title": "Analytics ready",
+      "message": "Your analytics report is ready."
+    },
+    "trends_ready": {
+      "title": "Trends ready",
+      "message": "New trend data is available."
+    },
+    "seo_ready": {
+      "title": "SEO ready",
+      "message": "Your SEO analysis is ready."
+    },
+    "error": {
+      "title": "Something went wrong",
+      "message": "An error occurred. Please check the details."
+    },
+    "system": {
+      "title": "System notification",
+      "message": "You have a system update."
+    },
+    "info": {
+      "title": "Information",
+      "message": "You have a new notification."
+    }
+  }
+}

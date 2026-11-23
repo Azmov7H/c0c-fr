@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { cookies } from "next/headers"
 import { NextIntlClientProvider } from "next-intl"
 
@@ -11,6 +12,15 @@ import { getLocale, getMessages } from "@/i18n/server"
  * cookie contract either way (same rule as middleware.ts).
  */
 const SESSION_COOKIE_NAMES = ["__Host-auth_session", "auth_session"] as const
+
+/**
+ * AR-027 — every authenticated surface is private. The route table keeps these
+ * paths out of the sitemap, and this keeps a URL someone links directly from
+ * being indexed; it mirrors the auth segment's policy.
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 export default async function DashboardLayout({
   children,

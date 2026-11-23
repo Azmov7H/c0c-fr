@@ -39,27 +39,27 @@ describe('project schema mirrors the backend contract', () => {
         ['description', PROJECT_LIMITS.description],
         ['idea', PROJECT_LIMITS.idea],
     ] as const)('accepts exactly %s=%i and rejects one more', (field, limit) => {
-        expect(projectFormSchema.safeParse({ ...valid, [field]: 'a'.repeat(limit) }).success).toBe(true);
-        expect(projectFormSchema.safeParse({ ...valid, [field]: 'a'.repeat(limit + 1) }).success).toBe(
+        expect(projectFormSchema().safeParse({ ...valid, [field]: 'a'.repeat(limit) }).success).toBe(true);
+        expect(projectFormSchema().safeParse({ ...valid, [field]: 'a'.repeat(limit + 1) }).success).toBe(
             false
         );
     });
 
     it('requires a non-empty title and idea after trimming', () => {
-        expect(projectFormSchema.safeParse({ ...valid, title: '   ' }).success).toBe(false);
-        expect(projectFormSchema.safeParse({ ...valid, idea: '   ' }).success).toBe(false);
+        expect(projectFormSchema().safeParse({ ...valid, title: '   ' }).success).toBe(false);
+        expect(projectFormSchema().safeParse({ ...valid, idea: '   ' }).success).toBe(false);
     });
 
     it('rejects platforms and tones the backend would reject', () => {
-        expect(projectFormSchema.safeParse({ ...valid, platform: 'shorts' }).success).toBe(false);
-        expect(projectFormSchema.safeParse({ ...valid, tone: 'funny' }).success).toBe(false);
+        expect(projectFormSchema().safeParse({ ...valid, platform: 'shorts' }).success).toBe(false);
+        expect(projectFormSchema().safeParse({ ...valid, tone: 'funny' }).success).toBe(false);
     });
 
     it('accepts facebook + format/duration (P04) and rejects out-of-range durations', () => {
         expect(
-            projectFormSchema.safeParse({ ...valid, platform: 'facebook', contentFormat: 'short', durationSeconds: 60 }).success
+            projectFormSchema().safeParse({ ...valid, platform: 'facebook', contentFormat: 'short', durationSeconds: 60 }).success
         ).toBe(true);
-        expect(projectFormSchema.safeParse({ ...valid, durationSeconds: 5 }).success).toBe(false);
-        expect(projectFormSchema.safeParse({ ...valid, durationSeconds: 9999 }).success).toBe(false);
+        expect(projectFormSchema().safeParse({ ...valid, durationSeconds: 5 }).success).toBe(false);
+        expect(projectFormSchema().safeParse({ ...valid, durationSeconds: 9999 }).success).toBe(false);
     });
 });

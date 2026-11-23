@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import { useProjectAudio } from '@/features/audio/hooks/use-audio';
 import { useProjectMedia } from '@/features/media/hooks/use-media';
@@ -8,6 +9,7 @@ import { useProjectScripts } from '@/features/scripts/hooks/use-scripts';
 import { useProjectThumbnails } from '@/features/thumbnails/hooks/use-thumbnails';
 
 import { deriveStages, currentStageId, type StageState } from '../lib/stages';
+import { stageMessages } from '../lib/workspace-labels';
 import { useProject } from './use-projects';
 import { useExportHistory } from './use-export-history';
 
@@ -24,6 +26,10 @@ export function useWorkflowStages(projectId: string): {
     currentStageId: string | null;
     isLoading: boolean;
 } {
+    const t = useTranslations('workspace');
+    const tp = useTranslations('projects');
+    const messages = React.useMemo(() => stageMessages(t, tp), [t, tp]);
+
     const project = useProject(projectId);
     const scripts = useProjectScripts(projectId);
     const thumbnails = useProjectThumbnails(projectId);
@@ -33,15 +39,18 @@ export function useWorkflowStages(projectId: string): {
 
     const stages = React.useMemo(
         () =>
-            deriveStages({
-                project: project.data,
-                scripts: scripts.data ?? [],
-                thumbnails: thumbnails.data ?? [],
-                audio: audio.data ?? [],
-                media: media.data?.data ?? [],
-                exports: exports.data?.records ?? [],
-            }),
-        [project.data, scripts.data, thumbnails.data, audio.data, media.data, exports.data]
+            deriveStages(
+                {
+                    project: project.data,
+                    scripts: scripts.data ?? [],
+                    thumbnails: thumbnails.data ?? [],
+                    audio: audio.data ?? [],
+                    media: media.data?.data ?? [],
+                    exports: exports.data?.records ?? [],
+                },
+                messages
+            ),
+        [messages, project.data, scripts.data, thumbnails.data, audio.data, media.data, exports.data]
     );
 
     const isLoading =

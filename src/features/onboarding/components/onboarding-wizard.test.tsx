@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 import * as React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+import { render } from '../test-utils';
 
 import { OnboardingWizard } from './onboarding-wizard';
 import { completeState, emptyState, testOptions } from '../lib/test-fixtures';
@@ -18,7 +20,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({
     useRouter: () => mocks.router,
-    usePathname: () => '/onboarding',
+    usePathname: () => '/en/onboarding',
     useSearchParams: () => new URLSearchParams(),
 }));
 

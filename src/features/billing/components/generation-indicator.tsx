@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+import { generationNoun } from '@/features/projects/lib/workspace-labels';
 import { useCredits, useBillingSummary } from '../hooks/use-billing';
 import { quotaFor, usageFor } from '../lib/entitlements';
 
@@ -25,6 +27,7 @@ export function GenerationIndicator({
     feature?: string;
     className?: string;
 }) {
+    const t = useTranslations('workspace');
     const billing = useBillingSummary();
     const credits = useCredits();
 
@@ -38,14 +41,17 @@ export function GenerationIndicator({
     const parts: string[] = [];
     if (remaining !== null) {
         parts.push(
-            `${remaining} ${feature === 'ai.generation' ? 'generation' : feature} left this month`
+            t('generation.remaining', {
+                remaining,
+                noun: generationNoun(t, feature),
+            })
         );
     } else {
-        parts.push(`${feature} is unlimited`);
+        parts.push(t('generation.unlimited', { feature }));
     }
     // A zero balance is not shown as "0 credits": while the monthly grant
     // is pending, zero means "not published", not "you have none".
-    if (balance > 0) parts.push(`${balance} credits`);
+    if (balance > 0) parts.push(t('generation.credits', { balance }));
 
     return (
         <p className={`text-xs text-muted-foreground ${className ?? ''}`} data-testid="generation-indicator">

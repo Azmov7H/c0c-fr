@@ -2,6 +2,7 @@
 
 import { useUrlLocale } from '@/i18n/locale';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
     Activity,
     FileText,
@@ -29,39 +30,47 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { formatAbsoluteTime, formatRelativeTime } from '@/lib/relative-time';
 import { toApiError } from '@/lib/api-error';
 
 import { useProjectActivity } from '../../hooks/use-collaboration';
 import type { ProjectActivityType } from '../../types';
+import {
+    activityFilterLabel,
+    activityTypeLabel,
+    workspaceAbsoluteTime,
+    workspaceRelativeTime,
+} from '../../lib/workspace-labels';
 
-const TYPE_META: Record<ProjectActivityType, { label: string; icon: typeof Activity }> = {
-    member_added: { label: 'added a member', icon: UserPlus },
-    member_removed: { label: 'removed a member', icon: UserMinus },
-    member_role_changed: { label: 'changed a role', icon: Shield },
-    invite_created: { label: 'invited someone', icon: Mail },
-    invite_accepted: { label: 'accepted an invite', icon: MailCheck },
-    invite_revoked: { label: 'revoked an invite', icon: MailX },
-    script_generated: { label: 'generated a script', icon: FileText },
-    thumbnail_generated: { label: 'generated a thumbnail', icon: ImageIcon },
-    audio_generated: { label: 'generated audio', icon: Music },
+/** The icon is decoration; the words come from `activity.types` in the catalog. */
+const TYPE_ICON: Record<ProjectActivityType, typeof Activity> = {
+    member_added: UserPlus,
+    member_removed: UserMinus,
+    member_role_changed: Shield,
+    invite_created: Mail,
+    invite_accepted: MailCheck,
+    invite_revoked: MailX,
+    script_generated: FileText,
+    thumbnail_generated: ImageIcon,
+    audio_generated: Music,
 };
 
-const FILTERS: Array<{ value: 'all' | ProjectActivityType; label: string }> = [
-    { value: 'all', label: 'All activity' },
-    { value: 'member_added', label: 'Members added' },
-    { value: 'member_removed', label: 'Members removed' },
-    { value: 'member_role_changed', label: 'Role changes' },
-    { value: 'invite_created', label: 'Invites sent' },
-    { value: 'invite_accepted', label: 'Invites accepted' },
-    { value: 'invite_revoked', label: 'Invites revoked' },
-    { value: 'script_generated', label: 'Scripts' },
-    { value: 'thumbnail_generated', label: 'Thumbnails' },
-    { value: 'audio_generated', label: 'Audio' },
+/** Stable wire values — the visible labels come from the catalog. */
+const FILTERS: readonly ('all' | ProjectActivityType)[] = [
+    'all',
+    'member_added',
+    'member_removed',
+    'member_role_changed',
+    'invite_created',
+    'invite_accepted',
+    'invite_revoked',
+    'script_generated',
+    'thumbnail_generated',
+    'audio_generated',
 ];
 
 export function ActivityTab({ projectId }: { projectId: string }) {
     const locale = useUrlLocale();
+    const t = useTranslations('workspace');
     const [filter, setFilter] = useState<'all' | ProjectActivityType>('all');
     const [page, setPage] = useState(1);
     const query = useProjectActivity(projectId, {
@@ -77,7 +86,7 @@ export function ActivityTab({ projectId }: { projectId: string }) {
             <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="flex items-center gap-2">
                     <Activity className="size-5" aria-hidden="true" />
-                    Activity
+                    {t('activity.title')}
                 </CardTitle>
                 <Select
                     value={filter}
@@ -86,13 +95,13 @@ export function ActivityTab({ projectId }: { projectId: string }) {
                         setPage(1);
                     }}
                 >
-                    <SelectTrigger className="h-11 w-full sm:w-56" aria-label="Filter activity by type">
+                    <SelectTrigger className="h-11 w-full sm:w-56" aria-label={t('activity.filterAria')}>
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        {FILTERS.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                                {option.label}
+                        {FILTERS.map((value) => (
+                            <SelectItem key={value} value={value}>
+                                {activityFilterLabel(t, value)}
                             </SelectItem>
                         ))}
                     </SelectContent>
@@ -100,7 +109,7 @@ export function ActivityTab({ projectId }: { projectId: string }) {
             </CardHeader>
             <CardContent>
                 {query.isLoading ? (
-                    <div className="space-y-4" role="status" aria-label="Loading activity">
+                    <div className="space-y-4" role="status" aria-label={t('activity.loading')}>
                         {Array.from({ length: 4 }).map((_, index) => (
                             <div key={index} className="flex items-center gap-3">
                                 <Skeleton className="size-9 rounded-full" />
@@ -113,11 +122,11 @@ export function ActivityTab({ projectId }: { projectId: string }) {
                     </div>
                 ) : query.isError ? (
                     <Alert variant="destructive">
-                        <AlertTitle>Could not load activity</AlertTitle>
+                        <AlertTitle>{t('activity.errorTitle')}</AlertTitle>
                         <AlertDescription className="flex items-center gap-3">
-                            {toApiError(query.error, 'Try again in a moment.').message}
+                            {toApiError(query.error, t('activity.errorFallback')).message}
                             <Button variant="outline" className="h-11" onClick={() => query.refetch()}>
-                                Retry
+                                {t('activity.retry')}
                             </Button>
                         </AlertDescription>
                     </Alert>
@@ -125,28 +134,28 @@ export function ActivityTab({ projectId }: { projectId: string }) {
                     filter === 'all' ? (
                         <EmptyState
                             icon={Activity}
-                            title="No activity yet"
-                            description="Invites, member changes and generations will appear here as your team works."
+                            title={t('activity.emptyTitle')}
+                            description={t('activity.emptyDescription')}
                         />
                     ) : (
                         <EmptyState
                             icon={Activity}
-                            title="No activity matches this filter"
-                            description="Try a different activity type, or show everything."
-                            action={{ label: 'Show all activity', onClick: () => setFilter('all') }}
+                            title={t('activity.filteredTitle')}
+                            description={t('activity.filteredDescription')}
+                            action={{ label: t('activity.showAll'), onClick: () => setFilter('all') }}
                         />
                     )
                 ) : (
                     <>
-                        <ul className="divide-y divide-border/60" aria-label="Project activity">
+                        <ul className="divide-y divide-border/60" aria-label={t('activity.listAria')}>
                             {items.map((item) => {
-                                const meta = TYPE_META[item.type];
-                                const Icon = meta?.icon ?? Activity;
+                                const Icon = TYPE_ICON[item.type] ?? Activity;
                                 const actorName = item.actor
                                     ? [item.actor.firstName, item.actor.lastName].filter(Boolean).join(' ') || item.actor.email
-                                    : 'Someone';
-                                const relative = formatRelativeTime(item.createdAt, locale);
-                                const label = meta?.label ?? item.type.replace(/_/g, ' ');
+                                    : t('activity.someone');
+                                const relative = workspaceRelativeTime(t, item.createdAt, locale);
+                                const absolute = workspaceAbsoluteTime(t, item.createdAt, locale);
+                                const label = activityTypeLabel(t, item.type);
                                 return (
                                     <li key={item.id} className="flex items-start gap-3 py-4">
                                         <Avatar className="size-9">
@@ -157,12 +166,12 @@ export function ActivityTab({ projectId }: { projectId: string }) {
                                         </Avatar>
                                         <div className="min-w-0 flex-1">
                                             <p className="text-sm">
-                                                <span className="font-medium">{actorName}</span> {label}{' '}
-                                                <span className="font-medium">{item.target}</span>
-                                                {item.role ? ` as ${item.role}` : ''}.
+                                                <span className="font-medium"><bdi>{actorName}</bdi></span> {label}{' '}
+                                                <span className="font-medium"><bdi>{item.target}</bdi></span>
+                                                {item.role ? t('activity.asRole', { role: item.role }) : ''}.
                                             </p>
-                                            <p className="mt-0.5 text-xs text-muted-foreground" title={formatAbsoluteTime(item.createdAt, locale)}>
-                                                {relative.relative} · {relative.absolute}
+                                            <p className="mt-0.5 text-xs text-muted-foreground" title={absolute}>
+                                                {relative} · {absolute}
                                             </p>
                                         </div>
                                         <Icon className="mt-1 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
@@ -173,7 +182,11 @@ export function ActivityTab({ projectId }: { projectId: string }) {
                         {meta && meta.total > meta.limit && (
                             <div className="mt-4 flex items-center justify-between">
                                 <p className="text-xs text-muted-foreground">
-                                    Page {meta.page} of {Math.max(1, meta.totalPages)} · {meta.total} events
+                                    {t('activity.pageOf', {
+                                        page: meta.page,
+                                        total: Math.max(1, meta.totalPages),
+                                        count: meta.total,
+                                    })}
                                 </p>
                                 <div className="flex gap-2">
                                     <Button
@@ -183,7 +196,7 @@ export function ActivityTab({ projectId }: { projectId: string }) {
                                         onClick={() => setPage((current) => Math.max(1, current - 1))}
                                     >
                                         <DirIcon name="ChevronLeft" className="me-1 size-4" aria-hidden="true" />
-                                        Previous
+                                        {t('activity.previous')}
                                     </Button>
                                     <Button
                                         variant="outline"
@@ -191,7 +204,7 @@ export function ActivityTab({ projectId }: { projectId: string }) {
                                         disabled={!meta.hasNextPage}
                                         onClick={() => setPage((current) => current + 1)}
                                     >
-                                        Next
+                                        {t('activity.next')}
                                         <DirIcon name="ChevronRight" className="ms-1 size-4" aria-hidden="true" />
                                     </Button>
                                 </div>

@@ -1,1 +1,199 @@
-{}
+{
+  "@dynamic": [
+    "activityWidget.types.project",
+    "activityWidget.types.script",
+    "statuses.draft",
+    "statuses.processing",
+    "statuses.completed",
+    "statuses.archived",
+    "upcomingWidget.statuses.pending",
+    "upcomingWidget.statuses.in_progress",
+    "upcomingWidget.statuses.completed",
+    "upcomingWidget.statuses.cancelled",
+    "health.database.connected",
+    "health.database.connecting",
+    "health.database.disconnected",
+    "statuses.all",
+    "analytics.description",
+    "analytics.lockedTitle",
+    "widgets.stats",
+    "widgets.projects",
+    "widgets.status",
+    "widgets.platforms",
+    "widgets.trending",
+    "widgets.activity",
+    "widgets.upcoming",
+    "widgets.quickActions",
+    "widgets.analytics",
+    "widgets.health",
+    "widgets.healthDescription",
+    "quickActions.script.title",
+    "quickActions.script.sub",
+    "quickActions.trends.title",
+    "quickActions.trends.sub",
+    "quickActions.project.title",
+    "quickActions.project.sub",
+    "quickActions.team.title",
+    "quickActions.team.sub"
+  ],
+  "metadata": {
+    "title": "لوحة التحكم",
+    "description": "نظرة عامة على مساحة إنشاء المحتوى الخاصة بك — المشاريع والنصوص ومقاييس الأداء."
+  },
+  "header": {
+    "title": "لوحة التحكم",
+    "description": "مشاريعك واتجاهاتك ونشاطك في لمحة.",
+    "newProject": "مشروع جديد"
+  },
+  "metrics": {
+    "heading": "المقاييس الرئيسية",
+    "projects": "المشاريع",
+    "scripts": "النصوص",
+    "thumbnails": "الصور المصغّرة",
+    "media": "الوسائط",
+    "inProgress": "{count} قيد التنفيذ",
+    "generated": "تم توليدها",
+    "designed": "تم تصميمها",
+    "inLibrary": "في مكتبتك",
+    "error": "تعذّر تحميل مقاييسك الرئيسية."
+  },
+  "statuses": {
+    "all": "الكل",
+    "draft": "مسودة",
+    "processing": "قيد التنفيذ",
+    "completed": "مكتمل",
+    "archived": "مؤرشف"
+  },
+  "projects": {
+    "heading": "المشاريع",
+    "filterAria": "تصفية المشاريع حسب الحالة",
+    "viewAll": "عرض الكل",
+    "continue": "تابع من حيث توقفت",
+    "resume": "استئناف",
+    "error": "تعذّر تحميل مشاريعك.",
+    "emptyAllTitle": "أنشئ مشروعك الأول",
+    "emptyStatusTitle": "لا توجد مشاريع {status}",
+    "emptyAllDescription": "تجمع المشاريع نصوصك وصورك المصغّرة والصوت وتحسين محركات البحث في مكان واحد.",
+    "emptyStatusDescription": "لا شيء يطابق هذه الحالة بعد. جرّب مرشحًا آخر أو أنشئ مشروعًا.",
+    "emptyAction": "أنشئ مشروعك الأول",
+    "listAria": "المشاريع"
+  },
+  "analytics": {
+    "description": "المشاريع المنشأة خلال الأيام السبعة الماضية",
+    "lockedDescription": "ارتقِ بحسابك لفتح مخطط اتجاه الإنشاء وإبقاء هذه الأداة ظاهرة.",
+    "error": "تعذّر تحميل اتجاه الإنشاء.",
+    "emptyTitle": "لا يوجد نشاط إنشاء بعد",
+    "emptyDescription": "أنشئ مشاريع هذا الأسبوع وسيظهر الاتجاه هنا.",
+    "lockedTitle": "تحليلات الإنشاء متاحة في خطتي Pro وStudio."
+  },
+  "widgets": {
+    "stats": "المقاييس الرئيسية",
+    "projects": "المشاريع",
+    "status": "حالة المشاريع",
+    "platforms": "توزيع المنصات",
+    "trending": "الرائج لك",
+    "activity": "النشاط الأخير",
+    "upcoming": "المحتوى القادم",
+    "quickActions": "إجراءات سريعة",
+    "analytics": "اتجاه الإنشاء",
+    "health": "حالة النظام",
+    "healthDescription": "حالة التبعيات المباشرة"
+  },
+  "statusWidget": {
+    "error": "تعذّر تحميل حالة المشاريع."
+  },
+  "platformsWidget": {
+    "error": "تعذّر تحميل توزيع المنصات.",
+    "emptyTitle": "لا توجد مشاريع حسب المنصة بعد",
+    "emptyDescription": "أنشئ مشروعًا وسيظهر في هذا التوزيع."
+  },
+  "trendingWidget": {
+    "error": "تعذّر تحميل موجز الاتجاهات الخاص بك.",
+    "emptyTitle": "لم تُقسَّ اتجاهات لك بعد",
+    "emptyDescription": "اختر اهتماماتك في التهيئة وسنرتّب المواضيع وفقها.",
+    "emptyAction": "حدّث اهتماماتك",
+    "score": "{score} نقطة",
+    "explore": "استكشف الاتجاهات"
+  },
+  "activityWidget": {
+    "error": "تعذّر تحميل النشاط الأخير.",
+    "emptyTitle": "لا يوجد نشاط بعد",
+    "emptyDescription": "ولّد نصًا أو أنشئ مشروعًا لبدء الموجز.",
+    "new": "جديد",
+    "types": {
+      "project": "مشروع",
+      "script": "نص"
+    }
+  },
+  "upcomingWidget": {
+    "error": "تعذّر تحميل المحتوى القادم.",
+    "emptyTitle": "لا شيء مجدول",
+    "emptyDescription": "حدّد تاريخ نشر وسيظهر هنا.",
+    "statuses": {
+      "pending": "قيد الانتظار",
+      "in_progress": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "cancelled": "ملغى"
+    }
+  },
+  "quickActions": {
+    "script": {
+      "title": "توليد نص",
+      "sub": "محرك المحتوى بالذكاء الاصطناعي"
+    },
+    "trends": {
+      "title": "استكشاف الاتجاهات",
+      "sub": "ما الذي يرتفع"
+    },
+    "project": {
+      "title": "مشروع جديد",
+      "sub": "ابدأ من فكرة"
+    },
+    "team": {
+      "title": "الفريق",
+      "sub": "ادعُ متعاونين"
+    }
+  },
+  "health": {
+    "unavailable": "الحالة غير متاحة — تعذّر الوصول إلى API",
+    "ready": "API جاهز — قاعدة البيانات متصلة",
+    "degraded": "متدهور — قاعدة البيانات {state}",
+    "retry": "إعادة المحاولة",
+    "database": {
+      "connected": "متصل",
+      "connecting": "جارٍ الاتصال",
+      "disconnected": "غير متصل"
+    }
+  },
+  "hidden": {
+    "preferencesError": "تعذّر تحميل تخطيطك المحفوظ؛ يُعرض التخطيط الافتراضي.",
+    "title": "كل الأدوات مخفية",
+    "description": "أعدها من «تخصيص» — لا شيء مفقود.",
+    "showAll": "إظهار كل الأدوات"
+  },
+  "footer": {
+    "prompt": "تريد نظرة عامة مختلفة؟",
+    "link": "حدّث اهتماماتك",
+    "tail": "لتخصيص الرائج والافتراضيات."
+  },
+  "settings": {
+    "trigger": "تخصيص",
+    "title": "أدوات لوحة التحكم",
+    "description": "تبقى الأدوات المخفية بعيدة عن طريقك لكنها متاحة هنا. يُحفظ تخطيطك في حسابك.",
+    "showAria": "إظهار {widget}",
+    "showAll": "إظهار كل الأدوات"
+  },
+  "chart": {
+    "series": "المشاريع المنشأة",
+    "summaryEmpty": "لم تُنشأ أي مشاريع خلال الأيام السبعة الماضية.",
+    "summary": "{count, plural, zero {لم تُنشأ مشاريع} one {أُنشئ مشروع واحد} two {أُنشئ مشروعان} few {{value} مشاريع أُنشئت} many {{value} مشروعًا أُنشئ} other {{value} مشروع أُنشئ}} خلال الأيام السبعة الماضية.",
+    "busiest": "أكثر يوم نشاطًا: {date} مع {count}.",
+    "viewTable": "عرض كجدول",
+    "caption": "المشاريع المنشأة يوميًا، آخر سبعة أيام",
+    "date": "التاريخ",
+    "projects": "المشاريع"
+  },
+  "toast": {
+    "saveError": "تعذّر حفظ تخطيط لوحة التحكم."
+  }
+}

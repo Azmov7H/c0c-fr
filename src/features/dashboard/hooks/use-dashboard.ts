@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { toast } from '@/lib/toast';
 
 import { dashboardService } from '../services/dashboard.service';
@@ -63,6 +64,7 @@ export function useDashboardPreferences() {
  * the previous layout is restored if the write fails.
  */
 export function useUpdateDashboardPreferences() {
+    const t = useTranslations('dashboard');
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -85,7 +87,7 @@ export function useUpdateDashboardPreferences() {
             if (context?.previous) {
                 queryClient.setQueryData(dashboardKeys.preferences(), context.previous);
             }
-            toast.error(toApiError(error, 'Could not save your dashboard layout.').message);
+            toast.error(toApiError(error, t('toast.saveError')).message);
         },
         onSuccess: (data, hiddenWidgets) => {
             queryClient.setQueryData<DashboardPreferences>(

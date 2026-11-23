@@ -65,5 +65,31 @@
     "selected": "الصورة المختارة",
     "selectedAlt": "الصورة المختارة",
     "clear": "إزالة"
+  },
+  "attribution": {
+    "photoBy": "الصورة بواسطة",
+    "on": "على"
+  },
+  "library": {
+    "title": "مكتبة الوسائط",
+    "description": "كل أصل تم توليده أو إرفاقه بالمشروع المحدد.",
+    "uploadDisabledTitle": "الرفع يحتاج إلى مزوّد تخزين، وهو غير مُهيأ بعد.",
+    "upload": "رفع",
+    "projectAria": "المشروع",
+    "projectPlaceholder": "اختر مشروعًا",
+    "uploadsDisabled": "الرفع معطّل حتى يتم ربط مزوّد تخزين.",
+    "searchPlaceholder": "ابحث في الأصول...",
+    "tabs": {
+      "all": "الكل",
+      "images": "الصور",
+      "videos": "الفيديوهات",
+      "audio": "الصوت",
+      "documents": "المستندات"
+    },
+    "loading": "جارٍ تحميل الوسائط",
+    "emptyFoundTitle": "لم يتم العثور على أصول",
+    "emptyFoundDescription": "جرّب تعديل البحث أو عوامل التصفية.",
+    "emptyTitle": "لا توجد وسائط بعد",
+    "emptyDescription": "ستظهر هنا الوسائط المولّدة من مشاريعك."
   }
 }

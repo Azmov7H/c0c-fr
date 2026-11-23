@@ -1,1 +1,60 @@
-{}
+{
+  "@dynamic": [
+    "roles.owner",
+    "roles.admin",
+    "roles.editor",
+    "roles.viewer"
+  ],
+  "metadata": {
+    "title": "الفريق",
+    "description": "إدارة أعضاء فريقك ومساحات العمل وإعدادات التعاون."
+  },
+  "page": {
+    "title": "فرق مساحة العمل",
+    "description": "إدارة المتعاونين والصلاحيات لمشاريع الذكاء الاصطناعي الخاصة بك"
+  },
+  "actions": {
+    "newWorkspace": "مساحة عمل جديدة",
+    "createWorkspace": "إنشاء مساحة عمل",
+    "creating": "جارٍ الإنشاء...",
+    "createFirstTeam": "أنشئ فريقك الأول",
+    "sendInvitation": "إرسال دعوة",
+    "teamSettings": "إعدادات الفريق"
+  },
+  "create": {
+    "title": "إنشاء مساحة عمل فريق جديدة",
+    "description": "تتيح لك مساحات العمل تجميع المشاريع والمتعاونين معًا.",
+    "nameLabel": "اسم مساحة العمل",
+    "namePlaceholder": "مثل: بيت التسويق",
+    "nameMin": "يجب أن يكون الاسم حرفين على الأقل"
+  },
+  "empty": {
+    "title": "أنت لست عضوًا في أي فرق بعد",
+    "description": "أنشئ مساحة عملك الأولى لبدء التعاون مع منشئي محتوى الذكاء الاصطناعي الآخرين."
+  },
+  "workspaces": {
+    "title": "مساحات العمل الخاصة بك"
+  },
+  "invite": {
+    "title": "دعوة متعاون",
+    "emailLabel": "البريد الإلكتروني للمستخدم",
+    "emailPlaceholder": "colleague@agency.com",
+    "emailInvalid": "أدخل عنوان بريد إلكتروني صالحًا",
+    "roleLabel": "تعيين الدور",
+    "roleAria": "تعيين الدور"
+  },
+  "roles": {
+    "owner": "مالك",
+    "admin": "مسؤول",
+    "editor": "محرر محتوى",
+    "viewer": "مشاهد فقط"
+  },
+  "members": {
+    "title": "الأعضاء والصلاحيات",
+    "count": "{count} مستخدمون نشطون في مساحة العمل هذه",
+    "columnMember": "العضو",
+    "columnRole": "الدور",
+    "removeAria": "إزالة العضو من الفريق",
+    "empty": "لا يوجد أعضاء بعد."
+  }
+}

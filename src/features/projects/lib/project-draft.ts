@@ -112,5 +112,5 @@ export function canRestoreDraft(draft: ProjectDraft | null): draft is ProjectDra
 }
 
 export function draftMatchesSchema(draft: ProjectDraft): boolean {
-    return projectFormSchema.safeParse(draft.values).success;
+    return projectFormSchema().safeParse(draft.values).success;
 }

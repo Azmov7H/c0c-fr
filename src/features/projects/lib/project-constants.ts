@@ -1,3 +1,5 @@
+import { Facebook, Instagram, PlaySquare, Youtube } from 'lucide-react';
+
 import type { ContentTone, Platform, ProjectStatus } from '@/types';
 
 /**
@@ -35,6 +37,13 @@ export const PROJECT_STATUSES = [
     'completed',
     'archived',
 ] as const satisfies readonly ProjectStatus[];
+
+export const PLATFORM_ICON: Record<Platform, typeof Youtube> = {
+    youtube: Youtube,
+    tiktok: PlaySquare,
+    instagram: Instagram,
+    facebook: Facebook,
+};
 
 export interface PlatformChoice {
     value: Platform;

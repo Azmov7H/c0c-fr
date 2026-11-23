@@ -1,4 +1,4 @@
-import type { Project } from '@/types';
+import type { ContentTone, Platform, Project } from '@/types';
 import type { Script } from '@/features/scripts/types';
 import type { Thumbnail } from '@/features/thumbnails/types';
 import { audioLayerOf, type AudioSuggestion } from '@/features/audio/types';
@@ -60,17 +60,94 @@ export interface StageState extends StageDefinition {
     detail: string;
 }
 
+/**
+ * AR-031 — the copy the derivation needs, supplied by the caller.
+ *
+ * `deriveStages` stays a pure function of the server's records: it decides
+ * WHICH stages exist and WHAT each one's state is, but it no longer owns the
+ * English words. A caller that passes no messages gets the original English
+ * copy (the regression floor the pure-data tests pin); the workspace hook
+ * passes the same sentences read from `messages/{en,ar}/workspace.json`.
+ */
+export interface StageMessages {
+    labels: Record<StageId, string>;
+    creationDetail: (title: string) => string;
+    creationEmpty: string;
+    configurationDetail: (platform: Platform, tone: ContentTone, duration: string) => string;
+    configurationDuration: (seconds: number) => string;
+    configurationEmpty: string;
+    scriptDetail: (scenes: number, version: number) => string;
+    scriptEmpty: string;
+    scriptEditBlocked: string;
+    scriptEditEdited: (version: number) => string;
+    scriptEditNotEdited: (version: number) => string;
+    scriptEditEmpty: string;
+    thumbnailReady: string;
+    thumbnailEmpty: string;
+    sceneImagesDetail: (filled: number, slots: number) => string;
+    narrationReady: string;
+    narrationEmpty: string;
+    sfxDetail: (count: number) => string;
+    sfxEmpty: string;
+    previewBlocked: string;
+    previewReady: string;
+    previewPartial: string;
+    exportBlocked: string;
+    exportReady: string;
+    exportEmpty: string;
+}
+
+/** The verbatim pre-AR-031 English — the floor, and the no-provider default. */
+export const EN_STAGE_MESSAGES: StageMessages = {
+    labels: {
+        creation: 'Project',
+        configuration: 'Configuration',
+        script: 'Script',
+        'script-edit': 'Script edit',
+        thumbnail: 'Thumbnail',
+        'scene-images': 'Scene images',
+        narration: 'Narration',
+        sfx: 'Sound effects',
+        preview: 'Preview',
+        export: 'Export',
+    },
+    creationDetail: (title) => title,
+    creationEmpty: 'No project loaded',
+    configurationDetail: (platform, tone, duration) => `${platform} · ${tone}${duration}`,
+    configurationDuration: (seconds) => ` · ${seconds}s`,
+    configurationEmpty: 'Not configured',
+    scriptDetail: (scenes, version) => `${scenes} scene(s) · version ${version}`,
+    scriptEmpty: 'No script yet',
+    scriptEditBlocked: 'Generate the script first',
+    scriptEditEdited: (version) => `Edited · version ${version}`,
+    scriptEditNotEdited: (version) => `Not edited yet · version ${version}`,
+    scriptEditEmpty: 'No script to edit',
+    thumbnailReady: 'Thumbnail ready',
+    thumbnailEmpty: 'No thumbnail yet',
+    sceneImagesDetail: (filled, slots) => `${filled} of ${slots} image slot(s) filled`,
+    narrationReady: 'Narration ready',
+    narrationEmpty: 'No narration yet',
+    sfxDetail: (count) => `${count} effect layer(s) ready`,
+    sfxEmpty: 'No sound effects yet',
+    previewBlocked: 'Finish the asset stages to preview the whole project',
+    previewReady: 'Everything is in place',
+    previewPartial: 'Shows what exists so far',
+    exportBlocked: 'Generate a script to export',
+    exportReady: 'Exported at least once',
+    exportEmpty: 'Not exported yet',
+};
+
 export const WORKFLOW_STAGES: readonly StageDefinition[] = [
-    { id: 'creation', label: 'Project', tab: 'assets', ready: true },
-    { id: 'configuration', label: 'Configuration', tab: 'assets', ready: true },
-    { id: 'script', label: 'Script', tab: 'assets', anchor: 'scripts', ready: true },
-    { id: 'script-edit', label: 'Script edit', tab: 'assets', anchor: 'scripts', ready: true },
-    { id: 'thumbnail', label: 'Thumbnail', tab: 'media', anchor: 'thumbnail', ready: true },
-    { id: 'scene-images', label: 'Scene images', tab: 'media', anchor: 'gallery', ready: true },
-    { id: 'narration', label: 'Narration', tab: 'media', anchor: 'narration', ready: true },
-    { id: 'sfx', label: 'Sound effects', tab: 'media', anchor: 'effects', ready: true },
-    { id: 'preview', label: 'Preview', tab: 'preview', ready: true },
-    { id: 'export', label: 'Export', tab: 'assets', anchor: 'export', ready: true },
+    { id: 'creation', label: EN_STAGE_MESSAGES.labels.creation, tab: 'assets', ready: true },
+    { id: 'configuration', label: EN_STAGE_MESSAGES.labels.configuration, tab: 'assets', ready: true },
+    { id: 'script', label: EN_STAGE_MESSAGES.labels.script, tab: 'assets', anchor: 'scripts', ready: true },
+    { id: 'script-edit', label: EN_STAGE_MESSAGES.labels['script-edit'], tab: 'assets', anchor: 'scripts', ready: true },
+    { id: 'thumbnail', label: EN_STAGE_MESSAGES.labels.thumbnail, tab: 'media', anchor: 'thumbnail', ready: true },
+    { id: 'scene-images', label: EN_STAGE_MESSAGES.labels['scene-images'], tab: 'media', anchor: 'gallery', ready: true },
+    { id: 'narration', label: EN_STAGE_MESSAGES.labels.narration, tab: 'media', anchor: 'narration', ready: true },
+    { id: 'sfx', label: EN_STAGE_MESSAGES.labels.sfx, tab: 'media', anchor: 'effects', ready: true },
+    { id: 'preview', label: EN_STAGE_MESSAGES.labels.preview, tab: 'preview', ready: true },
+    { id: 'export', label: EN_STAGE_MESSAGES.labels.export, tab: 'assets', anchor: 'export', ready: true },
 ];
 
 export interface WorkflowSnapshot {
@@ -116,7 +193,10 @@ const completedThumbnail = (thumbnails: Thumbnail[]): Thumbnail | undefined =>
  * the idea too — so neither is gated on the script, and the stepper never
  * locks a surface that would work.
  */
-export function deriveStages(snapshot: WorkflowSnapshot): StageState[] {
+export function deriveStages(
+    snapshot: WorkflowSnapshot,
+    messages: StageMessages = EN_STAGE_MESSAGES
+): StageState[] {
     const script = latestScript(snapshot.scripts);
     const hasScript = Boolean(script && script.sections.length > 0);
     const edited = Boolean(script && script.version > 1);
@@ -137,77 +217,80 @@ export function deriveStages(snapshot: WorkflowSnapshot): StageState[] {
         creation: {
             complete: Boolean(snapshot.project),
             blockedReason: null,
-            detail: snapshot.project ? snapshot.project.title : 'No project loaded',
+            detail: snapshot.project
+                ? messages.creationDetail(snapshot.project.title)
+                : messages.creationEmpty,
         },
         configuration: {
             complete: Boolean(configuration),
             blockedReason: null,
             detail: snapshot.project
-                ? `${snapshot.project.platform} · ${snapshot.project.tone}${
+                ? messages.configurationDetail(
+                      snapshot.project.platform,
+                      snapshot.project.tone,
                       snapshot.project.durationSeconds
-                          ? ` · ${snapshot.project.durationSeconds}s`
+                          ? messages.configurationDuration(snapshot.project.durationSeconds)
                           : ''
-                  }`
-                : 'Not configured',
+                  )
+                : messages.configurationEmpty,
         },
         script: {
             complete: hasScript,
             blockedReason: null,
             detail: hasScript && script
-                ? `${script.sections.length} scene(s) · version ${script.version}`
-                : 'No script yet',
+                ? messages.scriptDetail(script.sections.length, script.version)
+                : messages.scriptEmpty,
         },
         'script-edit': {
             complete: edited,
-            blockedReason: hasScript ? null : 'Generate the script first',
+            blockedReason: hasScript ? null : messages.scriptEditBlocked,
             detail: script
                 ? edited
-                    ? `Edited · version ${script.version}`
-                    : `Not edited yet · version ${script.version}`
-                : 'No script to edit',
+                    ? messages.scriptEditEdited(script.version)
+                    : messages.scriptEditNotEdited(script.version)
+                : messages.scriptEditEmpty,
         },
         thumbnail: {
             complete: Boolean(thumbnail),
             blockedReason: null,
-            detail: thumbnail ? 'Thumbnail ready' : 'No thumbnail yet',
+            detail: thumbnail ? messages.thumbnailReady : messages.thumbnailEmpty,
         },
         'scene-images': {
             complete: images.length > 0,
             blockedReason: null,
-            detail: `${images.length} of ${GALLERY_SLOTS} image slot(s) filled`,
+            detail: messages.sceneImagesDetail(images.length, GALLERY_SLOTS),
         },
         narration: {
             complete: narration,
             blockedReason: null,
-            detail: narration ? 'Narration ready' : 'No narration yet',
+            detail: narration ? messages.narrationReady : messages.narrationEmpty,
         },
         sfx: {
             complete: effects.length > 0,
             blockedReason: null,
-            detail: effects.length
-                ? `${effects.length} effect layer(s) ready`
-                : 'No sound effects yet',
+            detail: effects.length ? messages.sfxDetail(effects.length) : messages.sfxEmpty,
         },
         preview: {
             complete: hasScript && Boolean(thumbnail) && images.length > 0 && narration,
             blockedReason:
                 hasScript && thumbnail && images.length > 0 && narration
                     ? null
-                    : 'Finish the asset stages to preview the whole project',
+                    : messages.previewBlocked,
             detail:
                 hasScript && thumbnail && images.length > 0 && narration
-                    ? 'Everything is in place'
-                    : 'Shows what exists so far',
+                    ? messages.previewReady
+                    : messages.previewPartial,
         },
         export: {
             complete: exported,
-            blockedReason: hasScript ? null : 'Generate a script to export',
-            detail: exported ? 'Exported at least once' : 'Not exported yet',
+            blockedReason: hasScript ? null : messages.exportBlocked,
+            detail: exported ? messages.exportReady : messages.exportEmpty,
         },
     };
 
     return WORKFLOW_STAGES.filter((definition) => definition.ready).map((definition) => ({
         ...definition,
+        label: messages.labels[definition.id],
         ...states[definition.id],
     }));
 }

@@ -1,1 +1,51 @@
-{}
+{
+  "page": {
+    "title": "التحليلات",
+    "description": "نشاط الإنشاء المقاس عبر مشاريعك. تُوسَم التوقعات دائمًا."
+  },
+  "metrics": {
+    "projects": "المشاريع",
+    "scripts": "النصوص",
+    "thumbnails": "الصور المصغّرة",
+    "mediaAudio": "الوسائط والصوت",
+    "projectsSub": "{count} مكتمل",
+    "scriptsSub": "{count} قيد التنفيذ",
+    "thumbnailsSub": "{count} مسودة",
+    "mediaAudioSub": "{count} مؤرشف · حسب المنصة أدناه"
+  },
+  "activity": {
+    "title": "نشاط الإنشاء (آخر 7 أيام)",
+    "description": "المشاريع والنصوص المنشأة يوميًا — مقاسة، وليست مشاهدات",
+    "measured": "مقاس",
+    "aria": "نشاط الإنشاء حسب اليوم"
+  },
+  "completion": {
+    "title": "اكتمال المشاريع",
+    "description": "أعداد مقاسة حسب الحالة",
+    "draft": "مسودة",
+    "inProgress": "قيد التنفيذ",
+    "completed": "مكتمل",
+    "archived": "مؤرشف"
+  },
+  "platforms": {
+    "title": "المشاريع حسب المنصة",
+    "description": "أعداد المشاريع المقاسة",
+    "youtube": "YouTube",
+    "tiktok": "TikTok",
+    "instagram": "Instagram",
+    "facebook": "Facebook"
+  },
+  "recent": {
+    "title": "المشاريع الأخيرة",
+    "allProjects": "كل المشاريع"
+  },
+  "empty": {
+    "title": "لا يوجد نشاط توليد بعد",
+    "description": "أنشئ مشروعك الأول — ستظهر التحليلات بمجرد أن تبدأ التوليد."
+  },
+  "error": {
+    "loadFailed": "تعذر تحميل التحليلات."
+  },
+  "disclaimer": "لا يقيس C0C المشاهدات أو وقت المشاهدة أو الأداء المتوقع، ولا تُعرض أبدًا كبيانات حقيقية. تقارير الذكاء الاصطناعي لكل مشروع، عند توليدها، تحمل تسمية {projection}.",
+  "disclaimerProjection": "توقّع"
+}

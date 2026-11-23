@@ -1,7 +1,19 @@
 // @vitest-environment jsdom
 import * as React from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
+
+import { render } from '../test-utils';
+
+/**
+ * AR-029 — `useUrlLocale` reads the locale from the URL, so the panels need a
+ * router path; `/en/...` keeps the English assertions on the regression floor
+ * while the real catalogs come from the test-utils provider.
+ */
+vi.mock('next/navigation', () => ({
+    usePathname: () => '/en/onboarding',
+    useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
+}));
 
 import { OptionGrid } from './option-grid';
 import {

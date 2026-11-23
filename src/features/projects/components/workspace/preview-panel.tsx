@@ -11,9 +11,12 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslations } from 'next-intl';
 import { FileText, Image as ImageIcon, Music, PackageOpen } from 'lucide-react';
 
 import { useProject } from '../../hooks/use-projects';
+import { missingAssetLabel } from '../../lib/workspace-labels';
+import { scriptSceneLabel } from '@/features/scripts/lib/script-labels';
 
 /**
  * P11.3 — the Preview stage.
@@ -26,6 +29,8 @@ import { useProject } from '../../hooks/use-projects';
  * still missing instead of hiding them.
  */
 export function PreviewPanel({ projectId }: { projectId: string }) {
+    const t = useTranslations('workspace');
+    const ts = useTranslations('scripts');
     const project = useProject(projectId);
     const scripts = useProjectScripts(projectId);
     const thumbnails = useProjectThumbnails(projectId);
@@ -36,7 +41,7 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
         project.isLoading || scripts.isLoading || thumbnails.isLoading || media.isLoading || audio.isLoading;
     if (loading) {
         return (
-            <div className="space-y-3" role="status" aria-label="Loading preview">
+            <div className="space-y-3" role="status" aria-label={t('preview.loading')}>
                 <Skeleton className="h-64 w-full rounded-2xl" />
                 <Skeleton className="h-40 w-full rounded-2xl" />
             </div>
@@ -64,16 +69,16 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
     );
 
     const missing: string[] = [];
-    if (!script) missing.push('script');
-    if (!thumbUrl) missing.push('thumbnail');
-    if (images.length === 0) missing.push('scene images');
-    if (!narration) missing.push('narration');
+    if (!script) missing.push(missingAssetLabel(t, 'script'));
+    if (!thumbUrl) missing.push(missingAssetLabel(t, 'thumbnail'));
+    if (images.length === 0) missing.push(missingAssetLabel(t, 'sceneImages'));
+    if (!narration) missing.push(missingAssetLabel(t, 'narration'));
 
     if (!script && !thumbUrl && images.length === 0 && !narration) {
         return (
             <EmptyState
-                title="Nothing to preview yet"
-                description="Generate a script and some assets — they appear here as they land."
+                title={t('preview.emptyTitle')}
+                description={t('preview.emptyDescription')}
                 icon={PackageOpen}
             />
         );
@@ -83,7 +88,7 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
         <div className="space-y-6">
             {missing.length > 0 ? (
                 <p className="text-sm text-muted-foreground" role="status">
-                    Still missing: {missing.join(', ')}. The preview shows what exists so far.
+                    {t('preview.stillMissing', { list: missing.join(', ') })}
                 </p>
             ) : null}
 
@@ -92,16 +97,16 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-base">
                             <ImageIcon className="size-4" aria-hidden="true" />
-                            Thumbnail
+                            {t('preview.thumbnailTitle')}
                         </CardTitle>
-                        <CardDescription>The project&apos;s cover image.</CardDescription>
+                        <CardDescription>{t('preview.thumbnailDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="overflow-hidden rounded-xl border border-border/50">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={thumbUrl}
-                                alt="Project thumbnail"
+                                alt={t('preview.thumbnailAlt')}
                                 className="aspect-video w-full object-cover"
                             />
                         </div>
@@ -114,7 +119,7 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-base">
                             <ImageIcon className="size-4" aria-hidden="true" />
-                            Scene images
+                            {t('preview.imagesTitle')}
                             <Badge variant="secondary">{images.length}</Badge>
                         </CardTitle>
                     </CardHeader>
@@ -128,7 +133,7 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
                                             // eslint-disable-next-line @next/next/no-img-element
                                             <img
                                                 src={item.fileUrl}
-                                                alt={item.title || 'Scene image'}
+                                                alt={item.title || t('preview.imageAlt')}
                                                 className="aspect-video w-full object-cover"
                                             />
                                         ) : null}
@@ -151,21 +156,24 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-base">
                             <FileText className="size-4" aria-hidden="true" />
-                            Script
-                            <Badge variant="secondary">v{script.version}</Badge>
+                            {t('preview.scriptTitle')}
+                            <Badge variant="secondary">{t('preview.scriptVersion', { version: script.version })}</Badge>
                         </CardTitle>
                         <CardDescription>
-                            {script.sections.length} scene(s) · {script.wordCount} words
+                            {t('preview.scriptDetail', {
+                                scenes: script.sections.length,
+                                words: script.wordCount,
+                            })}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ol className="space-y-3">
                             {script.sections.map((section) => (
                                 <li key={section.order}>
-                                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                        {section.label}
+                                    <p dir="auto" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                        <bdi>{scriptSceneLabel(ts, section.label)}</bdi>
                                     </p>
-                                    <p className="mt-1 whitespace-pre-wrap text-sm leading-6">
+                                    <p dir="auto" className="mt-1 whitespace-pre-wrap text-sm leading-6">
                                         {section.content}
                                     </p>
                                 </li>
@@ -180,7 +188,7 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-base">
                             <Music className="size-4" aria-hidden="true" />
-                            Narration
+                            {t('preview.narrationTitle')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -189,7 +197,7 @@ export function PreviewPanel({ projectId }: { projectId: string }) {
                             preload="none"
                             src={narration.fileUrl}
                             className="w-full"
-                            aria-label="Narration playback"
+                            aria-label={t('preview.narrationAria')}
                         />
                     </CardContent>
                 </Card>

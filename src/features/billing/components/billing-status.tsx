@@ -20,7 +20,9 @@ interface CheckoutStatusProps {
 
 export function CheckoutStatus({ phase, target, onRefresh }: CheckoutStatusProps) {
     // AR-023: the plan's NAME is the catalogue's copy.
+    // AR-028: the rest of the checkout copy is the `billing` catalog's.
     const t = useTranslations('pricing');
+    const billingT = useTranslations('billing');
     const copy = buildPricingCopy(t);
 
     if (phase === 'idle') return null;
@@ -29,11 +31,11 @@ export function CheckoutStatus({ phase, target, onRefresh }: CheckoutStatusProps
         return (
             <Alert>
                 <Info />
-                <AlertTitle>Checkout cancelled</AlertTitle>
+                <AlertTitle>{billingT('checkout.cancelledTitle')}</AlertTitle>
                 <AlertDescription>
-                    You have not been charged and your plan has not changed.{' '}
+                    {billingT('checkout.cancelledDescription')}{' '}
                     <Link className="underline underline-offset-4" href="/settings/billing">
-                        Dismiss
+                        {billingT('checkout.dismiss')}
                     </Link>
                 </AlertDescription>
             </Alert>
@@ -41,13 +43,13 @@ export function CheckoutStatus({ phase, target, onRefresh }: CheckoutStatusProps
     }
 
     if (phase === 'confirmed') {
-        const planName = target ? copy.planName(target) : 'your new plan';
+        const planName = target ? copy.planName(target) : billingT('checkout.newPlan');
         return (
             <Alert>
                 <CheckCircle2 />
-                <AlertTitle>Payment confirmed</AlertTitle>
+                <AlertTitle>{billingT('checkout.confirmedTitle')}</AlertTitle>
                 <AlertDescription>
-                    {planName} is active. Your new limits are shown below.
+                    {billingT('checkout.confirmedDescription', { plan: planName })}
                 </AlertDescription>
             </Alert>
         );
@@ -57,14 +59,11 @@ export function CheckoutStatus({ phase, target, onRefresh }: CheckoutStatusProps
         return (
             <Alert>
                 <Clock3 />
-                <AlertTitle>Your payment is processing</AlertTitle>
+                <AlertTitle>{billingT('checkout.processingTitle')}</AlertTitle>
                 <AlertDescription className="gap-3">
-                    <p>
-                        Your payment is processing. This page will update shortly. You
-                        will not be charged twice if you refresh.
-                    </p>
+                    <p>{billingT('checkout.processingDescription')}</p>
                     <Button type="button" size="sm" variant="outline" onClick={onRefresh}>
-                        Refresh status
+                        {billingT('checkout.refresh')}
                     </Button>
                 </AlertDescription>
             </Alert>
@@ -74,10 +73,9 @@ export function CheckoutStatus({ phase, target, onRefresh }: CheckoutStatusProps
     return (
         <Alert aria-live="polite">
             <Clock3 />
-            <AlertTitle>We&apos;re confirming your payment</AlertTitle>
+            <AlertTitle>{billingT('checkout.confirmingTitle')}</AlertTitle>
             <AlertDescription>
-                Stripe has sent you back, but the payment confirmation can take a few
-                seconds. Your plan will update here as soon as it lands.
+                {billingT('checkout.confirmingDescription')}
             </AlertDescription>
         </Alert>
     );
@@ -96,6 +94,7 @@ export function BillingNoticeBanner({
     portalPending,
     managedByStripe,
 }: BillingNoticeBannerProps) {
+    const billingT = useTranslations('billing');
     const destructive = notice.kind === 'payment_failed';
     const Icon = destructive ? AlertTriangle : Info;
 
@@ -114,7 +113,9 @@ export function BillingNoticeBanner({
                             onClick={onPortal}
                             disabled={portalPending}
                         >
-                            {portalPending ? 'Opening portal…' : notice.actionLabel}
+                            {portalPending
+                                ? billingT('currentPlan.openingPortal')
+                                : notice.actionLabel}
                         </Button>
                     ) : null
                 ) : (

@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, screen, within } from '@testing-library/react';
 
 import type { DashboardStats } from '../services/dashboard.service';
 import type { Project } from '@/types';
+import { render } from '../test-utils';
 import { DashboardView } from './dashboard-view';
 
 const mocks = vi.hoisted(() => ({

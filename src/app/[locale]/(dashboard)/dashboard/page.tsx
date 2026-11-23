@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { dehydrate, HydrationBoundary, type QueryClient } from "@tanstack/react-query"
 
+import { getTranslations } from "@/i18n/server"
+
 import { DashboardView } from "@/features/dashboard/components/dashboard-view"
 import { dashboardKeys } from "@/features/dashboard/hooks/use-dashboard"
 import type {
@@ -20,9 +22,17 @@ import type { PaginatedResponse, Project } from "@/types"
 import { serverGet, serverGetEnvelope } from "@/lib/server-api"
 import { makeQueryClient } from "@/lib/query-client"
 
-export const metadata: Metadata = {
-  title: "Dashboard",
-  description: "Overview of your content creation workspace — projects, scripts, and performance metrics.",
+/**
+ * AR-027 — the dashboard's title and description come from the catalog, read
+ * on the server for the active locale. The route itself is `noindex` (see the
+ * segment layout): this copy is for the tab and assistive tech, not search.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("dashboard")
+  return {
+    title: t("metadata.title"),
+    description: t("metadata.description"),
+  }
 }
 
 /**

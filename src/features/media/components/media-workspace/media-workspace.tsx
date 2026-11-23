@@ -65,6 +65,7 @@ function LayerCard({
     anchor?: string;
 }) {
     const t = useTranslations('media');
+    const tw = useTranslations('workspace');
     const generate = useGenerateAudio();
     const update = useUpdateAudioSuggestion();
     const current = rows.find((a) => a.isCurrent) ?? rows[0];
@@ -98,10 +99,11 @@ function LayerCard({
                             <>
                                 <audio
                                     controls
+                                    dir="ltr"
                                     preload="none"
                                     src={current.fileUrl}
                                     className="w-full"
-                                    aria-label={`${title} playback`}
+                                    aria-label={tw('media.playbackAria', { title })}
                                 />
                                 <p className="text-xs text-muted-foreground">
                                     {t('audio.duration', {
@@ -177,6 +179,7 @@ function LayerCard({
 
 export function MediaWorkspace({ projectId }: { projectId: string }) {
     const t = useTranslations('media');
+    const tw = useTranslations('workspace');
     const projects = useProjects({ limit: 100 });
     const project = projects.data?.data.find((p) => p._id === projectId);
     const thumbnails = useProjectThumbnails(projectId);
@@ -193,7 +196,7 @@ export function MediaWorkspace({ projectId }: { projectId: string }) {
     const loading = thumbnails.isLoading || media.isLoading || audio.isLoading;
     if (loading) {
         return (
-            <div className="grid gap-6" role="status" aria-label="Loading media">
+            <div className="grid gap-6" role="status" aria-label={tw('media.loading')}>
                 <Skeleton className="h-64 rounded-2xl" />
                 <Skeleton className="h-40 rounded-2xl" />
             </div>

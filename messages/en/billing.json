@@ -1,4 +1,124 @@
 {
+  "@dynamic": [
+    "errors.rateLimit",
+    "errors.sessionExpired",
+    "errors.forbidden",
+    "errors.notFound",
+    "errors.invalidInput",
+    "errors.offline",
+    "errors.notConfigured",
+    "errors.server",
+    "errors.generic",
+    "creditKinds.grant",
+    "creditKinds.topup",
+    "creditKinds.reserve",
+    "creditKinds.settle",
+    "creditKinds.release",
+    "creditKinds.refund",
+    "creditKinds.expiry"
+  ],
+  "page": {
+    "metadataTitle": "Billing & Plan",
+    "metadataDescription": "Your current plan, usage and available upgrades.",
+    "title": "Billing & Plan",
+    "description": "See what your plan includes and what you have used this period. Upgrades and cancellations are handled by Stripe."
+  },
+  "status": {
+    "active": "Active",
+    "trialing": "Trial",
+    "past_due": "Payment failed",
+    "canceled": "Canceled",
+    "incomplete": "Setup incomplete",
+    "free": "Free plan"
+  },
+  "currentPlan": {
+    "label": "Current plan",
+    "price": "Price",
+    "renews": "Renews",
+    "ends": "Access ends",
+    "noPeriod": "No billing period",
+    "notScheduled": "Not scheduled",
+    "billing": "Billing",
+    "managedByStripe": "Managed by Stripe",
+    "grantedManually": "Granted manually",
+    "openingPortal": "Opening portal…",
+    "manage": "Manage subscription",
+    "starterHint": "Choose a paid plan below to start a subscription.",
+    "manualHint": "This plan has no Stripe subscription, so there is nothing to manage in the portal.",
+    "compare": "Compare paid plans"
+  },
+  "actions": {
+    "failedTitle": "Billing action failed",
+    "inProgress": "Billing action in progress"
+  },
+  "freeNote": "You are within the free limits. Paid plans are optional; upgrade only when a limit is actually in your way.",
+  "checkout": {
+    "cancelledTitle": "Checkout cancelled",
+    "cancelledDescription": "You have not been charged and your plan has not changed.",
+    "dismiss": "Dismiss",
+    "confirmedTitle": "Payment confirmed",
+    "confirmedDescription": "{plan} is active. Your new limits are shown below.",
+    "newPlan": "your new plan",
+    "processingTitle": "Your payment is processing",
+    "processingDescription": "Your payment is processing. This page will update shortly. You will not be charged twice if you refresh.",
+    "refresh": "Refresh status",
+    "confirmingTitle": "We're confirming your payment",
+    "confirmingDescription": "Stripe has sent you back, but the payment confirmation can take a few seconds. Your plan will update here as soon as it lands."
+  },
+  "usage": {
+    "title": "Usage this period",
+    "description": "Counters reset automatically at the date shown. Existing work is never deleted when a quota runs out.",
+    "noCap": "No cap on this resource.",
+    "used": "{percent}% used",
+    "progressLabel": "{label}: {percent}% used",
+    "resets": "Resets {date}",
+    "exhausted": "Quota reached — generation is paused until reset or upgrade.",
+    "included": "Included limits",
+    "concurrent": "Concurrent generations",
+    "endOfPeriod": "at the end of the period"
+  },
+  "credits": {
+    "title": "Monthly credits",
+    "available": "{count} available",
+    "fallbackTitle": "Credits",
+    "held": "{count} held",
+    "availableLabel": "Available",
+    "inProgress": "In progress",
+    "none": "None",
+    "cycle": "Cycle",
+    "resets": "{period} — resets {date}",
+    "notScheduled": "Not scheduled",
+    "note": "Generations reserve credits before they run and settle at the actual cost when they finish. If something fails, the reserved credits come back to you.",
+    "recent": "Recent activity",
+    "loading": "Loading credit activity",
+    "emptyTitle": "No credit activity yet",
+    "emptyDescription": "Activity appears here when a generation settles or a new cycle is granted.",
+    "balance": "balance {count}",
+    "amount": "amount {amount}",
+    "page": "Page {page} of {total}",
+    "newer": "Newer",
+    "older": "Older"
+  },
+  "creditKinds": {
+    "grant": "Monthly credit grant",
+    "topup": "Top-up pack",
+    "reserve": "Reserved for a generation",
+    "settle": "Generation charged",
+    "release": "Reservation returned",
+    "refund": "Refund",
+    "expiry": "Unused credits expired"
+  },
+  "errors": {
+    "rateLimit": "Too many attempts. Wait a moment and try again.",
+    "sessionExpired": "Your session has expired. Sign in again.",
+    "forbidden": "You do not have permission to do that.",
+    "notFound": "We could not find what you were looking for.",
+    "invalidInput": "Some fields are invalid. Check them and try again.",
+    "offline": "You appear to be offline. Check your connection and try again.",
+    "notConfigured": "Billing is not configured on this deployment yet. No payment was started.",
+    "server": "Something went wrong on our side. Try again shortly.",
+    "generic": "Billing could not be started."
+  },
   "notice": {
     "paymentFailedTitle": "Your payment needs attention",
     "paymentFailedDescription": "We could not confirm your latest payment. Update your payment method to keep your plan and quota.",
@@ -13,5 +133,15 @@
     "portalDate": "the date shown in the portal"
   },
   "cancellationScheduled": "Cancellation is scheduled. You keep {plan} until {date}. <link>Choose a plan to continue</link>.",
-  "cancellationEndFallback": "the end of the period"
+  "cancellationEndFallback": "the end of the period",
+  "upgrade": {
+    "seePlans": "See plans",
+    "unlimited": "unlimited",
+    "usage": "{used} of {limit} used",
+    "resets": "{usage} · resets {date}"
+  },
+  "generation": {
+    "creditSuffix": "Top up or upgrade in Billing to continue.",
+    "quotaSuffix": "Upgrade for more generations."
+  }
 }

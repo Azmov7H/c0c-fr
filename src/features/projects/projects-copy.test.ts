@@ -1,0 +1,349 @@
+import { describe, expect, it } from 'vitest';
+
+import arProjects from '../../../messages/ar/projects.json';
+import enProjects from '../../../messages/en/projects.json';
+import { hardcodedCopy } from '../../../tests/helpers/hardcoded-copy';
+
+/**
+ * AR-030 — the projects surface (list, toolbar, wizard and invite landing).
+ *
+ * The proofs every extraction makes:
+ *
+ *   1. the SURFACE reads its copy from the catalog — the shared scanner fails
+ *      on English still written in the source;
+ *   2. the ENGLISH is verbatim what the components rendered before AR-030;
+ *   3. the ARABIC is really Arabic — nothing empty, nothing a copy of English;
+ *   4. every placeholder survives, and no value uses a bare `#` (which would
+ *      flip the Latin digits the locale deliberately keeps).
+ */
+const SURFACE = [
+    'src/features/projects/components/projects-view.tsx',
+    'src/features/projects/components/projects-toolbar.tsx',
+    'src/features/projects/components/projects-table.tsx',
+    'src/features/projects/components/project-card.tsx',
+    'src/features/projects/components/project-badges.tsx',
+    'src/features/projects/components/project-actions.tsx',
+    'src/features/projects/components/delete-project-dialog.tsx',
+    'src/features/projects/components/new-project-wizard.tsx',
+    'src/features/projects/components/new-project-steps.tsx',
+    'src/features/projects/components/invite-landing.tsx',
+    'src/features/projects/lib/projects-labels.ts',
+    'src/features/projects/lib/projects-validation-messages.ts',
+    'src/features/projects/hooks/use-projects.ts',
+    'src/app/[locale]/(dashboard)/projects/page.tsx',
+    'src/app/[locale]/(dashboard)/projects/new/page.tsx',
+];
+
+/** A TypeScript generic in a `.tsx` file looks like JSX text to the scanner. */
+const ALLOWED = ['const COLUMN_CLASS', 'type StepProps'];
+
+type Catalog = typeof enProjects;
+
+/** The English the projects surface rendered before AR-030 — the floor. */
+const FLOOR: Catalog = {
+  metadata: {
+    title: 'Projects',
+    description: 'Manage your AI content projects, scripts, and workflows.',
+    newTitle: 'New Project',
+    newDescription: 'Create a project and seed it with the idea your scripts will grow from.'
+  },
+  pageHeader: {
+    title: 'Projects',
+    description: 'Your content projects, scripts and workflows in one place.',
+    archiveTitle: 'Project archive',
+    archiveDescription: 'Projects you have archived. Restore one to put it back in the active list.',
+    newProject: 'New Project'
+  },
+  toolbar: {
+    searchAria: 'Search projects',
+    searchPlaceholder: 'Search projects...',
+    clearSearch: 'Clear search',
+    filterAria: 'Filter by status and platform',
+    filterAriaMobile: 'Filter projects',
+    filterText: 'Filters',
+    statusLegend: 'Status',
+    platformLegend: 'Platform',
+    filtersTitle: 'Filters',
+    filtersDescription: 'Status, platform and sort order.',
+    sortLabel: 'Sort',
+    sortAria: 'Sort projects',
+    footerClear: 'Clear filters',
+    footerShow: 'Show {count, plural, one {# result} other {# results}}',
+    viewGridAria: 'Grid view',
+    viewTableAria: 'Table view',
+    clear: 'Clear',
+    archiveOn: 'Viewing archive',
+    archiveOff: 'View archive',
+    resultsMatch: 'matching',
+    resultsTotal: 'total'
+  },
+  list: {
+    activeFilters: 'Active filters',
+    chipRemove: 'Remove filter {label}',
+    searchChip: 'Search: {q}',
+    clearAll: 'Clear all',
+    emptyTitle: 'No projects yet',
+    emptyDescription: 'Create your first project to start generating AI-powered content.',
+    emptyAction: 'Create your first project',
+    filtersEmptyTitle: 'No projects match these filters',
+    filtersEmptyDescription: 'Try a different search term, or clear the filters to see everything.',
+    filtersEmptyAction: 'Clear filters',
+    archiveEmptyTitle: 'No archived projects',
+    archiveEmptyDescription: 'Archive a project to keep it out of the active list without removing it.',
+    archiveEmptyAction: 'Back to projects',
+    paginationAria: 'Project pages',
+    pageOf: 'Page {page} of {totalPages} · {total} {noun}',
+    previous: 'Previous',
+    next: 'Next',
+    ariaLive: '{total} {noun} found',
+    ariaLiveLoading: 'Loading projects'
+  },
+  view: {
+    tableHeaders: {
+      project: 'Project',
+      platform: 'Platform',
+      status: 'Status',
+      updated: 'Updated',
+      actions: 'Actions'
+    }
+  },
+  card: {
+    openLabel: 'Open {title}',
+    platformSr: '{label} · ',
+    thumbnailAlt: 'Thumbnail for {title}'
+  },
+  actions: {
+    triggerAria: 'Actions for {title}',
+    openProject: 'Open project',
+    changeStatus: 'Change status',
+    statusMarked: 'Project marked {status}.',
+    movedToArchive: 'Project moved to archive.',
+    restoreToDrafts: 'Restore to drafts',
+    archive: 'Archive',
+    remove: 'Remove…'
+  },
+  deleteDialog: {
+    titleWithProject: 'Remove “{title}”?',
+    fallbackTitle: 'Remove this project?',
+    description: 'It disappears from your workspace. The server keeps an archived record, but this app cannot restore it yet.',
+    keep: 'Keep project',
+    remove: 'Remove project',
+    removing: 'Removing…'
+  },
+  toast: {
+    updated: 'Project updated.',
+    updateFailed: 'Failed to update project.',
+    removed: 'Project removed from your workspace.',
+    removeFailed: 'Failed to remove project.'
+  },
+  vocab: {
+    projectNoun: { one: 'project', other: 'projects' },
+    platforms: {
+      youtube: {
+        label: 'YouTube',
+        summary: 'Long-form and Shorts',
+        affects: '16:9 thumbnails, 8–12 minute scripts, 3–5 broad hashtags.'
+      },
+      tiktok: {
+        label: 'TikTok',
+        summary: 'Short, fast-paced video',
+        affects: '9:16 thumbnails, 30–60 second scripts, trending sound-led hooks.'
+      },
+      instagram: {
+        label: 'Instagram',
+        summary: 'Reels and carousels',
+        affects: '4:5 / 9:16 visuals, 30–90 second scripts, up to 30 niche hashtags.'
+      },
+      facebook: {
+        label: 'Facebook',
+        summary: 'Reels',
+        affects: '9:16 visuals, short-form scripts, share-driven hooks.'
+      }
+    },
+    tones: {
+      educational: 'Educational',
+      dramatic: 'Dramatic',
+      viral: 'Viral',
+      storytelling: 'Storytelling',
+      casual: 'Casual',
+      professional: 'Professional'
+    },
+    tonesDescriptions: {
+      educational: 'Teach one clear idea with a takeaway.',
+      dramatic: 'Build tension and reveal a payoff.',
+      viral: 'Short, punchy and built around a hook.',
+      storytelling: 'Narrative arc with a character and stakes.',
+      casual: 'Conversational, like explaining to a friend.',
+      professional: 'Polished, credible and precise.'
+    },
+    statuses: {
+      draft: 'Draft',
+      processing: 'In progress',
+      completed: 'Completed',
+      archived: 'Archived'
+    },
+    sorts: {
+      updatedAt: 'Recent activity',
+      createdAt: 'Newest created',
+      title: 'Title A–Z',
+      status: 'Status'
+    },
+    formats: {
+      long: { label: 'Long-form', description: 'YouTube long-form video.' },
+      short: { label: 'Short-form', description: 'Reels, Shorts and other vertical video.' }
+    },
+    roles: {
+      owner: 'Owner',
+      editor: 'Editor',
+      commenter: 'Commenter',
+      viewer: 'Viewer'
+    },
+    roleDescriptions: {
+      editor: 'Can edit the project and generate assets.',
+      commenter: 'Can comment but not change the project.',
+      viewer: 'Can view the project and its assets.'
+    }
+  },
+  steps: {
+    details: {
+      titleLabel: 'Project title',
+      titlePlaceholder: 'e.g. The future of AI in SaaS',
+      titleHint: 'A name you will recognise in the list.',
+      descriptionLabel: 'Short description (optional)',
+      descriptionPlaceholder: 'One or two lines shown on the project card.',
+      ideaLabel: 'The idea',
+      ideaPlaceholder: 'What is the video about? Who is it for, and what should they take away?',
+      ideaHint: 'This is the seed for script generation — more context means a better first draft.',
+      promptButton: 'Start from a prompt',
+      promptSeed: 'I want to make a video that explains '
+    },
+    platformTone: { platformLabel: 'Platform', toneLabel: 'Tone' },
+    configuration: {
+      formatLabel: 'Content format',
+      durationLabel: 'Target duration (seconds, optional)',
+      durationPlaceholder: 'e.g. 60',
+      durationHint: '15 to 3600 seconds. Scripts target this budget.',
+      unavailableNote: 'Language, voice, and dialect options are not available until the text-to-speech provider is verified. They will appear here when available.'
+    },
+    review: {
+      edit: 'Edit',
+      titleLabel: 'Title',
+      descriptionLabel: 'Description',
+      ideaLabel: 'The idea',
+      platformToneLabel: 'Platform and tone',
+      formatDurationLabel: 'Format and duration',
+      noDescription: 'No description',
+      noDuration: 'No target duration'
+    }
+  },
+  wizard: {
+    progressAria: 'Progress',
+    stepLabels: {
+      details: 'Details',
+      platformTone: 'Platform & tone',
+      configuration: 'Configuration',
+      review: 'Review'
+    },
+    stepDescriptions: {
+      details: 'Define the idea. This becomes the seed for your scripts.',
+      platformTone: 'Choose where it will live and how it should sound.',
+      configuration: 'Choose the format and target duration.',
+      review: 'Check everything before we create the workspace.'
+    },
+    backToProjects: 'Projects',
+    draftRestored: 'Draft restored from {time}.',
+    startOver: 'Start over',
+    dismiss: 'Dismiss',
+    title: 'Create a project',
+    back: 'Back',
+    continue: 'Continue',
+    createWithTitle: 'Create “{title}”',
+    untitledProject: 'project',
+    creating: 'Creating…',
+    prefillIdea: 'I want to create content about {list}.',
+    toast: {
+      created: 'Project created.',
+      createFailed: 'Could not create the project.',
+      onboardingIncomplete: 'Finish onboarding before creating a project.'
+    },
+    cancel: {
+      title: 'Discard this draft?',
+      description: 'Your title, idea and platform choices have been autosaved in this tab. Leaving now discards them.',
+      keepEditing: 'Keep editing',
+      discardAndLeave: 'Discard and leave'
+    }
+  },
+  invite: {
+    unavailableTitle: 'Invite unavailable',
+    invalidCopy: 'This invite link is not valid. It may have expired, been revoked, or already used.',
+    signIn: 'Sign in',
+    goToProjects: 'Go to projects',
+    youAreInTitle: 'You are in',
+    joinedDescription: 'You joined {project} as {role}.',
+    openProject: 'Open project',
+    alreadyMemberTitle: 'You already have access',
+    alreadyMemberDescription: 'You are already a member of {project}.',
+    openYourProjects: 'Open your projects',
+    joinTitle: 'Join {project}',
+    joinDescription: '{inviter} invited you as {role}. {description}',
+    expiresIn: 'This invite expires in {count, plural, one {# day} other {# days}}.',
+    accept: 'Accept invite',
+    signInToAccept: 'Sign in to accept',
+    createAccount: 'Create an account'
+  },
+  validation: {
+    titleRequired: 'Title is required',
+    titleTooLong: 'Title must be {limit} characters or fewer',
+    descriptionTooLong: 'Description must be {limit} characters or fewer',
+    ideaRequired: 'Content idea is required',
+    ideaTooLong: 'Idea must be {limit} characters or fewer'
+  }
+};
+
+function leaves(value: unknown, prefix = ''): Record<string, string> {
+    const out: Record<string, string> = {};
+    if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+        out[prefix] = String(value);
+        return out;
+    }
+    for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+        Object.assign(out, leaves(child, prefix ? `${prefix}.${key}` : key));
+    }
+    return out;
+}
+
+describe('AR-030 projects copy', () => {
+    it('the surface has no English left in the source', () => {
+        for (const file of SURFACE) {
+            expect(hardcodedCopy(file, { allowed: ALLOWED }), file).toEqual([]);
+        }
+    });
+
+    it('the English catalog is verbatim the pre-extraction copy', () => {
+        expect(enProjects).toEqual(FLOOR);
+    });
+
+    it('every English key is translated, and nothing is a copy of English', () => {
+        const en = leaves(enProjects);
+        const ar = leaves(arProjects);
+        expect(Object.keys(en).sort()).toEqual(Object.keys(ar).sort());
+        for (const [key, value] of Object.entries(en)) {
+            expect(ar[key]?.trim(), `${key} is empty in Arabic`).toBeTruthy();
+            if (/^[A-Za-z0-9 .,:\-–—…()'"]+$/.test(value)) {
+                expect(ar[key], `${key} is still English`).not.toBe(value);
+            }
+        }
+    });
+
+    it('placeholders survive and the Arabic keeps Latin digits', () => {
+        const args = (message: string) =>
+            [...message.matchAll(/\{([A-Za-z_][\w]*)\s*[},]/g)].map((match) => match[1]).sort();
+        const ar = leaves(arProjects);
+        for (const [key, value] of Object.entries(leaves(enProjects))) {
+            expect(args(ar[key]!), `${key} placeholders`).toEqual(args(value));
+        }
+        for (const [key, value] of Object.entries(leaves(arProjects))) {
+            expect(value, `${key} uses a bare #`).not.toMatch(/(^|[^{])#/);
+        }
+    });
+});
