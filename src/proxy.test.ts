@@ -344,3 +344,32 @@ describe('matcher is narrowed (R-14)', () => {
         expect(matcher.test(path)).toBe(expected);
     });
 });
+
+describe('AP-019 — the /admin prefix (optimistic gate + noindex/no-store)', () => {
+    it('a signed-out visitor on /admin is redirected to login (optimistic gate)', async () => {
+        const res = await proxy(makeRequest('/en/admin/users'));
+        expect(res.status).toBe(307);
+        const loc = locationOf(res);
+        expect(loc).toContain('/en/login');
+        expect(loc).toContain('callbackUrl=%2Fen%2Fadmin%2Fusers');
+    });
+
+    it('an authenticated admin request passes through with noindex + no-store', async () => {
+        const res = await proxy(
+            makeRequest('/en/admin/users', { cookies: { [SESSION_COOKIE]: await signToken() } })
+        );
+        expect(res.status).toBe(200);
+        expect(res.headers.get('x-proxy-next')).toBe('1');
+        expect(res.headers.get('x-robots-tag')).toBe('noindex');
+        expect(res.headers.get('cache-control')).toBe('no-store');
+    });
+
+    it('non-admin routes are not stamped with the admin headers', async () => {
+        const res = await proxy(
+            makeRequest('/en/dashboard', { cookies: { [SESSION_COOKIE]: await signToken() } })
+        );
+        expect(res.status).toBe(200);
+        expect(res.headers.get('x-robots-tag')).toBeNull();
+        expect(res.headers.get('cache-control')).not.toBe('no-store');
+    });
+});

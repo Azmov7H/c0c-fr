@@ -42,6 +42,7 @@ import type { AppLocale } from '@/i18n/routing';
  * reachable regardless of session state (see session-initializer.tsx).
  */
 const protectedPrefixes = [
+    '/admin', // AP-019 — the console is an internal surface (optimistic gate).
     '/dashboard',
     '/onboarding',
     '/projects',
@@ -120,6 +121,19 @@ function createNonce(): string {
     crypto.getRandomValues(bytes);
     return btoa(String.fromCharCode(...bytes));
 }
+
+/**
+ * AP-019 — the `/admin` prefix (UI-UX-SPEC §2.4, `src/app/[locale]/(admin)`).
+ * `isAdminPath` matches the locale-less core path (`/admin`, `/admin/…`).
+ */
+const isAdminPath = (corePath: string): boolean =>
+    corePath === '/admin' || corePath.startsWith('/admin/');
+
+/** AP-019 — every /admin route is noindex + no-store (an internal surface). */
+const applyAdminHeaders = (response: NextResponse): void => {
+    response.headers.set('x-robots-tag', 'noindex');
+    response.headers.set('cache-control', 'no-store');
+};
 
 export function buildContentSecurityPolicy(scriptNonce: string, enforce = false): string {
     return [
@@ -258,6 +272,8 @@ export async function proxy(request: NextRequest) {
     // "reached the edge without the gate active" (mode: off bypasses above and
     // never carries this header).
     response.headers.set('x-proxy-next', '1');
+    // AP-019 — the admin console: nothing about it is SEO-visible or shareable.
+    if (isAdminPath(corePath)) applyAdminHeaders(response);
 
     return response;
 }
