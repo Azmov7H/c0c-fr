@@ -69,5 +69,24 @@
     "auditLogs": "Audit Logs",
     "settings": "Settings",
     "rolesPermissions": "Roles & Permissions"
+  },
+  "components": {
+    "idCell": { "copy": "Copy id", "copied": "Copied" },
+    "maskedValue": { "hidden": "Value is hidden — requires permission" },
+    "anomalyCard": { "link": "View user", "balance": "balance" },
+    "instanceMetricsNote": { "label": "since instance start · {since}" },
+    "auditDiff": { "field": "Field", "before": "Before", "after": "After" },
+    "stepUpPrompt": {
+      "password": "Password",
+      "confirm": "Confirm",
+      "invalid": "Password is incorrect — try again",
+      "hint": "Confirm with your password. This confirms the sensitive action."
+    },
+    "reasonField": { "label": "Reason", "placeholder": "Why are you doing this?" },
+    "adminActionDialog": { "cancel": "Cancel", "submitting": "Running…" },
+    "dangerConfirmDialog": {
+      "typeLabel": "Type the target value to confirm",
+      "mismatch": "Type exactly what you typed above — no match yet"
+    }
   }
 }
