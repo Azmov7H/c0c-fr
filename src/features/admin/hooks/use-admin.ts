@@ -1,30 +1,26 @@
 'use client';
 
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-
-import { adminService } from '../services/admin.service';
+import {
+    useAdminMe as useAdminMeContext,
+    useRefreshAdminMe as useRefreshAdminMeContext,
+} from '../components/admin-me-provider';
 import type { AdminMe } from '../types';
 
-export const adminKeys = {
-    me: ['admin', 'me'] as const,
-};
+/** Effective identity + permissions, bootstrapped by the layout (/admin/me). */
+export function useAdminMe(): AdminMe | undefined {
+    return useAdminMeContext();
+}
 
-/** Effective identity + permissions for the current admin session. */
-export function useAdminMe(): UseQueryResult<AdminMe> {
-    return useQuery({
-        queryKey: adminKeys.me,
-        queryFn: () => adminService.me(),
-        staleTime: 30_000,
-        refetchOnWindowFocus: false,
-    });
+/** Re-fetch /admin/me after the server state may have changed (spec §5.1 rule 6). */
+export function useRefreshAdminMe(): () => Promise<void> {
+    return useRefreshAdminMeContext();
 }
 
 /**
- * The effective permission set (spec §5.1 rule 1). Empty while `/admin/me` is
- * loading — nav filters to nothing, which is the right default for a role we
- * do not yet know.
+ * The effective permission set (spec §5.1 rule 1). Empty while /admin/me is
+ * unavailable.
  */
 export function useAdminPermissions(): string[] {
-    const { data } = useAdminMe();
-    return data?.permissions ?? [];
+    const me = useAdminMe();
+    return me?.permissions ?? [];
 }
