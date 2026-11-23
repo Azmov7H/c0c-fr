@@ -7,6 +7,7 @@ import pricing from '../../messages/en/pricing.json';
 import legal from '../../messages/en/legal.json';
 import dashboard from '../../messages/en/dashboard.json';
 import projects from '../../messages/en/projects.json';
+import advertisements from '../../messages/en/advertisements.json';
 import workspace from '../../messages/en/workspace.json';
 import scripts from '../../messages/en/scripts.json';
 import titles from '../../messages/en/titles.json';
@@ -55,6 +56,7 @@ declare module 'next-intl' {
             legal: typeof legal;
             dashboard: typeof dashboard;
             projects: typeof projects;
+            advertisements: typeof advertisements;
             workspace: typeof workspace;
             scripts: typeof scripts;
             titles: typeof titles;

@@ -7,6 +7,7 @@
     "groups.management",
     "items.dashboard",
     "items.projects",
+    "items.advertisements",
     "items.thumbnails",
     "items.mediaLibrary",
     "items.trending",
@@ -38,6 +39,7 @@
   "items": {
     "dashboard": "Dashboard",
     "projects": "Projects",
+    "advertisements": "Advertisements",
     "thumbnails": "Thumbnails",
     "mediaLibrary": "Media Library",
     "trending": "Trending",

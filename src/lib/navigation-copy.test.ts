@@ -43,6 +43,7 @@ const FLOOR = {
     items: {
         dashboard: 'Dashboard',
         projects: 'Projects',
+        advertisements: 'Advertisements',
         thumbnails: 'Thumbnails',
         mediaLibrary: 'Media Library',
         trending: 'Trending',
@@ -142,6 +143,19 @@ describe('AR-029 the shell navigation extraction', () => {
         ]);
         expect(ROUTE_LABELS.onboarding).toBe('Get started');
         expect(ROUTE_LABELS.audio).toBe('Audio Studio');
+    });
+
+    it('exposes Advertisements under Content Engine', () => {
+        const group = NAV_GROUPS.find((item) => item.label === 'Content Engine');
+        expect(group?.items).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    title: 'Advertisements',
+                    titleKey: 'items.advertisements',
+                    url: '/advertisements',
+                }),
+            ])
+        );
     });
 
     it('every breadcrumb label has a catalog key and vice versa', () => {
