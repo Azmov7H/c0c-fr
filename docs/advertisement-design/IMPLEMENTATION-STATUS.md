@@ -129,7 +129,7 @@ The design roadmap prescribed one branch per A-task. This implementation was exp
 
 | Gate | Status | Current evidence | Next action |
 |---|---|---|---|
-| Cloudinary live smoke | `PASSED` | Live upload, signed upload, delivery, and invalidated deletion; regression test `tests/unit/storage-mime.test.ts`. | Merge `origin/fix/cloudinary-image-mime` and include it in the release branch. |
+| Cloudinary live smoke | `PASSED` | Live upload, signed upload, delivery, and invalidated deletion; regression test `tests/unit/storage-mime.test.ts`. Merged externally via PR #32 into `origin/main`; no assistant-performed merge. | No further merge action; if trailing evidence docs are required on `main`, open a documentation-only PR. |
 | D8 TTS decision | `BLOCKED` | Extended live and official-document evidence is recorded in `D8-EVIDENCE-2026-11-24.md`; `ADS_AI_VOICE_ENABLED` remains false. | Obtain owner listening/feature-fit approval, Arabic dialect/locale policy, cost sign-off, and a signed D8 decision before enabling AI voice or a voice picker. |
 | Full 30 s MP4 render | `PASSED` | 30 s Arabic RTL renders passed at both 720 p (`1280x720`) and 1080 p (`1920x1080`) with real Chromium, FFmpeg, and Cloudinary; H.264, duration 30 s, MP4/poster `200`, cleanup `404`. | No further acceptance render needed at either resolution. |
 | Golden RTL frame review | `PARTIAL` | Frames captured at 1 s/15 s/29 s from both 720 p and 1080 p renders with stable RTL-anchored Arabic text; mechanical checks pass. | Obtain human visual approval of both resolution sets at pinned font/preset versions. |
@@ -143,7 +143,7 @@ The design roadmap prescribed one branch per A-task. This implementation was exp
 
 - No durable async motion-generation queue; generation is synchronous with deterministic fallback.
 - No in-repo worker container image, autoscale policy, or SLO dashboard.
-- Cloudinary live smoke, a full 30 s live render, and extended D8 evidence exist; human golden RTL review, signed D8 decision, cost sign-off, and R-01 rotation remain open. Full e2e and Lighthouse were run but remain blocked by stale specs, accepted axe debt, an invalid LHCI audit key, and pre-existing performance budgets.
+- Cloudinary live smoke, full 30 s 720 p and 1080 p live renders, and extended D8 evidence exist; human golden RTL review, signed D8 decision, cost sign-off, and R-01 rotation remain open. Full e2e and Lighthouse were run but remain blocked by stale specs, accepted axe debt, an invalid LHCI audit key, and pre-existing performance budgets.
 - The backend Cloudinary fix branch has been pushed but has no PR yet; the frontend feature branch also has no PR yet.
 - Historical design docs still describe a standalone wizard and AI-image/vision pipeline; the refreshed direction sections and this status file supersede them where they conflict.
 - Full backend lint has a large baseline warning count; targeted advertisement lint is 0 errors with 27 warnings.
