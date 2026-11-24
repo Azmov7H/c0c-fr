@@ -121,6 +121,79 @@
       "audit": "Recent audit",
       "empty": "No activity in this range",
       "emptyDescription": "Start moving credits or generating AI work to see activity here."
+    },
+    "users": {
+      "title": "Users",
+      "filters": { "search": "Search users", "role": "Role", "all": "All roles" },
+      "columns": {
+        "user": "User",
+        "role": "Role",
+        "plan": "Plan",
+        "subscription": "Subscription",
+        "credits": "Credits",
+        "status": "Status",
+        "created": "Created",
+        "actions": "Actions",
+        "unverified": "unverified"
+      },
+      "actions": {
+        "view": "View",
+        "suspend": "Suspend",
+        "restore": "Restore",
+        "revokeSessions": "Revoke sessions",
+        "changeRole": "Change role",
+        "delete": "Delete"
+      },
+      "list": { "noUsers": "No users match your filters" },
+      "detail": {
+        "plan": "Plan",
+        "created": "Created",
+        "credits": "Credits",
+        "projects": "Projects",
+        "audit": "Audit",
+        "emptyAudit": "No audit rows"
+      },
+      "dialogs": {
+        "suspend": {
+          "title": "Suspend {user}",
+          "description": "Suspending {user} blocks sign-ins, revokes their sessions, and suspends the account.",
+          "consequence": "While suspended the user cannot sign in or use the account.",
+          "reasonLabel": "Reason (required, 10–500 chars)",
+          "confirm": "Suspend user",
+          "success": "User suspended."
+        },
+        "restore": {
+          "title": "Restore {user}",
+          "description": "Restoring {user} returns the account to active status.",
+          "consequence": "The user can sign in again.",
+          "reasonLabel": "Reason (1–500 chars)",
+          "confirm": "Restore user",
+          "success": "User restored."
+        },
+        "revokeSessions": {
+          "title": "Revoke sessions for {user}",
+          "description": "All active sessions for {user} will be invalidated; the user must sign in again.",
+          "consequence": "The user will be signed out everywhere.",
+          "reasonLabel": "Reason (optional)",
+          "confirm": "Revoke sessions",
+          "success": "Sessions revoked."
+        },
+        "role": {
+          "title": "Change role",
+          "description": "Changing {user} to {role}.",
+          "consequence": "The new role applies immediately; it determines the permission set.",
+          "reasonLabel": "Reason (optional)",
+          "confirm": "Change role",
+          "success": "Role changed."
+        },
+        "delete": {
+          "title": "Delete user",
+          "description": "Type {user} to confirm deleting their account.",
+          "consequence": "Deleting is permanent — no data is recoverable.",
+          "confirm": "Delete user",
+          "success": "User deleted."
+        }
+      }
     }
   }
 }
