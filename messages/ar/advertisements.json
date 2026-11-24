@@ -1,0 +1,176 @@
+{
+  "metadata": {
+    "title": "الإعلانات",
+    "description": "راجع مقاطع المشاريع وصيّرها بحركة تتكيف مع لغة المحتوى."
+  },
+  "pageHeader": {
+    "title": "الإعلانات",
+    "description": "كل تركيبات الفيديو المولّدة من أصول مشاريعك في مكان واحد.",
+    "new": "الإنشاء من مشروع",
+    "newDescription": "ابدأ فيديو من مساحة عمل مشروع موجود."
+  },
+  "filters": {
+    "searchLabel": "ابحث في الإعلانات",
+    "searchPlaceholder": "ابحث باسم المشروع",
+    "statusLabel": "الحالة",
+    "allStatuses": "كل الحالات",
+    "clear": "مسح المرشحات",
+    "resultCount": "{count} إعلان"
+  },
+  "status": {
+    "draft": "مسودة",
+    "ready": "جاهز",
+    "rendering": "قيد التصيير",
+    "completed": "مكتمل",
+    "failed": "فاشل",
+    "archived": "مؤرشف"
+  },
+  "language": {
+    "ar": "العربية",
+    "en": "الإنجليزية"
+  },
+  "jobStatus": {
+    "queued": "في الطابور",
+    "rendering": "تصيير الإطارات",
+    "processingAudio": "مزج الصوت",
+    "finalizing": "الإنهاء",
+    "completed": "مكتمل",
+    "failed": "فاشل",
+    "cancelled": "ملغي"
+  },
+  "list": {
+    "emptyTitle": "لا توجد إعلانات بعد",
+    "emptyDescription": "افتح مشروعًا واستخدم «توليد فيديو» لإنشاء أول تركيب لديك.",
+    "emptyAction": "تصفح المشاريع",
+    "filteredEmptyTitle": "لا توجد إعلانات مطابقة",
+    "filteredEmptyDescription": "جرّب بحثًا أو حالة أخرى.",
+    "loading": "جارٍ تحميل الإعلانات",
+    "previous": "الصفحة السابقة",
+    "next": "الصفحة التالية"
+  },
+  "card": {
+    "duration": "{seconds} ث",
+    "updated": "آخر تحديث {time}",
+    "open": "افتح الإعلان",
+    "posterFallback": "لا توجد صورة غلاف بعد",
+    "ready": "الفيديو جاهز",
+    "archive": "أرشفة",
+    "archiveConfirm": "أرشفة هذا الإعلان؟ يمكنك استعادته بتوليد فيديو المشروع مجددًا.",
+    "cancel": "الإبقاء على الإعلان"
+  },
+  "detail": {
+    "back": "العودة إلى الإعلانات",
+    "project": "المشروع: {title}",
+    "language": "لغة المحتوى: {language}",
+    "plan": "تصيير الخطة: {resolution} بمعدل {fps} إطار/ثانية",
+    "notInitialized": "لا توجد مساحة فيديو لهذا المشروع بعد.",
+    "initialize": "تهيئة مساحة الفيديو",
+    "loadError": "تعذّر تحميل الإعلان.",
+    "retry": "إعادة المحاولة"
+  },
+  "languageGate": {
+    "title": "تأكيد لغة المحتوى",
+    "description": "النص قصير أو مختلط ولا يمكن اكتشاف لغته بثقة. الفيديو يتبع الكلمات لا لغة واجهتك.",
+    "label": "لغة الإعلان",
+    "confirm": "تأكيد اللغة",
+    "confirmed": "تم الاكتشاف: {language} ({confidence}٪)"
+  },
+  "composition": {
+    "title": "تركيب الحركة",
+    "description": "تُولَّد المشاهد من نص المشروع والصور المختارة. لا يُقبل HTML أو JavaScript خام من النموذج.",
+    "generate": "توليد فيديو",
+    "generating": "جارٍ التوليد…",
+    "regenerate": "إعادة توليد المشهد",
+    "scenes": "{count} مشهد",
+    "scene": "المشهد {number}",
+    "duration": "{seconds} ث",
+    "generatedAi": "مولّد بالذكاء الاصطناعي",
+    "generatedFallback": "تركيب احتياطي حتمي",
+    "empty": "لا يوجد تركيب بعد. ولّد فيديو للمتابعة.",
+    "previewTitle": "المعاينة",
+    "previewDescription": "المشغّل الحتمي نفسه الذي يستخدمه عامل التصيير.",
+    "previewUnavailable": "المعاينة غير متاحة حتى يتم توليد تركيب.",
+    "validationTitle": "فحوصات التركيب",
+    "validationIssue": "{message} (المشهد {sceneId})",
+    "voiceMismatch": "لغة التعليق الصوتي لا تطابق لغة التركيب.",
+    "scriptRequired": "ولّد نصًا للمشروع أولًا."
+  },
+  "audio": {
+    "title": "توقيت التعليق الصوتي",
+    "description": "قيّس تعليق المشروع ليتبع حدود المشاهد الصوت.",
+    "analyze": "تحليل التعليق الصوتي",
+    "analyzing": "جارٍ التحليل…",
+    "ready": "المدة المقيسة: {seconds} ث",
+    "segments": "{count} مقطع بتوقيت محدد",
+    "empty": "لا يوجد تحليل للتعليق الصوتي بعد.",
+    "noNarration": "لا يوجد أصل تعليق صوتي لهذا المشروع بعد.",
+    "sourceProbe": "مقيس بـ ffprobe",
+    "sourceFallback": "مُقدَّر من أقسام النص"
+  },
+  "voice": {
+    "title": "مصدر التعليق الصوتي",
+    "description": "اختر الصوت الذي يُمزج مع ملف MP4 النهائي.",
+    "existing": "تعليق المشروع",
+    "generated": "تعليق بالذكاء الاصطناعي",
+    "none": "بدون تعليق",
+    "useExisting": "استخدام تعليق المشروع",
+    "generate": "توليد تعليق بالذكاء الاصطناعي",
+    "generating": "جارٍ التوليد…",
+    "gated": "التعليق العربي بالذكاء الاصطناعي معطّل في هذا النشر.",
+    "active": "المصدر النشط: {source}"
+  },
+  "render": {
+    "title": "التصيير",
+    "description": "يلتقط عامل مستقل الإطارات ويمزج التعليق ويرفع ملف MP4 إلى Cloudinary.",
+    "resolution": "الدقة",
+    "start": "بدء التصيير",
+    "starting": "جارٍ الإضافة للطابور…",
+    "active": "تصيير نشط: {status}",
+    "progress": "التقدم: {percent}٪ — {stage}",
+    "frames": "الإطار {frame} من {total}",
+    "eta": "تبقى نحو {seconds} ث",
+    "cancel": "إلغاء التصيير",
+    "cancelling": "جارٍ الإلغاء…",
+    "retry": "إعادة التصيير",
+    "retrying": "جارٍ إعادة المحاولة…",
+    "completed": "اكتمل التصيير. التنزيل جاهز.",
+    "failed": "فشل التصيير: {message}",
+    "cancelled": "تم إلغاء هذا التصيير.",
+    "download": "تنزيل MP4",
+    "stale": "تغيّر التركيب منذ آخر تصيير.",
+    "noJob": "لا توجد مهمة تصيير بعد.",
+    "error": "تعذّر بدء التصيير."
+  },
+  "upgrade": {
+    "title": "المزيد من التصيير مع خطة أعلى",
+    "description": "استُنفدت حصّة تصيير الإعلانات لهذا الشهر.",
+    "creditTitle": "هذه العملية تحتاج إلى رصيد",
+    "creditDescription": "اشحن الرصيد أو ترقّ الخطة في الفوترة للمتابعة.",
+    "cta": "اطّلع على الخطط"
+  },
+  "toast": {
+    "archived": "تم أرشفة الإعلان",
+    "archiveFailed": "تعذّر أرشفة الإعلان",
+    "languageSaved": "تم تأكيد لغة المحتوى",
+    "languageFailed": "تعذّر تأكيد اللغة",
+    "audioAnalyzed": "تم تحليل توقيت التعليق الصوتي",
+    "audioFailed": "تعذّر تحليل التعليق الصوتي",
+    "generated": "تم توليد تركيب الفيديو",
+    "generateFailed": "تعذّر توليد تركيب الفيديو",
+    "sceneRegenerated": "تمت إعادة توليد المشهد",
+    "sceneFailed": "تعذّرت إعادة توليد المشهد",
+    "voiceSaved": "تم تحديث مصدر التعليق الصوتي",
+    "voiceFailed": "تعذّر تحديث مصدر التعليق الصوتي",
+    "renderQueued": "تمت إضافة التصيير إلى الطابور",
+    "renderFailed": "تعذّر بدء التصيير"
+  },
+  "workspace": {
+    "title": "فيديو الإعلان",
+    "description": "ولّد تركيب حركة من نص المشروع وصوره وتعليقه الصوتي.",
+    "generate": "توليد فيديو",
+    "generating": "جارٍ التجهيز…",
+    "emptyTitle": "لا توجد مساحة فيديو بعد",
+    "emptyDescription": "هيّئ مساحة فيديو المشروع لاكتشاف لغة محتواه وإعادة استخدام أصوله.",
+    "openDetail": "فتح التفاصيل الكاملة"
+  }
+}

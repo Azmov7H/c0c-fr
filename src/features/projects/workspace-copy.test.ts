@@ -63,6 +63,7 @@ const FLOOR = {
     "tabs": {
       "loading": "Loading tab",
       "assets": "Assets",
+      "video": "Video",
       "media": "Media",
       "preview": "Preview",
       "members": "Members",

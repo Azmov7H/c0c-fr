@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import { Activity, Eye, FileImage as ImageIcon, FolderKanban, Users } from 'lucide-react';
+import { Activity, Clapperboard, Eye, FileImage as ImageIcon, FolderKanban, Users } from 'lucide-react';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -34,6 +34,13 @@ const MediaTab = dynamic(
     { ssr: false, loading: () => <TabSkeleton /> },
 );
 
+// Advertisements: the project-first Generate Video surface stays out of the
+// workspace's initial bundle until the tab is opened.
+const VideoTab = dynamic(
+    () => import('@/features/advertisements/components/video-tab').then((mod) => mod.VideoTab),
+    { ssr: false, loading: () => <TabSkeleton /> },
+);
+
 function TabSkeleton() {
     const t = useTranslations('workspace');
     return (
@@ -44,10 +51,11 @@ function TabSkeleton() {
     );
 }
 
-export type WorkspaceTab = 'assets' | 'media' | 'preview' | 'members' | 'activity';
+export type WorkspaceTab = 'assets' | 'video' | 'media' | 'preview' | 'members' | 'activity';
 
 export const WORKSPACE_TABS: readonly WorkspaceTab[] = [
     'assets',
+    'video',
     'media',
     'preview',
     'members',
@@ -57,6 +65,7 @@ export const WORKSPACE_TABS: readonly WorkspaceTab[] = [
 export function isWorkspaceTab(value: string | null): value is WorkspaceTab {
     return (
         value === 'assets' ||
+        value === 'video' ||
         value === 'media' ||
         value === 'preview' ||
         value === 'members' ||
@@ -83,6 +92,10 @@ export function WorkspaceTabs({
                     <FolderKanban className="size-4" aria-hidden="true" />
                     {workspaceTabLabel(t, 'assets')}
                 </TabsTrigger>
+                <TabsTrigger value="video" className="h-11 gap-2 px-4">
+                    <Clapperboard className="size-4" aria-hidden="true" />
+                    {workspaceTabLabel(t, 'video')}
+                </TabsTrigger>
                 <TabsTrigger value="media" className="h-11 gap-2 px-4">
                     <ImageIcon className="size-4" aria-hidden="true" />
                     {workspaceTabLabel(t, 'media')}
@@ -105,6 +118,9 @@ export function WorkspaceTabs({
 
             <TabsContent value="assets" className="mt-6">
                 <AssetsTab projectId={projectId} role={role} />
+            </TabsContent>
+            <TabsContent value="video" className="mt-6">
+                <VideoTab projectId={projectId} role={role} />
             </TabsContent>
             <TabsContent value="media" className="mt-6">
                 <MediaTab projectId={projectId} role={role} />

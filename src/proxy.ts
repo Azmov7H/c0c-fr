@@ -46,6 +46,7 @@ const protectedPrefixes = [
     '/dashboard',
     '/onboarding',
     '/projects',
+    '/advertisements',
     '/trends',
     '/scripts',
     '/media',

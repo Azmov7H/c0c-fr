@@ -102,6 +102,8 @@ export function workspaceTabLabel(t: WorkspaceTranslator, tab: WorkspaceTab): st
     switch (tab) {
         case 'assets':
             return t('tabs.assets');
+        case 'video':
+            return t('tabs.video');
         case 'media':
             return t('tabs.media');
         case 'preview':

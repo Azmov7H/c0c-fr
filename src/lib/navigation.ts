@@ -1,6 +1,7 @@
 import {
     BarChart3,
     CalendarDays,
+    Clapperboard,
     CreditCard,
     FileText,
     Flame,
@@ -66,6 +67,7 @@ export const NAV_GROUPS: NavGroup[] = [
         labelKey: 'groups.contentEngine',
         items: [
             { title: 'Projects', titleKey: 'items.projects', url: '/projects', icon: FolderKanban },
+            { title: 'Advertisements', titleKey: 'items.advertisements', url: '/advertisements', icon: Clapperboard },
         ],
     },
     {
