@@ -144,3 +144,9 @@
 - The job reached `completed`/`100`, produced H.264 `1920x1080` with probed duration `30 s`, and uploaded MP4 and poster; both delivery URLs returned `200`. Cloudinary admin lookups for both public IDs returned `404` after cleanup. No credentials or signed URLs were logged.
 - Extracted frames at 1 s, 15 s, and 29 s. All three are 1920×1080 with a stable bright-pixel bounding box at x 1408–1722 inside the expected x 192–1728 headline area and entirely on the right half, consistent with RTL anchoring. This is a mechanical check; human visual sign-off is still pending for both 720 p and 1080 p frame sets.
 - **Status:** Full 30 s render gate is now `PASSED` at both 720 p and 1080 p. Golden RTL frame review remains `PARTIAL`; A10 remains `BLOCKED`.
+
+## 2026-11-24 — PR state verification
+
+- Anonymous GitHub API check showed frontend PR #66 open with head `fc3aa4d`, matching the current `feat/advertisement-system` tip. It was created externally by the repository owner; the assistant did not create or merge it. The curated `PR-BODY-c0c-fr.md` is retained for an authenticated body update.
+- The backend repository is private to anonymous API/web requests (`404`). `git ls-remote origin 'refs/pull/*/head'` showed PR refs #31 at `1ee9f5d` and #32 at `39bbf40`, both earlier commits on `fix/cloudinary-image-mime`; the branch itself is at `b4b709d`. Titles, state, and whether the PR head includes the latest evidence commit require an authenticated UI check.
+- **Status:** PR handoff evidence refreshed. A10 remains `BLOCKED`; no assistant-performed PR creation, merge, force-push, branch deletion, or `main` modification occurred.

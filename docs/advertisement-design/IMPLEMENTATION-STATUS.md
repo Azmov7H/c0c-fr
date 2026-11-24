@@ -19,8 +19,8 @@
 | Repo | Branch | Base before this work | State at snapshot |
 |---|---|---|---|
 | `c0c-bake` | `feat/advertisement-system` | `2715110` (`docs(advertisement): publish the advertisement-design planning milestone`) | Head `baf0bfe2754cfee906fa0f0ffb40e80138e13251`. PR #30 was created and merged externally into `origin/main` at `70d5873f43c93a200d183c6c737aad92a5ec3fb1`; this session did not merge or modify `main`. |
-| `c0c-bake` | `fix/cloudinary-image-mime` | `origin/main` (`70d5873f43c93a200d183c6c737aad92a5ec3fb1`) | Live-smoke fix committed as `9a8b23d` with a follow-up docs refresh, both pushed to `origin/fix/cloudinary-image-mime`. Current head is tracked in `PR-HANDOFF.md`. No PR was created here because `gh`/`GITHUB_TOKEN` are unavailable. |
-| `c0c-fr` | `feat/advertisement-system` | `661b22e` (`fix(ui): make dashboard sidebar RTL logical`) | Feature work and a follow-up docs refresh are pushed to `origin/feat/advertisement-system`. Current head is tracked in `PR-HANDOFF.md`. No PR exists yet. |
+| `c0c-bake` | `fix/cloudinary-image-mime` | `origin/main` (`70d5873f43c93a200d183c6c737aad92a5ec3fb1`) | Live-smoke fix and evidence docs are pushed to `origin/fix/cloudinary-image-mime`; current head is tracked in `PR-HANDOFF.md`. Remote PR refs #31/#32 point to earlier commits on this branch; the private repository prevents anonymous API verification of state/titles, so an authenticated head check is required. No PR was created by the assistant. |
+| `c0c-fr` | `feat/advertisement-system` | `661b22e` (`fix(ui): make dashboard sidebar RTL logical`) | Feature work and evidence docs are pushed to `origin/feat/advertisement-system`. PR #66 is open with head `fc3aa4d`, matching the branch tip; it was created externally, not by the assistant. |
 
 The design roadmap prescribed one branch per A-task. This implementation was explicitly consolidated into one feature branch per repository. No force-push, branch deletion, or assistant-performed merge occurred.
 
@@ -150,4 +150,4 @@ The design roadmap prescribed one branch per A-task. This implementation was exp
 
 ## Deployment readiness
 
-**Not release-ready.** The refreshed MVP is code-complete and all local automated gates pass. Cloudinary live storage, full 30 s 720 p and 1080 p live renders, and extended D8 evidence are verified, but A10 remains `BLOCKED` on human golden RTL sign-off, a signed D8 decision, worker operations, R-01 rotation, stale e2e/axe/Lighthouse debt, and cost sign-off. The safe next release step is to open the frontend PR and the backend fix PR, then complete the external gate checklist before enabling paid or AI-voice paths.
+**Not release-ready.** The refreshed MVP is code-complete and all local automated gates pass. Cloudinary live storage, full 30 s 720 p and 1080 p live renders, and extended D8 evidence are verified, but A10 remains `BLOCKED` on human golden RTL sign-off, a signed D8 decision, worker operations, R-01 rotation, stale e2e/axe/Lighthouse debt, and cost sign-off. Frontend PR #66 is open and backend fix PR refs exist but need an authenticated head/state check. Complete the external gate checklist before enabling paid or AI-voice paths.
