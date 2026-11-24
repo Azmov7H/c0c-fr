@@ -120,3 +120,10 @@
 - Repeated the live render smoke at the full 30 s acceptance duration with a 900-frame Arabic RTL 16:9 composition. The job reached `completed`/`100`, produced H.264 `1280x720` with probed duration `30 s`, uploaded MP4 and poster, both delivered `200`, and cleanup returned `404`.
 - Extracted frames at 1 s, 15 s, and 29 s. Each is 1280×720; bright-pixel content in the expected headline area stayed stable, with the Arabic text bounding box at x 939–1148 inside the x 128–1152 headline region, consistent with RTL anchoring. This is a mechanical check, not human visual approval.
 - **Status:** Full 30 s render gate `PASSED`; golden RTL frame review `PARTIAL` pending human sign-off; A10 remains `BLOCKED`.
+
+## 2026-11-24 — Extended D8 evidence (A6, A10)
+
+- Fetched the official non-real-time speech-synthesis guide, Qwen-Audio-TTS HTTP API, voice list, and model-pricing page. Confirmed the configured model/endpoint shape, `ar` as a valid `language_hints` code, `longanhuan_v3.1` as a female multilingual/dialect voice, `qwen-audio-3.1-tts-flash-naseem_ar` as a dedicated Arabic male voice, SSML/instruction/timestamp support, and token-based prices.
+- Ran a bounded live smoke with three calls: `longanhuan_v3.1` + `language_hints: ["ar"]`, `qwen-audio-3.1-tts-flash-naseem_ar`, and a 1500-character Arabic cap probe. All returned HTTP `200`, non-silent MP3s, `usage` token counts, and 24-hour URLs. The cap probe produced 252.624 s audio and 415/3157 input/output tokens. No credentials or signed URLs were logged.
+- Recorded the evidence in `D8-EVIDENCE-2026-11-24.md` and added an interim engineering decision to keep `ADS_AI_VOICE_ENABLED=false`, add no language/gender/dialect/SSML option, and require owner listening review, dialect/locale policy, and cost sign-off before a formal D8 decision.
+- **Status:** D8 evidence gates §7.1–§7.5 have supporting evidence; D8 remains `NOT DECIDED`, A6 remains `COMPLETED`, and A10 remains `BLOCKED`.
