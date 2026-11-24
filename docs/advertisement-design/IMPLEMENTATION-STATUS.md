@@ -1,6 +1,6 @@
 # Advertisement System — Implementation Status
 
-> **Snapshot:** 2026-11-24
+> **Snapshot:** 2026-11-25
 > **Scope:** Advertisement System, refreshed Motion Graphics direction (A0–A10 plus A3-L, A4-M, A6-S).
 > **Canonical location:** `tasks/advertisement-design/IMPLEMENTATION-STATUS.md`. Versioned copies live in `c0c-bake/docs/advertisement-design/` and `c0c-fr/docs/advertisement-design/`.
 
@@ -19,8 +19,8 @@
 | Repo | Branch | Base before this work | State at snapshot |
 |---|---|---|---|
 | `c0c-bake` | `feat/advertisement-system` | `2715110` (`docs(advertisement): publish the advertisement-design planning milestone`) | Head `baf0bfe2754cfee906fa0f0ffb40e80138e13251`. PR #30 was created and merged externally into `origin/main` at `70d5873f43c93a200d183c6c737aad92a5ec3fb1`; this session did not merge or modify `main`. |
-| `c0c-bake` | `fix/cloudinary-image-mime` | `origin/main` (`70d5873f43c93a200d183c6c737aad92a5ec3fb1`) | Live-smoke fix committed as `9a8b23d` with a follow-up docs refresh, both pushed to `origin/fix/cloudinary-image-mime`. Current head is tracked in `PR-HANDOFF.md`. No PR was created here because `gh`/`GITHUB_TOKEN` are unavailable. |
-| `c0c-fr` | `feat/advertisement-system` | `661b22e` (`fix(ui): make dashboard sidebar RTL logical`) | Feature work and a follow-up docs refresh are pushed to `origin/feat/advertisement-system`. Current head is tracked in `PR-HANDOFF.md`. No PR exists yet. |
+| `c0c-bake` | `fix/cloudinary-image-mime` | `origin/main` (`70d5873f43c93a200d183c6c737aad92a5ec3fb1`) | Live-smoke fix merged externally via PR #31 (`0cfcb98`) and PR #32 (`651e3fc`, current `origin/main`). The branch head, tracked in `PR-HANDOFF.md`, has additional documentation-only commits after the merged PR head. No PR or merge was performed by the assistant. |
+| `c0c-fr` | `feat/advertisement-system` | `661b22e` (`fix(ui): make dashboard sidebar RTL logical`) | Feature work merged externally via PR #65 (`8f5bb00`) and PR #66 (`d9b599a`, current `origin/main`) with head `fc3aa4d`. The branch head, tracked in `PR-HANDOFF.md`, has additional documentation-only commits after the merged PR head. No PR or merge was performed by the assistant. |
 
 The design roadmap prescribed one branch per A-task. This implementation was explicitly consolidated into one feature branch per repository. No force-push, branch deletion, or assistant-performed merge occurred.
 
@@ -39,7 +39,7 @@ The design roadmap prescribed one branch per A-task. This implementation was exp
 | **A6 — Audio Pipeline** | `COMPLETED` | Existing audio, uploaded narration, generated-narration handoff, and no-narration paths are implemented. `ffprobe` only probes allowlisted sources. Arabic TTS remains D8-gated: `ADS_AI_VOICE_ENABLED=false`, and the service returns `403 AI_VOICE_GATED` when the flag is off. Muxing is verified in the render worker contract. Extended D8 evidence now covers an Arabic hint, a dedicated Arabic voice, the 1500-character cap, official voice/pricing docs, and token usage; no voice picker or SSML/timestamp option was added. |
 | **A6-S — Audio Analysis & Synchronization Engine** | `VERIFIED` | `audio-analysis.ts` probes duration, segments Arabic/Latin narration without reversing characters, maps cumulative boundaries to scenes, keeps `wordTimestamps: null`-safe, computes drift, and refits composition durations only on count matches. Six dedicated unit tests pass. |
 | **A7 — Advertisement Editor / Project Workflow** | `COMPLETED` | The refreshed project-first workflow is implemented: role-gated **Generate Video** in `workspace-header.tsx`, lazy `video` workspace tab, `/advertisements` list and `[id]` detail routes, language gate, composition/audio/voice/render panels, `VideoPipeline`, bilingual catalogs (`advertisements.json` in `en`/`ar`), nav entry, protected `/advertisements` prefix, gate-error and upgrade states. Component/hook/service tests, i18n parity, RTL gate, link gate, typecheck, and production build pass. Full browser e2e is deferred to A10. |
-| **A8 — Subscription & Credits (D7 integration)** | `COMPLETED` | `ads.access`, `ads.upload`, `ads.voice.upload`, `ads.download`, `ads.render`, and `ads.styles.advanced` are wired into existing entitlements. `ads.render` quotas are 3/20/100 by plan and are reserved/refunded through the existing quota infrastructure; no parallel ledger exists. `ads.*` credit operations are priced at `0` pending Cost Analysis, so this is quota-shaped MVP gating, not a paid launch. |
+| **A8 — Subscription & Credits (D7 integration)** | `COMPLETED` | `ads.access`, `ads.upload`, `ads.voice.upload`, `ads.download`, `ads.render`, and `ads.styles.advanced` are wired into existing entitlements. `ads.render` quotas are 3/20/100 by plan and are reserved/refunded through the existing quota infrastructure; no parallel ledger exists. `ads.*` credit operations remain priced at `0` pending the signed table in [`../COST-ANALYSIS.md`](../../../tasks/COST-ANALYSIS.md), so this is quota-shaped MVP gating, not a paid launch. |
 | **A9 — Storage & Export** | `VERIFIED` | Upload, signed delivery (5–15 min TTL), download URL construction, poster/video upload, and destroy/cleanup seams exist in `storage.service.ts` and the render service. Owner/foreign/expired delivery is enforced through the authoritative backend routes. Live Cloudinary upload/delivery/invalidation passed; warm-cache deletion propagated in ~5–7 s. |
 | **A10 — QA & Production Readiness** | `BLOCKED` | In-repo gates pass. Cloudinary live smoke, full 30 s 720 p and 1080 p live renders, and extended D8 evidence now exist. Playwright and Lighthouse were run and triaged; no advertisement-attributable regression was found, but stale journey specs, accepted axe debt, an invalid LHCI audit key, and pre-existing performance budgets still block the gates. Release still requires human golden RTL frame sign-off, a signed D8 decision, worker deployment/SLOs/runbooks, R-01 key rotation, and pricing/cost sign-off. Existing CI baseline failures are documented below and were not introduced by this change. |
 
@@ -116,7 +116,7 @@ The design roadmap prescribed one branch per A-task. This implementation was exp
 7. No durable async motion-generation job was added in this iteration.
 8. AI voice-over remains D8-gated (`ADS_AI_VOICE_ENABLED=false`).
 9. MVP is 16:9, 30 FPS, 720p/1080p by plan, Cloudinary delivery, and quota-shaped `ads.render` gating.
-10. `ads.*` credit operations are priced `0` pending Cost Analysis.
+10. `ads.*` credit operations remain priced `0` pending the signed table in [`../COST-ANALYSIS.md`](../../../tasks/COST-ANALYSIS.md).
 11. Backend `/api/v1/advertisements/*` and `/api/v1/projects/:projectId/video/*` are authoritative; frontend paths omit `/api/v1` because Next rewrites.
 12. Advertisements were added to the existing five-group navigation under `Content Engine`, and `/advertisements` was added to `proxy.ts` protected prefixes.
 13. The Generate Video action lives in the project workspace header; the top-level `/advertisements` list/detail remains the history surface.
@@ -129,25 +129,25 @@ The design roadmap prescribed one branch per A-task. This implementation was exp
 
 | Gate | Status | Current evidence | Next action |
 |---|---|---|---|
-| Cloudinary live smoke | `PASSED` | Live upload, signed upload, delivery, and invalidated deletion; regression test `tests/unit/storage-mime.test.ts`. | Merge `origin/fix/cloudinary-image-mime` and include it in the release branch. |
+| Cloudinary live smoke | `PASSED` | Live upload, signed upload, delivery, and invalidated deletion; regression test `tests/unit/storage-mime.test.ts`. Merged externally via PR #32 into `origin/main`; no assistant-performed merge. | No further merge action; if trailing evidence docs are required on `main`, open a documentation-only PR. |
 | D8 TTS decision | `BLOCKED` | Extended live and official-document evidence is recorded in `D8-EVIDENCE-2026-11-24.md`; `ADS_AI_VOICE_ENABLED` remains false. | Obtain owner listening/feature-fit approval, Arabic dialect/locale policy, cost sign-off, and a signed D8 decision before enabling AI voice or a voice picker. |
 | Full 30 s MP4 render | `PASSED` | 30 s Arabic RTL renders passed at both 720 p (`1280x720`) and 1080 p (`1920x1080`) with real Chromium, FFmpeg, and Cloudinary; H.264, duration 30 s, MP4/poster `200`, cleanup `404`. | No further acceptance render needed at either resolution. |
 | Golden RTL frame review | `PARTIAL` | Frames captured at 1 s/15 s/29 s from both 720 p and 1080 p renders with stable RTL-anchored Arabic text; mechanical checks pass. | Obtain human visual approval of both resolution sets at pinned font/preset versions. |
 | Worker deployment / SLOs / runbooks | `BLOCKED` | Worker source and lifecycle exist; container/autoscale/dashboards are outside this repo change. | Deploy the digest-pinned, non-root worker; rehearse scale-to-zero rollback and add render p50/p95/failure-rate dashboards. |
 | R-01 key rotation | `BLOCKED` | Legacy xAI/HF keys remain in git history; human rotation is outstanding. | Rotate at the providers and confirm gitleaks remains green. |
 | Full e2e and Lighthouse | `BLOCKED` | Playwright and Lighthouse were run and triaged: two full e2e runs had 5 and 6 failures, a targeted RTL rerun had 2, and Lighthouse fails on an invalid config key plus pre-existing LCP/TBT budgets. No advertisement-attributable failure was found; evidence is in the browser-e2e/Lighthouse triage section above. | Update the stale wizard specs, resolve the accepted axe debt and configuration key, and retire the existing LCP/TBT performance debt. Rerun only after those source/config changes. |
-| Pricing / cost sign-off | `BLOCKED` | `ads.*` prices are `0`; quotas are live. | Complete Cost Analysis and set prices before enabling paid operations. |
+| Pricing / cost sign-off | `BLOCKED` | [`../COST-ANALYSIS.md`](../../../tasks/COST-ANALYSIS.md) records verified provider unit prices and measured usage; `ads.*` prices remain `0` and quotas are live. | Obtain owner sign-off and production configuration evidence, then fill the price table in a reviewed PR and add `PRICING_PENDING` guards before enabling paid operations. |
 | Existing CI baseline | `BASELINE` | Gitleaks history, `pnpm audit` mongoose advisories, MongoMemoryServer provider failures, and Workers Builds failures predate this work. | Track separately; do not attribute them to the advertisement feature. |
 
 ## Debt
 
 - No durable async motion-generation queue; generation is synchronous with deterministic fallback.
 - No in-repo worker container image, autoscale policy, or SLO dashboard.
-- Cloudinary live smoke, a full 30 s live render, and extended D8 evidence exist; human golden RTL review, signed D8 decision, cost sign-off, and R-01 rotation remain open. Full e2e and Lighthouse were run but remain blocked by stale specs, accepted axe debt, an invalid LHCI audit key, and pre-existing performance budgets.
+- Cloudinary live smoke, full 30 s 720 p and 1080 p live renders, extended D8 evidence, and provider-price evidence in [`../COST-ANALYSIS.md`](../../../tasks/COST-ANALYSIS.md) exist; human golden RTL review, signed D8 decision, numeric price sign-off, and R-01 rotation remain open. Full e2e and Lighthouse were run but remain blocked by stale specs, accepted axe debt, an invalid LHCI audit key, and pre-existing performance budgets.
 - The backend Cloudinary fix branch has been pushed but has no PR yet; the frontend feature branch also has no PR yet.
 - Historical design docs still describe a standalone wizard and AI-image/vision pipeline; the refreshed direction sections and this status file supersede them where they conflict.
 - Full backend lint has a large baseline warning count; targeted advertisement lint is 0 errors with 27 warnings.
 
 ## Deployment readiness
 
-**Not release-ready.** The refreshed MVP is code-complete and all local automated gates pass. Cloudinary live storage, full 30 s 720 p and 1080 p live renders, and extended D8 evidence are verified, but A10 remains `BLOCKED` on human golden RTL sign-off, a signed D8 decision, worker operations, R-01 rotation, stale e2e/axe/Lighthouse debt, and cost sign-off. The safe next release step is to open the frontend PR and the backend fix PR, then complete the external gate checklist before enabling paid or AI-voice paths.
+**Not release-ready.** The refreshed MVP is code-complete and all local automated gates pass. Cloudinary live storage, full 30 s 720 p and 1080 p live renders, and extended D8 evidence are verified. Backend fix PR #32 and frontend feature PR #66 were merged externally into their `main` branches; only trailing documentation-only commits remain on the feature branches. A10 remains `BLOCKED` on human golden RTL sign-off, a signed D8 decision, worker operations, R-01 rotation, stale e2e/axe/Lighthouse debt, and numeric cost sign-off (provider evidence: [`../COST-ANALYSIS.md`](../../../tasks/COST-ANALYSIS.md)). Complete the external gate checklist before enabling paid or AI-voice paths.

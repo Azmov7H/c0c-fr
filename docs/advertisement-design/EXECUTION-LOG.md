@@ -144,3 +144,18 @@
 - The job reached `completed`/`100`, produced H.264 `1920x1080` with probed duration `30 s`, and uploaded MP4 and poster; both delivery URLs returned `200`. Cloudinary admin lookups for both public IDs returned `404` after cleanup. No credentials or signed URLs were logged.
 - Extracted frames at 1 s, 15 s, and 29 s. All three are 1920×1080 with a stable bright-pixel bounding box at x 1408–1722 inside the expected x 192–1728 headline area and entirely on the right half, consistent with RTL anchoring. This is a mechanical check; human visual sign-off is still pending for both 720 p and 1080 p frame sets.
 - **Status:** Full 30 s render gate is now `PASSED` at both 720 p and 1080 p. Golden RTL frame review remains `PARTIAL`; A10 remains `BLOCKED`.
+
+## 2026-11-24 — External PR merge verification
+
+- Fetched remote-tracking refs only (no local `main` checkout or modification) and verified that backend PR #31 merged at `0cfcb98` and PR #32 merged at `651e3fc`; current `c0c-bake` `origin/main` is `651e3fc`. PR #32 included the Cloudinary fix and the e2e/Lighthouse triage docs through head `39bbf40`. The branch has two later docs-only commits (`b4b709d` 1080 p evidence, `3a9e103` PR-state note) that are not on `main`.
+- Verified through the public GitHub API that frontend PR #66 was merged by the repository owner at `2026-11-24T10:44:04Z` with merge commit `d9b599a` and head `fc3aa4d`; current `c0c-fr` `origin/main` is `d9b599a`. PR #65 had merged earlier at `8f5bb00`. The branch has one later docs-only commit (`fd96a62`) that is not on `main`.
+- The curated `PR-BODY-c0c-fr.md` remains in the handoff directory even though PR #66 used an auto-generated Gitar body. If the trailing documentation-only commits are required on `main`, a new doc-only PR is needed; no reset or force-push should be used.
+- **Status:** PR handoff evidence refreshed with external merge facts. A10 remains `BLOCKED`; no assistant-performed PR creation, merge, force-push, branch deletion, or local `main` modification occurred.
+
+## 2026-11-25 — Cross-milestone Cost Analysis evidence (A8, A10)
+
+- Created the canonical [`../COST-ANALYSIS.md`](../../../tasks/COST-ANALYSIS.md) evidence package. It records current `credit-prices.ts` placeholders, all nine `CreditOperation` rows, `PLAN_GRANT_MONTHLY`, quota/plan ladders, and the missing P11 estimate endpoint.
+- Collected official Alibaba Model Studio, Cloudinary, Vercel, and MongoDB Atlas unit prices with retrieval dates and region caveats. Derived arithmetic examples from the project's recorded TTS token usage; no provider price was guessed.
+- Mapped every price/credit consumer in both repositories, including `export` `402 PRICING_PENDING`, the ledger/history reads, and the absence of a paid guard on `ads.*`. Recorded the worker-host, telemetry, delivery-byte, and production-configuration gaps that still prevent a signed numeric table.
+- Cross-linked the evidence from the task registry, Milestone 3 tracker/decisions/status files, and the canonical advertisement status. No application price, entitlement value, feature flag, or status was changed.
+- **Status:** A8 remains `COMPLETED` (quota-shaped MVP only); A10 remains `BLOCKED`. Provider-cost evidence is `COMPLETE`; numeric price table and owner sign-off remain `BLOCKED`.
