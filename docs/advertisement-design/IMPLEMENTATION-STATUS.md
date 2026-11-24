@@ -41,7 +41,7 @@ The design roadmap prescribed one branch per A-task. This implementation was exp
 | **A7 — Advertisement Editor / Project Workflow** | `COMPLETED` | The refreshed project-first workflow is implemented: role-gated **Generate Video** in `workspace-header.tsx`, lazy `video` workspace tab, `/advertisements` list and `[id]` detail routes, language gate, composition/audio/voice/render panels, `VideoPipeline`, bilingual catalogs (`advertisements.json` in `en`/`ar`), nav entry, protected `/advertisements` prefix, gate-error and upgrade states. Component/hook/service tests, i18n parity, RTL gate, link gate, typecheck, and production build pass. Full browser e2e is deferred to A10. |
 | **A8 — Subscription & Credits (D7 integration)** | `COMPLETED` | `ads.access`, `ads.upload`, `ads.voice.upload`, `ads.download`, `ads.render`, and `ads.styles.advanced` are wired into existing entitlements. `ads.render` quotas are 3/20/100 by plan and are reserved/refunded through the existing quota infrastructure; no parallel ledger exists. `ads.*` credit operations are priced at `0` pending Cost Analysis, so this is quota-shaped MVP gating, not a paid launch. |
 | **A9 — Storage & Export** | `VERIFIED` | Upload, signed delivery (5–15 min TTL), download URL construction, poster/video upload, and destroy/cleanup seams exist in `storage.service.ts` and the render service. Owner/foreign/expired delivery is enforced through the authoritative backend routes. Live Cloudinary upload/delivery/invalidation passed; warm-cache deletion propagated in ~5–7 s. |
-| **A10 — QA & Production Readiness** | `BLOCKED` | In-repo gates pass. Cloudinary live smoke, a full 30 s live render, and extended D8 evidence now exist. Release still requires human golden RTL frame sign-off, a signed D8 decision, worker deployment/SLOs/runbooks, R-01 key rotation, full e2e/Lighthouse, and pricing/cost sign-off. Existing CI baseline failures are documented below and were not introduced by this change. |
+| **A10 — QA & Production Readiness** | `BLOCKED` | In-repo gates pass. Cloudinary live smoke, a full 30 s live render, and extended D8 evidence now exist. Playwright and Lighthouse were run and triaged; no advertisement-attributable regression was found, but stale journey specs, accepted axe debt, an invalid LHCI audit key, and pre-existing performance budgets still block the gates. Release still requires human golden RTL frame sign-off, a signed D8 decision, worker deployment/SLOs/runbooks, R-01 key rotation, and pricing/cost sign-off. Existing CI baseline failures are documented below and were not introduced by this change. |
 
 ## Validation evidence
 
@@ -80,6 +80,16 @@ The design roadmap prescribed one branch per A-task. This implementation was exp
 | D8 TTS partial evidence | Configured model `qwen-audio-3.1-tts-flash`, voice `longanhuan_v3.1`, MP3/24 kHz. `ar`: 2487 ms latency, 3.648 s duration, −19 dB mean volume. `en`: 2305 ms latency, 3.168 s duration, −19.8 dB mean volume. `expiresAt: 1795567351`. This proves short Arabic/English text returns non-silent audio; it does not prove Arabic voice/language correctness, roster, gender/dialect, pricing, text-length behavior, or the D8 decision. |
 | D8 TTS extended evidence | `language_hints: ["ar"]` with `longanhuan_v3.1` succeeded (2641 ms, 3.264 s, 12/40 tokens); dedicated `qwen-audio-3.1-tts-flash-naseem_ar` succeeded (1040 ms, 5.328 s, 12/66 tokens); the exact 1500-character app cap succeeded (23451 ms, 252.624 s, 415/3157 tokens). Official docs confirm `ar` as a valid hint, female/male voice genders, SSML/timestamp support, the endpoint/model fit, and token prices. Recorded in `D8-EVIDENCE-2026-11-24.md`; D8 remains undecided and no new options shipped. |
 
+### Browser e2e and Lighthouse triage (2026-11-24)
+
+| Gate | Evidence |
+|---|---|
+| Full Playwright e2e | Two full runs produced `25 passed / 5 failed` and `24 passed / 6 failed`; a targeted RTL rerun produced `12 passed / 2 failed`. Failures are stale 3-step-wizard journeys (`journey-2-invite-accept`, `journey-3-viewer-denied`, `m2-workspace`), the accepted `label-content-name-mismatch` axe debt, and an intermittent `/settings` `color-contrast` violation. No advertisement route, component, or navigation entry was implicated. `git diff 661b22e..HEAD -- tests/e2e playwright.config.ts package.json` is empty: the shipped wizard has had four steps since `d05787b`, while those specs still drive three. |
+| E2E experiment | Spec-only wizard updates were attempted and reverted. They exposed deeper unrelated baseline failures: invite-preview SSR error digest `263232933` while waiting for `Create an account`, and `m2-workspace` expecting a `Scripts` heading where the UI renders it as text. No e2e spec or advertisement source was left changed by the experiment. |
+| Accepted axe debt | `rtl-a11y.spec.ts` caps `label-content-name-mismatch` at 4 nodes. `/projects` was observed with 6 nodes on target `#radix-_r_4_` (sidebar Account menu button with visible initials `JO`); a debug run observed 2 nodes, so the count fluctuates. The Advertisements nav link is not among the offending targets. |
+| Lighthouse CI | Ran with Playwright Chromium via `CHROME_PATH=... LHCI_RUNS=1 pnpm lhci`. Collected `/en`, `/en/dashboard`, `/en/projects`, `/en/login`: LCP `5.343 / 3.260 / 5.160 / 6.556 s`, TBT `2917 / 5470 / 3829 / 5945 ms`, CLS `0`, accessibility `1 / 1 / 1 / 0.96`, performance `0.47 / 0.54 / 0.44 / 0.42`. LHCI also reports `"accessibility" is not a known audit` on every route. |
+| Lighthouse baseline | `lighthouserc.cjs` is unchanged from the pre-advertisement branch. Historical reports already exceed the same budgets (`2026-11-13`: landing LCP `4.477 s`/TBT `1797 ms`, dashboard `2.065 s`/`6264 ms`, projects `4.278 s`/`7799 ms`, login `6.423 s`/`2914 ms`; October/November TBT range `1004–12561 ms`). No advertisement source change was made for these gates. |
+
 ## Bugs found and fixed during validation
 
 - `compositionHash()` now uses `stableStringify()` so semantically identical compositions do not churn render invalidation.
@@ -112,6 +122,7 @@ The design roadmap prescribed one branch per A-task. This implementation was exp
 14. Top-level detail and workspace Video tab share `VideoPipeline`; project role is derived from `useProjectMembers` + `useAuthStore` + `can(role, 'edit')`.
 15. The live render smoke uses the full 30 s acceptance duration; golden RTL frames are captured mechanically but still require human visual sign-off.
 16. D8 evidence gathering is recorded separately in `D8-EVIDENCE-2026-11-24.md`; the audited D8 verdict is preserved and no language/gender/dialect/SSML option was added before a signed decision.
+17. Playwright and Lighthouse failures are classified as stale-test/accepted-debt/performance-debt issues, not advertisement regressions. Spec-only fix attempts were reverted; no advertisement source was changed to chase baseline failures.
 
 ## External gates and required next action
 
@@ -123,7 +134,7 @@ The design roadmap prescribed one branch per A-task. This implementation was exp
 | Golden RTL frame review | `PARTIAL` | Frames captured at 1 s/15 s/29 s with stable RTL-anchored Arabic text; mechanical checks pass. | Obtain human visual approval of the captured frames at pinned font/preset versions. |
 | Worker deployment / SLOs / runbooks | `BLOCKED` | Worker source and lifecycle exist; container/autoscale/dashboards are outside this repo change. | Deploy the digest-pinned, non-root worker; rehearse scale-to-zero rollback and add render p50/p95/failure-rate dashboards. |
 | R-01 key rotation | `BLOCKED` | Legacy xAI/HF keys remain in git history; human rotation is outstanding. | Rotate at the providers and confirm gitleaks remains green. |
-| Full e2e and Lighthouse | `BLOCKED` | Unit/component/build gates pass; browser e2e and Lighthouse were not run. | Run the project's Playwright journey and Lighthouse CI gates on a deployed stack. |
+| Full e2e and Lighthouse | `BLOCKED` | Playwright and Lighthouse were run and triaged: two full e2e runs had 5 and 6 failures, a targeted RTL rerun had 2, and Lighthouse fails on an invalid config key plus pre-existing LCP/TBT budgets. No advertisement-attributable failure was found; evidence is in the browser-e2e/Lighthouse triage section above. | Update the stale wizard specs, resolve the accepted axe debt and configuration key, and retire the existing LCP/TBT performance debt. Rerun only after those source/config changes. |
 | Pricing / cost sign-off | `BLOCKED` | `ads.*` prices are `0`; quotas are live. | Complete Cost Analysis and set prices before enabling paid operations. |
 | Existing CI baseline | `BASELINE` | Gitleaks history, `pnpm audit` mongoose advisories, MongoMemoryServer provider failures, and Workers Builds failures predate this work. | Track separately; do not attribute them to the advertisement feature. |
 
@@ -131,11 +142,11 @@ The design roadmap prescribed one branch per A-task. This implementation was exp
 
 - No durable async motion-generation queue; generation is synchronous with deterministic fallback.
 - No in-repo worker container image, autoscale policy, or SLO dashboard.
-- Cloudinary live smoke, a full 30 s live render, and extended D8 evidence exist; human golden RTL review, signed D8 decision, full e2e, Lighthouse, cost sign-off, and R-01 rotation remain open.
+- Cloudinary live smoke, a full 30 s live render, and extended D8 evidence exist; human golden RTL review, signed D8 decision, cost sign-off, and R-01 rotation remain open. Full e2e and Lighthouse were run but remain blocked by stale specs, accepted axe debt, an invalid LHCI audit key, and pre-existing performance budgets.
 - The backend Cloudinary fix branch has been pushed but has no PR yet; the frontend feature branch also has no PR yet.
 - Historical design docs still describe a standalone wizard and AI-image/vision pipeline; the refreshed direction sections and this status file supersede them where they conflict.
 - Full backend lint has a large baseline warning count; targeted advertisement lint is 0 errors with 27 warnings.
 
 ## Deployment readiness
 
-**Not release-ready.** The refreshed MVP is code-complete and all local automated gates pass. Cloudinary live storage, a full 30 s live render, and extended D8 evidence are verified, but A10 remains `BLOCKED` on human golden RTL sign-off, a signed D8 decision, worker operations, R-01 rotation, browser/CI performance gates, and cost sign-off. The safe next release step is to open the frontend PR and the backend fix PR, then complete the external gate checklist before enabling paid or AI-voice paths.
+**Not release-ready.** The refreshed MVP is code-complete and all local automated gates pass. Cloudinary live storage, a full 30 s live render, and extended D8 evidence are verified, but A10 remains `BLOCKED` on human golden RTL sign-off, a signed D8 decision, worker operations, R-01 rotation, stale e2e/axe/Lighthouse debt, and cost sign-off. The safe next release step is to open the frontend PR and the backend fix PR, then complete the external gate checklist before enabling paid or AI-voice paths.
