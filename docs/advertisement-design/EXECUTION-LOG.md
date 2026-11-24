@@ -151,3 +151,11 @@
 - Verified through the public GitHub API that frontend PR #66 was merged by the repository owner at `2026-11-24T10:44:04Z` with merge commit `d9b599a` and head `fc3aa4d`; current `c0c-fr` `origin/main` is `d9b599a`. PR #65 had merged earlier at `8f5bb00`. The branch has one later docs-only commit (`fd96a62`) that is not on `main`.
 - The curated `PR-BODY-c0c-fr.md` remains in the handoff directory even though PR #66 used an auto-generated Gitar body. If the trailing documentation-only commits are required on `main`, a new doc-only PR is needed; no reset or force-push should be used.
 - **Status:** PR handoff evidence refreshed with external merge facts. A10 remains `BLOCKED`; no assistant-performed PR creation, merge, force-push, branch deletion, or local `main` modification occurred.
+
+## 2026-11-25 — Cross-milestone Cost Analysis evidence (A8, A10)
+
+- Created the canonical [`../COST-ANALYSIS.md`](../../../tasks/COST-ANALYSIS.md) evidence package. It records current `credit-prices.ts` placeholders, all nine `CreditOperation` rows, `PLAN_GRANT_MONTHLY`, quota/plan ladders, and the missing P11 estimate endpoint.
+- Collected official Alibaba Model Studio, Cloudinary, Vercel, and MongoDB Atlas unit prices with retrieval dates and region caveats. Derived arithmetic examples from the project's recorded TTS token usage; no provider price was guessed.
+- Mapped every price/credit consumer in both repositories, including `export` `402 PRICING_PENDING`, the ledger/history reads, and the absence of a paid guard on `ads.*`. Recorded the worker-host, telemetry, delivery-byte, and production-configuration gaps that still prevent a signed numeric table.
+- Cross-linked the evidence from the task registry, Milestone 3 tracker/decisions/status files, and the canonical advertisement status. No application price, entitlement value, feature flag, or status was changed.
+- **Status:** A8 remains `COMPLETED` (quota-shaped MVP only); A10 remains `BLOCKED`. Provider-cost evidence is `COMPLETE`; numeric price table and owner sign-off remain `BLOCKED`.
