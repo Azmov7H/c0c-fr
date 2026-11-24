@@ -90,3 +90,27 @@
 - Committed each repository separately on `feat/advertisement-system` and pushed to `origin` without force-push, branch deletion, or merge.
 - `gh` is not installed in this environment; PR creation/update must be done through the GitHub web UI or API from an authenticated environment.
 - **Status:** A10 `BLOCKED` until the external gates in `IMPLEMENTATION-STATUS.md` are satisfied.
+
+## 2026-11-24 — Live Cloudinary smoke and storage fix (A2, A9)
+
+- Confirmed live Cloudinary credentials and provider connectivity (`api.ping` returned `ok`) without printing credentials.
+- Reproduced a real upload failure: the storage seam sent `data:image/*;base64,...`, which Cloudinary rejected; `data:application/octet-stream;base64,...` was accepted and sniffed as `png`.
+- Created `fix/cloudinary-image-mime` from `origin/main` (`70d5873`). Changed image data URIs to `application/octet-stream` and added `invalidate: true` to `destroy()` so deleted renders are purged from the CDN edge cache.
+- Added `tests/unit/storage-mime.test.ts` covering the wildcard-MIME regression, explicit video/audio MIMEs, and CDN invalidation. Replaced the unsafe secret assertion in `signUpload()` with an explicit guard so both TypeScript and ESLint are clean.
+- Live smoke passed: image, poster, and video uploads returned `200`; signed upload was generated; all three delivery URLs returned `404` after invalidation propagated (~5–7 s for warm cache). Unique public IDs were used and cleanup was attempted in `finally`.
+- Validation on the fix branch: `npx tsc --noEmit` clean, 7 files/35 targeted tests passed, targeted ESLint 0 errors/0 warnings, `npm run build` passed, and the live Cloudinary smoke passed again after the `signUpload()` guard change.
+- Committed as `9a8b23d` and pushed to `origin/fix/cloudinary-image-mime`. No PR was created here because `gh`/`GITHUB_TOKEN` are unavailable.
+- **Status:** A2 `VERIFIED`, A9 `VERIFIED`; backend feature PR #30 remains externally merged and the new fix PR is pending.
+
+## 2026-11-24 — Live render and D8 TTS evidence (A5, A6, A10)
+
+- Ran a live render smoke with real MongoMemoryServer, Chromium, FFmpeg, and Cloudinary using a 2 s Arabic RTL 16:9 composition. The job reached `completed`/`100`, produced H.264 `1280x720` with probed duration `2 s`, uploaded MP4 and poster, both delivered `200`, and cleanup returned `404`.
+- Ran a D8 live TTS smoke with the configured `qwen-audio-3.1-tts-flash` model and `longanhuan_v3.1` voice. Short Arabic and English prompts returned non-silent MP3 audio: ar 2487 ms/3.648 s/−19 dB, en 2305 ms/3.168 s/−19.8 dB, `expiresAt: 1795567351`. No signed URLs or credentials were printed.
+- Recorded the limits explicitly: the render was 2 s, not the 30 s acceptance duration; the TTS result proves provider acceptance of short text only, not Arabic voice/language correctness, roster, gender/dialect, pricing, limits, or a D8 decision. `ADS_AI_VOICE_ENABLED` remains false.
+- **Status:** A5 `COMPLETED` with partial live evidence; A6 `COMPLETED` with partial D8 evidence; A10 remains `BLOCKED` on full-duration render, golden RTL review, D8 decision, worker operations, R-01 rotation, e2e/Lighthouse, and cost sign-off.
+
+## 2026-11-24 — Status refresh and PR handoff
+
+- Refreshed the canonical `IMPLEMENTATION-STATUS.md` with the merged backend PR state, the new backend fix branch, live Cloudinary evidence, the 2 s render evidence, and the partial D8 TTS evidence.
+- Mirrored the updated status/log documents into `c0c-bake/docs/advertisement-design/` and `c0c-fr/docs/advertisement-design/` and updated `PR-HANDOFF.md` / `PR-BODY-c0c-fr.md` for manual PR creation.
+- **Status:** A10 `BLOCKED`; no assistant-performed merge, force-push, branch deletion, or `main` modification.
