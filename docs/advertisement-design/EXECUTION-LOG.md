@@ -120,3 +120,27 @@
 - Repeated the live render smoke at the full 30 s acceptance duration with a 900-frame Arabic RTL 16:9 composition. The job reached `completed`/`100`, produced H.264 `1280x720` with probed duration `30 s`, uploaded MP4 and poster, both delivered `200`, and cleanup returned `404`.
 - Extracted frames at 1 s, 15 s, and 29 s. Each is 1280×720; bright-pixel content in the expected headline area stayed stable, with the Arabic text bounding box at x 939–1148 inside the x 128–1152 headline region, consistent with RTL anchoring. This is a mechanical check, not human visual approval.
 - **Status:** Full 30 s render gate `PASSED`; golden RTL frame review `PARTIAL` pending human sign-off; A10 remains `BLOCKED`.
+
+## 2026-11-24 — Extended D8 evidence (A6, A10)
+
+- Fetched the official non-real-time speech-synthesis guide, Qwen-Audio-TTS HTTP API, voice list, and model-pricing page. Confirmed the configured model/endpoint shape, `ar` as a valid `language_hints` code, `longanhuan_v3.1` as a female multilingual/dialect voice, `qwen-audio-3.1-tts-flash-naseem_ar` as a dedicated Arabic male voice, SSML/instruction/timestamp support, and token-based prices.
+- Ran a bounded live smoke with three calls: `longanhuan_v3.1` + `language_hints: ["ar"]`, `qwen-audio-3.1-tts-flash-naseem_ar`, and a 1500-character Arabic cap probe. All returned HTTP `200`, non-silent MP3s, `usage` token counts, and 24-hour URLs. The cap probe produced 252.624 s audio and 415/3157 input/output tokens. No credentials or signed URLs were logged.
+- Recorded the evidence in `D8-EVIDENCE-2026-11-24.md` and added an interim engineering decision to keep `ADS_AI_VOICE_ENABLED=false`, add no language/gender/dialect/SSML option, and require owner listening review, dialect/locale policy, and cost sign-off before a formal D8 decision.
+- **Status:** D8 evidence gates §7.1–§7.5 have supporting evidence; D8 remains `NOT DECIDED`, A6 remains `COMPLETED`, and A10 remains `BLOCKED`.
+
+## 2026-11-24 — Playwright and Lighthouse triage (A10)
+
+- Ran the full Playwright suite twice: `25 passed / 5 failed`, then `24 passed / 6 failed`. A targeted RTL rerun produced `12 passed / 2 failed`. No advertisement route, component, or navigation entry was implicated.
+- Root-caused the failing journeys: `journey-2-invite-accept`, `journey-3-viewer-denied`, and `m2-workspace` still drive the old three-step wizard, while the shipped wizard has had four steps since `d05787b`. `git diff 661b22e..HEAD -- tests/e2e playwright.config.ts package.json` is empty.
+- Attempted spec-only wizard updates, then reverted them. They advanced to deeper unrelated baseline failures: invite-preview SSR error digest `263232933` while waiting for `Create an account`, and `m2-workspace` expecting a `Scripts` heading where the UI renders it as text. No e2e spec or advertisement source was left changed.
+- Investigated the axe failure: `label-content-name-mismatch` is accepted debt capped at 4 nodes; `/projects` was observed with 6 nodes on target `#radix-_r_4_`, a sidebar Account menu button with visible initials `JO`. A debug run observed 2 nodes, so the count fluctuates; the Advertisements nav link is not among the offenders. The one-run `/settings` `color-contrast` violation (24 nodes) did not reproduce in the targeted rerun.
+- Ran Lighthouse CI with Playwright Chromium (`CHROME_PATH=... LHCI_RUNS=1 pnpm lhci`). Collected `/en`, `/en/dashboard`, `/en/projects`, and `/en/login`: LCP `5.343 / 3.260 / 5.160 / 6.556 s`, TBT `2917 / 5470 / 3829 / 5945 ms`, CLS `0`, accessibility `1 / 1 / 1 / 0.96`, performance `0.47 / 0.54 / 0.44 / 0.42`. Every route also reports `"accessibility" is not a known audit`.
+- Confirmed `lighthouserc.cjs` is unchanged from the pre-advertisement branch and historical reports already exceed the same LCP/TBT budgets, including `2026-11-13` and October/November TBT as high as `12561 ms`. No advertisement source change was made for either gate.
+- **Status:** Full e2e and Lighthouse remain `BLOCKED` by stale specs, accepted axe debt, invalid LHCI configuration, and pre-existing performance debt. No new advertisement regression was identified; A10 remains `BLOCKED`.
+
+## 2026-11-24 — 1080 p acceptance render (A5, A10)
+
+- Reused the live render harness with the direct `1080p` worker config (plan gating remains server-side) and repeated the full 30 s Arabic RTL 16:9 acceptance with real MongoMemoryServer, Chromium, FFmpeg, and Cloudinary.
+- The job reached `completed`/`100`, produced H.264 `1920x1080` with probed duration `30 s`, and uploaded MP4 and poster; both delivery URLs returned `200`. Cloudinary admin lookups for both public IDs returned `404` after cleanup. No credentials or signed URLs were logged.
+- Extracted frames at 1 s, 15 s, and 29 s. All three are 1920×1080 with a stable bright-pixel bounding box at x 1408–1722 inside the expected x 192–1728 headline area and entirely on the right half, consistent with RTL anchoring. This is a mechanical check; human visual sign-off is still pending for both 720 p and 1080 p frame sets.
+- **Status:** Full 30 s render gate is now `PASSED` at both 720 p and 1080 p. Golden RTL frame review remains `PARTIAL`; A10 remains `BLOCKED`.
