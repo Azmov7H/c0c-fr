@@ -114,3 +114,9 @@
 - Refreshed the canonical `IMPLEMENTATION-STATUS.md` with the merged backend PR state, the new backend fix branch, live Cloudinary evidence, the 2 s render evidence, and the partial D8 TTS evidence.
 - Mirrored the updated status/log documents into `c0c-bake/docs/advertisement-design/` and `c0c-fr/docs/advertisement-design/` and updated `PR-HANDOFF.md` / `PR-BODY-c0c-fr.md` for manual PR creation.
 - **Status:** A10 `BLOCKED`; no assistant-performed merge, force-push, branch deletion, or `main` modification.
+
+## 2026-11-24 — Full 30 s render and golden RTL capture (A5, A10)
+
+- Repeated the live render smoke at the full 30 s acceptance duration with a 900-frame Arabic RTL 16:9 composition. The job reached `completed`/`100`, produced H.264 `1280x720` with probed duration `30 s`, uploaded MP4 and poster, both delivered `200`, and cleanup returned `404`.
+- Extracted frames at 1 s, 15 s, and 29 s. Each is 1280×720; bright-pixel content in the expected headline area stayed stable, with the Arabic text bounding box at x 939–1148 inside the x 128–1152 headline region, consistent with RTL anchoring. This is a mechanical check, not human visual approval.
+- **Status:** Full 30 s render gate `PASSED`; golden RTL frame review `PARTIAL` pending human sign-off; A10 remains `BLOCKED`.
