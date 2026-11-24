@@ -19,8 +19,8 @@
 | Repo | Branch | Base before this work | State at snapshot |
 |---|---|---|---|
 | `c0c-bake` | `feat/advertisement-system` | `2715110` (`docs(advertisement): publish the advertisement-design planning milestone`) | Head `baf0bfe2754cfee906fa0f0ffb40e80138e13251`. PR #30 was created and merged externally into `origin/main` at `70d5873f43c93a200d183c6c737aad92a5ec3fb1`; this session did not merge or modify `main`. |
-| `c0c-bake` | `fix/cloudinary-image-mime` | `origin/main` (`70d5873f43c93a200d183c6c737aad92a5ec3fb1`) | Live-smoke fix merged externally via PR #31 (`0cfcb98`) and PR #32 (`651e3fc`, current `origin/main`). The branch head, tracked in `PR-HANDOFF.md`, has two documentation-only commits after the merged PR head. No PR or merge was performed by the assistant. |
-| `c0c-fr` | `feat/advertisement-system` | `661b22e` (`fix(ui): make dashboard sidebar RTL logical`) | Feature work merged externally via PR #65 (`8f5bb00`) and PR #66 (`d9b599a`, current `origin/main`) with head `fc3aa4d`. The branch head, tracked in `PR-HANDOFF.md`, has one documentation-only commit after the merged PR head. No PR or merge was performed by the assistant. |
+| `c0c-bake` | `fix/cloudinary-image-mime` | `origin/main` (`70d5873f43c93a200d183c6c737aad92a5ec3fb1`) | Live-smoke fix merged externally via PR #31 (`0cfcb98`) and PR #32 (`651e3fc`, current `origin/main`). The branch head, tracked in `PR-HANDOFF.md`, has additional documentation-only commits after the merged PR head. No PR or merge was performed by the assistant. |
+| `c0c-fr` | `feat/advertisement-system` | `661b22e` (`fix(ui): make dashboard sidebar RTL logical`) | Feature work merged externally via PR #65 (`8f5bb00`) and PR #66 (`d9b599a`, current `origin/main`) with head `fc3aa4d`. The branch head, tracked in `PR-HANDOFF.md`, has additional documentation-only commits after the merged PR head. No PR or merge was performed by the assistant. |
 
 The design roadmap prescribed one branch per A-task. This implementation was explicitly consolidated into one feature branch per repository. No force-push, branch deletion, or assistant-performed merge occurred.
 
