@@ -137,3 +137,10 @@
 - Ran Lighthouse CI with Playwright Chromium (`CHROME_PATH=... LHCI_RUNS=1 pnpm lhci`). Collected `/en`, `/en/dashboard`, `/en/projects`, and `/en/login`: LCP `5.343 / 3.260 / 5.160 / 6.556 s`, TBT `2917 / 5470 / 3829 / 5945 ms`, CLS `0`, accessibility `1 / 1 / 1 / 0.96`, performance `0.47 / 0.54 / 0.44 / 0.42`. Every route also reports `"accessibility" is not a known audit`.
 - Confirmed `lighthouserc.cjs` is unchanged from the pre-advertisement branch and historical reports already exceed the same LCP/TBT budgets, including `2026-11-13` and October/November TBT as high as `12561 ms`. No advertisement source change was made for either gate.
 - **Status:** Full e2e and Lighthouse remain `BLOCKED` by stale specs, accepted axe debt, invalid LHCI configuration, and pre-existing performance debt. No new advertisement regression was identified; A10 remains `BLOCKED`.
+
+## 2026-11-24 — 1080 p acceptance render (A5, A10)
+
+- Reused the live render harness with the direct `1080p` worker config (plan gating remains server-side) and repeated the full 30 s Arabic RTL 16:9 acceptance with real MongoMemoryServer, Chromium, FFmpeg, and Cloudinary.
+- The job reached `completed`/`100`, produced H.264 `1920x1080` with probed duration `30 s`, and uploaded MP4 and poster; both delivery URLs returned `200`. Cloudinary admin lookups for both public IDs returned `404` after cleanup. No credentials or signed URLs were logged.
+- Extracted frames at 1 s, 15 s, and 29 s. All three are 1920×1080 with a stable bright-pixel bounding box at x 1408–1722 inside the expected x 192–1728 headline area and entirely on the right half, consistent with RTL anchoring. This is a mechanical check; human visual sign-off is still pending for both 720 p and 1080 p frame sets.
+- **Status:** Full 30 s render gate is now `PASSED` at both 720 p and 1080 p. Golden RTL frame review remains `PARTIAL`; A10 remains `BLOCKED`.
