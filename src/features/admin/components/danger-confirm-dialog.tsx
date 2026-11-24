@@ -8,7 +8,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-
 /**
  * `DangerConfirmDialog` (spec §7.2): type-to-confirm for destructive actions
  * ("role changes, deletion, and large grants" — spec §3.3). The confirm
@@ -20,6 +19,7 @@ export function DangerConfirmDialog({
     onOpenChange,
     title,
     description,
+    consequence,
     target,
     confirmLabel,
     onConfirm,
@@ -29,6 +29,8 @@ export function DangerConfirmDialog({
     onOpenChange: (open: boolean) => void;
     title: string;
     description: string;
+    /** One-sentence warning shown between the description and the input. */
+    consequence?: string;
     /** Email or name the caller asks the operator to type. */
     target: string;
     confirmLabel: string;
@@ -46,6 +48,7 @@ export function DangerConfirmDialog({
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription>{description}</DialogDescription>
                 </DialogHeader>
+                {consequence ? <p className="text-sm text-destructive">{consequence}</p> : null}
                 <div className="space-y-1.5">
                     <Label className="text-sm">{t('components.dangerConfirmDialog.typeLabel')}</Label>
                     <Input
