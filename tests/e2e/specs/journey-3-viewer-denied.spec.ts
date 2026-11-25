@@ -36,6 +36,7 @@ test('viewer cannot edit: control hidden AND direct patch returns 404', async ({
         .getByRole('radio', { name: /Professional/ })
         .click();
     await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByRole('button', { name: 'Continue' }).click();
     await page.locator('#main-content').getByRole('button', { name: /Create “Viewer-only review”/ }).click();
     await expect(page).toHaveURL(/\/projects\/[a-f\d]{24}$/);
     const projectUrl = page.url();

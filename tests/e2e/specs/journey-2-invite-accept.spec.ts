@@ -44,6 +44,7 @@ test('owner invites → invitee accepts in a second context → editor contribut
     const toneGroup = page.getByRole('radiogroup', { name: 'Tone' });
     await toneGroup.getByRole('radio', { name: /Casual/ }).click();
     await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByRole('button', { name: 'Continue' }).click();
 
     await page.locator('#main-content').getByRole('button', { name: /Create “Landing page teardown”/ }).click();
     await expect(page).toHaveURL(/\/projects\/[a-f\d]{24}$/);
