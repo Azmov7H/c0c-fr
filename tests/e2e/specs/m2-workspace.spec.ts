@@ -24,16 +24,19 @@ test('project → assets → media → audio → export → settings → legacy'
     await page.getByRole('button', { name: 'Continue' }).click();
     await page.getByRole('radiogroup', { name: 'Platform' }).getByRole('radio', { name: /YouTube/ }).click();
     await page.getByRole('radiogroup', { name: 'Tone' }).getByRole('radio', { name: /Professional/ }).click();
-    await expect(page).toHaveURL(/\/projects\/[^/]+$/);
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.locator('#main-content').getByRole('button', { name: /Create “M2 workspace journey”/ }).click();
+    await expect(page).toHaveURL(/\/projects\/[a-f\d]{24}$/);
 
     // Generation happens from the workspace (no standalone navigation).
     await page.getByRole('tab', { name: /Assets/ }).click();
-    await expect(page.getByRole('heading', { name: 'Scripts' })).toBeVisible();
+    await expect(page.locator('#scripts').getByText(/^Scripts/)).toBeVisible();
 
     // Media workspace tab renders thumbnail + 3 slots + audio states.
     await page.getByRole('tab', { name: /Media/ }).click();
-    await expect(page.getByRole('heading', { name: /Project Thumbnail/ })).toBeVisible();
-    await expect(page.getByRole('heading', { name: /AI Generated Images/ })).toBeVisible();
+    await expect(page.getByText('Project Thumbnail', { exact: true })).toBeVisible();
+    await expect(page.getByText('Images', { exact: true })).toBeVisible();
 
     // Settings: API tab is gone; legacy deep link lands on profile.
     await page.goto(localePath('/settings?tab=api'));
