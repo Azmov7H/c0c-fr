@@ -56,6 +56,8 @@ function LayerCard({
     projectId,
     description,
     anchor,
+    canGenerate = true,
+    hint,
 }: {
     title: string;
     rows: AudioSuggestion[];
@@ -63,6 +65,9 @@ function LayerCard({
     description: string;
     /** P11.2: the deep-link anchor for this stage panel. */
     anchor?: string;
+    /** Sound Mail has a dedicated upload/generate flow, not generic regeneration. */
+    canGenerate?: boolean;
+    hint?: string;
 }) {
     const t = useTranslations('media');
     const tw = useTranslations('workspace');
@@ -81,18 +86,21 @@ function LayerCard({
                     {/* P11.4: the server's remaining allowance on the control. */}
                     <GenerationIndicator className="mt-1" />
                 </div>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-11"
-                    disabled={generate.isPending}
-                    onClick={() => generate.mutate({ projectId })}
-                >
-                    <RefreshCw className="me-1 size-4" aria-hidden={generate.isPending} />
-                    {t('regenerate')}
-                </Button>
+                {canGenerate ? (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-11"
+                        disabled={generate.isPending}
+                        onClick={() => generate.mutate({ projectId })}
+                    >
+                        <RefreshCw className="me-1 size-4" aria-hidden={generate.isPending} />
+                        {t('regenerate')}
+                    </Button>
+                ) : null}
             </CardHeader>
             <CardContent>
+                {hint ? <p className="mb-3 text-xs text-muted-foreground">{hint}</p> : null}
                 {current ? (
                     <div className="space-y-3">
                         {current.fileUrl ? (
@@ -256,6 +264,7 @@ export function MediaWorkspace({ projectId }: { projectId: string }) {
     const narrationRows = (audio.data ?? []).filter((a) => audioLayerOf(a) === 'narration');
     const musicRows = (audio.data ?? []).filter((a) => audioLayerOf(a) === 'music');
     const sfxRows = (audio.data ?? []).filter((a) => audioLayerOf(a) === 'sfx');
+    const soundMailRows = (audio.data ?? []).filter((a) => audioLayerOf(a) === 'soundmail');
     const hasLegacy = (audio.data ?? []).some((a) => a.assetType === undefined);
 
     return (
@@ -471,6 +480,15 @@ export function MediaWorkspace({ projectId }: { projectId: string }) {
                 projectId={projectId}
                 description={t('audio.sfxDescription')}
                 anchor="effects"
+            />
+            <LayerCard
+                title={t('audio.soundMail')}
+                rows={soundMailRows}
+                projectId={projectId}
+                description={t('audio.soundMailDescription')}
+                anchor="sound-mail"
+                canGenerate={false}
+                hint={t('audio.soundMailHint')}
             />
         </div>
     );

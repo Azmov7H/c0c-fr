@@ -84,6 +84,27 @@ describe('advertisementsService', () => {
         expect(options?.headers?.['Idempotency-Key']).toMatch(/^ads-retry-/);
     });
 
+    it('downloads authenticated MP4 bytes and prefers the RFC 5987 filename', async () => {
+        const bytes = new Blob(['mp4']);
+        mocks.get.mockResolvedValue({
+            data: bytes,
+            headers: {
+                get: (name: string) =>
+                    name === 'content-disposition'
+                        ? `attachment; filename="advertisement.mp4"; filename*=UTF-8''%D8%B9%D8%B1%D8%A8%D9%8A.mp4`
+                        : null,
+            },
+        });
+
+        const result = await advertisementsService.download('ad 1');
+
+        expect(result.blob).toBe(bytes);
+        expect(result.filename).toBe('عربي.mp4');
+        expect(mocks.get).toHaveBeenCalledWith('/advertisements/ad%201/download', {
+            responseType: 'blob',
+        });
+    });
+
     it('falls back safely when an envelope has no data, and builds encoded download URLs', async () => {
         mocks.get.mockResolvedValue(apiResponse());
 

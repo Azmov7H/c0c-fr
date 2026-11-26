@@ -53,6 +53,23 @@
       "description": "Clear, unobtrusive ambient"
     }
   },
+  "soundMail": {
+    "title": "Sound Mail — project audio message",
+    "description": "A playable voice message attached to this project. Generated voice is disabled on this deployment; upload your own recording instead.",
+    "textLabel": "Message text (for generation)",
+    "textPlaceholder": "Write the message to turn into audio…",
+    "generate": "Generate audio message",
+    "generating": "Generating…",
+    "upload": "Upload audio message",
+    "uploading": "Uploading…",
+    "uploadAria": "Upload a Sound Mail recording",
+    "gated": "AI voice generation is disabled on this deployment (AI_VOICE_GATED). Upload a recording instead.",
+    "playAria": "Play Sound Mail: {title}",
+    "toasts": {
+      "generated": "Sound Mail generated",
+      "generateFailed": "Could not generate Sound Mail"
+    }
+  },
   "validation": {
     "noFile": "No file selected.",
     "unsupportedType": "Unsupported audio type ({type}). Use MP3, WAV, OGG or M4A.",

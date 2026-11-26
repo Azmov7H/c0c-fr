@@ -1,6 +1,38 @@
 export type ScriptStatus = 'draft' | 'generating' | 'completed' | 'error';
 export type SceneTransition = 'cut' | 'fade' | 'dissolve' | 'slide' | 'zoom' | 'none';
 
+/** D5 — the async generation route answers 202 with a durable job handle. */
+export interface GenerationJobStart {
+    jobId: string;
+    status: 'queued';
+    projectId: string;
+}
+
+export type GenerationJobStatusValue =
+    | 'queued'
+    | 'processing'
+    | 'completed'
+    | 'failed'
+    | 'cancelled';
+
+export interface GenerationJobStatus {
+    jobId: string;
+    projectId: string;
+    kind: string;
+    status: GenerationJobStatusValue;
+    scriptId: string | null;
+    error: string | null;
+    createdAt: string;
+    startedAt: string | null;
+    finishedAt: string | null;
+}
+
+export const isGenerationJobStart = (value: unknown): value is GenerationJobStart =>
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as GenerationJobStart).jobId === 'string' &&
+    (value as GenerationJobStart).status === 'queued';
+
 export interface ScriptSection {
     order: number;
     label: string;

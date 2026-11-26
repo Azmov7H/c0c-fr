@@ -1,6 +1,6 @@
 export type AudioMood = 'energetic' | 'suspenseful' | 'educational' | 'chill';
 export type AudioStatus = 'pending' | 'analyzing' | 'completed' | 'error';
-export type AudioAssetType = 'narration' | 'sfx' | 'music';
+export type AudioAssetType = 'narration' | 'sfx' | 'music' | 'soundmail';
 
 export interface AudioTrack {
     title: string;
@@ -102,4 +102,33 @@ export interface UpdateAudioSuggestionDTO extends Partial<CreateAudioSuggestionD
     sfxSuggestions?: SfxSuggestion[];
     timelinePlacements?: TimelinePlacement[];
     analysisConfidence?: number;
+}
+
+/** A6-M: signed Cloudinary credentials for a real browser upload. */
+export interface SignedAudioUpload {
+    cloudName: string;
+    apiKey: string;
+    timestamp: number;
+    signature: string;
+    folder: string;
+    publicId?: string;
+    resourceType: 'video';
+}
+
+export interface SignAudioUploadDTO {
+    projectId: string;
+    assetType?: AudioAssetType;
+    publicId?: string;
+}
+
+export interface GenerateSoundMailDTO {
+    projectId: string;
+    scriptId?: string;
+    text?: string;
+}
+
+export interface AudioUploadFileDTO {
+    projectId: string;
+    file: File;
+    assetType?: AudioAssetType;
 }

@@ -23,10 +23,26 @@
   },
   "projection": {
     "title": "Growth Projection",
-    "description": "Estimated visibility score across target platforms",
+    "description": "Estimated visibility score returned by the provider",
     "points": "Points",
-    "verdict": "\"SUPREME CANDIDATE\"",
-    "verdictDescription": "Exceptional coherence detected between narrative hooks and exponential trend clusters."
+    "verdictHigh": "STRONG SIGNAL",
+    "verdictHighDescription": "The provider scored this project in the top range.",
+    "verdictMedium": "MIXED SIGNAL",
+    "verdictMediumDescription": "The provider scored this project in the middle range.",
+    "verdictLow": "WEAK SIGNAL",
+    "verdictLowDescription": "The provider scored this project in the lower range."
+  },
+  "errors": {
+    "loadTitle": "Analysis unavailable",
+    "loadFailed": "The SEO analysis could not be loaded.",
+    "retry": "Retry"
+  },
+  "view": {
+    "projectLabel": "Project",
+    "pickPlaceholder": "Pick a project",
+    "emptyTitle": "No projects to analyze yet",
+    "emptyDescription": "SEO analysis runs against a project — create one, then generate content for it.",
+    "createCta": "Create a project"
   },
   "actions": {
     "reArchitect": "Re-Architect Logic"

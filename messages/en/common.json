@@ -10,6 +10,24 @@
   "navigation": {
     "quickCreate": "Quick Create"
   },
+  "realtime": {
+    "scriptGenerated": "Script Generated",
+    "scriptGeneratedDescription": "AI has finished generating your script.",
+    "thumbnailReady": "Thumbnail Ready",
+    "thumbnailReadyDescription": "AI has finished generating your thumbnail.",
+    "audioReady": "Audio Ready",
+    "audioReadyDescription": "AI has finished generating your audio suggestions.",
+    "generationFailed": "Generation failed",
+    "generationFailedDescription": "{message}",
+    "renderCompleted": "Render completed",
+    "renderCompletedDescription": "Advertisement {advertisementId} is ready to download.",
+    "renderFailed": "Render failed",
+    "renderFailedDescription": "Render job {jobId} for advertisement {advertisementId} failed.",
+    "renderCancelled": "Render cancelled",
+    "renderCancelledDescription": "The advertisement render was cancelled.",
+    "roomError": "Realtime unavailable for this room",
+    "socketError": "WebSocket Error"
+  },
   "marketing": {
     "navLabel": "Marketing",
     "nav": {

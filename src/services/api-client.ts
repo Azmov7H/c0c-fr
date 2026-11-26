@@ -115,10 +115,16 @@ function timeoutSignal(caller?: AbortSignal): AbortSignal {
     return typeof AbortSignal.any === 'function' ? AbortSignal.any([caller, timeout]) : caller;
 }
 
-async function parseBody(response: Response): Promise<unknown> {
-    // M2-T25: binary payloads (ZIP export) — return the blob untouched.
+async function parseBody(response: Response, options: RequestOptions = {}): Promise<unknown> {
+    // Binary payloads (ZIP export, authenticated MP4 download) opt in via
+    // `responseType`. Content-Type alone is not enough: Cloudinary serves
+    // `video/mp4`, which would otherwise be misparsed as text and lost.
     const contentType = response.headers.get('content-type') ?? '';
-    if (contentType.includes('application/zip') || contentType.includes('application/octet-stream')) {
+    if (
+        options.responseType === 'blob' ||
+        contentType.includes('application/zip') ||
+        contentType.includes('application/octet-stream')
+    ) {
         return await response.blob();
     }
     const text = await response.text().catch(() => '');
@@ -171,9 +177,15 @@ async function execute<T>(
     }
 
     if (response.ok) {
-        return { data: (await parseBody(response)) as T, status: response.status, headers: response.headers };
+        return {
+            data: (await parseBody(response, options)) as T,
+            status: response.status,
+            headers: response.headers,
+        };
     }
 
+    // Error envelopes are always JSON, even when the successful response was
+    // requested as a blob.
     const body_ = await parseBody(response);
 
     // 401 -> single-flight refresh -> retry once (FE-05).

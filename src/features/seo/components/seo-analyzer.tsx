@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useProjectSEO, useGenerateSEO } from '../hooks/use-seo';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +23,7 @@ import {
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/lib/toast';
+import { toApiError } from '@/lib/api-error';
 import { cn } from '@/lib/utils';
 
 interface SEOAnalyzerProps {
@@ -30,7 +32,7 @@ interface SEOAnalyzerProps {
 
 export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
     const t = useTranslations('seo');
-    const { data: analysis, isLoading } = useProjectSEO(projectId);
+    const { data: analysis, isLoading, error, refetch } = useProjectSEO(projectId);
     const { mutate: generateSEO, isPending: isGenerating } = useGenerateSEO();
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -51,6 +53,26 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                 <Skeleton className="h-96 w-full rounded-[32px]" />
                 <Skeleton className="h-96 w-full rounded-[32px]" />
             </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <Alert variant="destructive">
+                <AlertTitle>{t('errors.loadTitle')}</AlertTitle>
+                <AlertDescription className="space-y-3">
+                    <p>{toApiError(error, t('errors.loadFailed')).message}</p>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        onClick={() => void refetch()}
+                    >
+                        <RefreshCw className="size-4" aria-hidden="true" />
+                        {t('errors.retry')}
+                    </Button>
+                </AlertDescription>
+            </Alert>
         );
     }
 
@@ -85,6 +107,22 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
             </div>
         );
     }
+
+    // Display guard only: the backend validates the provider score. The copy
+    // below is derived from that score, never a fixed " Supreme candidate".
+    const score = Math.min(100, Math.max(0, Number(analysis.platformScore) || 0));
+    const verdict =
+        score >= 80
+            ? t('projection.verdictHigh')
+            : score >= 50
+              ? t('projection.verdictMedium')
+              : t('projection.verdictLow');
+    const verdictDescription =
+        score >= 80
+            ? t('projection.verdictHighDescription')
+            : score >= 50
+              ? t('projection.verdictMediumDescription')
+              : t('projection.verdictLowDescription');
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -207,7 +245,7 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                                 <circle
                                     className="text-primary stroke-current transition-all duration-1500 ease-out"
                                     strokeWidth="8"
-                                    strokeDasharray={`${analysis.platformScore * 2.76}, 276.4`}
+                                    strokeDasharray={`${score * 2.76}, 276.4`}
                                     strokeLinecap="round"
                                     fill="transparent"
                                     r="44" cx="50" cy="50"
@@ -215,14 +253,14 @@ export const SEOAnalyzer = ({ projectId }: SEOAnalyzerProps) => {
                                 />
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <span className="text-6xl font-black text-foreground tracking-tighter">{analysis.platformScore}</span>
+                                <span className="text-6xl font-black text-foreground tracking-tighter">{score}</span>
                                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60">{t('projection.points')}</span>
                             </div>
                         </div>
                         <div className="space-y-3">
-                            <h4 className="text-2xl font-black text-foreground tracking-tight underline decoration-primary decoration-4 underline-offset-8">{t('projection.verdict')}</h4>
+                            <h4 className="text-2xl font-black text-foreground tracking-tight underline decoration-primary decoration-4 underline-offset-8">{verdict}</h4>
                             <p className="text-sm text-muted-foreground font-medium max-w-[280px] leading-relaxed mx-auto italic mt-4">
-                                {t('projection.verdictDescription')}
+                                {verdictDescription}
                             </p>
                         </div>
                     </CardContent>

@@ -23,6 +23,8 @@ const scriptMocks = vi.hoisted(() => ({
     script: undefined as
         | { id: string; projectId: string; sections: Array<Record<string, unknown>>; version: number; wordCount: number; status: string }
         | undefined,
+    generated: undefined as Script | undefined,
+    projects: [] as Array<{ _id: string; title: string; idea: string; platform: string; tone: string }>,
     update: vi.fn(),
     generate: vi.fn(),
 }));
@@ -30,7 +32,24 @@ const scriptMocks = vi.hoisted(() => ({
 vi.mock('./hooks/use-scripts', () => ({
     useScript: () => ({ data: scriptMocks.script, isLoading: false }),
     useUpdateScript: () => ({ mutate: scriptMocks.update, isPending: false }),
-    useGenerateScript: () => ({ mutate: scriptMocks.generate, isPending: false }),
+    useGenerateScript: () => ({ data: scriptMocks.generated, mutate: scriptMocks.generate, isPending: false }),
+}));
+
+vi.mock('@/features/projects/hooks/use-projects', () => ({
+    useProjects: () => ({
+        data: { data: scriptMocks.projects },
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+    }),
+}));
+
+vi.mock('@/i18n/navigation', () => ({
+    Link: ({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+        <a href={href} {...props}>
+            {children}
+        </a>
+    ),
 }));
 
 const MESSAGES = {
@@ -59,6 +78,8 @@ const scriptFixture = (sections: Array<Record<string, unknown>>) =>
 describe('AR-032 scripts/titles/hashtags i18n', () => {
     beforeEach(() => {
         scriptMocks.script = undefined;
+        scriptMocks.generated = undefined;
+        scriptMocks.projects = [];
         scriptMocks.update.mockReset();
         scriptMocks.generate.mockReset();
     });
@@ -107,13 +128,32 @@ describe('AR-032 scripts/titles/hashtags i18n', () => {
         expect(payload.data.sections[0].content).toBe('مرحبا بالعالم');
     });
 
-    it('script generator renders Arabic chrome', () => {
+    it('script generator renders Arabic chrome and no fake project state', () => {
         renderWith('ar', <ScriptGenerator />);
         expect(screen.getByText('مولّد النصوص')).toBeTruthy();
-        expect(screen.getByText('لوحة النص')).toBeTruthy();
+        expect(screen.getByText('موجز المشروع')).toBeTruthy();
         expect(screen.getByText('الناتج المُولّد')).toBeTruthy();
         expect(screen.getByText('توليد النص')).toBeTruthy();
         expect(screen.getByText('لا يوجد نص بعد')).toBeTruthy();
+        expect(screen.getByText('لا توجد مشاريع بعد')).toBeTruthy();
+        expect(screen.getByText('المشروع')).toBeTruthy();
+    });
+
+    it('script generator generates from the selected project and shows persisted sections', async () => {
+        scriptMocks.projects = [
+            { _id: 'p1', title: 'مشروعي', idea: 'فكرة حقيقية', platform: 'youtube', tone: 'educational' },
+        ];
+        scriptMocks.generated = scriptFixture([
+            { order: 1, label: 'Hook', content: 'محتوى من المزوّد', narration: '', visualDirection: '', transition: 'cut', durationSeconds: 5, assetIds: [] },
+        ]) as Script;
+
+        renderWith('ar', <ScriptGenerator />);
+        fireEvent.click(screen.getByText('توليد النص'));
+
+        await waitFor(() => expect(scriptMocks.generate).toHaveBeenCalledWith('p1'));
+        expect(screen.getByText('محتوى من المزوّد')).toBeTruthy();
+        expect(screen.queryByText(/HOOK \(0-3s\)/)).toBeNull();
+        expect(screen.queryByText(/STOP SCROLLING/i)).toBeNull();
     });
 
     it('title generator renders Arabic chrome', () => {

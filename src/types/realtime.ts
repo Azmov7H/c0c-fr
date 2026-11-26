@@ -37,6 +37,33 @@ export interface AudioGeneratedPayload {
     audioId: string;
 }
 
+/** D5 — terminal state of an async generation job (success or failure). */
+export interface GenerationCompletedPayload {
+    userId: string;
+    projectId: string;
+    jobId: string;
+    kind: string;
+    status: 'completed' | 'failed';
+    scriptId?: string;
+    error?: string;
+}
+
+/** A8 — HTTP polling stays authoritative; this invalidates open tabs. */
+export interface AdvertisementRenderUpdatedPayload {
+    userId: string;
+    projectId: string;
+    advertisementId: string;
+    jobId: string;
+    status:
+        | 'queued'
+        | 'rendering'
+        | 'processing-audio'
+        | 'finalizing'
+        | 'completed'
+        | 'failed'
+        | 'cancelled';
+}
+
 export interface ProjectUpdatedPayload {
     projectId: string;
     userId: string;
@@ -75,8 +102,10 @@ export interface ServerToClientEvents {
     notification: (data: NotificationPayload) => void;
     'notification:unread': (data: UnreadPayload) => void;
     'script:generated': (data: ScriptGeneratedPayload) => void;
+    'generation:completed': (data: GenerationCompletedPayload) => void;
     'thumbnail:generated': (data: ThumbnailGeneratedPayload) => void;
     'audio:generated': (data: AudioGeneratedPayload) => void;
+    'advertisement:render.updated': (data: AdvertisementRenderUpdatedPayload) => void;
     'project:updated': (data: ProjectUpdatedPayload) => void;
     'project.member_added': (data: MemberChangedPayload) => void;
     'project.member_removed': (data: MemberChangedPayload) => void;

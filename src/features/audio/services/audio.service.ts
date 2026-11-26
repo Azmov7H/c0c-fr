@@ -1,5 +1,14 @@
 import apiClient from '@/services/api-client';
-import { AudioSuggestion, CreateAudioSuggestionDTO, UpdateAudioSuggestionDTO, UploadAudioDTO, ReplaceAudioDTO } from '../types';
+import {
+    AudioSuggestion,
+    CreateAudioSuggestionDTO,
+    UpdateAudioSuggestionDTO,
+    UploadAudioDTO,
+    ReplaceAudioDTO,
+    SignedAudioUpload,
+    SignAudioUploadDTO,
+    GenerateSoundMailDTO,
+} from '../types';
 import { ApiResponse } from '@/types';
 
 class AudioService {
@@ -46,6 +55,24 @@ class AudioService {
 
     async getCurrent(projectId: string): Promise<AudioSuggestion | null> {
         const response = await apiClient.get<ApiResponse<AudioSuggestion | null>>(`${this.baseUrl}/project/${projectId}/current`);
+        return response.data.data;
+    }
+
+    /** A6-M: signed browser-upload credentials; no bytes pass through the API. */
+    async signUpload(data: SignAudioUploadDTO): Promise<SignedAudioUpload> {
+        const response = await apiClient.post<ApiResponse<SignedAudioUpload>>(
+            `${this.baseUrl}/sign-upload`,
+            data
+        );
+        return response.data.data;
+    }
+
+    /** A6-M: generated project audio message. 403 AI_VOICE_GATED while D8 is off. */
+    async generateSoundMail(data: GenerateSoundMailDTO): Promise<AudioSuggestion> {
+        const response = await apiClient.post<ApiResponse<AudioSuggestion>>(
+            `${this.baseUrl}/sound-mail/generate`,
+            data
+        );
         return response.data.data;
     }
 }

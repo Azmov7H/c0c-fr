@@ -1,9 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { scriptsService } from '../services/scripts.service';
-import { CreateScriptDTO, UpdateScriptDTO, Script } from '../types';
+import {
+    CreateScriptDTO,
+    UpdateScriptDTO,
+    Script,
+    isGenerationJobStart,
+} from '../types';
 import { toast } from '@/lib/toast';
-import { toApiError } from '@/lib/api-error';
+import { ApiError, toApiError } from '@/lib/api-error';
 
 export const scriptsKeys = {
     all: ['scripts'] as const,
@@ -59,7 +64,21 @@ export const useGenerateScript = () => {
     const t = useTranslations('scripts');
 
     return useMutation({
-        mutationFn: (projectId: string) => scriptsService.generateScript(projectId),
+        // Keep the mutation pending until the durable job reaches a terminal
+        // state. A 202 is a receipt, not a script.
+        mutationFn: async (projectId: string): Promise<Script> => {
+            const result = await scriptsService.generateScript(projectId);
+            if (!isGenerationJobStart(result)) return result;
+
+            const job = await scriptsService.waitForGenerationJob(result.jobId);
+            if (job.status !== 'completed' || !job.scriptId) {
+                throw new ApiError({
+                    code: 'GENERATION_FAILED',
+                    message: job.error ?? t('toasts.generateFailed'),
+                });
+            }
+            return scriptsService.getScriptById(job.scriptId);
+        },
         onSuccess: (data) => {
             toast.success(t('toasts.generated'));
             queryClient.invalidateQueries({ queryKey: scriptsKeys.list(data.projectId) });

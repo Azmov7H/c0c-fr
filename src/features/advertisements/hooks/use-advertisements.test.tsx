@@ -9,6 +9,7 @@ import enAdvertisements from '../../../../messages/en/advertisements.json';
 import { detailFixture, renderJobFixture } from '../../../../tests/helpers/advertisements';
 import { advertisementKeys } from '../lib/query-keys';
 import {
+    useDownloadRender,
     useGenerateVideo,
     useInitializeProjectVideo,
     useRenderJob,
@@ -32,6 +33,7 @@ const mocks = vi.hoisted(() => ({
     listRenderJobs: vi.fn(),
     cancelRender: vi.fn(),
     retryRender: vi.fn(),
+    download: vi.fn(),
 }));
 
 vi.mock('../services/advertisements.service', () => ({
@@ -54,6 +56,7 @@ vi.mock('../services/advertisements.service', () => ({
         getRenderJob: mocks.getRenderJob,
         cancelRender: mocks.cancelRender,
         retryRender: mocks.retryRender,
+        download: mocks.download,
     },
 }));
 
@@ -134,5 +137,33 @@ describe('advertisement hooks', () => {
         const idle = renderHook(() => useRenderJob('ad-1'), { wrapper });
         await waitFor(() => expect(idle.result.current.fetchStatus).toBe('idle'));
         expect(mocks.getRenderJob).toHaveBeenCalledTimes(1);
+    });
+
+    it('downloads rendered bytes through the API client and revokes the object URL', async () => {
+        const bytes = new Blob(['mp4']);
+        const createObjectURL = vi.fn(() => 'blob:render');
+        const revokeObjectURL = vi.fn();
+        const click = vi
+            .spyOn(HTMLAnchorElement.prototype, 'click')
+            .mockImplementation(() => undefined);
+        Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: createObjectURL });
+        Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revokeObjectURL });
+        mocks.download.mockResolvedValue({ blob: bytes, filename: 'عربي.mp4' });
+
+        try {
+            const { result } = renderHook(() => useDownloadRender('ad-1'), { wrapper });
+            await act(async () => {
+                await result.current.mutateAsync();
+            });
+
+            expect(mocks.download).toHaveBeenCalledWith('ad-1');
+            expect(createObjectURL).toHaveBeenCalledWith(bytes);
+            expect(revokeObjectURL).toHaveBeenCalledWith('blob:render');
+            expect(click).toHaveBeenCalledTimes(1);
+        } finally {
+            Reflect.deleteProperty(URL, 'createObjectURL');
+            Reflect.deleteProperty(URL, 'revokeObjectURL');
+            click.mockRestore();
+        }
     });
 });

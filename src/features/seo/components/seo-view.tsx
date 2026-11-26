@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { FolderKanban } from 'lucide-react';
 import { useProjects } from '@/features/projects/hooks/use-projects';
 import { DataState } from '@/components/shared/data-state';
@@ -23,6 +24,7 @@ import { SEOAnalyzer } from './seo-analyzer';
  */
 export function SeoView() {
     const router = useRouter();
+    const t = useTranslations('seo');
     const { data, isLoading, error, refetch } = useProjects({ limit: 50 });
     const projects = data?.data ?? [];
     const [pickedId, setPickedId] = useState<string>();
@@ -37,12 +39,18 @@ export function SeoView() {
             error={error}
             onRetry={() => refetch()}
             isEmpty={projects.length === 0}
-            emptyTitle="No projects to analyze yet"
-            emptyDescription="SEO analysis runs against a project — create one, then generate content for it."
+            emptyTitle={t('view.emptyTitle')}
+            emptyDescription={t('view.emptyDescription')}
             emptyIcon={FolderKanban}
             emptyAction={{
-                label: 'Create a project',
+                label: t('view.createCta'),
                 onClick: () => router.push('/projects/new'),
+            }}
+            labels={{
+                loading: t('empty.analyzing'),
+                errorTitle: t('errors.loadTitle'),
+                errorFallback: t('errors.loadFailed'),
+                retry: t('errors.retry'),
             }}
             loadingFallback={
                 <div className="space-y-6">
@@ -61,11 +69,11 @@ export function SeoView() {
                             htmlFor="seo-project"
                             className="mb-1.5 block text-xs font-medium text-muted-foreground"
                         >
-                            Project
+                            {t('view.projectLabel')}
                         </label>
                         <Select value={projectId} onValueChange={setPickedId}>
                             <SelectTrigger id="seo-project" className="w-full">
-                                <SelectValue placeholder="Pick a project" />
+                                <SelectValue placeholder={t('view.pickPlaceholder')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {projects.map((project) => (

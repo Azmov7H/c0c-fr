@@ -23,10 +23,26 @@
   },
   "projection": {
     "title": "توقّع النمو",
-    "description": "درجة الظهور المقدّرة عبر المنصات المستهدفة",
+    "description": "درجة الظهور التي أعادها مزوّد الخدمة",
     "points": "نقاط",
-    "verdict": "\"مرشح متميز\"",
-    "verdictDescription": "تم رصد اتساق استثنائي بين خطافات السرد وعناقيد الاتجاهات المتسارعة."
+    "verdictHigh": "إشارة قوية",
+    "verdictHighDescription": "قيّم المزوّد هذا المشروع في النطاق الأعلى.",
+    "verdictMedium": "إشارة مختلطة",
+    "verdictMediumDescription": "قيّم المزوّد هذا المشروع في النطاق المتوسط.",
+    "verdictLow": "إشارة ضعيفة",
+    "verdictLowDescription": "قيّم المزوّد هذا المشروع في النطاق الأدنى."
+  },
+  "errors": {
+    "loadTitle": "التحليل غير متاح",
+    "loadFailed": "تعذّر تحليل SEO.",
+    "retry": "إعادة المحاولة"
+  },
+  "view": {
+    "projectLabel": "المشروع",
+    "pickPlaceholder": "اختر مشروعًا",
+    "emptyTitle": "لا توجد مشاريع للتحليل بعد",
+    "emptyDescription": "يعمل تحليل SEO على مشروع محدد — أنشئ مشروعًا ثم ولّد محتواه.",
+    "createCta": "إنشاء مشروع"
   },
   "actions": {
     "reArchitect": "إعادة بناء المنطق"
