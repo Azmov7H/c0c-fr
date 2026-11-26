@@ -213,6 +213,39 @@ describe('api-client 401 interceptor', () => {
         expect((limited as { status?: number }).status).toBe(429);
     });
 
+    it('responseType blob returns real bytes and still parses error envelopes', async () => {
+        server.use(
+            http.get('/api/v1/mp4', () =>
+                new HttpResponse(new Blob(['render-bytes']), {
+                    headers: { 'Content-Type': 'video/mp4' },
+                })
+            ),
+            http.get('/api/v1/mp4-blocked', () =>
+                HttpResponse.json(
+                    {
+                        success: false,
+                        error: { code: 'RENDER_NOT_READY', message: 'No completed render.' },
+                    },
+                    { status: 409 }
+                )
+            )
+        );
+
+        const apiClient = await useApi();
+        const response = await apiClient.get<Blob>('/mp4', { responseType: 'blob' });
+        expect(response.data).toBeInstanceOf(Blob);
+        // jsdom's Blob has no reliable `.text()`; size/type still prove the
+        // bytes were returned raw rather than JSON-parsed.
+        expect(response.data.size).toBeGreaterThan(0);
+        expect(response.data.type).toBe('video/mp4');
+
+        const error = (await apiClient
+            .get('/mp4-blocked', { responseType: 'blob' })
+            .catch((e: unknown) => e)) as { code?: string; message?: string };
+        expect(error.code).toBe('RENDER_NOT_READY');
+        expect(error.message).toBe('No completed render.');
+    });
+
     it('success responses keep the envelope the feature services read', async () => {
         server.use(
             http.get('/api/v1/meta', () =>

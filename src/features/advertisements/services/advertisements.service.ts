@@ -29,9 +29,35 @@ const idempotencyKey = (operation: string): string => {
     return `${operation}-${random}`;
 };
 
+/** Prefer the RFC 5987 name; fall back to the ASCII header, then a safe name. */
+const downloadFilename = (disposition: string): string => {
+    const encoded = /filename\*=UTF-8''([^;]+)/i.exec(disposition)?.[1];
+    if (encoded) {
+        try {
+            return decodeURIComponent(encoded.trim().replace(/^"|"$/g, ''));
+        } catch {
+            // Fall through to the plain filename.
+        }
+    }
+    const plain = /filename="?([^";]+)"?/i.exec(disposition)?.[1];
+    return plain?.trim() || 'advertisement.mp4';
+};
+
 export const advertisementsService = {
     downloadUrl: (id: string): string =>
         `${config.apiUrl}/advertisements/${encodeURIComponent(id)}/download`,
+
+    /** Authenticated MP4 fetch: a bare link cannot refresh an expired session. */
+    download: async (id: string): Promise<{ blob: Blob; filename: string }> => {
+        const response = await apiClient.get<Blob>(
+            `/advertisements/${encodeURIComponent(id)}/download`,
+            { responseType: 'blob' }
+        );
+        return {
+            blob: response.data,
+            filename: downloadFilename(response.headers.get('content-disposition') ?? ''),
+        };
+    },
 
     getProjectVideo: async (projectId: string): Promise<ProjectVideoState> => {
         const response = await apiClient.get<ApiEnvelope<ProjectVideoState>>(

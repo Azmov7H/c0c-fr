@@ -10,6 +10,24 @@
   "navigation": {
     "quickCreate": "إنشاء سريع"
   },
+  "realtime": {
+    "scriptGenerated": "تم توليد النص",
+    "scriptGeneratedDescription": "أنهى الذكاء الاصطناعي توليد نصك.",
+    "thumbnailReady": "الصورة المصغّرة جاهزة",
+    "thumbnailReadyDescription": "أنهى الذكاء الاصطناعي توليد الصورة المصغّرة.",
+    "audioReady": "الصوت جاهز",
+    "audioReadyDescription": "أنهى الذكاء الاصطناعي توليد اقتراحات الصوت.",
+    "generationFailed": "فشل التوليد",
+    "generationFailedDescription": "تعذّر التوليد، {message}",
+    "renderCompleted": "اكتمل التصيير",
+    "renderCompletedDescription": "الإعلان {advertisementId} جاهز للتنزيل.",
+    "renderFailed": "فشل التصيير",
+    "renderFailedDescription": "فشلت مهمة التصيير {jobId} للإعلان {advertisementId}.",
+    "renderCancelled": "تم إلغاء التصيير",
+    "renderCancelledDescription": "تم إلغاء تصيير الإعلان.",
+    "roomError": "الوقت الفعلي غير متاح لهذه الغرفة",
+    "socketError": "خطأ في WebSocket"
+  },
   "marketing": {
     "navLabel": "التسويق",
     "nav": {

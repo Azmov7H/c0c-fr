@@ -218,3 +218,26 @@ export function useRetryRender(id: string) {
         },
     });
 }
+
+/** A8: download through the API client so 401 refresh/retry still applies. */
+export function useDownloadRender(id: string) {
+    const t = useTranslations('advertisements');
+    return useMutation({
+        mutationFn: async () => {
+            const { blob, filename } = await advertisementsService.download(id);
+            const url = URL.createObjectURL(blob);
+            try {
+                const anchor = document.createElement('a');
+                anchor.href = url;
+                anchor.download = filename;
+                document.body.append(anchor);
+                anchor.click();
+                anchor.remove();
+            } finally {
+                URL.revokeObjectURL(url);
+            }
+        },
+        onError: (error) =>
+            toast.error(toApiError(error, t('render.downloadFailed')).message),
+    });
+}

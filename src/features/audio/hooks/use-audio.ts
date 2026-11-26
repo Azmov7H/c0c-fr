@@ -2,7 +2,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import { audioService } from '../services/audio.service';
-import { CreateAudioSuggestionDTO, UpdateAudioSuggestionDTO, UploadAudioDTO, ReplaceAudioDTO } from '../types';
+import { uploadAudioFile } from '../lib/upload-audio-file';
+import {
+    CreateAudioSuggestionDTO,
+    UpdateAudioSuggestionDTO,
+    UploadAudioDTO,
+    ReplaceAudioDTO,
+    AudioUploadFileDTO,
+    GenerateSoundMailDTO,
+} from '../types';
 import { toast } from '@/lib/toast';
 import { generationErrorMessage } from '@/features/billing/lib/generation-error';
 
@@ -129,6 +137,74 @@ export const useReplaceAudio = () => {
     return useMutation({
         mutationFn: ({ id, data }: { id: string; data: ReplaceAudioDTO }) =>
             audioService.replaceAudio(id, data),
+        onSuccess: (data) => {
+            toast.success(t('toasts.replaced'));
+            queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
+            queryClient.setQueryData(audioKeys.detail(data.id), data);
+        },
+        onError: (error: unknown) => {
+            toast.error(generationErrorMessage(error, t('toasts.replaceFailed'), suffixes));
+        },
+    });
+};
+
+/** A6-M: generated project audio message; the D8 gate is reported, not hidden. */
+export const useGenerateSoundMail = () => {
+    const queryClient = useQueryClient();
+    const t = useTranslations('audio');
+    const suffixes = useGenerationSuffixes();
+    return useMutation({
+        mutationFn: (data: GenerateSoundMailDTO) => audioService.generateSoundMail(data),
+        onSuccess: (data) => {
+            toast.success(t('soundMail.toasts.generated'));
+            queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
+            queryClient.setQueryData(audioKeys.detail(data.id), data);
+        },
+        onError: (error: unknown) => {
+            toast.error(generationErrorMessage(error, t('soundMail.toasts.generateFailed'), suffixes));
+        },
+    });
+};
+
+/** A6-M: upload real bytes, then persist the durable URL as an audio asset. */
+export const useUploadAudioFile = () => {
+    const queryClient = useQueryClient();
+    const t = useTranslations('audio');
+    const suffixes = useGenerationSuffixes();
+    return useMutation({
+        mutationFn: async (data: AudioUploadFileDTO) => {
+            const payload = await uploadAudioFile(data);
+            return audioService.uploadAudio(payload);
+        },
+        onSuccess: (data) => {
+            toast.success(t('toasts.uploaded'));
+            queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
+        },
+        onError: (error: unknown) => {
+            toast.error(generationErrorMessage(error, t('toasts.uploadFailed'), suffixes));
+        },
+    });
+};
+
+/** Replace the current layer only after the new bytes are durably uploaded. */
+export const useReplaceAudioFile = () => {
+    const queryClient = useQueryClient();
+    const t = useTranslations('audio');
+    const suffixes = useGenerationSuffixes();
+    return useMutation({
+        mutationFn: async ({
+            id,
+            projectId,
+            file,
+            assetType,
+        }: AudioUploadFileDTO & { id: string }) => {
+            const uploaded = await uploadAudioFile({ projectId, file, assetType });
+            return audioService.replaceAudio(id, {
+                fileUrl: uploaded.fileUrl,
+                fileSize: uploaded.fileSize,
+                format: uploaded.format,
+            });
+        },
         onSuccess: (data) => {
             toast.success(t('toasts.replaced'));
             queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });

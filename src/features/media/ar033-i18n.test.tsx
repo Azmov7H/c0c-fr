@@ -3,8 +3,9 @@
  */
 import type { ReactElement } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
+import { ApiError } from '@/lib/api-error';
 
 import arAudio from '../../../messages/ar/audio.json';
 import enAudio from '../../../messages/en/audio.json';
@@ -24,6 +25,7 @@ const mocks = vi.hoisted(() => ({
     projects: [] as Array<{ _id: string; title: string }>,
     audio: [] as unknown[],
     media: { data: [] as unknown[] },
+    generateSoundMail: vi.fn(),
 }));
 
 vi.mock('@/features/projects/hooks/use-projects', () => ({
@@ -34,7 +36,13 @@ vi.mock('@/features/audio/hooks/use-audio', () => ({
     useProjectAudio: () => ({ data: mocks.audio, isLoading: false }),
     useGenerateAudio: () => ({ mutate: vi.fn(), isPending: false, isError: false, error: null }),
     useUploadAudio: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
-    useReplaceAudio: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
+    useReplaceAudioFile: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
+    useUploadAudioFile: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
+    useGenerateSoundMail: () => ({
+        mutate: mocks.generateSoundMail,
+        mutateAsync: vi.fn(),
+        isPending: false,
+    }),
 }));
 
 vi.mock('@/features/media/hooks/use-media', () => ({
@@ -74,6 +82,7 @@ beforeEach(() => {
     mocks.projects = [];
     mocks.audio = [];
     mocks.media = { data: [] };
+    mocks.generateSoundMail.mockReset();
 });
 
 afterEach(() => {
@@ -105,6 +114,33 @@ describe('AR-033 audio/thumbnails/media i18n', () => {
         expect(screen.getByText('الصوت الحالي')).toBeTruthy();
         const audio = container.querySelector('audio[controls]');
         expect(audio?.getAttribute('dir')).toBe('ltr');
+    });
+
+    it('surfaces the D8 gate for generated Sound Mail in Arabic', () => {
+        mocks.projects = [{ _id: 'p1', title: 'مشروع' }];
+        mocks.generateSoundMail.mockImplementation(
+            (
+                _data: unknown,
+                options?: { onError?: (error: unknown) => void }
+            ) => {
+                options?.onError?.(
+                    new ApiError({ code: 'AI_VOICE_GATED', message: 'AI voice disabled' })
+                );
+            }
+        );
+
+        renderAr(<AudioStudio />);
+        fireEvent.click(screen.getByRole('button', { name: /توليد رسالة صوتية/ }));
+
+        expect(
+            screen
+                .getAllByRole('alert')
+                .some((node) => node.textContent?.includes('AI_VOICE_GATED'))
+        ).toBe(true);
+        expect(mocks.generateSoundMail).toHaveBeenCalledWith(
+            expect.objectContaining({ projectId: 'p1' }),
+            expect.anything()
+        );
     });
 
     it('thumbnail studio renders Arabic chrome', () => {

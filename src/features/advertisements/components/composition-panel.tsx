@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/card';
 import { useUrlLocale } from '@/i18n/locale';
 import { getFormatters } from '@/lib/format';
+import { toApiError } from '@/lib/api-error';
 
 import {
     useComposition,
@@ -82,6 +83,22 @@ export function CompositionPanel({ detail, canEdit, compact = false }: Compositi
                     ) : null}
 
                     <GateError error={generate.error} feature="ads.motion.generate" />
+
+                    {compositionQuery.error ? (
+                        <Alert variant="destructive">
+                            <AlertDescription>
+                                {toApiError(compositionQuery.error, t('composition.loadFailed')).message}
+                            </AlertDescription>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="mt-2 gap-2"
+                                onClick={() => void compositionQuery.refetch()}
+                            >
+                                {t('composition.retry')}
+                            </Button>
+                        </Alert>
+                    ) : null}
 
                     {composition ? (
                         <>
@@ -160,7 +177,23 @@ export function CompositionPanel({ detail, canEdit, compact = false }: Compositi
                         <CardDescription>{t('composition.previewDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <PreviewPlayer preview={previewQuery.data} />
+                        {previewQuery.error ? (
+                            <Alert variant="destructive">
+                                <AlertDescription>
+                                    {toApiError(previewQuery.error, t('composition.previewFailed')).message}
+                                </AlertDescription>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-2 gap-2"
+                                    onClick={() => void previewQuery.refetch()}
+                                >
+                                    {t('composition.retry')}
+                                </Button>
+                            </Alert>
+                        ) : (
+                            <PreviewPlayer preview={previewQuery.data} />
+                        )}
                     </CardContent>
                 </Card>
             ) : null}

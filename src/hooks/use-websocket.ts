@@ -1,6 +1,8 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
+import { advertisementKeys } from '@/features/advertisements/lib/query-keys';
 import { notificationsKeys } from '@/features/notifications/hooks/use-notifications';
 import { projectKeys } from '@/features/projects/lib/query-keys';
 import { scriptsKeys } from '@/features/scripts/hooks/use-scripts';
@@ -37,6 +39,7 @@ const MAX_RECONNECT_DELAY_MS = 30_000;
 export function useWebSocket() {
     const { user } = useAuth();
     const queryClient = useQueryClient();
+    const t = useTranslations('common');
     const socketRef = useRef<Socket | null>(null);
     const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const attemptRef = useRef(0);
@@ -121,17 +124,40 @@ export function useWebSocket() {
             void queryClient.invalidateQueries({ queryKey: scriptsKeys.list(data.projectId) });
             void queryClient.invalidateQueries({ queryKey: projectKeys.activity(data.projectId) });
             void queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
-            toast.success('Script Generated', {
-                description: 'AI has finished generating your script.',
+            toast.success(t('realtime.scriptGenerated'), {
+                description: t('realtime.scriptGeneratedDescription'),
             });
+        });
+
+        // D5: the async route has no synchronous script to cache. invalidate
+        // the project list (and the finished detail when present); failures
+        // must surface instead of leaving a permanently spinning card.
+        socket.on('generation:completed', (data) => {
+            void queryClient.invalidateQueries({ queryKey: scriptsKeys.list(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: projectKeys.activity(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
+            if (data.scriptId) {
+                void queryClient.invalidateQueries({ queryKey: scriptsKeys.detail(data.scriptId) });
+            }
+            if (data.status === 'failed') {
+                toast.error(t('realtime.generationFailed'), {
+                    description: t('realtime.generationFailedDescription', {
+                        message: data.error ?? '',
+                    }),
+                });
+            } else {
+                toast.success(t('realtime.scriptGenerated'), {
+                    description: t('realtime.scriptGeneratedDescription'),
+                });
+            }
         });
 
         socket.on('thumbnail:generated', (data) => {
             void queryClient.invalidateQueries({ queryKey: thumbnailsKeys.list(data.projectId) });
             void queryClient.invalidateQueries({ queryKey: projectKeys.activity(data.projectId) });
             void queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
-            toast.success('Thumbnail Ready', {
-                description: 'AI has finished generating your thumbnail.',
+            toast.success(t('realtime.thumbnailReady'), {
+                description: t('realtime.thumbnailReadyDescription'),
             });
         });
 
@@ -139,9 +165,39 @@ export function useWebSocket() {
             void queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
             void queryClient.invalidateQueries({ queryKey: projectKeys.activity(data.projectId) });
             void queryClient.invalidateQueries({ queryKey: notificationsKeys.all });
-            toast.success('Audio Ready', {
-                description: 'AI has finished generating your audio suggestions.',
+            toast.success(t('realtime.audioReady'), {
+                description: t('realtime.audioReadyDescription'),
             });
+        });
+
+        // A8: polling stops at terminal statuses. The wire event wakes an open
+        // tab that missed the last poll, and only terminal states deserve a toast.
+        socket.on('advertisement:render.updated', (data) => {
+            void queryClient.invalidateQueries({ queryKey: advertisementKeys.detail(data.advertisementId) });
+            void queryClient.invalidateQueries({ queryKey: advertisementKeys.renderJobs(data.advertisementId) });
+            void queryClient.invalidateQueries({
+                queryKey: advertisementKeys.renderJob(data.advertisementId, data.jobId),
+            });
+            void queryClient.invalidateQueries({ queryKey: advertisementKeys.projectVideo(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: advertisementKeys.lists() });
+            if (data.status === 'completed') {
+                toast.success(t('realtime.renderCompleted'), {
+                    description: t('realtime.renderCompletedDescription', {
+                        advertisementId: data.advertisementId,
+                    }),
+                });
+            } else if (data.status === 'failed') {
+                toast.error(t('realtime.renderFailed'), {
+                    description: t('realtime.renderFailedDescription', {
+                        jobId: data.jobId,
+                        advertisementId: data.advertisementId,
+                    }),
+                });
+            } else if (data.status === 'cancelled') {
+                toast.info(t('realtime.renderCancelled'), {
+                    description: t('realtime.renderCancelledDescription'),
+                });
+            }
         });
 
         socket.on('project:updated', (data: ProjectUpdatedPayload) => {
@@ -163,13 +219,13 @@ export function useWebSocket() {
 
         // Room denial (RT-02): surface instead of silent emptiness.
         socket.on('room:error', (data: RoomErrorPayload) => {
-            toast.error('Realtime unavailable for this room', { description: data.message });
+            toast.error(t('realtime.roomError'), { description: data.message });
         });
 
         socket.on('error', (message: string) => {
-            toast.error('WebSocket Error', { description: message });
+            toast.error(t('realtime.socketError'), { description: message });
         });
-    }, [user, queryClient, markConnected, scheduleReconnect]);
+    }, [user, queryClient, t, markConnected, scheduleReconnect]);
 
     // Always point the reconnect timer at the latest connect closure.
     useEffect(() => {

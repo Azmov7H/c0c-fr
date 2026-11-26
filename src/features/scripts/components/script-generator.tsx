@@ -2,9 +2,12 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { Copy, Download, FileText, Loader2, RotateCcw, Sparkles } from 'lucide-react';
+
 import { PageHeader } from '@/components/shared/page-header';
 import { TwoPanelLayout } from '@/components/shared/two-panel-layout';
-import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
@@ -14,139 +17,177 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { FileText, Sparkles, Copy, Download, RotateCcw } from 'lucide-react';
+import { useProjects } from '@/features/projects/hooks/use-projects';
+import { Link } from '@/i18n/navigation';
+import { toApiError } from '@/lib/api-error';
 
-const TONES = ['Educational', 'Hype', 'Storytelling', 'Conversational'] as const;
-type Tone = (typeof TONES)[number];
+import { useGenerateScript } from '../hooks/use-scripts';
+import { scriptSceneLabel } from '../lib/script-labels';
+import type { Script } from '../types';
 
-function toneLabel(t: ReturnType<typeof useTranslations<'scripts'>>, tone: Tone): string {
-  switch (tone) {
-    case 'Educational':
-      return t('generator.tones.Educational');
-    case 'Hype':
-      return t('generator.tones.Hype');
-    case 'Storytelling':
-      return t('generator.tones.Storytelling');
-    case 'Conversational':
-      return t('generator.tones.Conversational');
-  }
-}
+/** The persisted script is the only output; no client-side placeholder text. */
+const scriptTextOf = (script: Script): string =>
+  script.sections
+    .slice()
+    .sort((left, right) => left.order - right.order)
+    .map((section) => {
+      const narration = section.narration?.trim()
+        ? `\n${section.narration.trim()}`
+        : '';
+      // Export keeps the persisted label token byte-stable; only the panel
+      // renders localized labels (AR-032).
+      return `${section.label}: ${section.content}${narration}`;
+    })
+    .join('\n\n');
 
 export function ScriptGenerator() {
   const t = useTranslations('scripts');
-  const [idea, setIdea] = useState('');
-  const [platform, setPlatform] = useState<string>('youtube-shorts');
-  const [tone, setTone] = useState<Tone>('Educational');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedScript, setGeneratedScript] = useState<string | null>(null);
+  const { data, isLoading, error, refetch } = useProjects({ limit: 50 });
+  const projects = data?.data ?? [];
+  const [pickedId, setPickedId] = useState<string>();
+  const generate = useGenerateScript();
 
-  const handleGenerate = async () => {
-    if (!idea.trim()) return;
-    setIsGenerating(true);
-    // Simulate AI generation — replace with actual API call
-    await new Promise((r) => setTimeout(r, 2000));
-    setGeneratedScript(
-      `HOOK (0-3s):\n"Stop scrolling. What if I told you ${idea.toLowerCase().slice(0, 50)}..."\n\nBODY (3-45s):\nHere's the thing most people don't realize...\n[Explain the core concept with examples]\n\nCTA (45-60s):\n"Follow for more ${platform} content like this!"`
+  const projectId = pickedId ?? projects[0]?._id;
+  const project = projects.find((item) => item._id === projectId);
+  // A script from another project is never shown under a different brief.
+  const script = generate.data?.projectId === projectId ? generate.data : undefined;
+
+  const handleGenerate = () => {
+    if (!projectId) return;
+    generate.mutate(projectId);
+  };
+
+  const copyScript = () => {
+    if (script) void navigator.clipboard.writeText(scriptTextOf(script));
+  };
+
+  const exportScript = () => {
+    if (!script) return;
+    const url = URL.createObjectURL(
+      new Blob([scriptTextOf(script)], { type: 'text/plain;charset=utf-8' })
     );
-    setIsGenerating(false);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `script-${script.id}.txt`;
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
   };
 
   const leftContent = (
     <div className="space-y-6">
-      <div className="space-y-3">
-        <Label htmlFor="script-idea">{t('generator.ideaLabel')}</Label>
-        <Textarea
-          id="script-idea"
-          dir="auto"
-          placeholder={t('generator.ideaPlaceholder')}
-          value={idea}
-          onChange={(e) => setIdea(e.target.value)}
-          className="min-h-[140px] resize-none"
-        />
-      </div>
+      {error ? (
+        <Alert variant="destructive">
+          <AlertTitle>{t('generator.loadErrorTitle')}</AlertTitle>
+          <AlertDescription className="space-y-3">
+            <p>{toApiError(error, t('generator.loadError')).message}</p>
+            <Button variant="outline" size="sm" onClick={() => void refetch()}>
+              {t('generator.retry')}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {!isLoading && !error && projects.length === 0 ? (
+        <Alert>
+          <AlertTitle>{t('generator.noProjects')}</AlertTitle>
+          <AlertDescription className="space-y-3">
+            <p>{t('generator.noProjectsDescription')}</p>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/projects/new">{t('generator.createProject')}</Link>
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
       <div className="space-y-3">
-        <Label>{t('generator.platform')}</Label>
-        <Select value={platform} onValueChange={setPlatform}>
-          <SelectTrigger>
-            <SelectValue />
+        <Label htmlFor="script-project">{t('generator.projectLabel')}</Label>
+        <Select
+          value={projectId}
+          onValueChange={setPickedId}
+          disabled={isLoading || projects.length === 0}
+        >
+          <SelectTrigger id="script-project">
+            <SelectValue placeholder={t('generator.projectPlaceholder')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="youtube-shorts">YouTube Shorts</SelectItem>
-            <SelectItem value="tiktok">TikTok</SelectItem>
-            <SelectItem value="instagram-reels">Instagram Reels</SelectItem>
-            <SelectItem value="youtube-long">YouTube Long-form</SelectItem>
+            {projects.map((item) => (
+              <SelectItem key={item._id} value={item._id}>
+                {item.title}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
 
-      <div className="space-y-3">
-        <Label>{t('generator.tone')}</Label>
-        <div className="flex flex-wrap gap-2">
-          {TONES.map((toneOption) => {
-            const label = toneLabel(t, toneOption);
-            return (
-              <Badge
-                key={toneOption}
-                variant={tone === toneOption ? 'default' : 'outline'}
-                className="cursor-pointer transition-all"
-                onClick={() => setTone(toneOption)}
-                role="button"
-                tabIndex={0}
-                aria-pressed={tone === toneOption}
-                aria-label={t('generator.toneAria', { tone: label })}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setTone(toneOption); } }}
-              >
-                {label}
-              </Badge>
-            );
-          })}
+      {project ? (
+        <div className="space-y-2 rounded-xl border border-border/50 p-4" dir="auto">
+          <h3 className="text-sm font-semibold">{t('generator.briefLabel')}</h3>
+          <p className="text-sm text-muted-foreground">{project.idea}</p>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline">{project.platform}</Badge>
+            <Badge variant="outline">{project.tone}</Badge>
+          </div>
         </div>
-      </div>
+      ) : null}
 
-      <Button onClick={handleGenerate} disabled={isGenerating || !idea.trim()} className="w-full">
-        {isGenerating ? (
-          <Sparkles className="w-4 h-4 me-2 animate-spin" />
+      <Button onClick={handleGenerate} disabled={!projectId || generate.isPending} className="w-full">
+        {generate.isPending ? (
+          <Loader2 className="size-4 me-2 animate-spin" aria-hidden="true" />
         ) : (
-          <Sparkles className="w-4 h-4 me-2" />
+          <Sparkles className="size-4 me-2" aria-hidden="true" />
         )}
-        {isGenerating ? t('generator.generating') : t('generator.generate')}
+        {generate.isPending ? t('generator.generating') : t('generator.generate')}
       </Button>
     </div>
   );
 
-  const rightContent = generatedScript ? (
+  const rightContent = script ? (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Badge variant="outline">{t('generator.generatedBadge')}</Badge>
-          <Badge variant="outline">{platform}</Badge>
+          <Badge variant="outline">
+            {t('generator.sectionSummary', {
+              scenes: script.sections.length,
+              words: script.wordCount,
+            })}
+          </Badge>
         </div>
         <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setGeneratedScript(null)}>
-            <RotateCcw className="w-3.5 h-3.5 me-1" /> {t('generator.regenerate')}
+          <Button variant="ghost" size="sm" onClick={handleGenerate} disabled={generate.isPending}>
+            <RotateCcw className="size-3.5 me-1" aria-hidden="true" /> {t('generator.regenerate')}
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigator.clipboard.writeText(generatedScript)}
-          >
-            <Copy className="w-3.5 h-3.5 me-1" /> {t('generator.copy')}
+          <Button variant="ghost" size="sm" onClick={copyScript}>
+            <Copy className="size-3.5 me-1" aria-hidden="true" /> {t('generator.copy')}
           </Button>
-          <Button variant="ghost" size="sm">
-            <Download className="w-3.5 h-3.5 me-1" /> {t('generator.export')}
+          <Button variant="ghost" size="sm" onClick={exportScript}>
+            <Download className="size-3.5 me-1" aria-hidden="true" /> {t('generator.export')}
           </Button>
         </div>
       </div>
-      <div dir="auto" className="p-6 rounded-xl border bg-muted/20 font-mono text-sm whitespace-pre-wrap leading-relaxed">
-        {generatedScript}
-      </div>
+
+      {script.sections.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{t('generator.noSections')}</p>
+      ) : (
+        <div className="space-y-3">
+          {script.sections
+            .slice()
+            .sort((left, right) => left.order - right.order)
+            .map((section) => (
+              <div key={`${section.order}-${section.label}`} dir="auto" className="rounded-xl border p-4">
+                <p className="text-sm font-semibold">{scriptSceneLabel(t, section.label)}</p>
+                <p className="mt-2 whitespace-pre-wrap text-sm">{section.content}</p>
+              </div>
+            ))}
+        </div>
+      )}
     </div>
   ) : (
     <div className="flex flex-col items-center justify-center h-full text-center p-12">
-      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-        <FileText className="w-8 h-8 text-primary" />
+      <div className="size-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+        <FileText className="size-8 text-primary" />
       </div>
       <h3 className="text-xl font-semibold mb-2">{t('generator.emptyTitle')}</h3>
       <p className="text-muted-foreground text-sm max-w-sm">

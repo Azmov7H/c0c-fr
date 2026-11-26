@@ -20,6 +20,7 @@ import { getFormatters } from '@/lib/format';
 
 import {
     useCancelRender,
+    useDownloadRender,
     useRenderJob,
     useRenderJobs,
     useRetryRender,
@@ -27,7 +28,6 @@ import {
 } from '../hooks/use-advertisements';
 import { renderPollIntervalMs, isActiveRenderStatus } from '../lib/render-status';
 import { renderStatusLabel } from '../lib/labels';
-import { advertisementsService } from '../services/advertisements.service';
 import type { AdvertisementDetail } from '../types';
 import { GateError } from './gate-error';
 
@@ -56,6 +56,7 @@ export function RenderPanel({
     const start = useStartRender(id);
     const cancel = useCancelRender(id);
     const retry = useRetryRender(id);
+    const download = useDownloadRender(id);
     const hasComposition = Boolean(detail.advertisement.compositionHash);
     const activeJob = job && isActiveRenderStatus(job.status) ? job : null;
 
@@ -94,6 +95,20 @@ export function RenderPanel({
 
                 <GateError error={start.error} feature="ads.render" />
                 <GateError error={retry.error} feature="ads.render.retry" />
+
+                {jobs.error ? (
+                    <Alert variant="destructive">
+                        <AlertDescription>{t('render.jobsError')}</AlertDescription>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-2 gap-2"
+                            onClick={() => void jobs.refetch()}
+                        >
+                            {t('render.jobsRetry')}
+                        </Button>
+                    </Alert>
+                ) : null}
 
                 {!activeJob ? (
                     <Button
@@ -172,11 +187,17 @@ export function RenderPanel({
                         {job.status === 'completed' ? (
                             <div className="space-y-3">
                                 <p className="text-sm">{t('render.completed')}</p>
-                                <Button asChild size="sm">
-                                    <a href={advertisementsService.downloadUrl(id)}>
+                                <Button
+                                    size="sm"
+                                    disabled={download.isPending}
+                                    onClick={() => download.mutate()}
+                                >
+                                    {download.isPending ? (
+                                        <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />
+                                    ) : (
                                         <Download className="me-2 size-4" aria-hidden="true" />
-                                        {t('render.download')}
-                                    </a>
+                                    )}
+                                    {download.isPending ? t('render.downloading') : t('render.download')}
                                 </Button>
                             </div>
                         ) : null}

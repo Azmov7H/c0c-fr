@@ -1,9 +1,12 @@
 // @vitest-environment jsdom
 import { act, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 
+import enCommon from '../../messages/en/common.json';
+import { advertisementKeys } from '@/features/advertisements/lib/query-keys';
 import { audioKeys } from '@/features/audio/hooks/use-audio';
 import { notificationsKeys } from '@/features/notifications/hooks/use-notifications';
 import { projectKeys } from '@/features/projects/lib/query-keys';
@@ -80,7 +83,9 @@ function setup(user: User | null) {
     const setQueryData = vi.spyOn(qc, 'setQueryData');
     const rendered = renderHook(() => useWebSocket(), {
         wrapper: ({ children }: { children: ReactNode }) => (
-            <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+            <NextIntlClientProvider locale="en" messages={{ common: enCommon }}>
+                <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+            </NextIntlClientProvider>
         ),
     });
     return { ...rendered, invalidate, setQueryData };
@@ -228,6 +233,18 @@ describe('useWebSocket', () => {
         await fire('script:generated', { projectId: 'p1' });
         await fire('thumbnail:generated', { projectId: 'p1' });
         await fire('audio:generated', { projectId: 'p1' });
+        await fire('generation:completed', {
+            projectId: 'p1',
+            jobId: 'job-1',
+            status: 'failed',
+            error: 'provider declined',
+        });
+        await fire('advertisement:render.updated', {
+            projectId: 'p1',
+            advertisementId: 'ad-1',
+            jobId: 'render-1',
+            status: 'completed',
+        });
         await fire('project:updated', { projectId: 'p1' });
         await fire('project.member_added', { projectId: 'p1' });
         await fire('room:error', { message: 'no access' });
@@ -246,10 +263,14 @@ describe('useWebSocket', () => {
         expect(keys).toContainEqual(audioKeys.list('p1'));
         expect(keys).toContainEqual(projectKeys.activity('p1'));
         expect(keys).toContainEqual(projectKeys.members('p1'));
+        expect(keys).toContainEqual(advertisementKeys.detail('ad-1'));
+        expect(keys).toContainEqual(advertisementKeys.renderJobs('ad-1'));
 
         const toasts = toast as unknown as Record<string, ReturnType<typeof vi.fn>>;
         expect(toasts.info).toHaveBeenCalledWith('New comment', { description: 'Nice!' });
         expect(toasts.success).toHaveBeenCalledWith('Thumbnail Ready', expect.anything());
+        expect(toasts.success).toHaveBeenCalledWith('Render completed', expect.anything());
+        expect(toasts.error).toHaveBeenCalledWith('Generation failed', expect.anything());
         expect(toasts.error).toHaveBeenCalledWith('Realtime unavailable for this room', {
             description: 'no access',
         });

@@ -93,7 +93,10 @@
     "validationTitle": "Composition checks",
     "validationIssue": "{message} (scene {sceneId})",
     "voiceMismatch": "The narration language does not match the composition language.",
-    "scriptRequired": "Generate a script for this project first."
+    "scriptRequired": "Generate a script for this project first.",
+    "loadFailed": "The composition could not be loaded.",
+    "retry": "Retry",
+    "previewFailed": "The preview could not be loaded."
   },
   "audio": {
     "title": "Narration timing",
@@ -137,9 +140,13 @@
     "failed": "The render failed: {message}",
     "cancelled": "This render was cancelled.",
     "download": "Download MP4",
+    "downloading": "Downloading…",
+    "downloadFailed": "Could not download the MP4.",
     "stale": "The composition changed since the last render.",
     "noJob": "No render job yet.",
-    "error": "The render could not be started."
+    "error": "The render could not be started.",
+    "jobsError": "The render history could not be loaded.",
+    "jobsRetry": "Retry loading render history"
   },
   "upgrade": {
     "title": "More renders available with a higher plan",

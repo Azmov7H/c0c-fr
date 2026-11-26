@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
     Select,
@@ -19,7 +20,15 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { EmptyState } from '@/components/ui/empty-state';
-import { useGenerateAudio, useProjectAudio, useUploadAudio, useReplaceAudio } from '@/features/audio/hooks/use-audio';
+import {
+    useGenerateAudio,
+    useGenerateSoundMail,
+    useProjectAudio,
+    useUploadAudio,
+    useUploadAudioFile,
+    useReplaceAudioFile,
+} from '@/features/audio/hooks/use-audio';
+import { audioLayerOf } from '@/features/audio/types';
 import { useProjects } from '@/features/projects/hooks/use-projects';
 import { toApiError } from '@/lib/api-error';
 import { cn } from '@/lib/utils';
@@ -54,7 +63,10 @@ export function AudioStudio() {
     const [quotaError, setQuotaError] = useState<string | null>(null);
     const [externalUrl, setExternalUrl] = useState('');
     const [externalError, setExternalError] = useState<string | null>(null);
+    const [soundMailText, setSoundMailText] = useState('');
+    const [soundMailError, setSoundMailError] = useState<string | null>(null);
     const replaceInputRef = useRef<HTMLInputElement | null>(null);
+    const soundMailInputRef = useRef<HTMLInputElement | null>(null);
     const billing = useBillingSummary();
     const aiUsage = usageFor(billing.data, 'ai.generation');
     const aiLimit = aiUsage?.limit ?? quotaFor(billing.data, 'ai.generation');
@@ -63,12 +75,15 @@ export function AudioStudio() {
     const audio = useProjectAudio(activeProjectId);
     const generate = useGenerateAudio();
     const upload = useUploadAudio();
-    const replace = useReplaceAudio();
+    const replaceFile = useReplaceAudioFile();
+    const uploadFile = useUploadAudioFile();
+    const generateSoundMail = useGenerateSoundMail();
 
     const suggestions = audio.data ?? [];
     // T24: current = explicit flag, newest-first fallback for legacy rows.
     const current = suggestions.find((s) => s.isCurrent) ?? suggestions[0];
     const history = suggestions.filter((s) => s.id !== current?.id);
+    const soundMailRows = suggestions.filter((s) => audioLayerOf(s) === 'soundmail');
 
     const ALLOWED_MIME = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4'];
     const MAX_BYTES = 25 * 1024 * 1024;
@@ -78,22 +93,49 @@ export function AudioStudio() {
         if (file.size > MAX_BYTES) return t('validation.tooLarge');
         return null;
     };
-    const fileToPayload = (file: File) => ({
-        fileUrl: URL.createObjectURL(file),
-        format: (file.type.includes('wav') ? 'wav' : file.type.includes('ogg') ? 'ogg' : file.type.includes('mp4') ? 'm4a' : 'mp3') as 'mp3' | 'wav' | 'ogg' | 'm4a',
-        fileSize: file.size,
-        durationSeconds: undefined,
-    });
-
     const onReplaceFile = (file: File | undefined) => {
         const err = validateFile(file);
         if (err) {
             setExternalError(err);
             return;
         }
-        if (!current || !file) return;
+        if (!current || !file || !activeProjectId) return;
         setExternalError(null);
-        replace.mutate({ id: current.id, data: fileToPayload(file) });
+        replaceFile.mutate({
+            id: current.id,
+            projectId: activeProjectId,
+            file,
+            assetType: audioLayerOf(current),
+        });
+    };
+
+    const onSoundMailFile = (file: File | undefined) => {
+        const err = validateFile(file);
+        if (err) {
+            setSoundMailError(err);
+            return;
+        }
+        if (!file || !activeProjectId) return;
+        setSoundMailError(null);
+        uploadFile.mutate({ projectId: activeProjectId, file, assetType: 'soundmail' });
+    };
+
+    const onGenerateSoundMail = () => {
+        if (!activeProjectId) return;
+        setSoundMailError(null);
+        generateSoundMail.mutate(
+            {
+                projectId: activeProjectId,
+                ...(soundMailText.trim() ? { text: soundMailText.trim() } : {}),
+            },
+            {
+                onError: (error) => {
+                    if (toApiError(error, '').code === 'AI_VOICE_GATED') {
+                        setSoundMailError(t('soundMail.gated'));
+                    }
+                },
+            }
+        );
     };
 
     const onUploadExternal = () => {
@@ -183,6 +225,63 @@ export function AudioStudio() {
                 )}
                 {generate.isPending ? t('studio.generating') : t('studio.generate')}
             </Button>
+
+            <div className="space-y-3 rounded-xl border border-border/50 p-4">
+                <div className="space-y-1">
+                    <h3 className="text-sm font-semibold">{t('soundMail.title')}</h3>
+                    <p className="text-xs text-muted-foreground">{t('soundMail.description')}</p>
+                </div>
+                <Label htmlFor="sound-mail-text" className="sr-only">{t('soundMail.textLabel')}</Label>
+                <Textarea
+                    id="sound-mail-text"
+                    dir="auto"
+                    value={soundMailText}
+                    onChange={(event) => setSoundMailText(event.target.value)}
+                    placeholder={t('soundMail.textPlaceholder')}
+                    className="min-h-24 resize-none"
+                />
+                <div className="flex flex-wrap gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-11"
+                        disabled={!activeProjectId || generateSoundMail.isPending || uploadFile.isPending}
+                        onClick={onGenerateSoundMail}
+                    >
+                        {generateSoundMail.isPending ? (
+                            <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />
+                        ) : (
+                            <Sparkles className="me-2 size-4" aria-hidden="true" />
+                        )}
+                        {generateSoundMail.isPending ? t('soundMail.generating') : t('soundMail.generate')}
+                    </Button>
+                    <input
+                        ref={soundMailInputRef}
+                        type="file"
+                        accept="audio/*"
+                        className="sr-only"
+                        aria-label={t('soundMail.uploadAria')}
+                        onChange={(event) => onSoundMailFile(event.target.files?.[0])}
+                    />
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-11"
+                        disabled={!activeProjectId || uploadFile.isPending || generateSoundMail.isPending}
+                        onClick={() => soundMailInputRef.current?.click()}
+                    >
+                        {uploadFile.isPending ? (
+                            <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />
+                        ) : (
+                            <Upload className="me-2 size-4" aria-hidden="true" />
+                        )}
+                        {uploadFile.isPending ? t('soundMail.uploading') : t('soundMail.upload')}
+                    </Button>
+                </div>
+                {soundMailError ? (
+                    <p role="alert" className="text-sm text-destructive">{soundMailError}</p>
+                ) : null}
+            </div>
         </div>
     );
 
@@ -199,6 +298,31 @@ export function AudioStudio() {
                     resetAt={aiUsage?.resetAt}
                 />
             )}
+            {soundMailRows.length > 0 ? (
+                <div className="space-y-3 rounded-xl border border-border/50 p-4">
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                        {t('soundMail.title')}
+                    </h4>
+                    {soundMailRows.map((row) => (
+                        <div key={row.id} className="space-y-2">
+                            <Badge variant="outline">{row.source ?? t('studio.generatedFallback')}</Badge>
+                            {row.fileUrl ? (
+                                <audio
+                                    controls
+                                    dir="ltr"
+                                    preload="none"
+                                    src={row.fileUrl}
+                                    className="w-full"
+                                    aria-label={t('soundMail.playAria', { title: row.musicType || row.id })}
+                                    onError={() => setExternalError(t('studio.expired'))}
+                                />
+                            ) : (
+                                <p className="text-sm text-muted-foreground">{t('studio.legacySuggestion')}</p>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            ) : null}
             {current && (
                 <div className="space-y-3 rounded-xl border border-border/50 p-4" aria-label={t('studio.currentAudioAria')}>
                     <div className="flex items-center justify-between">
@@ -212,9 +336,9 @@ export function AudioStudio() {
                     )}
                     <div className="flex flex-wrap gap-2">
                         <input ref={replaceInputRef} type="file" accept="audio/*" className="sr-only" aria-label={t('studio.replaceAria')} onChange={(e) => onReplaceFile(e.target.files?.[0])} />
-                        <Button variant="outline" size="sm" className="h-11" disabled={replace.isPending || !activeProjectId} onClick={() => replaceInputRef.current?.click()}>
-                            {replace.isPending ? <Loader2 className="me-1 size-4 animate-spin" aria-hidden="true" /> : <RefreshCw className="me-1 size-4" aria-hidden="true" />}
-                            {replace.isPending ? t('studio.replacing') : t('studio.replace')}
+                        <Button variant="outline" size="sm" className="h-11" disabled={replaceFile.isPending || !activeProjectId} onClick={() => replaceInputRef.current?.click()}>
+                            {replaceFile.isPending ? <Loader2 className="me-1 size-4 animate-spin" aria-hidden="true" /> : <RefreshCw className="me-1 size-4" aria-hidden="true" />}
+                            {replaceFile.isPending ? t('studio.replacing') : t('studio.replace')}
                         </Button>
                         {current.fileUrl && (
                             <Button asChild variant="ghost" size="sm" className="h-11">
