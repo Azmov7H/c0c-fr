@@ -83,7 +83,7 @@ export function EmailVerificationBanner() {
                 <MailWarning className="mt-0.5 h-5 w-5 shrink-0 text-warning" aria-hidden="true" />
                 <div className="text-sm">
                     <p className="font-medium text-foreground">{t('banner.title')}</p>
-                    <p className="text-muted-foreground">
+                    <p className="text-foreground">
                         {t('banner.bodyLead')}{' '}
                         <span className="font-medium text-foreground">{user.email}</span>.
                     </p>

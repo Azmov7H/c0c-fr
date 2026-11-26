@@ -53,20 +53,10 @@ interface AxeViolation {
  * decisions, not bugs the suite forgot.
  */
 const AXE_EXCEPTIONS: Record<string, { reason: string; maxNodes: number }> = {
-    'color-contrast': {
-        reason:
-            'the muted foreground token does not reach WCAG AA on the card background — a design decision, tracked for the design system, not for this suite',
-        maxNodes: 16,
-    },
     region: {
         reason:
             'some content sits outside a landmark — the marketing and dashboard shells decide their own landmark structure',
         maxNodes: 3,
-    },
-    'label-content-name-mismatch': {
-        reason:
-            'a control shows an icon and an sr-only label; the visible text is not part of the accessible name',
-        maxNodes: 4,
     },
     'page-has-heading-one': {
         reason:
@@ -89,8 +79,34 @@ function unexpected(violations: AxeViolation[]): AxeViolation[] {
     });
 }
 
+/**
+ * Scan the settled UI, not a mid-animation frame.
+ *
+ * Several shells fade in over 500ms, and data-backed pages mount that fade
+ * AFTER network idle. Axe run mid-fade sees blended colors (for example
+ * `#6c6c71` at 90% opacity reads as `#74747d`) and reports contrast failures
+ * that do not exist in the rendered state. Collapsing animation and
+ * transition durations makes the scan deterministic without changing any
+ * token or layout — the final styles are exactly the ones under test.
+ */
+async function waitForSettledAnimations(page: Page): Promise<void> {
+    await page.waitForLoadState('networkidle');
+    await page.addStyleTag({
+        content: `*, *::before, *::after {
+            animation-duration: 0s !important;
+            animation-delay: 0s !important;
+            transition-duration: 0s !important;
+        }`,
+    });
+    await page.evaluate(async () => {
+        await document.fonts.ready;
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    });
+}
+
 /** Runs axe-core in the page and returns the violations it found. */
 async function runAxe(page: Page): Promise<AxeViolation[]> {
+    await waitForSettledAnimations(page);
     await page.addScriptTag({ path: AXE_SOURCE });
 
     return page.evaluate(async () => {

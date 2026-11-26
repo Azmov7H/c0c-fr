@@ -56,6 +56,7 @@ export function NotificationBell() {
 
     const notifications = data?.data || [];
     const unread = unreadCount || 0;
+    const unreadText = unread > 99 ? '99+' : unread;
 
     return (
         <DropdownMenu>
@@ -64,7 +65,11 @@ export function NotificationBell() {
                     variant="ghost"
                     size="icon"
                     className="relative max-md:size-11"
-                    aria-label={t('bell.ariaLabel')}
+                    aria-label={
+                        unread > 0
+                            ? `${t('bell.ariaLabel')} — ${unreadText}`
+                            : t('bell.ariaLabel')
+                    }
                 >
                     <Bell className="size-5" />
                     {unread > 0 && (
