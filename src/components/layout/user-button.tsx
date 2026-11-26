@@ -45,7 +45,7 @@ export function UserButton() {
             size-9 max-md:size-11
             focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background
           "
-          aria-label={t("userMenu.accountMenu")}
+          aria-label={`${t("userMenu.accountMenu")} — ${initials}`}
           aria-haspopup="menu"
         >
           <Avatar className="h-9 w-9 border border-border transition hover:scale-105">

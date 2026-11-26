@@ -232,7 +232,7 @@ export function ProjectsToolbar({
                             <Button
                                 variant="outline"
                                 className="hidden h-11 gap-2 md:inline-flex"
-                                aria-label={t('toolbar.filterAria')}
+                                aria-label={`${t('toolbar.filterText')} — ${t('toolbar.filterAria')}`}
                             >
                                 <SlidersHorizontal className="size-4" aria-hidden="true" />
                                 {t('toolbar.filterText')}
@@ -268,7 +268,7 @@ export function ProjectsToolbar({
                             <Button
                                 variant="outline"
                                 className="h-11 gap-2 md:hidden"
-                                aria-label={t('toolbar.filterAriaMobile')}
+                                aria-label={`${t('toolbar.filterText')} — ${t('toolbar.filterAriaMobile')}`}
                             >
                                 <SlidersHorizontal className="size-4" aria-hidden="true" />
                                 {t('toolbar.filterText')}

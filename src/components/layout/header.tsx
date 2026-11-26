@@ -194,7 +194,7 @@ export function Header() {
         <Button
           variant="outline"
           onClick={openCmd}
-          aria-label={t("_a11y.searchWorkspace")}
+          aria-label={`${t("_a11y.searchWorkspace")} — ${t("action.search")} ⌘K`}
           className="
             hidden md:flex h-9 w-full max-w-xs
             items-center justify-between gap-2

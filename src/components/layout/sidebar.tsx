@@ -97,7 +97,7 @@ export function AppSidebar() {
               )}
               <SidebarGroup className="py-0">
                 {!collapsed && (
-                  <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-3 py-2 h-auto">
+                  <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-3 py-2 h-auto">
                     {t(group.labelKey)}
                   </SidebarGroupLabel>
                 )}

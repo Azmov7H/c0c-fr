@@ -43,6 +43,8 @@ export function ProjectCard({ project }: { project: Project }) {
     const locale = useUrlLocale();
     const updated = formatRelativeTime(project.updatedAt, locale);
     const excerpt = project.description?.trim() || project.idea;
+    const initial = project.title.trim().charAt(0) || 'P';
+    const platform = platformLabel(t, project.platform);
 
     return (
         <Card
@@ -52,7 +54,7 @@ export function ProjectCard({ project }: { project: Project }) {
             <Link
                 href={`/projects/${project._id}`}
                 className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                aria-label={t('card.openLabel', { title: project.title })}
+                aria-label={`${t('card.openLabel', { title: project.title })} — ${initial}${platform}`}
             >
                 <ProjectThumbnail project={project} />
             </Link>

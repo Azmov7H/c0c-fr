@@ -60,7 +60,7 @@ export function AuthFormLayout({
                         <Sparkles className="h-8 w-8 text-primary-foreground" aria-hidden="true" />
                     </div>
                     <h1 className="text-4xl font-extrabold tracking-tight text-foreground">{heading}</h1>
-                    <p className="text-muted-foreground mt-2 font-medium">{subheading}</p>
+                    <p className="text-foreground mt-2 font-medium">{subheading}</p>
                 </div>
 
                 <Card className="glass border-border/50 shadow-premium overflow-hidden">
@@ -74,7 +74,7 @@ export function AuthFormLayout({
                     ) : null}
                 </Card>
 
-                <p className="text-center text-[10px] text-muted-foreground mt-8 uppercase tracking-[0.2em] font-bold opacity-50">
+                <p className="text-center text-[10px] text-muted-foreground mt-8 uppercase tracking-[0.2em] font-bold">
                     {t('layout.copyright', { year: new Date().getFullYear() })}
                 </p>
             </div>
