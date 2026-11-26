@@ -58,7 +58,9 @@ test('owner invites → invitee accepts in a second context → editor contribut
     const inviteLinkInput = page.getByLabel('Invite link');
     await expect(inviteLinkInput).toBeVisible();
     const acceptUrl = await inviteLinkInput.inputValue();
-    expect(acceptUrl).toMatch(/\/invites\/[a-zA-Z0-9]+/);
+    // Mirror the backend's `inviteTokenParamSchema`: URL-safe tokens may contain
+    // `_` and `-`. Alphanumerics-only made this journey intermittently fail.
+    expect(acceptUrl).toMatch(/\/invites\/[A-Za-z0-9_-]{20,200}$/);
 
     // ── Second context: the invitee has NO session ──────────────────────────
     // Playwright applies the test's `storageState` option to MANUALLY created

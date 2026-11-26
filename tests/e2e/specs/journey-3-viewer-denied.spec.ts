@@ -49,7 +49,9 @@ test('viewer cannot edit: control hidden AND direct patch returns 404', async ({
     await page.getByRole('button', { name: 'Create invite' }).click();
 
     const acceptUrl = await page.getByLabel('Invite link').inputValue();
-    expect(acceptUrl).toMatch(/\/invites\/[a-zA-Z0-9]+/);
+    // Mirror the backend's `inviteTokenParamSchema`: URL-safe tokens may contain
+    // `_` and `-`. Alphanumerics-only made this journey intermittently fail.
+    expect(acceptUrl).toMatch(/\/invites\/[A-Za-z0-9_-]{20,200}$/);
 
     // ── Second context: fresh signup → accept as viewer ─────────────────────
     // `storageState: undefined` must be explicit — a bare `browser.newContext()`
