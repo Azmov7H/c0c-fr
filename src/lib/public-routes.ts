@@ -17,7 +17,7 @@ import { defaultLocale, locales } from '@/i18n/routing';
  * `src/features/landing/marketing-links.test.ts` asserts every path here has a
  * real page, that no private route leaks in, and that robots/sitemap agree.
  */
-export const SITE_URL = 'https://c0c-fr.vercel.app';
+export const SITE_URL = 'https://avyra-an.vercel.app';
 
 /**
  * The site's name, as the layout's title template spells it.
@@ -27,7 +27,7 @@ export const SITE_URL = 'https://c0c-fr.vercel.app';
  * Engine`, the pages said `AI Content Engine`). One constant, used by both,
  * so a card cannot claim a different site than the page it links to.
  */
-export const SITE_NAME = 'C0C || AI Content Engine';
+export const SITE_NAME = 'Avyra || AI Content Engine';
 
 export interface PublicRoute {
     path: string;

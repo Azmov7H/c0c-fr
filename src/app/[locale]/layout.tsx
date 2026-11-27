@@ -43,23 +43,23 @@ export const metadata: Metadata = {
   // Absolute URLs for OG/Twitter images resolve against this (T11 — removes
   // the "metadataBase not set" build warning and pins canonical media URLs
   // to the production domain).
-  metadataBase: new URL('https://c0c-fr.vercel.app'),
+  metadataBase: new URL('https://avyra-an.vercel.app'),
   title: {
-    template: '%s | C0C || AI Content Engine',
+    template: '%s | Avyra || AI Content Engine',
     default: 'AI Content Engine - Transform raw concepts into high-performing content',
   },
   description: 'Transform raw concepts into high-performing content. Manage projects, write scripts, and automate workflows.',
   openGraph: {
-    title: 'C0C || AI Content Engine',
+    title: 'Avyra || AI Content Engine',
     description: 'Transform raw concepts into high-performing content.',
-    url: 'https://c0c-fr.vercel.app',
-    siteName: 'C0C || AI Content Engine',
+    url: 'https://avyra-an.vercel.app',
+    siteName: 'Avyra || AI Content Engine',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'C0C || AI Content Engine',
+    title: 'Avyra || AI Content Engine',
     description: 'Transform raw concepts into high-performing content.',
   },
 };
