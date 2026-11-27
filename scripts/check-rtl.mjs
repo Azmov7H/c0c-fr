@@ -75,8 +75,8 @@ for (const file of sourceFiles(SRC_DIR)) {
     }
 }
 
-// The debt may only shrink: an allowlist entry that no longer occurs is
-// reported, and `--write` removes it.
+// The debt may only shrink: an allowlist entry that no longer occurs is a
+// failure; `--write` is the explicit path that drops it.
 const stale = [];
 for (const [file, list] of allowed) {
     const hits = found.get(file);
