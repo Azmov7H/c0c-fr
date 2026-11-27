@@ -32,16 +32,18 @@ export default async function AuthLayout({
     const t = await getTranslations('common');
 
     // AR-026: the auth cards are CLIENT components that read their own copy
-    // (`useTranslations('auth')`), so the subtree gets a provider. It carries
-    // the `auth` namespace and nothing else: the cards never read another
-    // namespace, and shipping the whole catalog here would put every other
-    // surface's copy in the login page's first-load bundle.
+    // (`useTranslations('auth')`). The provider wraps AppProviders because the
+    // globally mounted socket bridge reads `common` for realtime toasts; it
+    // carries only those two namespaces, not the whole catalog.
     const locale = await getLocale();
     const messages = await getMessages();
 
     return (
-        <AppProviders>
-            <NextIntlClientProvider locale={locale} messages={{ auth: messages.auth }}>
+        <NextIntlClientProvider
+            locale={locale}
+            messages={{ auth: messages.auth, common: messages.common }}
+        >
+            <AppProviders>
                 {/* FR-1: the language switch is reachable from the auth pages too.
                     The auth layout has no header bar, so it sits in the corner. */}
                 <div className="fixed end-4 top-4 z-10">
@@ -56,7 +58,7 @@ export default async function AuthLayout({
                 <main id="main-content" tabIndex={-1}>
                     {children}
                 </main>
-            </NextIntlClientProvider>
-        </AppProviders>
+            </AppProviders>
+        </NextIntlClientProvider>
     );
 }
