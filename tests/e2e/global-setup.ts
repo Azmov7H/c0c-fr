@@ -95,6 +95,14 @@ const BACKEND_ENV: Record<string, string> = {
     CORS_ORIGIN: FE_URL,
     TRUST_PROXY_HOPS: '1', // fixtures register in their own XFF bucket
     ALIBABA_BASE_URL: AI_FAKE_URL,
+    // The provider client refuses to dial without a key. This is a non-live
+    // sentinel: ALIBABA_BASE_URL above is the only destination, so it is sent
+    // exclusively to the local stub and never to a real provider.
+    ALIBABA_API_KEY: 't18-e2e-local-stub-key',
+    // The webhook readiness check requires both Stripe env vars. No SDK call is
+    // made by the webhook handler, and the journey mocks only at the delivery
+    // boundary, so a non-live key is sufficient and no real key is needed.
+    STRIPE_SECRET_KEY: 'sk_test_t18_e2e_local_only',
     STRIPE_WEBHOOK_SECRET,
 };
 

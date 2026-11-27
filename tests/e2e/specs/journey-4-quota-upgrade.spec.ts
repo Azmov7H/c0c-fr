@@ -62,7 +62,10 @@ test('starter quota exhausts → upgrade webhook lands → pro generation succee
             { data: { projectId: staged.projectId } }
         );
         if (response.status() === 429) break;
-        if (!response.ok) {
+        // Playwright's APIResponse.ok is a method. Reading it as a property
+        // yields a truthy function and hides provider failures as "success",
+        // which made this journey blame quota for 60 refunded 502s.
+        if (!response.ok()) {
             throw new Error(`unexpected ${response.status()} on generation attempt ${attempts}`);
         }
     }

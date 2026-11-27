@@ -36,17 +36,17 @@ export default async function DashboardLayout({
   const hasSession = SESSION_COOKIE_NAMES.some((name) => Boolean(cookieStore.get(name)?.value))
 
   // AR-009: the app shell is the first surface that reads from a catalog.
-  // The provider hands the client components the messages of the locale they
-  // are rendered in — and only those messages, so the client bundle carries
-  // the namespaces a subtree needs, not the whole catalog.
+  // The provider wraps AppProviders because the globally mounted socket bridge
+  // reads `common` for realtime toasts; it hands client components the messages
+  // of the locale they are rendered in, not the whole catalog.
   const locale = await getLocale()
   const messages = await getMessages()
 
   return (
-    <AppProviders>
-      <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <AppProviders>
         <AppShell initialAuthenticated={hasSession}>{children}</AppShell>
-      </NextIntlClientProvider>
-    </AppProviders>
+      </AppProviders>
+    </NextIntlClientProvider>
   )
 }
