@@ -190,6 +190,7 @@
     "audioAnalyzed": "Narration timing analysed",
     "audioFailed": "Could not analyse narration",
     "generated": "Video composition generated",
+    "animationGenerated": "Animation video generated from the content package",
     "generateFailed": "Could not generate the video composition",
     "sceneRegenerated": "Scene regenerated",
     "sceneFailed": "Could not regenerate the scene",
@@ -201,10 +202,31 @@
   "workspace": {
     "title": "Advertisement video",
     "description": "Generate a motion composition from this project's script, images and narration.",
-    "generate": "Generate Video",
+    "generate": "Generate Animation Video",
     "generating": "Preparing…",
     "emptyTitle": "No video workspace yet",
     "emptyDescription": "Initialize the project video state to detect its content language and reuse existing assets.",
     "openDetail": "Open full detail"
+  },
+  "preparation": {
+    "title": "Content Package Ready",
+    "description": "Automatic preparation builds and tracks every resource for this project.",
+    "loading": "Loading content preparation",
+    "resourcesAria": "Prepared content resources",
+    "ready": "Content Package Ready",
+    "notReady": "Preparing",
+    "progress": "{completed} of {total} resources ready · {percent}%",
+    "context": "Status: {status} · Language: {language} · Direction: {direction}",
+    "retry": "Retry resource",
+    "gated": "AI Voiceover gated",
+    "lastError": "Last error: {message}",
+    "status": {
+      "pending": "Pending",
+      "queued": "Queued",
+      "processing": "Processing",
+      "completed": "Completed",
+      "failed": "Failed",
+      "skipped": "Skipped"
+    }
   }
 }

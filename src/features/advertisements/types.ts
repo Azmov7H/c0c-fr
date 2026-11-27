@@ -290,6 +290,76 @@ export interface ProjectVideoState {
     detail?: AdvertisementDetail;
 }
 
+/** Backend-owned content preparation contract. The client never derives this. */
+export type PreparationResourceKind =
+    | 'script'
+    | 'voiceover'
+    | 'music'
+    | 'images'
+    | 'sfx'
+    | 'seo';
+
+export type PreparationResourceStatus =
+    | 'pending'
+    | 'queued'
+    | 'processing'
+    | 'completed'
+    | 'failed'
+    | 'skipped';
+
+export interface PreparationResource {
+    kind: PreparationResourceKind;
+    label:
+        | 'Script'
+        | 'Voiceover/TTS'
+        | 'Video Soundtrack/background music'
+        | 'Images/visual assets'
+        | 'SFX'
+        | 'SEO';
+    status: PreparationResourceStatus;
+    dependsOn: PreparationResourceKind[];
+    attempts: number;
+    errorCode?: string;
+    errorMessage?: string;
+    resultIds: string[];
+    resultUrl?: string;
+}
+
+export interface ProjectPreparationState {
+    id: string;
+    projectId: string;
+    userId: string;
+    status: 'pending' | 'queued' | 'processing' | 'completed' | 'failed';
+    context: {
+        title: string;
+        idea: string;
+        language: string;
+        direction: 'ltr' | 'rtl';
+        generatedAt: string;
+        [key: string]: unknown;
+    };
+    contentPackageReady: boolean;
+    progress: { percent: number; completed: number; total: number };
+    resources: PreparationResource[];
+    lastError?: string;
+    updatedAt: string;
+}
+
+export interface AnimationArtifacts {
+    scriptId?: string;
+    imageIds?: string[];
+    voiceoverId?: string;
+    musicId?: string;
+    sfxId?: string;
+    seoId?: string;
+}
+
+export interface GenerateAnimationVideoResult extends GenerateVideoResult {
+    preparation: ProjectPreparationState;
+    artifacts: AnimationArtifacts;
+    render: RenderStartResult;
+}
+
 export interface VideoPreview {
     html: string;
     durationSec: number;

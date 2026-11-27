@@ -48,6 +48,16 @@ const ScriptEditor = dynamic(
     }
 );
 
+// A7: the preparation status panel is not needed to paint the workspace; keep
+// its retry/table machinery out of the page's first-load JavaScript budget.
+const ContentPreparationPanel = dynamic(
+    () => import('./content-preparation-panel').then((m) => m.ContentPreparationPanel),
+    {
+        ssr: false,
+        loading: () => <Skeleton className="h-64 w-full rounded-2xl" />,
+    }
+);
+
 function AssetRow({
     title,
     subtitle,
@@ -174,6 +184,8 @@ export function AssetsTab({ projectId, role }: { projectId: string; role: Projec
 
     return (
         <div className="space-y-6">
+            {/* A2/A3/A6/A7: backend-owned readiness before individual assets. */}
+            <ContentPreparationPanel projectId={projectId} role={role} />
             {/* P11.2: the export stage's panel anchor. */}
             <div id="export">
                 <ProjectExport projectId={projectId} title={t('assets.projectTitle')} />

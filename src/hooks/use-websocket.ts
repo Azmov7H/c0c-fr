@@ -6,8 +6,10 @@ import { advertisementKeys } from '@/features/advertisements/lib/query-keys';
 import { notificationsKeys } from '@/features/notifications/hooks/use-notifications';
 import { projectKeys } from '@/features/projects/lib/query-keys';
 import { scriptsKeys } from '@/features/scripts/hooks/use-scripts';
+import { seoKeys } from '@/features/seo/hooks/use-seo';
 import { thumbnailsKeys } from '@/features/thumbnails/hooks/use-thumbnails';
 import { audioKeys } from '@/features/audio/hooks/use-audio';
+import { mediaKeys } from '@/features/media/hooks/use-media';
 import { registerSocket } from '@/lib/socket-registry';
 import { toast } from '@/lib/toast';
 import { useAuth } from '@/features/auth/hooks/use-auth';
@@ -198,6 +200,19 @@ export function useWebSocket() {
                     description: t('realtime.renderCancelledDescription'),
                 });
             }
+        });
+
+        // A2/A3/A6/A7 — preparation is backend-owned. Every resource update
+        // invalidates the project's canonical asset views, not a derived stage.
+        socket.on('preparation:updated', (data) => {
+            void queryClient.invalidateQueries({ queryKey: advertisementKeys.preparation(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: scriptsKeys.list(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: audioKeys.list(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: seoKeys.project(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: mediaKeys.list(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: advertisementKeys.projectVideo(data.projectId) });
+            void queryClient.invalidateQueries({ queryKey: advertisementKeys.lists() });
+            void queryClient.invalidateQueries({ queryKey: projectKeys.activity(data.projectId) });
         });
 
         socket.on('project:updated', (data: ProjectUpdatedPayload) => {

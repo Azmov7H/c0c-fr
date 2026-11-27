@@ -6,7 +6,10 @@ import type {
     AdvertisementLanguage,
     AdvertisementList,
     AdvertisementsQuery,
+    GenerateAnimationVideoResult,
     GenerateVideoResult,
+    PreparationResourceKind,
+    ProjectPreparationState,
     ProjectVideoState,
     RenderJob,
     RenderStartResult,
@@ -66,6 +69,24 @@ export const advertisementsService = {
         return unwrap(response.data, { initialized: false, projectId });
     },
 
+    /** Backend-owned preparation state — one durable document per project. */
+    getProjectPreparation: async (projectId: string): Promise<ProjectPreparationState> => {
+        const response = await apiClient.get<ApiEnvelope<ProjectPreparationState>>(
+            `/projects/${projectId}/preparation`
+        );
+        return unwrap(response.data, null as unknown as ProjectPreparationState);
+    },
+
+    retryPreparationResource: async (
+        projectId: string,
+        kind: PreparationResourceKind
+    ): Promise<ProjectPreparationState> => {
+        const response = await apiClient.post<ApiEnvelope<ProjectPreparationState>>(
+            `/projects/${projectId}/preparation/${kind}/retry`
+        );
+        return unwrap(response.data, null as unknown as ProjectPreparationState);
+    },
+
     initializeProjectVideo: async (projectId: string): Promise<AdvertisementDetail> => {
         const response = await apiClient.post<ApiEnvelope<AdvertisementDetail>>(
             `/projects/${projectId}/video/initialize`
@@ -119,6 +140,29 @@ export const advertisementsService = {
             { headers: { 'Idempotency-Key': idempotencyKey('ads-generate') } }
         );
         return unwrap(response.data, null as unknown as GenerateVideoResult);
+    },
+
+    /**
+     * One user action, two explicitly metered server decisions: composition
+     * generation from the prepared package, then the existing render route.
+     */
+    generateAnimationVideo: async (
+        projectId: string,
+        targetDurationSec?: number
+    ): Promise<GenerateAnimationVideoResult> => {
+        const response = await apiClient.post<ApiEnvelope<GenerateAnimationVideoResult>>(
+            `/projects/${projectId}/video/generate-animation`,
+            targetDurationSec ? { targetDurationSec } : {},
+            { headers: { 'Idempotency-Key': idempotencyKey('ads-animation') } }
+        );
+        const generated = unwrap(
+            response.data,
+            null as unknown as GenerateAnimationVideoResult
+        );
+        const render = await advertisementsService.startRender(
+            generated.detail.advertisement.id
+        );
+        return { ...generated, render };
     },
 
     getComposition: async (id: string): Promise<{

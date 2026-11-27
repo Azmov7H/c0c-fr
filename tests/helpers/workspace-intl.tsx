@@ -11,6 +11,7 @@
  * as in production, for the tests that prove the components really read them.
  */
 import type { ReactElement, ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
 import {
     render as rtlRender,
@@ -18,6 +19,8 @@ import {
     type RenderResult,
 } from '@testing-library/react';
 
+import enAdvertisements from '../../messages/en/advertisements.json';
+import arAdvertisements from '../../messages/ar/advertisements.json';
 import enWorkspace from '../../messages/en/workspace.json';
 import arWorkspace from '../../messages/ar/workspace.json';
 import enProjects from '../../messages/en/projects.json';
@@ -32,6 +35,7 @@ import enScripts from '../../messages/en/scripts.json';
 import arScripts from '../../messages/ar/scripts.json';
 
 const EN = {
+    advertisements: enAdvertisements,
     workspace: enWorkspace,
     projects: enProjects,
     billing: enBilling,
@@ -40,6 +44,7 @@ const EN = {
     scripts: enScripts,
 };
 const AR = {
+    advertisements: arAdvertisements,
     workspace: arWorkspace,
     projects: arProjects,
     billing: arBilling,
@@ -55,10 +60,17 @@ export function WorkspaceIntlProvider({
     children: ReactNode;
     locale?: 'en' | 'ar';
 }) {
+    // Workspace panels are query-backed in production; tests must mount the
+    // same provider or a newly mounted panel fails for the wrong reason.
+    const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
     return (
-        <NextIntlClientProvider locale={locale} messages={locale === 'en' ? EN : AR}>
-            {children}
-        </NextIntlClientProvider>
+        <QueryClientProvider client={queryClient}>
+            <NextIntlClientProvider locale={locale} messages={locale === 'en' ? EN : AR}>
+                {children}
+            </NextIntlClientProvider>
+        </QueryClientProvider>
     );
 }
 

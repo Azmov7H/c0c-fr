@@ -5,10 +5,18 @@ import { useTranslations } from 'next-intl';
 import { toast } from '@/lib/toast';
 
 import { toApiError } from '@/lib/api-error';
+import { audioKeys } from '@/features/audio/hooks/use-audio';
+import { mediaKeys } from '@/features/media/hooks/use-media';
+import { scriptsKeys } from '@/features/scripts/hooks/use-scripts';
+import { seoKeys } from '@/features/seo/hooks/use-seo';
 import { advertisementsService } from '../services/advertisements.service';
 import { advertisementKeys } from '../lib/query-keys';
 import { renderPollIntervalMs } from '../lib/render-status';
-import type { AdvertisementDetail, AdvertisementsQuery } from '../types';
+import type {
+    AdvertisementDetail,
+    AdvertisementsQuery,
+    PreparationResourceKind,
+} from '../types';
 
 export { advertisementKeys };
 
@@ -21,6 +29,18 @@ const cacheDetail = (
         advertisementKeys.projectVideo(detail.advertisement.projectId),
         detail
     );
+};
+
+/** A preparation event can change any canonical asset behind the workspace. */
+const invalidatePreparationAssets = (
+    queryClient: ReturnType<typeof useQueryClient>,
+    projectId: string
+): void => {
+    void queryClient.invalidateQueries({ queryKey: advertisementKeys.preparation(projectId) });
+    void queryClient.invalidateQueries({ queryKey: scriptsKeys.list(projectId) });
+    void queryClient.invalidateQueries({ queryKey: audioKeys.list(projectId) });
+    void queryClient.invalidateQueries({ queryKey: seoKeys.project(projectId) });
+    void queryClient.invalidateQueries({ queryKey: mediaKeys.list(projectId) });
 };
 
 export function useAdvertisements(query?: AdvertisementsQuery) {
@@ -44,6 +64,28 @@ export function useProjectVideo(projectId: string) {
         queryKey: advertisementKeys.projectVideo(projectId),
         queryFn: () => advertisementsService.getProjectVideo(projectId),
         enabled: !!projectId,
+    });
+}
+
+export function useProjectPreparation(projectId: string) {
+    return useQuery({
+        queryKey: advertisementKeys.preparation(projectId),
+        queryFn: () => advertisementsService.getProjectPreparation(projectId),
+        enabled: !!projectId,
+        // The worker emits preparation:updated; polling only covers a missed socket.
+        refetchInterval: (query) =>
+            query.state.data?.contentPackageReady === false ? 5_000 : false,
+    });
+}
+
+export function useRetryPreparationResource(projectId: string) {
+    const queryClient = useQueryClient();
+    const t = useTranslations('advertisements');
+    return useMutation({
+        mutationFn: (kind: PreparationResourceKind) =>
+            advertisementsService.retryPreparationResource(projectId, kind),
+        onSuccess: () => invalidatePreparationAssets(queryClient, projectId),
+        onError: (error) => toast.error(toApiError(error, t('toast.generateFailed')).message),
     });
 }
 
@@ -109,6 +151,27 @@ export function useGenerateVideo(id: string) {
             void queryClient.invalidateQueries({ queryKey: advertisementKeys.composition(id) });
             void queryClient.invalidateQueries({ queryKey: advertisementKeys.preview(id) });
             toast.success(t('toast.generated'));
+        },
+        onError: (error) => toast.error(toApiError(error, t('toast.generateFailed')).message),
+    });
+}
+
+export function useGenerateAnimationVideo(projectId: string) {
+    const queryClient = useQueryClient();
+    const t = useTranslations('advertisements');
+    return useMutation({
+        mutationFn: (targetDurationSec?: number) =>
+            advertisementsService.generateAnimationVideo(projectId, targetDurationSec),
+        onSuccess: (result) => {
+            const id = result.detail.advertisement.id;
+            cacheDetail(queryClient, result.detail);
+            invalidatePreparationAssets(queryClient, projectId);
+            void queryClient.invalidateQueries({ queryKey: advertisementKeys.projectVideo(projectId) });
+            void queryClient.invalidateQueries({ queryKey: advertisementKeys.composition(id) });
+            void queryClient.invalidateQueries({ queryKey: advertisementKeys.preview(id) });
+            void queryClient.invalidateQueries({ queryKey: advertisementKeys.renderJobs(id) });
+            void queryClient.invalidateQueries({ queryKey: advertisementKeys.lists() });
+            toast.success(t('toast.animationGenerated'));
         },
         onError: (error) => toast.error(toApiError(error, t('toast.generateFailed')).message),
     });
