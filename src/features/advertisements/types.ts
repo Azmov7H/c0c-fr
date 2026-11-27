@@ -118,6 +118,43 @@ export interface MotionLayer {
     keyframes: MotionKeyframe[];
 }
 
+export interface SceneDirectionNotes {
+    visualFocus: string;
+    narrationRelationship: string;
+    sfxCue: string;
+}
+
+export interface CreativeDirection {
+    version: string;
+    visualIdentity: string;
+    palette: { colors: string[]; rationale: string };
+    typography: {
+        profile: 'latin' | 'arabic' | 'mixed';
+        treatment: 'precision' | 'guided' | 'editorial';
+        rationale: string;
+    };
+    composition: {
+        structure: string;
+        backgrounds: string;
+        pacing: string;
+        animationLanguage: string;
+    };
+    transitions: {
+        primary: 'cut' | 'fade' | 'dissolve' | 'slide' | 'zoom';
+        rationale: string;
+    };
+    narrationRelationship: string;
+    sfxPlacement: Array<{
+        sceneId: string;
+        source: 'voiceover' | 'music' | 'sfx';
+        cue: string;
+        placement: string;
+    }>;
+    finalInstructions: string;
+    generatedBy: 'ai' | 'fallback';
+    fallbackReason?: string;
+}
+
 export interface MotionScene {
     sceneId: string;
     sourceSectionId: string;
@@ -128,6 +165,7 @@ export interface MotionScene {
     layers: MotionLayer[];
     transitionIn: { type: 'cut' | 'fade' | 'dissolve' | 'slide' | 'zoom'; durationSec: number };
     transitionOut: { type: 'cut' | 'fade' | 'dissolve' | 'slide' | 'zoom'; durationSec: number };
+    directionNotes?: SceneDirectionNotes;
 }
 
 export interface MotionComposition {
@@ -138,6 +176,7 @@ export interface MotionComposition {
     contentLanguage: AdvertisementLanguage;
     direction: AdvertisementDirection;
     audioAnalysisRef?: { totalDurationSec: number; durationSource: 'probe' | 'fallback' };
+    creativeDirection?: CreativeDirection;
     scenes: MotionScene[];
     totalDurationSec: number;
     generatedBy: 'ai' | 'fallback';

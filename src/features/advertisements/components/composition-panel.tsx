@@ -24,6 +24,7 @@ import {
     useVideoPreview,
 } from '../hooks/use-advertisements';
 import type { AdvertisementDetail } from '../types';
+import { CreativeDirectionPanel } from './creative-direction-panel';
 import { GateError } from './gate-error';
 import { PreviewPlayer } from './preview-player';
 
@@ -100,6 +101,12 @@ export function CompositionPanel({ detail, canEdit, compact = false }: Compositi
                         </Alert>
                     ) : null}
 
+                    {compositionQuery.isLoading && !composition ? (
+                        <p className="rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
+                            {t('composition.loading')}
+                        </p>
+                    ) : null}
+
                     {composition ? (
                         <>
                             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -134,6 +141,34 @@ export function CompositionPanel({ detail, canEdit, compact = false }: Compositi
                                                 <p className="text-xs text-muted-foreground">
                                                     {scene.layers.map((layer) => layer.type).join(' · ')}
                                                 </p>
+                                                {scene.directionNotes ? (
+                                                    <div className="space-y-1 border-t border-border/60 pt-2 text-xs text-muted-foreground">
+                                                        <p>
+                                                            <span className="font-medium">
+                                                                {t('creativeDirection.visualFocus')}:
+                                                            </span>{' '}
+                                                            <bdi dir={scene.direction}>
+                                                                {scene.directionNotes.visualFocus}
+                                                            </bdi>
+                                                        </p>
+                                                        <p>
+                                                            <span className="font-medium">
+                                                                {t('creativeDirection.narrationRelationship')}:
+                                                            </span>{' '}
+                                                            <bdi dir={scene.direction}>
+                                                                {scene.directionNotes.narrationRelationship}
+                                                            </bdi>
+                                                        </p>
+                                                        <p>
+                                                            <span className="font-medium">
+                                                                {t('creativeDirection.sfxCue')}:
+                                                            </span>{' '}
+                                                            <bdi dir={scene.direction}>
+                                                                {scene.directionNotes.sfxCue}
+                                                            </bdi>
+                                                        </p>
+                                                    </div>
+                                                ) : null}
                                             </div>
                                             <div className="flex flex-wrap items-center gap-2">
                                                 <Badge variant="outline">
@@ -169,6 +204,13 @@ export function CompositionPanel({ detail, canEdit, compact = false }: Compositi
                     )}
                 </CardContent>
             </Card>
+
+            {composition ? (
+                <CreativeDirectionPanel
+                    direction={composition.creativeDirection}
+                    contentDirection={composition.direction}
+                />
+            ) : null}
 
             {composition ? (
                 <Card>
