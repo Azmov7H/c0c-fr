@@ -63,7 +63,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             {/* Sidebar — desktop */}
             <aside
                 className={cn(
-                    'fixed top-0 z-30 hidden h-screen flex-col border-r bg-sidebar transition-all lg:flex',
+                    'fixed top-0 z-30 hidden h-screen flex-col border-e bg-sidebar transition-all lg:flex',
                     collapsed ? 'w-16' : 'w-60',
                 )}
             >
@@ -88,14 +88,14 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <Button
                 variant="ghost"
                 size="icon"
-                className="fixed left-3 top-3 z-30 h-9 w-9 lg:hidden"
+                className="fixed start-3 top-3 z-30 h-9 w-9 lg:hidden"
                 aria-label={t('shell.nav.openMenu')}
                 onClick={() => setMobileOpen(true)}
             >
                 <Menu className="h-5 w-5" />
             </Button>
 
-            <div className={cn('flex min-h-screen flex-col transition-[padding-left]', collapsed ? 'lg:pl-16' : 'lg:pl-60')}>
+            <div className={cn('flex min-h-screen flex-col transition-[padding-inline-start]', collapsed ? 'lg:ps-16' : 'lg:ps-60')}>
                 <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur">
                     <AdminBreadcrumbs />
                     <div className="ml-auto flex items-center gap-3">

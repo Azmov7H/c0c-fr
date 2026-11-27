@@ -17,13 +17,13 @@ export function AuditDiff({ entries }: { entries: AuditDiffEntry[] }) {
         <table className="w-full text-sm">
             <thead>
                 <tr>
-                    <th className="py-1 text-left font-medium text-muted-foreground">
+                    <th className="py-1 text-start font-medium text-muted-foreground">
                         {t('components.auditDiff.field')}
                     </th>
-                    <th className="py-1 text-left font-medium text-muted-foreground">
+                    <th className="py-1 text-start font-medium text-muted-foreground">
                         {t('components.auditDiff.before')}
                     </th>
-                    <th className="py-1 text-left font-medium text-muted-foreground">
+                    <th className="py-1 text-start font-medium text-muted-foreground">
                         {t('components.auditDiff.after')}
                     </th>
                 </tr>

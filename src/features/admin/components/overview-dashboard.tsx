@@ -94,7 +94,7 @@ export function OverviewDashboard(props: OverviewDashboardProps) {
                             </SelectContent>
                         </Select>
                         <Button variant="outline" onClick={() => router.refresh()}>
-                            <RefreshCw className="mr-2 h-4 w-4" />
+                            <RefreshCw className="me-2 h-4 w-4" />
                             {t('pages.overview.refresh')}
                         </Button>
                     </div>

@@ -11,9 +11,9 @@
  *   - scans `src/**` for the physical utilities;
  *   - compares what it finds with `rtl-exceptions.json`, the allowlist of the
  *     places where a physical utility is deliberate;
- *   - FAILS on an exception that is not on the list (a new physical utility
- *     slipped in) — and on a list that GREW, because the debt may only
- *     decrease.
+ *   - FAILS on a physical utility that is not on the list (a new exception
+ *     slipped in) — and on an allowlist entry that no longer occurs, because
+ *     stale debt must be removed rather than carried forward.
  *
  * Usage: node scripts/check-rtl.mjs [--write]
  * Exit:  0 when the code and the list agree, 1 with every violation named.
@@ -21,7 +21,7 @@
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-import { findPhysicalUtilities, PHYSICAL_UTILITIES } from './rtl-utilities.mjs';
+import { findPhysicalUtilities } from './rtl-utilities.mjs';
 
 const ROOT = process.cwd();
 const SRC_DIR = join(ROOT, 'src');
@@ -29,16 +29,13 @@ const EXCEPTIONS_FILE = join(ROOT, 'rtl-exceptions.json');
 const write = process.argv.includes('--write');
 
 /**
- * The physical utilities, per the conversion table (RTL-DESIGN-SYSTEM §3).
- *
- * `text-right` is included: a text alignment is a direction decision, and
- * the exception list is where the numeric columns are justified.
- *
  * The MATCHER lives in `scripts/rtl-utilities.mjs` — the same one the
  * rendered-output check uses (AR-021), so the gate and the test can never
- * disagree about what "a physical utility" is.
+ * disagree about what "a physical utility" is. The conversion table is
+ * RTL-DESIGN-SYSTEM §3; `text-right` is included because text alignment is a
+ * direction decision and the exception list is where numeric columns are
+ * justified.
  */
-const PHYSICAL = PHYSICAL_UTILITIES;
 
 function sourceFiles(dir) {
     const out = [];
@@ -117,6 +114,8 @@ console.log(
     `✓ rtl gate: ${total} physical utilit(ies), all on the allowlist (${allowed.size} file(s))`
 );
 if (stale.length > 0) {
-    console.log(`  ${stale.length} allowlist entr(ies) no longer occur — run with --write to drop them`);
-    for (const entry of stale) console.log(`  · ${entry}`);
+    console.error(`\n✗ rtl gate: ${stale.length} allowlist entr(ies) no longer occur\n`);
+    for (const entry of stale) console.error(`  ${entry}`);
+    console.error('\nRun with --write to drop them, or restore the physical utility if it is still required.\n');
+    process.exit(1);
 }

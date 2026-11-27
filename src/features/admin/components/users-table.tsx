@@ -80,10 +80,10 @@ export function UsersTable({ users }: { users: AdminUserRow[] }) {
         <section className="space-y-3">
             <table className="w-full text-sm">
                 <thead>
-                    <tr className="border-b text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <tr className="border-b text-start text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         {(['user', 'role', 'plan', 'subscription', 'credits', 'status', 'created', 'actions'] as const).map(
                             (key) => (
-                                <th key={key} className="py-2 pr-3">{columnLabels[key]}</th>
+                                <th key={key} className="py-2 pe-3">{columnLabels[key]}</th>
                             ),
                         )}
                     </tr>
@@ -98,7 +98,7 @@ export function UsersTable({ users }: { users: AdminUserRow[] }) {
                     ) : (
                         users.map((user) => (
                             <tr key={user.id} className="border-b hover:bg-accent/40">
-                                <td className="py-2 pr-3">
+                                <td className="py-2 pe-3">
                                     <div className="flex items-center gap-2">
                                         <UserIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
                                         <div className="min-w-0">
@@ -111,23 +111,23 @@ export function UsersTable({ users }: { users: AdminUserRow[] }) {
                                         </div>
                                     </div>
                                 </td>
-                                <td className="py-2 pr-3">
+                                <td className="py-2 pe-3">
                                     <StatusBadge status={user.role} label={user.role} />
                                 </td>
-                                <td className="py-2 pr-3">
+                                <td className="py-2 pe-3">
                                     <span className="capitalize">{user.plan}</span>
                                 </td>
-                                <td className="py-2 pr-3">
+                                <td className="py-2 pe-3">
                                     <StatusBadge status={user.subscription.status} />
                                 </td>
-                                <td className="py-2 pr-3">
+                                <td className="py-2 pe-3">
                                     {user.credits ? (
                                         <Money value={user.credits.balance} />
                                     ) : (
                                         <span className="text-muted-foreground">—</span>
                                     )}
                                 </td>
-                                <td className="py-2 pr-3">
+                                <td className="py-2 pe-3">
                                     <div className="flex gap-1">
                                         <StatusBadge status={user.suspended ? 'suspended' : 'active'} />
                                         {!user.emailVerified ? (
@@ -135,7 +135,7 @@ export function UsersTable({ users }: { users: AdminUserRow[] }) {
                                         ) : null}
                                     </div>
                                 </td>
-                                <td className="py-2 pr-3">{formatTime(user.createdAt)}</td>
+                                <td className="py-2 pe-3">{formatTime(user.createdAt)}</td>
                                 <td className="py-2">
                                     <div className="flex flex-wrap items-center gap-1">
                                         <Button
