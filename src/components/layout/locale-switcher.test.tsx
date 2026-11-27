@@ -40,6 +40,12 @@ function renderSwitcher() {
     return anchor;
 }
 
+/** The preference helper is lazily imported on click; let that microtask settle. */
+async function click(anchor: HTMLAnchorElement) {
+    anchor.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    await vi.waitFor(() => expect(mocks.syncLocalePreference).toHaveBeenCalled());
+}
+
 describe('LocaleSwitcher', () => {
     afterEach(() => {
         vi.clearAllMocks();
@@ -73,41 +79,39 @@ describe('LocaleSwitcher', () => {
         expect(anchor.getAttribute('href')).toBe('/ar/projects/42');
     });
 
-    it('keeps the query (the visitor does not lose the filter they typed)', () => {
+    it('keeps the query (the visitor does not lose the filter they typed)', async () => {
         mocks.pathname = '/en/projects';
         const anchor = renderSwitcher();
-        const event = new MouseEvent('click', { bubbles: true, cancelable: true });
         Object.defineProperty(window, 'location', {
             value: { ...window.location, search: '?tab=audio' },
             writable: true,
         });
-        anchor.dispatchEvent(event);
+        await click(anchor);
         expect(mocks.router.replace).toHaveBeenCalledWith('/ar/projects?tab=audio', { scroll: false });
     });
 
-    it('replaces rather than pushes — the back button does not walk languages', () => {
+    it('replaces rather than pushes — the back button does not walk languages', async () => {
         mocks.pathname = '/en/dashboard';
         const anchor = renderSwitcher();
-        const event = new MouseEvent('click', { bubbles: true, cancelable: true });
-        anchor.dispatchEvent(event);
+        await click(anchor);
         expect(mocks.router.replace).toHaveBeenCalled();
         expect(mocks.router.push).not.toHaveBeenCalled();
     });
 
-    it('writes the cookie and starts the preference sync before navigating', () => {
+    it('writes the cookie and starts the preference sync before navigating', async () => {
         mocks.pathname = '/en/dashboard';
         const anchor = renderSwitcher();
-        anchor.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        await click(anchor);
 
         expect(mocks.setLocaleCookie).toHaveBeenCalledWith('ar');
         expect(mocks.syncLocalePreference).toHaveBeenCalledWith('ar');
         expect(mocks.router.replace).toHaveBeenCalledTimes(1);
     });
 
-    it('the Arabic page syncs English', () => {
+    it('the Arabic page syncs English', async () => {
         mocks.pathname = '/ar/dashboard';
         const anchor = renderSwitcher();
-        anchor.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        await click(anchor);
 
         expect(mocks.setLocaleCookie).toHaveBeenCalledWith('en');
         expect(mocks.syncLocalePreference).toHaveBeenCalledWith('en');
