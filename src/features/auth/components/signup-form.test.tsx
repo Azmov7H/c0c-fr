@@ -18,6 +18,15 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/lib/toast', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
+// AR-039: registration resolves the DB locale for its landing path. The form
+// test owns only the register call; the preference adapter is a separate unit.
+vi.mock('@/services/locale-preference.service', () => ({
+    localePreferenceService: {
+        get: vi.fn().mockResolvedValue('en'),
+        update: vi.fn(),
+    },
+}));
+
 function renderSignup() {
     const client = new QueryClient({
         defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -99,7 +108,7 @@ describe('SignupForm', () => {
         });
         expect('acceptedTerms' in sent).toBe(false);
 
-        await waitFor(() => expect(nav.router.push).toHaveBeenCalledWith('/dashboard'));
+        await waitFor(() => expect(nav.router.push).toHaveBeenCalledWith('/en/dashboard'));
     });
 
     it('strength meter reports all requirements met for a policy-compliant password', () => {

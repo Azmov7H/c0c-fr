@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 /**
- * AR-006 — the language switch.
+ * AR-006 / AR-039 — the language switch.
  *
- * The switch is a navigation: it keeps the visitor on the page they are on
- * and only changes the language. The assertions below pin the three
- * properties FR-2 asks for — the deep path survives, the query survives, and
- * the session is never touched.
+ * The switch is still a navigation: it keeps the visitor on the page they are
+ * on and only changes the language. AR-039 adds two persistence effects — an
+ * immediate cookie write and a dependency-free preference sync — without
+ * turning the anchor into an auth-dependent control or growing the landing
+ * bundle.
  */
 import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -16,11 +17,21 @@ import { LocaleSwitcher } from './locale-switcher';
 const mocks = vi.hoisted(() => ({
     pathname: '/en/dashboard',
     router: { replace: vi.fn(), push: vi.fn() },
+    setLocaleCookie: vi.fn(),
+    syncLocalePreference: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({
     useRouter: () => mocks.router,
     usePathname: () => mocks.pathname,
+}));
+
+vi.mock('@/i18n/locale-cookie', () => ({
+    setLocaleCookie: mocks.setLocaleCookie,
+}));
+
+vi.mock('@/i18n/locale-preference-sync', () => ({
+    syncLocalePreference: mocks.syncLocalePreference,
 }));
 
 function renderSwitcher() {
@@ -32,6 +43,11 @@ function renderSwitcher() {
 describe('LocaleSwitcher', () => {
     afterEach(() => {
         vi.clearAllMocks();
+        mocks.pathname = '/en/dashboard';
+        Object.defineProperty(window, 'location', {
+            value: { ...window.location, search: '' },
+            writable: true,
+        });
         cleanup();
     });
 
@@ -78,12 +94,23 @@ describe('LocaleSwitcher', () => {
         expect(mocks.router.push).not.toHaveBeenCalled();
     });
 
-    it('never touches the session — no logout, no re-authentication', () => {
+    it('writes the cookie and starts the preference sync before navigating', () => {
         mocks.pathname = '/en/dashboard';
         const anchor = renderSwitcher();
         anchor.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-        // The switcher only ever calls the router: there is no auth call in
-        // its module at all.
+
+        expect(mocks.setLocaleCookie).toHaveBeenCalledWith('ar');
+        expect(mocks.syncLocalePreference).toHaveBeenCalledWith('ar');
         expect(mocks.router.replace).toHaveBeenCalledTimes(1);
+    });
+
+    it('the Arabic page syncs English', () => {
+        mocks.pathname = '/ar/dashboard';
+        const anchor = renderSwitcher();
+        anchor.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+        expect(mocks.setLocaleCookie).toHaveBeenCalledWith('en');
+        expect(mocks.syncLocalePreference).toHaveBeenCalledWith('en');
+        expect(mocks.router.replace).toHaveBeenCalledWith('/en/dashboard', { scroll: false });
     });
 });

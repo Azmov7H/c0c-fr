@@ -30,6 +30,7 @@ export default defineConfig({
                         'src/lib/**/*.test.ts',
                         'src/proxy.test.ts',
                         'src/features/**/*.test.ts',
+                        'src/services/**/*.test.ts',
                         'tests/security/**/*.test.ts',
                         // AR-002: the i18n compatibility gate (next-intl ↔
                         // Next 16 proxy.ts) is a node-environment suite.
@@ -70,6 +71,7 @@ export default defineConfig({
                     testTimeout: 30_000,
                     include: [
                         'src/components/**/*.test.tsx',
+                        'src/i18n/**/*.test.ts',
                         'src/features/**/*.test.tsx',
                         'src/store/**/*.test.tsx',
                         'src/styles/**/*.test.tsx',

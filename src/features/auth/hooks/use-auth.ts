@@ -2,9 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from '@/lib/toast';
+import { setLocaleCookie } from '@/i18n/locale-cookie';
 import { authService } from '../services/auth.service';
+import { markAuthenticated } from '../lib/auth-presence';
 import { useAuthStore } from '@/store/auth-store';
 import { LoginCredentials, RegisterCredentials, User } from '@/types';
+import { localePreferenceService } from '@/services/locale-preference.service';
+import { reconcilePostAuthTarget, requestedLocale } from '../lib/locale-reconciliation';
 import { safeCallbackUrl } from '../lib/callback-url';
 import { defaultPostAuthTarget } from '@/lib/onboarding-gate';
 import { trackEvent } from '@/lib/analytics';
@@ -19,10 +23,33 @@ function getCallbackUrl(): string | null {
  * T13: a freshly authed user who has not onboarded goes to the wizard, not the
  * dashboard — the backend 428s project creation until then. The onboarding rule
  * outranks a callback URL for the same reason.
+ *
+ * AR-039: the DB preference decides the locale of that landing path. The
+ * callback's deep path and query survive; only its locale prefix is reconciled.
+ * If the preference endpoint is unavailable, the locale the browser asked for
+ * (callback first, then the current page) is kept — no invented DB value.
  */
-function postAuthTarget(user: User): string {
-    if (user.onboardingCompleted === false) return defaultPostAuthTarget(false);
-    return getCallbackUrl() ?? defaultPostAuthTarget(true);
+async function postAuthTarget(user: User): Promise<string> {
+    const callback = getCallbackUrl();
+    let locale = requestedLocale(
+        callback,
+        typeof window === 'undefined' ? null : window.location.pathname
+    );
+    try {
+        locale = await localePreferenceService.get();
+        setLocaleCookie(locale);
+    } catch {
+        // Keep the requested locale and the existing cookie.
+    }
+
+    const fallback = user.onboardingCompleted === false
+        ? defaultPostAuthTarget(false)
+        : defaultPostAuthTarget(true);
+    return reconcilePostAuthTarget(
+        user.onboardingCompleted === false ? null : callback,
+        fallback,
+        locale
+    );
 }
 
 /**
@@ -39,10 +66,11 @@ export function useLogin() {
 
     return useMutation({
         mutationFn: (credentials: LoginCredentials) => authService.login(credentials),
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
             setUser(data.user);
+            markAuthenticated(true);
             toast.success(t('toast.welcomeBack'));
-            router.push(postAuthTarget(data.user));
+            router.push(await postAuthTarget(data.user));
             router.refresh();
         },
     });
@@ -56,11 +84,12 @@ export function useRegister() {
 
     return useMutation({
         mutationFn: (credentials: RegisterCredentials) => authService.register(credentials),
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
             setUser(data.user);
+            markAuthenticated(true);
             trackEvent('signup_completed');
             toast.success(t('toast.accountCreated'));
-            router.push(postAuthTarget(data.user));
+            router.push(await postAuthTarget(data.user));
             router.refresh();
         },
     });
@@ -74,6 +103,7 @@ export function useLogout() {
         mutationFn: () => authService.logout(),
         onSuccess: () => {
             logout();
+            markAuthenticated(false);
             const from = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '';
             router.push(`/login${from && from !== '/' ? `?from=${encodeURIComponent(from)}` : ''}`);
             router.refresh();
@@ -81,6 +111,7 @@ export function useLogout() {
         onError: () => {
             // Always clear the local session even if the server call fails.
             logout();
+            markAuthenticated(false);
             const from = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '';
             router.push(`/login${from && from !== '/' ? `?from=${encodeURIComponent(from)}` : ''}`);
             router.refresh();

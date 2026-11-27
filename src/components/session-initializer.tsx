@@ -3,9 +3,13 @@
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { authService } from '@/features/auth/services/auth.service';
+import { markAuthenticated } from '@/features/auth/lib/auth-presence';
+import { localeInTarget } from '@/features/auth/lib/locale-reconciliation';
 import { safeCallbackUrl } from '@/features/auth/lib/callback-url';
+import { setLocaleCookie } from '@/i18n/locale-cookie';
 import { defaultPostAuthTarget, onboardingRedirect } from '@/lib/onboarding-gate';
-import { defaultLocale, localeFromPath, stripLocaleFromPath, withLocale } from '@/i18n/routing';
+import { defaultLocale, localeFromPath, stripLocaleFromPath } from '@/i18n/routing';
+import { localePreferenceService } from '@/services/locale-preference.service';
 import { useAuthStore } from '@/store/auth-store';
 
 /**
@@ -51,6 +55,27 @@ export function SessionInitializer() {
 
                 if (session.authenticated && session.user) {
                     setUser(session.user);
+                    markAuthenticated(true);
+
+                    // AR-039: the account is authoritative (USER-PREFERENCES §3).
+                    // On a second device the cookie can still say "en" while the
+                    // DB says "ar". Read the preference before choosing any
+                    // redirect so the gate, the callback and the landing page
+                    // all agree. A failing endpoint keeps the URL locale — it
+                    // must never lock a user out or invent a preference.
+                    let resolvedLocale = locale;
+                    try {
+                        resolvedLocale = await localePreferenceService.get();
+                        // Only write when there is a disagreement to repair.
+                        // An unconditional write would race an immediate
+                        // switcher click: the click sets the new cookie, then
+                        // this late response writes the old URL locale back.
+                        if (resolvedLocale !== locale) setLocaleCookie(resolvedLocale);
+                    } catch {
+                        // The session itself is valid; a preference read is not
+                        // worth bouncing to /login over.
+                    }
+                    if (cancelled) return;
 
                     // T13 gate: incomplete users are routed to the wizard,
                     // finished users away from it. The helper returns null on
@@ -62,7 +87,7 @@ export function SessionInitializer() {
                         onboardingCompleted: session.user.onboardingCompleted,
                     });
                     if (gate) {
-                        router.replace(withLocale(gate, locale));
+                        router.replace(localeInTarget(gate, resolvedLocale));
                         return;
                     }
 
@@ -73,11 +98,23 @@ export function SessionInitializer() {
                         const callbackUrl =
                             safeCallbackUrl(params.get('callbackUrl') || params.get('from'));
                         router.replace(
-                            callbackUrl ?? withLocale(defaultPostAuthTarget(session.user.onboardingCompleted), locale)
+                            callbackUrl
+                                ? localeInTarget(callbackUrl, resolvedLocale)
+                                : localeInTarget(defaultPostAuthTarget(session.user.onboardingCompleted), resolvedLocale)
                         );
+                        return;
+                    }
+
+                    // A cross-device DB preference that disagrees with the URL
+                    // is applied here, on the settled session, preserving the
+                    // deep path AND the query (FR-2). The cookie was already
+                    // updated above, so the next first paint is in this locale.
+                    if (resolvedLocale !== locale) {
+                        router.replace(localeInTarget(`${browserPath}${window.location.search}`, resolvedLocale));
                     }
                 } else {
                     setUser(null);
+                    markAuthenticated(false);
                     const isAuthFlowPage =
                         AUTH_FLOW_PAGES.some((p) => pathname?.startsWith(p)) ||
                         isInvitePage(pathname);
@@ -92,7 +129,10 @@ export function SessionInitializer() {
                     }
                 }
             } catch {
-                if (!cancelled) setUser(null);
+                if (!cancelled) {
+                    setUser(null);
+                    markAuthenticated(false);
+                }
             } finally {
                 if (!cancelled) setLoading(false);
             }
