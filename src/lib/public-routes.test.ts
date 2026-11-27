@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
     PUBLIC_ROUTES,
@@ -47,5 +47,34 @@ describe('public route table', () => {
             'x-default': `${SITE_URL}/en/pricing`,
         });
         expect(Object.keys(alternateLanguages('/'))).toEqual(['en', 'ar', 'x-default']);
+    });
+});
+
+describe('AR-040 single origin', () => {
+    afterEach(() => {
+        vi.unstubAllEnvs();
+        vi.resetModules();
+    });
+
+    it('reads SITE_URL from the server environment and normalises it to an origin', async () => {
+        vi.stubEnv('SITE_URL', 'https://seo.example.test/');
+        vi.resetModules();
+        const routes = await import('./public-routes');
+
+        expect(routes.SITE_URL).toBe('https://seo.example.test');
+        expect(routes.absolutePublicUrl('/pricing', 'ar')).toBe(
+            'https://seo.example.test/ar/pricing'
+        );
+        expect(routes.alternateLanguages('/pricing')).toEqual({
+            en: 'https://seo.example.test/en/pricing',
+            ar: 'https://seo.example.test/ar/pricing',
+            'x-default': 'https://seo.example.test/en/pricing',
+        });
+    });
+
+    it('rejects a configured origin that carries a path', async () => {
+        vi.stubEnv('SITE_URL', 'https://seo.example.test/base');
+        vi.resetModules();
+        await expect(import('./public-routes')).rejects.toThrow('SITE_URL must be an origin');
     });
 });

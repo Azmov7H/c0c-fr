@@ -54,19 +54,20 @@ jobs:
       - name: served routes are the real Next app (not an error page)
         run: |
           # AR-004: every page lives under the locale segment, so the landing
-          # page is served at /en (the bare / answers with the locale
-          # redirect to it — that redirect is the routing contract, not an
-          # error page).
+          # page is served at /en (the bare / answers with the staged 301
+          # to it — that redirect is the routing contract, not an error page).
           code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5110/en)
           if [ "$code" != "200" ]; then
             echo "GET /en returned $code — expected 200"; docker logs c0c-fr; exit 1
           fi
           echo "GET /en → 200 from the standalone server"
+          # AR-040 — the bare public root answers with a permanent (301) hop
+          # to the default locale now that the hreflang pairs are live.
           root=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5110/)
-          if [ "$root" != "307" ]; then
-            echo "GET / returned $root — expected the locale redirect (307)"; docker logs c0c-fr; exit 1
+          if [ "$root" != "301" ]; then
+            echo "GET / returned $root — expected the staged SEO redirect (301)"; docker logs c0c-fr; exit 1
           fi
-          echo "GET / → 307 to the default locale"
+          echo "GET / → 301 to the default locale"
       - name: process is non-root (uid 1000)
         run: |
           uid=$(docker exec c0c-fr node -e "console.log(process.getuid())")

@@ -3,7 +3,9 @@ import { Inter, Noto_Sans_Arabic, Space_Grotesk } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { hasLocale } from 'next-intl';
 
-import { directionFor, routing } from '@/i18n/routing';
+import { defaultLocale, directionFor, isAppLocale, routing } from '@/i18n/routing';
+import { getTranslations } from '@/i18n/server';
+import { rootMetadata } from '@/lib/seo/root-metadata';
 import '../../styles/globals.css';
 
 // Both faces are variable fonts — no `weight` array, so next/font ships the
@@ -39,30 +41,30 @@ const notoSansArabic = Noto_Sans_Arabic({
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  // Absolute URLs for OG/Twitter images resolve against this (T11 — removes
-  // the "metadataBase not set" build warning and pins canonical media URLs
-  // to the production domain).
-  metadataBase: new URL('https://avyra-an.vercel.app'),
-  title: {
-    template: '%s | Avyra || AI Content Engine',
-    default: 'AI Content Engine - Transform raw concepts into high-performing content',
-  },
-  description: 'Transform raw concepts into high-performing content. Manage projects, write scripts, and automate workflows.',
-  openGraph: {
-    title: 'Avyra || AI Content Engine',
-    description: 'Transform raw concepts into high-performing content.',
-    url: 'https://avyra-an.vercel.app',
-    siteName: 'Avyra || AI Content Engine',
-    locale: 'en_US',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Avyra || AI Content Engine',
-    description: 'Transform raw concepts into high-performing content.',
-  },
-};
+/**
+ * AR-040 — one origin, one brand, locale-aware root copy. The public pages'
+ * metadata overrides the canonical/hreflang pairs; everything it inherits
+ * (metadataBase, title template, site name, social card defaults) resolves
+ * through the same server-side seam.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  // The segment is validated by the route, but TypeScript still sees a string:
+  // narrow it once so the translator and the SEO helper agree on the locale.
+  const activeLocale = isAppLocale(locale) ? locale : defaultLocale;
+  const t = await getTranslations({ locale: activeLocale, namespace: 'landing' });
+
+  return rootMetadata(activeLocale, {
+    defaultTitle: t('meta.title'),
+    description: t('meta.description'),
+    ogTitle: t('meta.ogTitle'),
+    ogDescription: t('meta.ogDescription'),
+  });
+}
 
 /**
  * AR-004 — the locale segment.

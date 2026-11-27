@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import { SignJWT } from 'jose';
 import { NextRequest } from 'next/server';
 import { proxy, sanitizeRedirectPath, splitLocalePath, config as proxyConfig } from './proxy';
@@ -18,6 +18,7 @@ const SESSION_COOKIE = 'auth_session'; // dev name; proxy must accept both
 const originalSecret = process.env.JWT_SECRET;
 const originalMode = process.env.AUTH_MIDDLEWARE_MODE;
 const originalCsp = process.env.CSP_ENFORCE;
+const originalSeo301 = process.env.SEO_BARE_PATH_301;
 
 beforeAll(() => {
     process.env.JWT_SECRET = SECRET;
@@ -30,6 +31,8 @@ afterAll(() => {
     else process.env.AUTH_MIDDLEWARE_MODE = originalMode;
     if (originalCsp === undefined) delete process.env.CSP_ENFORCE;
     else process.env.CSP_ENFORCE = originalCsp;
+    if (originalSeo301 === undefined) delete process.env.SEO_BARE_PATH_301;
+    else process.env.SEO_BARE_PATH_301 = originalSeo301;
 });
 
 async function signToken(
@@ -371,5 +374,53 @@ describe('AP-019 — the /admin prefix (optimistic gate + noindex/no-store)', ()
         expect(res.status).toBe(200);
         expect(res.headers.get('x-robots-tag')).toBeNull();
         expect(res.headers.get('cache-control')).not.toBe('no-store');
+    });
+});
+
+describe('AR-040 staged bare-path 301 (SEO finalization)', () => {
+    afterEach(() => {
+        if (originalSeo301 === undefined) delete process.env.SEO_BARE_PATH_301;
+        else process.env.SEO_BARE_PATH_301 = originalSeo301;
+    });
+
+    it.each([
+        ['/', '/en'],
+        ['/pricing', '/en/pricing'],
+        ['/privacy', '/en/privacy'],
+        ['/terms', '/en/terms'],
+    ])('%s → 301 to %s at the default locale', async (bare, expected) => {
+        const res = await proxy(makeRequest(bare));
+        expect(res.status).toBe(301);
+        expect(new URL(locationOf(res)).pathname).toBe(expected);
+    });
+
+    it('preserves the query string on the permanent hop', async () => {
+        const res = await proxy(
+            makeRequest('/pricing', { search: '?utm_source=newsletter&plan=pro' })
+        );
+        expect(res.status).toBe(301);
+        const loc = new URL(locationOf(res));
+        expect(loc.pathname).toBe('/en/pricing');
+        expect(loc.searchParams.get('utm_source')).toBe('newsletter');
+        expect(loc.searchParams.get('plan')).toBe('pro');
+    });
+
+    it('does not redirect a locale-prefixed public path a second time', async () => {
+        const res = await proxy(makeRequest('/ar/pricing'));
+        expect(res.status).toBe(200);
+        expect(res.headers.get('x-proxy-next')).toBe('1');
+    });
+
+    it('keeps the 307 negotiation for non-public bare paths', async () => {
+        const res = await proxy(makeRequest('/dashboard'));
+        expect(res.status).toBe(307);
+        expect(new URL(locationOf(res)).pathname).toBe('/en/dashboard');
+    });
+
+    it('SEO_BARE_PATH_301=false rolls back to the 307 negotiation', async () => {
+        process.env.SEO_BARE_PATH_301 = 'false';
+        const res = await proxy(makeRequest('/pricing'));
+        expect(res.status).toBe(307);
+        expect(new URL(locationOf(res)).pathname).toBe('/en/pricing');
     });
 });

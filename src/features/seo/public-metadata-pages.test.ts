@@ -6,7 +6,7 @@ import arPricing from '../../../messages/ar/pricing.json';
 import enLegal from '../../../messages/en/legal.json';
 import enLanding from '../../../messages/en/landing.json';
 import enPricing from '../../../messages/en/pricing.json';
-import { SITE_URL } from '@/lib/public-routes';
+import { SITE_NAME, SITE_URL } from '@/lib/public-routes';
 
 /**
  * AR-025 — the public pages' metadata, per locale.
@@ -132,7 +132,8 @@ describe('the public pages name the site the layout names', () => {
     it('the Open Graph site name is the layout site name', async () => {
         state.locale = 'en';
         const metadata = await landingMetadata();
-        expect(metadata.openGraph?.siteName).toBe('C0C || AI Content Engine');
+        expect(metadata.openGraph?.siteName).toBe(SITE_NAME);
+        expect(SITE_NAME).toBe('Avyra || AI Content Engine');
     });
 });
 

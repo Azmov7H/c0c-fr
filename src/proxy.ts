@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { verifySessionToken } from '@/lib/auth-verify';
-import { isAppLocale, routing } from '@/i18n/routing';
+import { defaultLocale, isAppLocale, routing } from '@/i18n/routing';
 import type { AppLocale } from '@/i18n/routing';
+import { PUBLIC_ROUTES, publicUrl } from '@/lib/public-routes';
 
 /**
  * Optimistic gate, NOT an authorization boundary.
@@ -176,13 +177,39 @@ function isRedirect(response: Response): boolean {
     return response.status >= 300 && response.status < 400;
 }
 
+/**
+ * AR-040 — staged bare-path SEO transition (SEO-REQUIREMENTS §8).
+ *
+ * The hreflang pairs have been live since AR-025, so public bare paths can
+ * move from the locale middleware's 307 to a permanent 301 at the DEFAULT
+ * locale. Only the four indexable public paths qualify; `/register` keeps its
+ * own 301 to `/signup`, private paths keep the 307 negotiation, and the query
+ * is preserved by cloning Next's URL. `SEO_BARE_PATH_301=false` is the rollback
+ * switch — no rebuild needed, only a restart.
+ */
+const BARE_PUBLIC_PATHS = new Set(PUBLIC_ROUTES.map((route) => route.path));
+
+function stagedBarePathRedirect(request: NextRequest): Response | null {
+    if (process.env.SEO_BARE_PATH_301 === 'false') return null;
+    const pathname = request.nextUrl.pathname;
+    if (!BARE_PUBLIC_PATHS.has(pathname)) return null;
+
+    const target = request.nextUrl.clone();
+    target.pathname = publicUrl(pathname, defaultLocale);
+    return NextResponse.redirect(target, 301);
+}
+
 export async function proxy(request: NextRequest) {
     const mode = process.env.AUTH_MIDDLEWARE_MODE ?? 'verify';
 
     // ── 1. the locale ──────────────────────────────────────────────────────
-    // The locale middleware runs first and owns the redirect matrix: a
-    // locale-less path is answered with a redirect to the negotiated locale,
-    // and the auth gate then sees the locale-prefixed path.
+    // AR-040: public bare paths are the staged exception — after hreflang
+    // pairs went live they answer 301 at the default locale. Everything else
+    // still lets the locale middleware own the 307 negotiation matrix, and
+    // the auth gate then sees the locale-prefixed path.
+    const staged = stagedBarePathRedirect(request);
+    if (staged) return staged;
+
     const intlResponse = handleI18nRouting(request);
     if (isRedirect(intlResponse)) return intlResponse;
 

@@ -16,17 +16,18 @@ import { E2E_ARABIC_LOCALE, localePath } from '../harness';
  */
 
 test.describe('locale routing', () => {
-    test('the bare root redirects to the default locale', async ({ request }) => {
-        // maxRedirects: 0 — the assertion is about the REDIRECT, not about
-        // where the browser ends up.
+    test('the bare root redirects permanently to the default locale', async ({ request }) => {
+        // AR-040 — maxRedirects: 0: the assertion is about the REDIRECT, not
+        // about where the browser ends up. Public bare paths are 301 after the
+        // hreflang pairs went live; private paths still negotiate with 307.
         const response = await request.get('/', { maxRedirects: 0 });
-        expect(response.status()).toBe(307);
+        expect(response.status()).toBe(301);
         expect(response.headers().location).toContain('/en');
     });
 
-    test('a locale-less deep path keeps its path', async ({ request }) => {
+    test('a locale-less public deep path keeps its path', async ({ request }) => {
         const response = await request.get('/pricing', { maxRedirects: 0 });
-        expect(response.status()).toBe(307);
+        expect(response.status()).toBe(301);
         expect(response.headers().location).toContain('/en/pricing');
     });
 

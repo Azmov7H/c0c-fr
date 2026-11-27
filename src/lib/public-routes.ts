@@ -17,15 +17,37 @@ import { defaultLocale, locales } from '@/i18n/routing';
  * `src/features/landing/marketing-links.test.ts` asserts every path here has a
  * real page, that no private route leaks in, and that robots/sitemap agree.
  */
-export const SITE_URL = 'https://avyra-an.vercel.app';
+/**
+ * AR-040 — the one public origin. The server-side `SITE_URL` (NOT a
+ * `NEXT_PUBLIC_` value) feeds metadataBase, canonical/OG URLs, the sitemap and
+ * robots, so a deploy cannot advertise one domain from the head and another
+ * from the sitemap. The fallback is the current production origin; a value
+ * with a path/query/credentials is rejected because the contract is an origin.
+ */
+function siteUrlFromEnv(): string {
+    const configured = process.env.SITE_URL?.trim() || 'https://avyra-an.vercel.app';
+    const parsed = new URL(configured);
+    if (
+        parsed.pathname !== '/' ||
+        parsed.search ||
+        parsed.hash ||
+        parsed.username ||
+        parsed.password
+    ) {
+        throw new Error('SITE_URL must be an origin, for example https://example.com');
+    }
+    return parsed.origin;
+}
+
+export const SITE_URL = siteUrlFromEnv();
 
 /**
  * The site's name, as the layout's title template spells it.
  *
- * AR-025: the Open Graph `site_name` used to be written per page, and the
- * pages had drifted from the layout (the layout says `C0C || AI Content
- * Engine`, the pages said `AI Content Engine`). One constant, used by both,
- * so a card cannot claim a different site than the page it links to.
+ * AR-025/AR-040: this is the canonical brand (`Avyra || AI Content Engine`).
+ * The root layout, the public pages' Open Graph cards, the sitemap and the
+ * tests all consume this one constant — a card cannot claim a different site
+ * than the page it links to.
  */
 export const SITE_NAME = 'Avyra || AI Content Engine';
 
