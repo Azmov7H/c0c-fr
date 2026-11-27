@@ -12,6 +12,7 @@ import {
     useDownloadRender,
     useGenerateVideo,
     useInitializeProjectVideo,
+    useRegenerateScene,
     useRenderJob,
 } from './use-advertisements';
 
@@ -85,7 +86,7 @@ afterEach(() => {
 });
 
 describe('advertisement hooks', () => {
-    it('caches the generated detail and invalidates the preview query', async () => {
+    it('caches the generated detail and invalidates composition and preview queries', async () => {
         const original = detailFixture();
         const generated = detailFixture({
             advertisement: {
@@ -96,6 +97,10 @@ describe('advertisement hooks', () => {
         });
         mocks.generate.mockResolvedValue({ detail: generated, generatedBy: 'fallback' });
         queryClient.setQueryData(advertisementKeys.detail('ad-1'), original);
+        queryClient.setQueryData(advertisementKeys.composition('ad-1'), {
+            composition: original.composition,
+            validationIssues: [],
+        });
         queryClient.setQueryData(advertisementKeys.preview('ad-1'), {
             html: 'old',
             durationSec: 30,
@@ -109,6 +114,30 @@ describe('advertisement hooks', () => {
 
         expect(mocks.generate).toHaveBeenCalledWith('ad-1', undefined);
         expect(queryClient.getQueryData(advertisementKeys.detail('ad-1'))).toEqual(generated);
+        expect(queryClient.getQueryState(advertisementKeys.composition('ad-1'))?.isInvalidated).toBe(true);
+        expect(queryClient.getQueryState(advertisementKeys.preview('ad-1'))?.isInvalidated).toBe(true);
+    });
+
+    it('invalidates the composition query when a scene is regenerated', async () => {
+        const detail = detailFixture();
+        mocks.regenerateScene.mockResolvedValue(detail);
+        queryClient.setQueryData(advertisementKeys.composition('ad-1'), {
+            composition: detail.composition,
+            validationIssues: [],
+        });
+        queryClient.setQueryData(advertisementKeys.preview('ad-1'), {
+            html: 'old',
+            durationSec: 30,
+            sandbox: 'allow-scripts',
+        });
+
+        const { result } = renderHook(() => useRegenerateScene('ad-1'), { wrapper });
+        await act(async () => {
+            await result.current.mutateAsync('scene-1');
+        });
+
+        expect(mocks.regenerateScene).toHaveBeenCalledWith('ad-1', 'scene-1');
+        expect(queryClient.getQueryState(advertisementKeys.composition('ad-1'))?.isInvalidated).toBe(true);
         expect(queryClient.getQueryState(advertisementKeys.preview('ad-1'))?.isInvalidated).toBe(true);
     });
 

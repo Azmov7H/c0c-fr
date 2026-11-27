@@ -106,6 +106,7 @@ export function useGenerateVideo(id: string) {
         mutationFn: (targetDurationSec?: number) => advertisementsService.generate(id, targetDurationSec),
         onSuccess: (result) => {
             cacheDetail(queryClient, result.detail);
+            void queryClient.invalidateQueries({ queryKey: advertisementKeys.composition(id) });
             void queryClient.invalidateQueries({ queryKey: advertisementKeys.preview(id) });
             toast.success(t('toast.generated'));
         },
@@ -137,6 +138,7 @@ export function useRegenerateScene(id: string) {
         mutationFn: (sceneId: string) => advertisementsService.regenerateScene(id, sceneId),
         onSuccess: (detail) => {
             cacheDetail(queryClient, detail);
+            void queryClient.invalidateQueries({ queryKey: advertisementKeys.composition(id) });
             void queryClient.invalidateQueries({ queryKey: advertisementKeys.preview(id) });
             toast.success(t('toast.sceneRegenerated'));
         },

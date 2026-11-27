@@ -33,11 +33,16 @@ vi.mock('../hooks/use-advertisements', () => ({
 vi.mock('./gate-error', () => ({ GateError: () => null }));
 vi.mock('@/i18n/locale', () => ({ useUrlLocale: () => 'ar' }));
 
-const renderPanel = (composition = false) =>
+const renderPanel = (
+    composition = false,
+    overrides: Partial<ReturnType<typeof compositionFixture>> = {}
+) =>
     render(
         <NextIntlClientProvider locale="ar" messages={{ advertisements: arAdvertisements }}>
             <CompositionPanel
-                detail={detailFixture(composition ? { composition: compositionFixture() } : {})}
+                detail={detailFixture(
+                    composition ? { composition: { ...compositionFixture(), ...overrides } } : {}
+                )}
                 canEdit
             />
         </NextIntlClientProvider>
@@ -74,5 +79,32 @@ describe('composition and preview load failures', () => {
         const retry = screen.getAllByRole('button', { name: 'إعادة المحاولة' })[0];
         retry?.click();
         expect(mocks.previewRefetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('renders the persisted creative direction read-only with RTL text and the fallback reason', () => {
+        renderPanel(true);
+
+        expect(screen.getByText('الاتجاه الإبداعي')).toBeVisible();
+        expect(screen.getByText(/عرض تقني دقيق/)).toBeVisible();
+        expect(screen.getByText(/سبب الاحتياطي: stubbed provider unavailable/)).toBeVisible();
+        expect(screen.getByLabelText('اللون #22D3EE')).toBeTruthy();
+
+        const rationale = screen.getByText(/الأزرق السماوي يفصل البيانات/);
+        expect(rationale.closest('bdi')?.getAttribute('dir')).toBe('rtl');
+    });
+
+    it('states explicitly when no direction plan was persisted', () => {
+        renderPanel(true, { creativeDirection: undefined });
+
+        expect(
+            screen.getByText('لا توجد خطة اتجاه إبداعي محفوظة لهذا التركيب.')
+        ).toBeVisible();
+    });
+
+    it('renders per-scene direction notes from the persisted composition', () => {
+        renderPanel(true);
+
+        expect(screen.getByText(/إظهار مقياس زمن الاستجابة \(rise\)/)).toBeVisible();
+        expect(screen.getAllByText(/نقرة واجهة خفيفة عند التسمية/).length).toBeGreaterThan(0);
     });
 });
