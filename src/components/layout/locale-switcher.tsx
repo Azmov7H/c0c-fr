@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 
+import { setLocaleCookie } from '@/i18n/locale-cookie';
 import { defaultLocale, localeFromPath, pathInLocale } from '@/i18n/routing';
 
 /**
@@ -23,12 +24,16 @@ import { defaultLocale, localeFromPath, pathInLocale } from '@/i18n/routing';
  * and the switch is a client-side navigation either way, so the page is not
  * re-downloaded.
  *
- * The persistence is the locale cookie, and the PROXY writes it: the
- * middleware sees the prefixed URL and stores the locale there. One writer,
- * no second source of truth (FR-3).
+ * The persistence is the locale cookie. AR-006 let the proxy write it on the
+ * next navigation; AR-039 writes it here too so the cookie agrees with the
+ * switch immediately. For a signed-in visitor the DB preference is updated as
+ * well — the cookie is only the render-time cache, the account is the source
+ * of truth (USER-PREFERENCES §5). The patch is fire-and-forget, through a
+ * dependency-free helper loaded on click: a slow or failing preference endpoint
+ * must never strand the visitor on the old page or inflate first-load JS.
  *
  * The switch never touches the session: no logout, no re-authentication
- * (FR-6).
+ * (FR-6). A preference PATCH is not an auth mutation.
  */
 
 const TARGET_LABEL = {
@@ -58,9 +63,17 @@ export function LocaleSwitcher({ className }: LocaleSwitcherProps) {
             // other language.
             event.preventDefault();
             const search = typeof window === 'undefined' ? '' : window.location.search;
+
+            // Cookie first: the next render (and the next visit) must not read
+            // a stale locale even if the PATCH or the navigation is slow.
+            setLocaleCookie(target);
+            void import('@/i18n/locale-preference-sync').then(({ syncLocalePreference }) => {
+                syncLocalePreference(target);
+            });
+
             router.replace(`${href}${search}`, { scroll: false });
         },
-        [router, href]
+        [router, href, target]
     );
 
     return (

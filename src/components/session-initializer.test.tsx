@@ -2,7 +2,8 @@
 /** T18 P0: the mounted session initializer is the last line before a
  *  signed-out visitor sees app chrome (or an expired session lingers on a
  *  login page). The gate maths is covered in onboarding-gate.test.ts; these
- *  are the wiring rules a pure unit cannot express.
+ *  are the wiring rules a pure unit cannot express. AR-039 adds DB-wins
+ *  locale reconciliation here.
  */
 import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -15,6 +16,8 @@ const mocks = vi.hoisted(() => ({
         user: null,
     } as { authenticated: boolean; user: Record<string, unknown> | null },
     sessionError: false,
+    dbLocale: null as 'en' | 'ar' | null,
+    setLocaleCookie: vi.fn(),
     pathname: '/dashboard',
     router: { replace: vi.fn(), push: vi.fn(), refresh: vi.fn(), back: vi.fn() },
     setUser: vi.fn(),
@@ -33,6 +36,19 @@ vi.mock('@/features/auth/services/auth.service', () => ({
             return mocks.session;
         },
     },
+}));
+
+vi.mock('@/services/locale-preference.service', () => ({
+    localePreferenceService: {
+        get: async () => {
+            if (!mocks.dbLocale) throw new Error('no preference available');
+            return mocks.dbLocale;
+        },
+    },
+}));
+
+vi.mock('@/i18n/locale-cookie', () => ({
+    setLocaleCookie: mocks.setLocaleCookie,
 }));
 
 vi.mock('@/store/auth-store', () => ({
@@ -68,6 +84,7 @@ describe('SessionInitializer', () => {
         vi.clearAllMocks();
         mocks.session = { authenticated: false, user: null };
         mocks.sessionError = false;
+        mocks.dbLocale = null;
         cleanup();
     });
 
@@ -104,7 +121,8 @@ describe('SessionInitializer', () => {
         mount('/en/login', 'from=/projects/42');
 
         await vi.waitFor(() => expect(firstReplace()).not.toBeNull());
-        expect(firstReplace()).toBe('/projects/42');
+        // AR-039: a locale-less callback is now stamped with the resolved locale.
+        expect(firstReplace()).toBe('/en/projects/42');
     });
 
     it('authenticated user on /login without a callback lands on the default target', async () => {
@@ -163,6 +181,57 @@ describe('SessionInitializer', () => {
         // down, /login would sit on top of a dead session anyway. The next real
         // navigation (middleware, or the app-shell guard) sends the user on.
         expect(mocks.setUser).toHaveBeenCalledWith(null);
+        expect(firstReplace()).toBeNull();
+    });
+
+    it('AR-039: DB locale wins over the URL and the cookie follows it', async () => {
+        mocks.session = { authenticated: true, user: completeUser };
+        mocks.dbLocale = 'ar';
+        mount('/en/dashboard', 'tab=all');
+
+        await vi.waitFor(() => expect(firstReplace()).not.toBeNull());
+        expect(mocks.setLocaleCookie).toHaveBeenCalledWith('ar');
+        expect(firstReplace()).toBe('/ar/dashboard?tab=all');
+    });
+
+    it('AR-039: DB locale rewrites a callback in the other language', async () => {
+        mocks.session = { authenticated: true, user: completeUser };
+        mocks.dbLocale = 'en';
+        mount('/ar/login', 'callbackUrl=%2Far%2Fdashboard');
+
+        await vi.waitFor(() => expect(firstReplace()).not.toBeNull());
+        expect(mocks.setLocaleCookie).toHaveBeenCalledWith('en');
+        expect(firstReplace()).toBe('/en/dashboard');
+    });
+
+    it('AR-039: the onboarding gate uses the DB locale too', async () => {
+        mocks.session = {
+            authenticated: true,
+            user: { ...completeUser, onboardingCompleted: false },
+        };
+        mocks.dbLocale = 'ar';
+        mount('/en/dashboard');
+
+        await vi.waitFor(() => expect(firstReplace()).not.toBeNull());
+        expect(firstReplace()).toBe('/ar/onboarding');
+    });
+
+    it('AR-039: a matching DB locale does not rewrite the cookie (no switch race)', async () => {
+        mocks.session = { authenticated: true, user: completeUser };
+        mocks.dbLocale = 'en';
+        mount('/en/dashboard');
+
+        await vi.waitFor(() => expect(mocks.setLoading).toHaveBeenLastCalledWith(false));
+        expect(mocks.setLocaleCookie).not.toHaveBeenCalled();
+        expect(firstReplace()).toBeNull();
+    });
+
+    it('AR-039: an unavailable preference endpoint keeps the URL locale', async () => {
+        mocks.session = { authenticated: true, user: completeUser };
+        mount('/ar/dashboard');
+
+        await vi.waitFor(() => expect(mocks.setLoading).toHaveBeenLastCalledWith(false));
+        expect(mocks.setLocaleCookie).not.toHaveBeenCalled();
         expect(firstReplace()).toBeNull();
     });
 });
