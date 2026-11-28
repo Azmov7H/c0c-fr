@@ -8,6 +8,8 @@ export const advertisementKeys = {
     detail: (id: string) => [...advertisementKeys.details(), id] as const,
     projectVideo: (projectId: string) =>
         [...advertisementKeys.all, 'project-video', projectId] as const,
+    preparation: (projectId: string) =>
+        [...advertisementKeys.all, 'preparation', projectId] as const,
     composition: (id: string) => [...advertisementKeys.all, 'composition', id] as const,
     preview: (id: string) => [...advertisementKeys.all, 'preview', id] as const,
     renderJobs: (id: string) => [...advertisementKeys.all, 'render-jobs', id] as const,

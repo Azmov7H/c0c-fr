@@ -64,6 +64,17 @@ export interface AdvertisementRenderUpdatedPayload {
         | 'cancelled';
 }
 
+/** Backend-owned content preparation status; the UI reflects, never derives. */
+export interface PreparationUpdatedPayload {
+    userId: string;
+    projectId: string;
+    preparationId: string;
+    status: 'pending' | 'queued' | 'processing' | 'completed' | 'failed';
+    resourceKind?: 'script' | 'voiceover' | 'music' | 'images' | 'sfx' | 'seo';
+    resourceStatus?: 'pending' | 'queued' | 'processing' | 'completed' | 'failed' | 'skipped';
+    contentPackageReady: boolean;
+}
+
 export interface ProjectUpdatedPayload {
     projectId: string;
     userId: string;
@@ -106,6 +117,7 @@ export interface ServerToClientEvents {
     'thumbnail:generated': (data: ThumbnailGeneratedPayload) => void;
     'audio:generated': (data: AudioGeneratedPayload) => void;
     'advertisement:render.updated': (data: AdvertisementRenderUpdatedPayload) => void;
+    'preparation:updated': (data: PreparationUpdatedPayload) => void;
     'project:updated': (data: ProjectUpdatedPayload) => void;
     'project.member_added': (data: MemberChangedPayload) => void;
     'project.member_removed': (data: MemberChangedPayload) => void;

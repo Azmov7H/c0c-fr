@@ -8,9 +8,11 @@ import type { ReactNode } from 'react';
 import enCommon from '../../messages/en/common.json';
 import { advertisementKeys } from '@/features/advertisements/lib/query-keys';
 import { audioKeys } from '@/features/audio/hooks/use-audio';
+import { mediaKeys } from '@/features/media/hooks/use-media';
 import { notificationsKeys } from '@/features/notifications/hooks/use-notifications';
 import { projectKeys } from '@/features/projects/lib/query-keys';
 import { scriptsKeys } from '@/features/scripts/hooks/use-scripts';
+import { seoKeys } from '@/features/seo/hooks/use-seo';
 import { thumbnailsKeys } from '@/features/thumbnails/hooks/use-thumbnails';
 import { useAuthStore } from '@/store/auth-store';
 import { useRealtimeStore } from '@/store/realtime-store';
@@ -233,6 +235,14 @@ describe('useWebSocket', () => {
         await fire('script:generated', { projectId: 'p1' });
         await fire('thumbnail:generated', { projectId: 'p1' });
         await fire('audio:generated', { projectId: 'p1' });
+        await fire('preparation:updated', {
+            projectId: 'p1',
+            preparationId: 'prep-1',
+            status: 'processing',
+            resourceKind: 'script',
+            resourceStatus: 'completed',
+            contentPackageReady: false,
+        });
         await fire('generation:completed', {
             projectId: 'p1',
             jobId: 'job-1',
@@ -261,6 +271,14 @@ describe('useWebSocket', () => {
         expect(keys).toContainEqual(scriptsKeys.list('p1'));
         expect(keys).toContainEqual(thumbnailsKeys.list('p1'));
         expect(keys).toContainEqual(audioKeys.list('p1'));
+
+        // Preparation is backend-owned: one event refreshes the preparation
+        // document and every canonical asset view behind it.
+        expect(keys).toContainEqual(advertisementKeys.preparation('p1'));
+        expect(keys).toContainEqual(seoKeys.project('p1'));
+        expect(keys).toContainEqual(mediaKeys.list('p1'));
+        expect(keys).toContainEqual(advertisementKeys.projectVideo('p1'));
+        expect(keys).toContainEqual(advertisementKeys.lists());
         expect(keys).toContainEqual(projectKeys.activity('p1'));
         expect(keys).toContainEqual(projectKeys.members('p1'));
         expect(keys).toContainEqual(advertisementKeys.detail('ad-1'));

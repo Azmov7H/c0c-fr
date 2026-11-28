@@ -2,13 +2,12 @@
 
 import { useUrlLocale } from '@/i18n/locale';
 import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
     Archive,
     ChevronDown,
-    Clapperboard,
     Copy,
     Loader2,
     MoreHorizontal,
@@ -35,8 +34,6 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { Project, ProjectStatus } from '@/types';
-import { useInitializeProjectVideo } from '@/features/advertisements/hooks/use-advertisements';
-import { advertisementsService } from '@/features/advertisements/services/advertisements.service';
 
 import { useCreateProject, useDeleteProject, useUpdateProject } from '../../hooks/use-projects';
 import { can } from '../../lib/permissions';
@@ -48,6 +45,21 @@ import { DeleteProjectDialog } from '../delete-project-dialog';
 import { WorkflowStepper } from './workflow-stepper';
 import type { ProjectRole } from '../../types';
 
+function GenerateAnimationVideoButtonFallback() {
+    const adsT = useTranslations('advertisements');
+    return <Button className="h-11" disabled>{adsT('workspace.generate')}</Button>;
+}
+
+// A7: keep the readiness query, composition mutation and router out of the
+// shell's first-load chunk; the disabled placeholder preserves the label.
+const GenerateAnimationVideoButton = dynamic(
+    () => import('./generate-animation-video-button').then((m) => m.GenerateAnimationVideoButton),
+    {
+        ssr: false,
+        loading: GenerateAnimationVideoButtonFallback,
+    }
+);
+
 interface WorkspaceHeaderProps {
     project: Project;
     role: ProjectRole;
@@ -56,21 +68,17 @@ interface WorkspaceHeaderProps {
 
 export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
     const locale = useUrlLocale();
-    const router = useRouter();
     const t = useTranslations('workspace');
     const tp = useTranslations('projects');
-    const adsT = useTranslations('advertisements');
     const [editing, setEditing] = useState(false);
     const [confirmArchive, setConfirmArchive] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [ideaOpen, setIdeaOpen] = useState(false);
-    const [preparingVideo, setPreparingVideo] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const update = useUpdateProject();
     const create = useCreateProject();
     const remove = useDeleteProject();
-    const initializeVideo = useInitializeProjectVideo();
     const mayEdit = can(role, 'edit');
     const mayManage = can(role, 'manage');
 
@@ -114,21 +122,6 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
             },
             { onSuccess: (created) => { window.location.assign(`/projects/${created._id}`); } }
         );
-    };
-
-    // Project-first entry point: initialize the 1:1 video child when needed,
-    // then open the workspace tab where the gated Generate Video controls live.
-    const openGenerateVideo = async () => {
-        setPreparingVideo(true);
-        try {
-            const state = await advertisementsService.getProjectVideo(project._id);
-            if (!state.initialized || !state.detail) {
-                await initializeVideo.mutateAsync(project._id);
-            }
-        } finally {
-            setPreparingVideo(false);
-            router.push(`/projects/${project._id}?tab=video`);
-        }
     };
 
     return (
@@ -187,22 +180,7 @@ export function WorkspaceHeader({ project, role }: WorkspaceHeaderProps) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    {mayEdit && (
-                        <Button
-                            className="h-11"
-                            disabled={preparingVideo || initializeVideo.isPending}
-                            onClick={() => void openGenerateVideo()}
-                        >
-                            {preparingVideo || initializeVideo.isPending ? (
-                                <Loader2 className="me-2 size-4 animate-spin" aria-hidden="true" />
-                            ) : (
-                                <Clapperboard className="me-2 size-4" aria-hidden="true" />
-                            )}
-                            {preparingVideo || initializeVideo.isPending
-                                ? adsT('workspace.generating')
-                                : adsT('workspace.generate')}
-                        </Button>
-                    )}
+                    {mayEdit && <GenerateAnimationVideoButton projectId={project._id} />}
 
                     {mayEdit && (
                         <Button
